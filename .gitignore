@@ -1,0 +1,32 @@
+node_modules/
+dist/
+*.tsbuildinfo
+
+# 抓取中间产物（全量导出体积大，不追踪）
+research/poc/data/*.partial.json
+research/poc/data/*.PARTIAL.txt
+.cache/
+packages/data-build/.cache/
+
+# 编辑器与系统
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+.DS_Store
+Thumbs.db
+
+# 日志与本地环境
+*.log
+.env
+.env.local
+
+# 本地安装缓存（沙箱内安装时使用）
+.npm-cache/
+
+# 紫卡模拟器 OCR 模型体积极大，运行时产物不进仓库
+*.onnx
+*.onnx.gz
+
+# 参考用的第三方单文件工具（体积大且许可未确认，不入库）
+20261031紫卡模拟器V10.html

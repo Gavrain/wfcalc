@@ -1,0 +1,9 @@
+{
+  "name": "@wfcalc/data-build",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build:data": "tsx src/index.ts"
+  }
+}
