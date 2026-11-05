@@ -81,6 +81,33 @@ export function spreadTotal(s: DamageSpread): number {
   return total;
 }
 
+/**
+ * 只合并**伤害分布**的加量（物理 + 元素）。
+ *
+ * 调用前置条件（口径见 `docs/伤害公式.md` §5 与 `docs/decisions.md` D-017）：
+ *   · 玄骸加成**不**在 `spread` 里，也不在 `physical` / `elemental` 里 ——
+ *     它必须在基伤之前单独算（`applyKuvaBonus`：面板总伤 × 比例），并随后被基伤括号放大；
+ *   · 把玄骸混进 `spread` 会被当成"面板伤害"，导致元素 %Mod 的基数被重复计算。
+ *
+ * 正确顺序：玄骸 ∈ 面板基伤 → 乘基伤 → 本函数求新面板总伤 → 用它算元素加量 → 再两两合成。
+ */
+export function spreadTotalAfterMods(
+  spread: DamageSpread,
+  physical: Readonly<Partial<Record<DamageType, number>>> = {},
+  elemental: Readonly<Partial<Record<DamageType, number>>> = {},
+): number {
+  let total = 0;
+  for (const k in spread) {
+    const t = k as DamageType;
+    const v = spread[t];
+    if (!v) continue;
+    // 物理与元素分别按各自的占比放大（例如 4.1 校验例 1：新面板总伤 = 100×2 + 100×1 = 300）
+    if (isPhysical(t)) total += v * (1 + (physical[t] ?? 0));
+    else total += v * (1 + (elemental[t] ?? 0));
+  }
+  return total;
+}
+
 /** 分布按比例缩放；总和为 0 时原样返回 */
 export function scaleSpread(s: DamageSpread, factor: number): DamageSpread {
   const total = spreadTotal(s);

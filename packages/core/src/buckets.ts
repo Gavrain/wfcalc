@@ -1,11 +1,16 @@
 /**
- * 涔樺尯锛坆ucket锛夊畾涔夈€? *
- * 璁捐鍘熷垯锛?*姣忎釜灞炴€ф槑纭睘浜庡敮涓€涓€涓箻鍖?*锛屼箻鍖哄唴閮ㄧ浉鍔犮€佷箻鍖轰箣闂寸浉涔樸€? * 杩欐槸妯℃嫙鍣ㄨ兘缁欏嚭"姣忎釜涔樺尯璐＄尞澶氬皯"鐨勫熀纭€锛屼篃鏄槻姝?Mod 鏁板€奸敊閰嶇殑鍏抽敭銆? *
- * 娉ㄦ剰锛氳繖寮犺〃鍙槸缁撴瀯楠ㄦ灦锛屽叿浣撴瘡涓睘鎬х殑褰掑睘涓庣浉浜掑奖鍝嶏紝
- * 閫氳繃 `docs/` 涓嬬殑涔樺尯褰掑睘琛ㄩ€愭潯纭鍚庡啓鍏ワ紙褰撳墠涓哄緟纭鐘舵€侊級銆? */
+ * 乘区（bucket）定义。
+ *
+ * 设计原则：**每个属性明确属于唯一一个乘区**，乘区内相加、乘区之间相乘。
+ * 这是模拟器能给出"每个乘区贡献多少"的基础，也是防止 Mod 数值错配的关键。
+ *
+ * 口径来源：`docs/乘区归属表.md`（第 0~8 节已逐条确认）与 `docs/伤害公式.md`（第 2 节通用骨架）。
+ *
+ * 说明：本文件的注释此前为历史遗留的乱码，现已重写；逻辑以 `docs/乘区归属表.md` 为准。
+ */
 import type { DamageType } from './damage-types.ts';
 
-/** 闈㈡澘涓婁竴涓彲琚?Mod 褰卞搷鐨勫睘鎬?*/
+/** 面板上一个可被 Mod 影响的属性 */
 export type WeaponStat =
   | 'baseDamage'
   | 'multishot'
@@ -25,9 +30,9 @@ export type WeaponStat =
   | `elemental:${DamageType}`
   | `physical:${DamageType}`;
 
-/** 涔樺尯 id锛氫笌璧勬枡閲岀殑鍒嗙被鍙ｅ緞涓€鑷达紝渚夸簬瀵圭収 */
+/** 乘区 id：与资料里的分类口径一致，便于对照 */
 export type BucketId =
-  | 'baseDamage'   // 鍩轰激锛堝惈澶氶噸骞跺垪鐨?鍔犳硶"绫伙級
+  | 'baseDamage'   // 基伤（含与多重并列的"加法"类）
   | 'multishot'
   | 'elemental'
   | 'physical'
@@ -36,23 +41,23 @@ export type BucketId =
   | 'statusChance'
   | 'faction'
   | 'fireRate'
-  | 'utility';     // 鎹㈠脊銆佸脊鑽€佺┛閫忋€佸皠绋嬬瓑涓嶅奖鍝嶅崟鍙戜激瀹崇殑閮ㄥ垎
+  | 'utility';     // 换弹、弹匣、穿透、射程等不影响单发伤害的部分
 
-/** 涓€涓?Mod / 璧嬭兘 / 绱崱璇嶆潯 / 鑷畾涔夊姞鎴愭彁渚涚殑鍔犳垚 */
+/** 一个 Mod / 赋能 / 紫卡词条 / 自定义加成提供的加成 */
 export interface StatContribution {
   stat: WeaponStat;
-  /** 鍗曚綅锛氱櫨鍒嗘瘮锛?50% 璁颁负 50锛?*/
+  /** 单位：百分比（+50% 记为 50） */
   percent: number;
-  /** 鏉ユ簮鏍囪瘑锛岀敤浜庢媶瑙ｅ睍绀?*/
+  /** 来源标识，用于拆解展示 */
   source: string;
 }
 
-/** 涓€涓箻鍖哄湪鏌愭璁＄畻涓殑绱姞缁撴灉锛屼緵 UI 鎷嗚В灞曠ず */
+/** 一个乘区在某次计算中的累加结果，供 UI 拆解展示 */
 export interface BucketAccumulation {
   bucket: BucketId;
-  /** 鍔犳硶绱姞鍜岋紙鐧惧垎姣旓級 */
+  /** 加法累加和（百分比） */
   additivePercent: number;
-  /** 鏈€缁堝€嶇巼 = 1 + additivePercent / 100 */
+  /** 最终倍率 = 1 + additivePercent / 100 */
   multiplier: number;
   contributions: StatContribution[];
 }

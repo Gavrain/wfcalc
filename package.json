@@ -14,7 +14,8 @@
   "scripts": {
     "test": "node --test --experimental-strip-types \"packages/*/test/**/*.test.ts\"",
     "typecheck": "tsc -p tsconfig.json",
-    "build:data": "node --experimental-strip-types packages/data-build/src/index.ts"
+    "build:data": "node --experimental-strip-types packages/data-build/src/index.ts",
+    "build:mods": "node --experimental-strip-types packages/data-build/src/build-mods.ts"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",

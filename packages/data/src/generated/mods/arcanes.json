@@ -1,0 +1,3431 @@
+{
+  "generatedAt": "2026-11-05T08:28:41.935Z",
+  "source": "ExportArcanes.json（官方结构化逐级数值）+ dict.zh/en 渲染描述",
+  "note": "levels[].values 为各级的数值槽（路径 → 数值）；bucket 对应 docs/乘区归属表.md",
+  "scope": "仅收录武器可用赋能（主要·/次要·/近战·/神威·/和平·/残差·/弓箭·/霰弹·/双枪·/瀑流·/联结·/分形·）",
+  "count": 56,
+  "skipped": [
+    {
+      "name": "近战·坚壁",
+      "reason": "近战·坚壁：近战击杀 +210 护甲，只加护甲、不改武器伤害"
+    },
+    {
+      "name": "神威·勇武",
+      "reason": "神威·勇武：重击击杀回能量，属战甲能量层"
+    },
+    {
+      "name": "和平·高飞",
+      "reason": "和平·高飞：只影响精准度/后坐力/飞身瞄准时长"
+    },
+    {
+      "name": "神威·力量",
+      "reason": "只回血"
+    },
+    {
+      "name": "和平·电充",
+      "reason": "和平·电充：电池充电延迟，只影响弹药循环"
+    },
+    {
+      "name": "和平·电闪",
+      "reason": "和平·电闪：给下一个技能加技能效率/强度，属战甲层"
+    }
+  ],
+  "arcanes": [
+    {
+      "id": "AmmoEfficiencyOnSliding",
+      "key": "AmmoEfficiencyOnSliding",
+      "name": {
+        "en": "Akimbo Slip Shot",
+        "zh": "双枪·滑射"
+      },
+      "category": "secondary",
+      "prefix": "双枪·",
+      "maxRank": 5,
+      "rarity": "RARE",
+      "effectKind": "utility",
+      "bucket": null,
+      "description": {
+        "en": "While sliding or aim gliding: Gain 65% ammo efficiency with Dual Pistols.",
+        "zh": "滑行或处于飞身瞄准时：使用双持手枪获得 65% 的弹药效率。"
+      },
+      "levels": [
+        {
+          "rank": 0,
+          "values": {
+            "[0].AMMO_EFFICIENCY": 15
+          }
+        },
+        {
+          "rank": 1,
+          "values": {
+            "[0].AMMO_EFFICIENCY": 25
+          }
+        },
+        {
+          "rank": 2,
+          "values": {
+            "[0].AMMO_EFFICIENCY": 35
+          }
+        },
+        {
+          "rank": 3,
+          "values": {
+            "[0].AMMO_EFFICIENCY": 45
+          }
+        },
+        {
+          "rank": 4,
+          "values": {
+            "[0].AMMO_EFFICIENCY": 55
+          }
+        },
+        {
+          "rank": 5,
+          "values": {
+            "[0].AMMO_EFFICIENCY": 65
+          }
+        }
+      ]
+    },
+    {
+      "id": "BonusDamageNextShotForCurEnergy",
+      "key": "BonusDamageNextShotForCurEnergy",
+      "name": {
+        "en": "Secondary Surge",
+        "zh": "次要·激涌"
+      },
+      "category": "secondary",
+      "prefix": "次要·",
+      "maxRank": 5,
+      "rarity": "RARE",
+      "effectKind": "damageBuff",
+      "bucket": "baseDamage",
+      "description": {
+        "en": "On Ability Cast: Next shot gains a Damage Multiplier for every 200 current Energy, up to x8.",
+        "zh": "施放技能时：当前每拥有 200 能量，下一次射击伤害增加 1 倍，最高可达 8 倍。"
+      },
+      "levels": [
+        {
+          "rank": 0,
+          "values": {
+            "[0].ENERGY_TO_GET_1X": 200,
+            "[0].BONUS_LIMIT": 3
+          }
+        },
+        {
+          "rank": 1,
+          "values": {
+            "[0].ENERGY_TO_GET_1X": 200,
+            "[0].BONUS_LIMIT": 4
+          }
+        },
+        {
+          "rank": 2,
+          "values": {
+            "[0].ENERGY_TO_GET_1X": 200,
+            "[0].BONUS_LIMIT": 5
+          }
+        },
+        {
+          "rank": 3,
+          "values": {
+            "[0].ENERGY_TO_GET_1X": 200,
+            "[0].BONUS_LIMIT": 6
+          }
+        },
+        {
+          "rank": 4,
+          "values": {
+            "[0].ENERGY_TO_GET_1X": 200,
+            "[0].BONUS_LIMIT": 7
+          }
+        },
+        {
+          "rank": 5,
+          "values": {
+            "[0].ENERGY_TO_GET_1X": 200,
+            "[0].BONUS_LIMIT": 8
+          }
+        }
+      ]
+    },
+    {
+      "id": "CorrosiveMeleePerAbilityCast",
+      "key": "CorrosiveMeleePerAbilityCast",
+      "name": {
+        "en": "Melee Exposure",
+        "zh": "近战·暴露"
+      },
+      "category": "melee",
+      "prefix": "近战·",
+      "maxRank": 5,
+      "rarity": "RARE",
+      "effectKind": "elemental",
+      "bucket": "elemental",
+      "description": {
+        "en": "On Ability Cast: Gain 60% Corrosive Damage on Melee strikes for 25s. Stacks up to 240%.",
+        "zh": "使用技能后：近战攻击获得 60% 腐蚀伤害，持续 25 秒。最多叠加到 240% 伤害。"
+      },
+      "levels": [
+        {
+          "rank": 0,
+          "values": {
+            "[0].DAMAGE_PERCENT": 10,
+            "[0].DURATION": 25,
+            "[0].BUFF_CAP": 240
+          }
+        },
+        {
+          "rank": 1,
+          "values": {
+            "[0].DAMAGE_PERCENT": 20,
+            "[0].DURATION": 25,
+            "[0].BUFF_CAP": 240
+          }
+        },
+        {
+          "rank": 2,
+          "values": {
+            "[0].DAMAGE_PERCENT": 30,
+            "[0].DURATION": 25,
+            "[0].BUFF_CAP": 240
+          }
+        },
+        {
+          "rank": 3,
+          "values": {
+            "[0].DAMAGE_PERCENT": 40,
+            "[0].DURATION": 25,
+            "[0].BUFF_CAP": 240
+          }
+        },
+        {
+          "rank": 4,
+          "values": {
+            "[0].DAMAGE_PERCENT": 50,
+            "[0].DURATION": 25,
+            "[0].BUFF_CAP": 240
+          }
+        },
+        {
+          "rank": 5,
+          "values": {
+            "[0].DAMAGE_PERCENT": 60,
+            "[0].DURATION": 25,
+            "[0].BUFF_CAP": 240
+          }
+        }
+      ]
+    },
+    {
+      "id": "CritChannelingDamage",
+      "key": "CritChannelingDamage",
+      "name": {
+        "en": "Exodia Valor",
+        "zh": "神威·勇猛"
+      },
+      "category": "melee",
+      "prefix": "神威·",
+      "maxRank": 3,
+      "rarity": "UNCOMMON",
+      "effectKind": "combo",
+      "bucket": null,
+      "description": {
+        "en": "+200% Additional Combo Count Chance on Lifted enemies",
+        "zh": "对浮空敌人有 +200% 额外连击数几率"
+      },
+      "levels": [
+        {
+          "rank": 0,
+          "values": {
+            "[0].val": 50
+          }
+        },
+        {
+          "rank": 1,
+          "values": {
+            "[0].val": 100
+          }
+        },
+        {
+          "rank": 2,
+          "values": {
+            "[0].val": 150
+          }
+        },
+        {
+          "rank": 3,
+          "values": {
+            "[0].val": 200
+          }
+        }
+      ]
+    },
+    {
+      "id": "CritDamageForPunctureStatus",
+      "key": "CritDamageForPunctureStatus",
+      "name": {
+        "en": "Melee Doughty",
+        "zh": "近战·无畏"
+      },
+      "category": "melee",
+      "prefix": "近战·",
+      "maxRank": 5,
+      "rarity": "RARE",
+      "effectKind": "crit",
+      "bucket": "critMultiplier",
+      "description": {
+        "en": "Gain 1.0x Critical Damage for every 10% <DT_PUNCTURE_COLOR>Puncture Status chance on your Melee Weapon.",
+        "zh": "每 10% 近战武器 <DT_PUNCTURE_COLOR>穿刺触发几率可获得 1.0 倍暴击伤害加成。"
+      },
+      "levels": [
+        {
+          "rank": 0,
+          "values": {
+            "[0].GIVE_STAT": 0.5,
+            "[0].HAVE_STAT": 10
+          }
+        },
+        {
+          "rank": 1,
+          "values": {
+            "[0].GIVE_STAT": 0.6,
+            "[0].HAVE_STAT": 10
+          }
+        },
+        {
+          "rank": 2,
+          "values": {
+            "[0].GIVE_STAT": 0.7,
+            "[0].HAVE_STAT": 10
+          }
+        },
+        {
+          "rank": 3,
+          "values": {
+            "[0].GIVE_STAT": 0.8,
+            "[0].HAVE_STAT": 10
+          }
+        },
+        {
+          "rank": 4,
+          "values": {
+            "[0].GIVE_STAT": 0.9,
+            "[0].HAVE_STAT": 10
+          }
+        },
+        {
+          "rank": 5,
+          "values": {
+            "[0].GIVE_STAT": 1,
+            "[0].HAVE_STAT": 10
+          }
+        }
+      ]
+    },
+    {
+      "id": "DamageForBonusArmour",
+      "key": "DamageForBonusArmour",
+      "name": {
+        "en": "Primary Bulwark",
+        "zh": "主要·堡垒"
+      },
+      "category": "primary",
+      "prefix": "主要·",
+      "maxRank": 5,
+      "rarity": "RARE",
+      "effectKind": "damageBuff",
+      "bucket": "baseDamage",
+      "description": {
+        "en": "Gain +1% damage for each unit of armor past 1,000, up to a max of +500%.",
+        "zh": "超过 1,000 护甲值的每一点护甲，增加 1% 伤害，最高可增加 500%。"
+      },
+      "levels": [
+        {
+          "rank": 0,
+          "values": {
+            "[0].GIVE_STAT": 1,
+            "[0].GIVE_STAT_MAX": 250
+          }
+        },
+        {
+          "rank": 1,
+          "values": {
+            "[0].GIVE_STAT": 1,
+            "[0].GIVE_STAT_MAX": 300
+          }
+        },
+        {
+          "rank": 2,
+          "values": {
+            "[0].GIVE_STAT": 1,
+            "[0].GIVE_STAT_MAX": 350
+          }
+        },
+        {
+          "rank": 3,
+          "values": {
+            "[0].GIVE_STAT": 1,
+            "[0].GIVE_STAT_MAX": 400
+          }
+        },
+        {
+          "rank": 4,
+          "values": {
+            "[0].GIVE_STAT": 1,
+            "[0].GIVE_STAT_MAX": 450
+          }
+        },
+        {
+          "rank": 5,
+          "values": {
+            "[0].GIVE_STAT": 1,
+            "[0].GIVE_STAT_MAX": 500
+          }
+        }
+      ]
+    },
+    {
+      "id": "DuplicateStatusOnKnock",
+      "key": "DuplicateStatusOnKnock",
+      "name": {
+        "en": "Melee Afflictions",
+        "zh": "近战·苦痛"
+      },
+      "category": "melee",
+      "prefix": "近战·",
+      "maxRank": 5,
+      "rarity": "RARE",
+      "effectKind": "status",
+      "bucket": "statusChance",
+      "description": {
+        "en": "Enemies affected by Status Effects gain 6 additional stacks when they're knocked down or flung by melee attacks.",
+        "zh": "受到异常状态影响的敌人在被近战攻击击倒或击飞时，增加 6 层额外异常状态层数。"
+      },
+      "levels": [
+        {
+          "rank": 0,
+          "values": {
+            "[0].duplicate_num": 1
+          }
+        },
+        {
+          "rank": 1,
+          "values": {
+            "[0].duplicate_num": 2
+          }
+        },
+        {
+          "rank": 2,
+          "values": {
+            "[0].duplicate_num": 3
+          }
+        },
+        {
+          "rank": 3,
+          "values": {
+            "[0].duplicate_num": 4
+          }
+        },
+        {
+          "rank": 4,
+          "values": {
+            "[0].duplicate_num": 5
+          }
+        },
+        {
+          "rank": 5,
+          "values": {
+            "[0].duplicate_num": 6
+          }
+        }
+      ]
+    },
+    {
+      "id": "GroundSlamPull",
+      "key": "GroundSlamPull",
+      "name": {
+        "en": "Exodia Hunt",
+        "zh": "神威·狩猎"
+      },
+      "category": "melee",
+      "prefix": "神威·",
+      "maxRank": 3,
+      "rarity": "RARE",
+      "effectKind": "special",
+      "bucket": null,
+      "description": {
+        "en": "On Ground Slam: 50% chance to pull enemies within 12m into melee range.",
+        "zh": "震地攻击时： 50% 的几率将 12 米内的敌人拉至近战范围。"
+      },
+      "levels": [
+        {
+          "rank": 0,
+          "values": {
+            "[0].BONUS.CHANCE": 50,
+            "[0].BONUS.RANGE": 6
+          }
+        },
+        {
+          "rank": 1,
+          "values": {
+            "[0].BONUS.CHANCE": 50,
+            "[0].BONUS.RANGE": 8
+          }
+        },
+        {
+          "rank": 2,
+          "values": {
+            "[0].BONUS.CHANCE": 50,
+            "[0].BONUS.RANGE": 10
+          }
+        },
+        {
+          "rank": 3,
+          "values": {
+            "[0].BONUS.CHANCE": 50,
+            "[0].BONUS.RANGE": 12
+          }
+        }
+      ]
+    },
+    {
+      "id": "HeavyAttackDamageAndShieldOnShieldBreak",
+      "key": "HeavyAttackDamageAndShieldOnShieldBreak",
+      "name": {
+        "en": "Melee Assimilation",
+        "zh": "近战·同化"
+      },
+      "category": "melee",
+      "prefix": "近战·",
+      "maxRank": 5,
+      "rarity": "RARE",
+      "effectKind": "damageBuff",
+      "bucket": "baseDamage",
+      "description": {
+        "en": "On Shield Break: +150% Melee Damage on Heavy Attack and Heavy Attack kills restore +30% of max Shields for 20s.",
+        "zh": "护盾被打破时： +150% 在重击时的近战伤害 和 重击击杀可恢复 +30% 最大护盾值，持续 20 秒。"
+      },
+      "levels": [
+        {
+          "rank": 0,
+          "values": {
+            "[0].BONUS1.val": 25,
+            "[0].BONUS2.val": 5,
+            "[0].DURATION": 20
+          }
+        },
+        {
+          "rank": 1,
+          "values": {
+            "[0].BONUS1.val": 50,
+            "[0].BONUS2.val": 10,
+            "[0].DURATION": 20
+          }
+        },
+        {
+          "rank": 2,
+          "values": {
+            "[0].BONUS1.val": 75,
+            "[0].BONUS2.val": 15,
+            "[0].DURATION": 20
+          }
+        },
+        {
+          "rank": 3,
+          "values": {
+            "[0].BONUS1.val": 100,
+            "[0].BONUS2.val": 20,
+            "[0].DURATION": 20
+          }
+        },
+        {
+          "rank": 4,
+          "values": {
+            "[0].BONUS1.val": 125,
+            "[0].BONUS2.val": 25,
+            "[0].DURATION": 20
+          }
+        },
+        {
+          "rank": 5,
+          "values": {
+            "[0].BONUS1.val": 150,
+            "[0].BONUS2.val": 30,
+            "[0].DURATION": 20
+          }
+        }
+      ]
+    },
+    {
+      "id": "HeavyCritOnRegularMelee",
+      "key": "HeavyCritOnRegularMelee",
+      "name": {
+        "en": "Melee Animosity",
+        "zh": "近战·憎恶"
+      },
+      "category": "melee",
+      "prefix": "近战·",
+      "maxRank": 5,
+      "rarity": "RARE",
+      "effectKind": "crit",
+      "bucket": "critChance",
+      "description": {
+        "en": "On Melee Hit: Gain 42% Critical Chance on your next Heavy Attack, up to 420%",
+        "zh": "近战命中时：下一次重击获得 42% 暴击几率，最多获得 420% 暴击几率。"
+      },
+      "levels": [
+        {
+          "rank": 0,
+          "values": {
+            "[0].CRIT_CHANCE_PER_HIT": 7,
+            "[0].CRIT_CHANCE_LIMIT": 70
+          }
+        },
+        {
+          "rank": 1,
+          "values": {
+            "[0].CRIT_CHANCE_PER_HIT": 14,
+            "[0].CRIT_CHANCE_LIMIT": 140
+          }
+        },
+        {
+          "rank": 2,
+          "values": {
+            "[0].CRIT_CHANCE_PER_HIT": 21,
+            "[0].CRIT_CHANCE_LIMIT": 210
+          }
+        },
+        {
+          "rank": 3,
+          "values": {
+            "[0].CRIT_CHANCE_PER_HIT": 28,
+            "[0].CRIT_CHANCE_LIMIT": 280
+          }
+        },
+        {
+          "rank": 4,
+          "values": {
+            "[0].CRIT_CHANCE_PER_HIT": 35,
+            "[0].CRIT_CHANCE_LIMIT": 350
+          }
+        },
+        {
+          "rank": 5,
+          "values": {
+            "[0].CRIT_CHANCE_PER_HIT": 42,
+            "[0].CRIT_CHANCE_LIMIT": 420
+          }
+        }
+      ]
+    },
+    {
+      "id": "LongbowDamageOnHeadshot",
+      "key": "LongbowDamageOnHeadshot",
+      "name": {
+        "en": "Longbow Sharpshot",
+        "zh": "弓箭·利矢"
+      },
+      "category": "secondary",
+      "prefix": "弓箭·",
+      "maxRank": 5,
+      "rarity": "LEGENDARY",
+      "effectKind": "damageBuff",
+      "bucket": "baseDamage",
+      "description": {
+        "en": "On Headshot: Gain +300% damage on your next shot.",
+        "zh": "造成爆头后：下一次射击 +300% 伤害。"
+      },
+      "levels": [
+        {
+          "rank": 0,
+          "values": {
+            "[0].BONUS.DAMAGE": 50
+          }
+        },
+        {
+          "rank": 1,
+          "values": {
+            "[0].BONUS.DAMAGE": 100
+          }
+        },
+        {
+          "rank": 2,
+          "values": {
+            "[0].BONUS.DAMAGE": 150
+          }
+        },
+        {
+          "rank": 3,
+          "values": {
+            "[0].BONUS.DAMAGE": 200
+          }
+        },
+        {
+          "rank": 4,
+          "values": {
+            "[0].BONUS.DAMAGE": 250
+          }
+        },
+        {
+          "rank": 5,
+          "values": {
+            "[0].BONUS.DAMAGE": 300
+          }
+        }
+      ]
+    },
+    {
+      "id": "MeleeArcaneProjectileOnJump",
+      "key": "MeleeArcaneProjectileOnJump",
+      "name": {
+        "en": "Exodia Contagion",
+        "zh": "神威·触染"
+      },
+      "category": "melee",
+      "prefix": "神威·",
+      "maxRank": 3,
+      "rarity": "LEGENDARY",
+      "effectKind": "special",
+      "bucket": null,
+      "description": {
+        "en": "After a Bullet Jump or Double Jump: Melee while Aim Gliding launches a projectile that explodes on impact",
+        "zh": "旋身飞跃或二段跳后： 飞身瞄准时进行近战会射出一个投射物，并在撞击后爆炸"
+      },
+      "levels": [
+        {
+          "rank": 0,
+          "values": {}
+        },
+        {
+          "rank": 1,
+          "values": {}
+        },
+        {
+          "rank": 2,
+          "values": {}
+        },
+        {
+          "rank": 3,
+          "values": {}
+        }
+      ]
+    },
+    {
+      "id": "MeleeArcaneShockwaveOnJump",
+      "key": "MeleeArcaneShockwaveOnJump",
+      "name": {
+        "en": "Exodia Epidemic",
+        "zh": "神威·流行病"
+      },
+      "category": "melee",
+      "prefix": "神威·",
+      "maxRank": 3,
+      "rarity": "LEGENDARY",
+      "effectKind": "special",
+      "bucket": null,
+      "description": {
+        "en": "After a Bullet Jump or Double Jump: Slam emits a shockwave forwards that suspends enemies in the air for a short period",
+        "zh": "旋身飞跃或二段跳后： 震地攻击向前放出一道冲击波，将敌人悬停在空中一小段时间。"
+      },
+      "levels": [
+        {
+          "rank": 0,
+          "values": {}
+        },
+        {
+          "rank": 1,
+          "values": {}
+        },
+        {
+          "rank": 2,
+          "values": {}
+        },
+        {
+          "rank": 3,
+          "values": {}
+        }
+      ]
+    },
+    {
+      "id": "MeleeDamageForActiveShields",
+      "key": "MeleeDamageForActiveShields",
+      "name": {
+        "en": "Melee Retaliation",
+        "zh": "近战·报复"
+      },
+      "category": "melee",
+      "prefix": "近战·",
+      "maxRank": 5,
+      "rarity": "UNCOMMON",
+      "effectKind": "damageBuff",
+      "bucket": "baseDamage",
+      "description": {
+        "en": "Gain 30% Melee Damage for every 200 current Shields, up to 420%. Bonus halved for Overshields.",
+        "zh": "当前每拥有 200 护盾，获得 30% 近战伤害，最多获得 420% 近战伤害。通过过载护盾获得的增益减半。"
+      },
+      "levels": [
+        {
+          "rank": 0,
+          "values": {
+            "[0].DAMAGE_PERCENT": 5,
+            "[0].SHIELD_NUM": 200,
+            "[0].DAMAGE_PERCENT_LIMIT": 420
+          }
+        },
+        {
+          "rank": 1,
+          "values": {
+            "[0].DAMAGE_PERCENT": 10,
+            "[0].SHIELD_NUM": 200,
+            "[0].DAMAGE_PERCENT_LIMIT": 420
+          }
+        },
+        {
+          "rank": 2,
+          "values": {
+            "[0].DAMAGE_PERCENT": 15,
+            "[0].SHIELD_NUM": 200,
+            "[0].DAMAGE_PERCENT_LIMIT": 420
+          }
+        },
+        {
+          "rank": 3,
+          "values": {
+            "[0].DAMAGE_PERCENT": 20,
+            "[0].SHIELD_NUM": 200,
+            "[0].DAMAGE_PERCENT_LIMIT": 420
+          }
+        },
+        {
+          "rank": 4,
+          "values": {
+            "[0].DAMAGE_PERCENT": 25,
+            "[0].SHIELD_NUM": 200,
+            "[0].DAMAGE_PERCENT_LIMIT": 420
+          }
+        },
+        {
+          "rank": 5,
+          "values": {
+            "[0].DAMAGE_PERCENT": 30,
+            "[0].SHIELD_NUM": 200,
+            "[0].DAMAGE_PERCENT_LIMIT": 420
+          }
+        }
+      ]
+    },
+    {
+      "id": "MeleeProcsSpread",
+      "key": "MeleeProcsSpread",
+      "name": {
+        "en": "Melee Influence",
+        "zh": "近战·侵染"
+      },
+      "category": "melee",
+      "prefix": "近战·",
+      "maxRank": 5,
+      "rarity": "RARE",
+      "effectKind": "status",
+      "bucket": "statusChance",
+      "description": {
+        "en": "On Melee <DT_ELECTRICITY_COLOR>Electricity Status: 20% chance for elemental Melee Status Effects to apply to enemies within 20m for 18s. Cannot refresh while active.",
+        "zh": "近战造成 <DT_ELECTRICITY_COLOR>电击异常状态时：有 20% 几率使 18 秒内近战攻击触发的元素异常状态施加于 20 米内的敌人上。效果激活时无法刷新。"
+      },
+      "levels": [
+        {
+          "rank": 0,
+          "values": {
+            "[0].CHANCE": 20,
+            "[0].range": 10,
+            "[0].DURATION": 3
+          }
+        },
+        {
+          "rank": 1,
+          "values": {
+            "[0].CHANCE": 20,
+            "[0].range": 12,
+            "[0].DURATION": 6
+          }
+        },
+        {
+          "rank": 2,
+          "values": {
+            "[0].CHANCE": 20,
+            "[0].range": 14,
+            "[0].DURATION": 9
+          }
+        },
+        {
+          "rank": 3,
+          "values": {
+            "[0].CHANCE": 20,
+            "[0].range": 16,
+            "[0].DURATION": 12
+          }
+        },
+        {
+          "rank": 4,
+          "values": {
+            "[0].CHANCE": 20,
+            "[0].range": 18,
+            "[0].DURATION": 15
+          }
+        },
+        {
+          "rank": 5,
+          "values": {
+            "[0].CHANCE": 20,
+            "[0].range": 20,
+            "[0].DURATION": 18
+          }
+        }
+      ]
+    },
+    {
+      "id": "MultishotForCombo",
+      "key": "MultishotForCombo",
+      "name": {
+        "en": "Secondary Outburst",
+        "zh": "次要·爆发"
+      },
+      "category": "secondary",
+      "prefix": "次要·",
+      "maxRank": 5,
+      "rarity": "RARE",
+      "effectKind": "crit",
+      "bucket": "critMultiplier",
+      "description": {
+        "en": "On swapping to Secondary Weapon, consume all Combo Multipliers to increase Secondary Weapon Critical Chance and Critical Damage by 20% per Combo consumed for 30s.",
+        "zh": "切换到次要武器时消耗所有连击倍率，每层消耗的连击倍率增加 20% 的次要武器暴击几率和暴击伤害，持续 30 秒。"
+      },
+      "levels": [
+        {
+          "rank": 0,
+          "values": {
+            "[0].STAT_VALUE": 5,
+            "[0].DURATION": 30
+          }
+        },
+        {
+          "rank": 1,
+          "values": {
+            "[0].STAT_VALUE": 7,
+            "[0].DURATION": 30
+          }
+        },
+        {
+          "rank": 2,
+          "values": {
+            "[0].STAT_VALUE": 9,
+            "[0].DURATION": 30
+          }
+        },
+        {
+          "rank": 3,
+          "values": {
+            "[0].STAT_VALUE": 12,
+            "[0].DURATION": 30
+          }
+        },
+        {
+          "rank": 4,
+          "values": {
+            "[0].STAT_VALUE": 16,
+            "[0].DURATION": 30
+          }
+        },
+        {
+          "rank": 5,
+          "values": {
+            "[0].STAT_VALUE": 20,
+            "[0].DURATION": 30
+          }
+        }
+      ]
+    },
+    {
+      "id": "MultishotForMaxEnergy",
+      "key": "MultishotForMaxEnergy",
+      "name": {
+        "en": "Primary Overcharge",
+        "zh": "主要·过载"
+      },
+      "category": "primary",
+      "prefix": "主要·",
+      "maxRank": 5,
+      "rarity": "RARE",
+      "effectKind": "multishot",
+      "bucket": "multishot",
+      "description": {
+        "en": "While at or above 90% Energy: Gain 35% of Max Energy as Multishot, capped at 350%.",
+        "zh": "当能量值达到或超过 90% 时：获得最大能量值的 35% 作为多重射击，上限为 350%。"
+      },
+      "levels": [
+        {
+          "rank": 0,
+          "values": {
+            "[0].HAVE_STAT_MIN": 90,
+            "[0].GIVE_STAT": 35,
+            "[0].GIVE_STAT_CAP": 100
+          }
+        },
+        {
+          "rank": 1,
+          "values": {
+            "[0].HAVE_STAT_MIN": 90,
+            "[0].GIVE_STAT": 35,
+            "[0].GIVE_STAT_CAP": 150
+          }
+        },
+        {
+          "rank": 2,
+          "values": {
+            "[0].HAVE_STAT_MIN": 90,
+            "[0].GIVE_STAT": 35,
+            "[0].GIVE_STAT_CAP": 200
+          }
+        },
+        {
+          "rank": 3,
+          "values": {
+            "[0].HAVE_STAT_MIN": 90,
+            "[0].GIVE_STAT": 35,
+            "[0].GIVE_STAT_CAP": 250
+          }
+        },
+        {
+          "rank": 4,
+          "values": {
+            "[0].HAVE_STAT_MIN": 90,
+            "[0].GIVE_STAT": 35,
+            "[0].GIVE_STAT_CAP": 300
+          }
+        },
+        {
+          "rank": 5,
+          "values": {
+            "[0].HAVE_STAT_MIN": 90,
+            "[0].GIVE_STAT": 35,
+            "[0].GIVE_STAT_CAP": 350
+          }
+        }
+      ]
+    },
+    {
+      "id": "OverguardSteal",
+      "key": "OverguardSteal",
+      "name": {
+        "en": "Secondary Fortifier",
+        "zh": "次要·筑垒"
+      },
+      "category": "secondary",
+      "prefix": "次要·",
+      "maxRank": 5,
+      "rarity": "RARE",
+      "effectKind": "damageBuff",
+      "bucket": null,
+      "description": {
+        "en": "Gain 1 Overguard for every 100 Damage dealt to an enemy's Overguard.Deals x8 Extra Damage to Overguard.",
+        "zh": "每对敌人的超宏防护造成 100 伤害，便获得 1 超宏防护。对超宏防护造成 x8 额外伤害。"
+      },
+      "levels": [
+        {
+          "rank": 0,
+          "values": {
+            "[1].val#x": 3
+          }
+        },
+        {
+          "rank": 1,
+          "values": {
+            "[1].val#x": 4
+          }
+        },
+        {
+          "rank": 2,
+          "values": {
+            "[1].val#x": 5
+          }
+        },
+        {
+          "rank": 3,
+          "values": {
+            "[1].val#x": 6
+          }
+        },
+        {
+          "rank": 4,
+          "values": {
+            "[1].val#x": 7
+          }
+        },
+        {
+          "rank": 5,
+          "values": {
+            "[1].val#x": 8
+          }
+        }
+      ]
+    },
+    {
+      "id": "PermaComboOnFinisher",
+      "key": "PermaComboOnFinisher",
+      "name": {
+        "en": "Melee Crescendo",
+        "zh": "近战·渐强"
+      },
+      "category": "melee",
+      "prefix": "近战·",
+      "maxRank": 5,
+      "rarity": "LEGENDARY",
+      "effectKind": "combo",
+      "bucket": null,
+      "description": {
+        "en": "On Finisher Kill: Gain 6 Initial Combo for the rest of your mission",
+        "zh": "处决击杀时：永久获得 6 初始连击，直到任务结束"
+      },
+      "levels": [
+        {
+          "rank": 0,
+          "values": {
+            "[0].INITIAL_COMBO_UPGRADE": 1
+          }
+        },
+        {
+          "rank": 1,
+          "values": {
+            "[0].INITIAL_COMBO_UPGRADE": 2
+          }
+        },
+        {
+          "rank": 2,
+          "values": {
+            "[0].INITIAL_COMBO_UPGRADE": 3
+          }
+        },
+        {
+          "rank": 3,
+          "values": {
+            "[0].INITIAL_COMBO_UPGRADE": 4
+          }
+        },
+        {
+          "rank": 4,
+          "values": {
+            "[0].INITIAL_COMBO_UPGRADE": 5
+          }
+        },
+        {
+          "rank": 5,
+          "values": {
+            "[0].INITIAL_COMBO_UPGRADE": 6
+          }
+        }
+      ]
+    },
+    {
+      "id": "PrimaryCritDmgAndMultishotOnColdProc",
+      "key": "PrimaryCritDmgAndMultishotOnColdProc",
+      "name": {
+        "en": "Primary Frostbite",
+        "zh": "主要·霜冻"
+      },
+      "category": "primary",
+      "prefix": "主要·",
+      "maxRank": 5,
+      "rarity": "RARE",
+      "effectKind": "multishot",
+      "bucket": "multishot",
+      "description": {
+        "en": "On <DT_FREEZE_COLOR>Cold Status Effect: +3% Critical Damage and +2.25% Multishot for 12s. Stacks up to 40x.",
+        "zh": "触发 <DT_FREEZE_COLOR>冰冻异常状态时： +3% 暴击伤害 和 +2.25% 多重射击，持续 12 秒。最多叠加到 40 层。"
+      },
+      "levels": [
+        {
+          "rank": 0,
+          "values": {
+            "[0].BONUS1.val": 0.5,
+            "[0].BONUS2.val": 0.38,
+            "[0].DURATION": 12,
+            "[0].STACKS": 40
+          }
+        },
+        {
+          "rank": 1,
+          "values": {
+            "[0].BONUS1.val": 1,
+            "[0].BONUS2.val": 0.75,
+            "[0].DURATION": 12,
+            "[0].STACKS": 40
+          }
+        },
+        {
+          "rank": 2,
+          "values": {
+            "[0].BONUS1.val": 1.5,
+            "[0].BONUS2.val": 1.12,
+            "[0].DURATION": 12,
+            "[0].STACKS": 40
+          }
+        },
+        {
+          "rank": 3,
+          "values": {
+            "[0].BONUS1.val": 2,
+            "[0].BONUS2.val": 1.5,
+            "[0].DURATION": 12,
+            "[0].STACKS": 40
+          }
+        },
+        {
+          "rank": 4,
+          "values": {
+            "[0].BONUS1.val": 2.5,
+            "[0].BONUS2.val": 1.88,
+            "[0].DURATION": 12,
+            "[0].STACKS": 40
+          }
+        },
+        {
+          "rank": 5,
+          "values": {
+            "[0].BONUS1.val": 3,
+            "[0].BONUS2.val": 2.25,
+            "[0].DURATION": 12,
+            "[0].STACKS": 40
+          }
+        }
+      ]
+    },
+    {
+      "id": "PrimaryDamageOnKill",
+      "key": "PrimaryDamageOnKill",
+      "name": {
+        "en": "Primary Merciless",
+        "zh": "主要·无情"
+      },
+      "category": "primary",
+      "prefix": "主要·",
+      "maxRank": 5,
+      "rarity": "RARE",
+      "effectKind": "damageBuff",
+      "bucket": "baseDamage",
+      "description": {
+        "en": "On Kill: +30% Damage for 4s. Stacks up to 12x.+30% Reload Speed",
+        "zh": "击杀时： +30% 伤害，持续 4 秒。最多叠加到 12 层。+30% 装填速度"
+      },
+      "levels": [
+        {
+          "rank": 0,
+          "values": {
+            "[0].BONUS.val": 5,
+            "[0].DURATION": 4,
+            "[0].STACKS": 12
+          }
+        },
+        {
+          "rank": 1,
+          "values": {
+            "[0].BONUS.val": 10,
+            "[0].DURATION": 4,
+            "[0].STACKS": 12
+          }
+        },
+        {
+          "rank": 2,
+          "values": {
+            "[0].BONUS.val": 15,
+            "[0].DURATION": 4,
+            "[0].STACKS": 12
+          }
+        },
+        {
+          "rank": 3,
+          "values": {
+            "[0].BONUS.val": 20,
+            "[0].DURATION": 4,
+            "[0].STACKS": 12
+          }
+        },
+        {
+          "rank": 4,
+          "values": {
+            "[0].BONUS.val": 25,
+            "[0].DURATION": 4,
+            "[0].STACKS": 12
+          }
+        },
+        {
+          "rank": 5,
+          "values": {
+            "[0].BONUS.val": 30,
+            "[0].DURATION": 4,
+            "[0].STACKS": 12,
+            "[1].val": 30
+          }
+        }
+      ]
+    },
+    {
+      "id": "PrimaryDamageOnMeleeKill",
+      "key": "PrimaryDamageOnMeleeKill",
+      "name": {
+        "en": "Primary Dexterity",
+        "zh": "主要·熟练"
+      },
+      "category": "primary",
+      "prefix": "主要·",
+      "maxRank": 5,
+      "rarity": "RARE",
+      "effectKind": "damageBuff",
+      "bucket": "baseDamage",
+      "description": {
+        "en": "On Melee Kill: +60% Damage for 20s. Stacks up to 6x.+7.5s Combo Duration",
+        "zh": "近战击杀时： +60% 伤害，持续 20 秒。最多叠加到 6 层。+7.5 秒连击持续时间"
+      },
+      "levels": [
+        {
+          "rank": 0,
+          "values": {
+            "[0].BONUS.val": 10,
+            "[0].DURATION": 20,
+            "[0].STACKS": 6
+          }
+        },
+        {
+          "rank": 1,
+          "values": {
+            "[0].BONUS.val": 20,
+            "[0].DURATION": 20,
+            "[0].STACKS": 6
+          }
+        },
+        {
+          "rank": 2,
+          "values": {
+            "[0].BONUS.val": 30,
+            "[0].DURATION": 20,
+            "[0].STACKS": 6
+          }
+        },
+        {
+          "rank": 3,
+          "values": {
+            "[0].BONUS.val": 40,
+            "[0].DURATION": 20,
+            "[0].STACKS": 6
+          }
+        },
+        {
+          "rank": 4,
+          "values": {
+            "[0].BONUS.val": 50,
+            "[0].DURATION": 20,
+            "[0].STACKS": 6
+          }
+        },
+        {
+          "rank": 5,
+          "values": {
+            "[0].BONUS.val": 60,
+            "[0].DURATION": 20,
+            "[0].STACKS": 6,
+            "[1].val": 7.5
+          }
+        }
+      ]
+    },
+    {
+      "id": "PrimaryDamageOnNoMelee",
+      "key": "PrimaryDamageOnNoMelee",
+      "name": {
+        "en": "Primary Deadhead",
+        "zh": "主要·死首"
+      },
+      "category": "primary",
+      "prefix": "主要·",
+      "maxRank": 5,
+      "rarity": "RARE",
+      "effectKind": "damageBuff",
+      "bucket": "baseDamage",
+      "description": {
+        "en": "On Headshot Kill: +120% Damage for 24s. Stacks up to 3x.+30% to Headshot Multiplier-50% Weapon Recoil",
+        "zh": "爆头击杀时： +120% 伤害，持续 24 秒。最多叠加到 3 层。+30% 爆头倍率-50% 武器后坐力"
+      },
+      "levels": [
+        {
+          "rank": 0,
+          "values": {
+            "[0].BONUS.val": 20,
+            "[0].DURATION": 24,
+            "[0].STACKS": 3
+          }
+        },
+        {
+          "rank": 1,
+          "values": {
+            "[0].BONUS.val": 40,
+            "[0].DURATION": 24,
+            "[0].STACKS": 3
+          }
+        },
+        {
+          "rank": 2,
+          "values": {
+            "[0].BONUS.val": 60,
+            "[0].DURATION": 24,
+            "[0].STACKS": 3
+          }
+        },
+        {
+          "rank": 3,
+          "values": {
+            "[0].BONUS.val": 80,
+            "[0].DURATION": 24,
+            "[0].STACKS": 3
+          }
+        },
+        {
+          "rank": 4,
+          "values": {
+            "[0].BONUS.val": 100,
+            "[0].DURATION": 24,
+            "[0].STACKS": 3
+          }
+        },
+        {
+          "rank": 5,
+          "values": {
+            "[0].BONUS.val": 120,
+            "[0].DURATION": 24,
+            "[0].STACKS": 3,
+            "[1].val": 30,
+            "[2].val": -50
+          }
+        }
+      ]
+    },
+    {
+      "id": "PrimaryDamagePerAmmoOnReload",
+      "key": "PrimaryDamagePerAmmoOnReload",
+      "name": {
+        "en": "Primary Plated Round",
+        "zh": "主要·镀金弹头"
+      },
+      "category": "primary",
+      "prefix": "主要·",
+      "maxRank": 5,
+      "rarity": "RARE",
+      "effectKind": "damageBuff",
+      "bucket": "baseDamage",
+      "description": {
+        "en": "On Reload: Deal increased damage per round loaded based on max magazine size. Lasts for 10s.",
+        "zh": "装填时：每装填一发子弹可根据最大弹匣容量增加伤害。持续 10 秒。"
+      },
+      "levels": [
+        {
+          "rank": 0,
+          "values": {
+            "[0].DURATION": 3
+          }
+        },
+        {
+          "rank": 1,
+          "values": {
+            "[0].DURATION": 4
+          }
+        },
+        {
+          "rank": 2,
+          "values": {
+            "[0].DURATION": 5
+          }
+        },
+        {
+          "rank": 3,
+          "values": {
+            "[0].DURATION": 6
+          }
+        },
+        {
+          "rank": 4,
+          "values": {
+            "[0].DURATION": 8
+          }
+        },
+        {
+          "rank": 5,
+          "values": {
+            "[0].DURATION": 10
+          }
+        }
+      ]
+    },
+    {
+      "id": "PrimaryEnergyRegenOnImpactProc",
+      "key": "PrimaryEnergyRegenOnImpactProc",
+      "name": {
+        "en": "Primary Exhilarate",
+        "zh": "主要·激昂"
+      },
+      "category": "primary",
+      "prefix": "主要·",
+      "maxRank": 5,
+      "rarity": "RARE",
+      "effectKind": "status",
+      "bucket": "statusChance",
+      "description": {
+        "en": "On Weapon <DT_IMPACT_COLOR>Impact Status Effect: +1.2 Energy Regen/s for 10s. Stacks up to 3x.",
+        "zh": "武器触发 <DT_IMPACT_COLOR>冲击异常状态： 每秒恢复 +1.2 能量，持续 10 秒。最多叠加到 3 层。"
+      },
+      "levels": [
+        {
+          "rank": 0,
+          "values": {
+            "[0].BONUS.val": 0.2,
+            "[0].DURATION": 10,
+            "[0].STACKS": 3
+          }
+        },
+        {
+          "rank": 1,
+          "values": {
+            "[0].BONUS.val": 0.4,
+            "[0].DURATION": 10,
+            "[0].STACKS": 3
+          }
+        },
+        {
+          "rank": 2,
+          "values": {
+            "[0].BONUS.val": 0.6,
+            "[0].DURATION": 10,
+            "[0].STACKS": 3
+          }
+        },
+        {
+          "rank": 3,
+          "values": {
+            "[0].BONUS.val": 0.8,
+            "[0].DURATION": 10,
+            "[0].STACKS": 3
+          }
+        },
+        {
+          "rank": 4,
+          "values": {
+            "[0].BONUS.val": 1,
+            "[0].DURATION": 10,
+            "[0].STACKS": 3
+          }
+        },
+        {
+          "rank": 5,
+          "values": {
+            "[0].BONUS.val": 1.2,
+            "[0].DURATION": 10,
+            "[0].STACKS": 3
+          }
+        }
+      ]
+    },
+    {
+      "id": "PrimaryHeadshotCritMultOnHeadshot",
+      "key": "PrimaryHeadshotCritMultOnHeadshot",
+      "name": {
+        "en": "Primary Blight",
+        "zh": "主要·毒侵"
+      },
+      "category": "primary",
+      "prefix": "主要·",
+      "maxRank": 5,
+      "rarity": "RARE",
+      "effectKind": "multishot",
+      "bucket": "multishot",
+      "description": {
+        "en": "On <DT_POISON_COLOR>Toxin Status Effect: +3.6% Critical Damage and +1.8% Multishot for 12s. Stacks up to 40x.",
+        "zh": "触发 <DT_POISON_COLOR>毒素异常状态时： +3.6% 暴击伤害 和 +1.8% 多重射击，持续 12 秒。最多叠加到 40 层。"
+      },
+      "levels": [
+        {
+          "rank": 0,
+          "values": {
+            "[0].BONUS1.val": 0.6,
+            "[0].BONUS2.val": 0.3,
+            "[0].DURATION": 12,
+            "[0].STACKS": 40
+          }
+        },
+        {
+          "rank": 1,
+          "values": {
+            "[0].BONUS1.val": 1.2,
+            "[0].BONUS2.val": 0.6,
+            "[0].DURATION": 12,
+            "[0].STACKS": 40
+          }
+        },
+        {
+          "rank": 2,
+          "values": {
+            "[0].BONUS1.val": 1.8,
+            "[0].BONUS2.val": 0.9,
+            "[0].DURATION": 12,
+            "[0].STACKS": 40
+          }
+        },
+        {
+          "rank": 3,
+          "values": {
+            "[0].BONUS1.val": 2.4,
+            "[0].BONUS2.val": 1.2,
+            "[0].DURATION": 12,
+            "[0].STACKS": 40
+          }
+        },
+        {
+          "rank": 4,
+          "values": {
+            "[0].BONUS1.val": 3,
+            "[0].BONUS2.val": 1.5,
+            "[0].DURATION": 12,
+            "[0].STACKS": 40
+          }
+        },
+        {
+          "rank": 5,
+          "values": {
+            "[0].BONUS1.val": 3.6,
+            "[0].BONUS2.val": 1.8,
+            "[0].DURATION": 12,
+            "[0].STACKS": 40
+          }
+        }
+      ]
+    },
+    {
+      "id": "PrimaryJamEnemyWeaponsOnMagneticProc",
+      "key": "PrimaryJamEnemyWeaponsOnMagneticProc",
+      "name": {
+        "en": "Primary Obstruct",
+        "zh": "主要·滞阻"
+      },
+      "category": "primary",
+      "prefix": "主要·",
+      "maxRank": 5,
+      "rarity": "RARE",
+      "effectKind": "status",
+      "bucket": "statusChance",
+      "description": {
+        "en": "On Weapon <DT_MAGNETIC_COLOR>Magnetic Status Effect: Enemy weapons jam within 15m of target. Cooldown 10s.",
+        "zh": "武器触发 <DT_MAGNETIC_COLOR>磁力异常状态时：目标 15 米内的敌人武器会被干扰。冷却时间 10 秒。"
+      },
+      "levels": [
+        {
+          "rank": 0,
+          "values": {
+            "[0].JAM_RANGE": 15,
+            "[0].COOLDOWN": 60
+          }
+        },
+        {
+          "rank": 1,
+          "values": {
+            "[0].JAM_RANGE": 15,
+            "[0].COOLDOWN": 50
+          }
+        },
+        {
+          "rank": 2,
+          "values": {
+            "[0].JAM_RANGE": 15,
+            "[0].COOLDOWN": 40
+          }
+        },
+        {
+          "rank": 3,
+          "values": {
+            "[0].JAM_RANGE": 15,
+            "[0].COOLDOWN": 30
+          }
+        },
+        {
+          "rank": 4,
+          "values": {
+            "[0].JAM_RANGE": 15,
+            "[0].COOLDOWN": 20
+          }
+        },
+        {
+          "rank": 5,
+          "values": {
+            "[0].JAM_RANGE": 15,
+            "[0].COOLDOWN": 10
+          }
+        }
+      ]
+    },
+    {
+      "id": "PullEnemiesOnMeleeKill",
+      "key": "PullEnemiesOnMeleeKill",
+      "name": {
+        "en": "Melee Vortex",
+        "zh": "近战·漩涡"
+      },
+      "category": "melee",
+      "prefix": "近战·",
+      "maxRank": 5,
+      "rarity": "RARE",
+      "effectKind": "status",
+      "bucket": "statusChance",
+      "description": {
+        "en": "Kill an enemy affected by <DT_MAGNETIC_COLOR>Magnetic Status for a 45% chance to pull in enemies within 18m radius",
+        "zh": "击杀受到 <DT_MAGNETIC_COLOR>磁力异常状态影响的敌人时有 45% 几率将半径 18 米内的敌人拉近。"
+      },
+      "levels": [
+        {
+          "rank": 0,
+          "values": {
+            "[0].SPAWN_CHANCE": 20,
+            "[0].RANGE": 18
+          }
+        },
+        {
+          "rank": 1,
+          "values": {
+            "[0].SPAWN_CHANCE": 25,
+            "[0].RANGE": 18
+          }
+        },
+        {
+          "rank": 2,
+          "values": {
+            "[0].SPAWN_CHANCE": 30,
+            "[0].RANGE": 18
+          }
+        },
+        {
+          "rank": 3,
+          "values": {
+            "[0].SPAWN_CHANCE": 35,
+            "[0].RANGE": 18
+          }
+        },
+        {
+          "rank": 4,
+          "values": {
+            "[0].SPAWN_CHANCE": 40,
+            "[0].RANGE": 18
+          }
+        },
+        {
+          "rank": 5,
+          "values": {
+            "[0].SPAWN_CHANCE": 45,
+            "[0].RANGE": 18
+          }
+        }
+      ]
+    },
+    {
+      "id": "RadialDamageOnMaxRadiationStackHit",
+      "key": "RadialDamageOnMaxRadiationStackHit",
+      "name": {
+        "en": "Secondary Irradiate",
+        "zh": "次要·照射"
+      },
+      "category": "secondary",
+      "prefix": "次要·",
+      "maxRank": 5,
+      "rarity": "RARE",
+      "effectKind": "damageBuff",
+      "bucket": "baseDamage",
+      "description": {
+        "en": "On hitting enemies afflicted by 10 stacks of <DT_RADIATION_COLOR>Radiation: Deal 180% of the hit damage to enemies within 7m.",
+        "zh": "命中受到 10 层 <DT_RADIATION_COLOR>辐射影响的敌人时：对 7 米范围内的敌人造成 180% 的命中伤害。"
+      },
+      "levels": [
+        {
+          "rank": 0,
+          "values": {
+            "[0].STACKS": 10,
+            "[0].DAMAGE": 80,
+            "[0].RADIUS": 4.5
+          }
+        },
+        {
+          "rank": 1,
+          "values": {
+            "[0].STACKS": 10,
+            "[0].DAMAGE": 100,
+            "[0].RADIUS": 5
+          }
+        },
+        {
+          "rank": 2,
+          "values": {
+            "[0].STACKS": 10,
+            "[0].DAMAGE": 120,
+            "[0].RADIUS": 5.5
+          }
+        },
+        {
+          "rank": 3,
+          "values": {
+            "[0].STACKS": 10,
+            "[0].DAMAGE": 140,
+            "[0].RADIUS": 6
+          }
+        },
+        {
+          "rank": 4,
+          "values": {
+            "[0].STACKS": 10,
+            "[0].DAMAGE": 160,
+            "[0].RADIUS": 6.5
+          }
+        },
+        {
+          "rank": 5,
+          "values": {
+            "[0].STACKS": 10,
+            "[0].DAMAGE": 180,
+            "[0].RADIUS": 7
+          }
+        }
+      ]
+    },
+    {
+      "id": "ReplayLightCritHits",
+      "key": "ReplayLightCritHits",
+      "name": {
+        "en": "Melee Duplicate",
+        "zh": "近战·刃影"
+      },
+      "category": "melee",
+      "prefix": "近战·",
+      "maxRank": 5,
+      "rarity": "LEGENDARY",
+      "effectKind": "special",
+      "bucket": null,
+      "description": {
+        "en": "On Base Critical Hits: 100% chance for your attack to strike a second time",
+        "zh": "基础暴击命中时：有 100% 几率施加第二次攻击。"
+      },
+      "levels": [
+        {
+          "rank": 0,
+          "values": {
+            "[0].CHANCE": 25
+          }
+        },
+        {
+          "rank": 1,
+          "values": {
+            "[0].CHANCE": 40
+          }
+        },
+        {
+          "rank": 2,
+          "values": {
+            "[0].CHANCE": 55
+          }
+        },
+        {
+          "rank": 3,
+          "values": {
+            "[0].CHANCE": 70
+          }
+        },
+        {
+          "rank": 4,
+          "values": {
+            "[0].CHANCE": 85
+          }
+        },
+        {
+          "rank": 5,
+          "values": {
+            "[0].CHANCE": 100
+          }
+        }
+      ]
+    },
+    {
+      "id": "SecondaryColdOnPuncture",
+      "key": "SecondaryColdOnPuncture",
+      "name": {
+        "en": "Secondary Cryogenic",
+        "zh": "次要·低温"
+      },
+      "category": "secondary",
+      "prefix": "次要·",
+      "maxRank": 5,
+      "rarity": "RARE",
+      "effectKind": "status",
+      "bucket": "statusChance",
+      "description": {
+        "en": "On <DT_PUNCTURE_COLOR> Puncture: Apply 3 <DT_FREEZE_COLOR> Cold stacks on targets within 15m.",
+        "zh": "造成 <DT_PUNCTURE_COLOR> 穿刺时：对 15 米内的敌人施加 3 层 <DT_FREEZE_COLOR> 冰冻异常状态。"
+      },
+      "levels": [
+        {
+          "rank": 0,
+          "values": {
+            "[0].NUM_PROCS": 1,
+            "[0].RADIUS": 10
+          }
+        },
+        {
+          "rank": 1,
+          "values": {
+            "[0].NUM_PROCS": 1,
+            "[0].RADIUS": 11
+          }
+        },
+        {
+          "rank": 2,
+          "values": {
+            "[0].NUM_PROCS": 2,
+            "[0].RADIUS": 12
+          }
+        },
+        {
+          "rank": 3,
+          "values": {
+            "[0].NUM_PROCS": 2,
+            "[0].RADIUS": 13
+          }
+        },
+        {
+          "rank": 4,
+          "values": {
+            "[0].NUM_PROCS": 3,
+            "[0].RADIUS": 14
+          }
+        },
+        {
+          "rank": 5,
+          "values": {
+            "[0].NUM_PROCS": 3,
+            "[0].RADIUS": 15
+          }
+        }
+      ]
+    },
+    {
+      "id": "SecondaryCritChancePerBuff",
+      "key": "SecondaryCritChancePerBuff",
+      "name": {
+        "en": "Secondary Kinship",
+        "zh": "次要·手足"
+      },
+      "category": "secondary",
+      "prefix": "次要·",
+      "maxRank": 5,
+      "rarity": "RARE",
+      "effectKind": "crit",
+      "bucket": "critChance",
+      "description": {
+        "en": "While Buffing Ally Warframes: +20% Critical Chance per buff",
+        "zh": "为友军战甲提供增益时：每个增益 +20% 暴击率。"
+      },
+      "levels": [
+        {
+          "rank": 0,
+          "values": {
+            "[0].VALUE": 3
+          }
+        },
+        {
+          "rank": 1,
+          "values": {
+            "[0].VALUE": 6
+          }
+        },
+        {
+          "rank": 2,
+          "values": {
+            "[0].VALUE": 10
+          }
+        },
+        {
+          "rank": 3,
+          "values": {
+            "[0].VALUE": 13
+          }
+        },
+        {
+          "rank": 4,
+          "values": {
+            "[0].VALUE": 17
+          }
+        },
+        {
+          "rank": 5,
+          "values": {
+            "[0].VALUE": 20
+          }
+        }
+      ]
+    },
+    {
+      "id": "SecondaryCritOnHit",
+      "key": "SecondaryCritOnHit",
+      "name": {
+        "en": "Secondary Enervate",
+        "zh": "次要·失活"
+      },
+      "category": "secondary",
+      "prefix": "次要·",
+      "maxRank": 5,
+      "rarity": "RARE",
+      "effectKind": "crit",
+      "bucket": "critChance",
+      "description": {
+        "en": "On Hit: Increase Critical Chance by 10%. Resets after 6 Big Critical Hit.",
+        "zh": "命中时：增加 10% 暴击几率。在 6 次强力暴击命中后重置。"
+      },
+      "levels": [
+        {
+          "rank": 0,
+          "values": {
+            "[0].CRIT_CHANCE": 10,
+            "[0].NUM_CRITS": 1
+          }
+        },
+        {
+          "rank": 1,
+          "values": {
+            "[0].CRIT_CHANCE": 10,
+            "[0].NUM_CRITS": 2
+          }
+        },
+        {
+          "rank": 2,
+          "values": {
+            "[0].CRIT_CHANCE": 10,
+            "[0].NUM_CRITS": 3
+          }
+        },
+        {
+          "rank": 3,
+          "values": {
+            "[0].CRIT_CHANCE": 10,
+            "[0].NUM_CRITS": 4
+          }
+        },
+        {
+          "rank": 4,
+          "values": {
+            "[0].CRIT_CHANCE": 10,
+            "[0].NUM_CRITS": 5
+          }
+        },
+        {
+          "rank": 5,
+          "values": {
+            "[0].CRIT_CHANCE": 10,
+            "[0].NUM_CRITS": 6
+          }
+        }
+      ]
+    },
+    {
+      "id": "SecondaryDamageOnHeatProc",
+      "key": "SecondaryDamageOnHeatProc",
+      "name": {
+        "en": "Cascadia Flare",
+        "zh": "瀑流·耀炎"
+      },
+      "category": "secondary",
+      "prefix": "瀑流·",
+      "maxRank": 5,
+      "rarity": "RARE",
+      "effectKind": "status",
+      "bucket": "statusChance",
+      "description": {
+        "en": "On <DT_FIRE_COLOR>Heat Status Effect: +12% Damage for 10s. Stacks up to 480%.",
+        "zh": "触发 <DT_FIRE_COLOR>火焰异常状态时： +12% 伤害，持续 10 秒。最多叠加到 480%。"
+      },
+      "levels": [
+        {
+          "rank": 0,
+          "values": {
+            "[0].BONUS.val": 2,
+            "[0].DURATION": 10,
+            "[0].STACKS": 80
+          }
+        },
+        {
+          "rank": 1,
+          "values": {
+            "[0].BONUS.val": 4,
+            "[0].DURATION": 10,
+            "[0].STACKS": 160
+          }
+        },
+        {
+          "rank": 2,
+          "values": {
+            "[0].BONUS.val": 6,
+            "[0].DURATION": 10,
+            "[0].STACKS": 240
+          }
+        },
+        {
+          "rank": 3,
+          "values": {
+            "[0].BONUS.val": 8,
+            "[0].DURATION": 10,
+            "[0].STACKS": 320
+          }
+        },
+        {
+          "rank": 4,
+          "values": {
+            "[0].BONUS.val": 10,
+            "[0].DURATION": 10,
+            "[0].STACKS": 400
+          }
+        },
+        {
+          "rank": 5,
+          "values": {
+            "[0].BONUS.val": 12,
+            "[0].DURATION": 10,
+            "[0].STACKS": 480
+          }
+        }
+      ]
+    },
+    {
+      "id": "SecondaryDamageOnKill",
+      "key": "SecondaryDamageOnKill",
+      "name": {
+        "en": "Secondary Merciless",
+        "zh": "次要·无情"
+      },
+      "category": "secondary",
+      "prefix": "次要·",
+      "maxRank": 5,
+      "rarity": "RARE",
+      "effectKind": "damageBuff",
+      "bucket": "baseDamage",
+      "description": {
+        "en": "On Kill: +30% Damage for 4s. Stacks up to 12x.+30% Reload Speed",
+        "zh": "击杀时： +30% 伤害，持续 4 秒。最多叠加到 12 层。+30% 装填速度"
+      },
+      "levels": [
+        {
+          "rank": 0,
+          "values": {
+            "[0].BONUS.val": 5,
+            "[0].DURATION": 4,
+            "[0].STACKS": 12
+          }
+        },
+        {
+          "rank": 1,
+          "values": {
+            "[0].BONUS.val": 10,
+            "[0].DURATION": 4,
+            "[0].STACKS": 12
+          }
+        },
+        {
+          "rank": 2,
+          "values": {
+            "[0].BONUS.val": 15,
+            "[0].DURATION": 4,
+            "[0].STACKS": 12
+          }
+        },
+        {
+          "rank": 3,
+          "values": {
+            "[0].BONUS.val": 20,
+            "[0].DURATION": 4,
+            "[0].STACKS": 12
+          }
+        },
+        {
+          "rank": 4,
+          "values": {
+            "[0].BONUS.val": 25,
+            "[0].DURATION": 4,
+            "[0].STACKS": 12
+          }
+        },
+        {
+          "rank": 5,
+          "values": {
+            "[0].BONUS.val": 30,
+            "[0].DURATION": 4,
+            "[0].STACKS": 12,
+            "[1].val": 30
+          }
+        }
+      ]
+    },
+    {
+      "id": "SecondaryDamageOnMeleeKill",
+      "key": "SecondaryDamageOnMeleeKill",
+      "name": {
+        "en": "Secondary Dexterity",
+        "zh": "次要·熟练"
+      },
+      "category": "secondary",
+      "prefix": "次要·",
+      "maxRank": 5,
+      "rarity": "RARE",
+      "effectKind": "damageBuff",
+      "bucket": "baseDamage",
+      "description": {
+        "en": "On Melee Kill: +60% Damage for 20s. Stacks up to 6x.+7.5s Combo Duration",
+        "zh": "近战击杀时： +60% 伤害，持续 20 秒。最多叠加到 6 层。+7.5 秒连击持续时间"
+      },
+      "levels": [
+        {
+          "rank": 0,
+          "values": {
+            "[0].BONUS.val": 10,
+            "[0].DURATION": 20,
+            "[0].STACKS": 6
+          }
+        },
+        {
+          "rank": 1,
+          "values": {
+            "[0].BONUS.val": 20,
+            "[0].DURATION": 20,
+            "[0].STACKS": 6
+          }
+        },
+        {
+          "rank": 2,
+          "values": {
+            "[0].BONUS.val": 30,
+            "[0].DURATION": 20,
+            "[0].STACKS": 6
+          }
+        },
+        {
+          "rank": 3,
+          "values": {
+            "[0].BONUS.val": 40,
+            "[0].DURATION": 20,
+            "[0].STACKS": 6
+          }
+        },
+        {
+          "rank": 4,
+          "values": {
+            "[0].BONUS.val": 50,
+            "[0].DURATION": 20,
+            "[0].STACKS": 6
+          }
+        },
+        {
+          "rank": 5,
+          "values": {
+            "[0].BONUS.val": 60,
+            "[0].DURATION": 20,
+            "[0].STACKS": 6,
+            "[1].val": 7.5
+          }
+        }
+      ]
+    },
+    {
+      "id": "SecondaryDamageOnNoMelee",
+      "key": "SecondaryDamageOnNoMelee",
+      "name": {
+        "en": "Secondary Deadhead",
+        "zh": "次要·死首"
+      },
+      "category": "secondary",
+      "prefix": "次要·",
+      "maxRank": 5,
+      "rarity": "RARE",
+      "effectKind": "damageBuff",
+      "bucket": "baseDamage",
+      "description": {
+        "en": "On Precision Headshot Kill: +120% Damage for 24s. Stacks up to 3x.+30% to Headshot Multiplier-50% Weapon Recoil",
+        "zh": "精准爆头击杀时： +120% 伤害，持续 24 秒。最多叠加到 3 层。+30% 爆头倍率-50% 武器后坐力"
+      },
+      "levels": [
+        {
+          "rank": 0,
+          "values": {
+            "[0].BONUS.val": 20,
+            "[0].DURATION": 24,
+            "[0].STACKS": 3
+          }
+        },
+        {
+          "rank": 1,
+          "values": {
+            "[0].BONUS.val": 40,
+            "[0].DURATION": 24,
+            "[0].STACKS": 3
+          }
+        },
+        {
+          "rank": 2,
+          "values": {
+            "[0].BONUS.val": 60,
+            "[0].DURATION": 24,
+            "[0].STACKS": 3
+          }
+        },
+        {
+          "rank": 3,
+          "values": {
+            "[0].BONUS.val": 80,
+            "[0].DURATION": 24,
+            "[0].STACKS": 3
+          }
+        },
+        {
+          "rank": 4,
+          "values": {
+            "[0].BONUS.val": 100,
+            "[0].DURATION": 24,
+            "[0].STACKS": 3
+          }
+        },
+        {
+          "rank": 5,
+          "values": {
+            "[0].BONUS.val": 120,
+            "[0].DURATION": 24,
+            "[0].STACKS": 3,
+            "[1].val": 30,
+            "[2].val": -50
+          }
+        }
+      ]
+    },
+    {
+      "id": "SecondaryExtraDamagePerFreezeStack",
+      "key": "SecondaryExtraDamagePerFreezeStack",
+      "name": {
+        "en": "Secondary Shiver",
+        "zh": "次要·冷颤"
+      },
+      "category": "secondary",
+      "prefix": "次要·",
+      "maxRank": 5,
+      "rarity": "LEGENDARY",
+      "effectKind": "status",
+      "bucket": "statusChance",
+      "description": {
+        "en": "Enemies take +45% damage per <DT_FREEZE_COLOR>Cold Status",
+        "zh": "每层 <DT_FREEZE_COLOR>冰冻异常状态会使敌人受到 +45% 的伤害"
+      },
+      "levels": [
+        {
+          "rank": 0,
+          "values": {
+            "[0].val": 7.5
+          }
+        },
+        {
+          "rank": 1,
+          "values": {
+            "[0].val": 15
+          }
+        },
+        {
+          "rank": 2,
+          "values": {
+            "[0].val": 22.5
+          }
+        },
+        {
+          "rank": 3,
+          "values": {
+            "[0].val": 30
+          }
+        },
+        {
+          "rank": 4,
+          "values": {
+            "[0].val": 37.5
+          }
+        },
+        {
+          "rank": 5,
+          "values": {
+            "[0].val": 45
+          }
+        }
+      ]
+    },
+    {
+      "id": "SecondaryReloadSpeedAndMultishotOnElectricProc",
+      "key": "SecondaryReloadSpeedAndMultishotOnElectricProc",
+      "name": {
+        "en": "Conjunction Voltage",
+        "zh": "联结·电压"
+      },
+      "category": "secondary",
+      "prefix": "联结·",
+      "maxRank": 5,
+      "rarity": "RARE",
+      "effectKind": "multishot",
+      "bucket": "multishot",
+      "description": {
+        "en": "On <DT_ELECTRICITY_COLOR>Electricity Status Effect: +1.5% Reload Speed and +3% Multishot for 12s. Stacks up to 40x.",
+        "zh": "触发 <DT_ELECTRICITY_COLOR>电击异常状态时： +1.5% 装填速度 和 +3% 多重射击，持续 12 秒。最多叠加到 40 层。"
+      },
+      "levels": [
+        {
+          "rank": 0,
+          "values": {
+            "[0].BONUS1.val": 0.25,
+            "[0].BONUS2.val": 0.5,
+            "[0].DURATION": 12,
+            "[0].STACKS": 40
+          }
+        },
+        {
+          "rank": 1,
+          "values": {
+            "[0].BONUS1.val": 0.5,
+            "[0].BONUS2.val": 1,
+            "[0].DURATION": 12,
+            "[0].STACKS": 40
+          }
+        },
+        {
+          "rank": 2,
+          "values": {
+            "[0].BONUS1.val": 0.75,
+            "[0].BONUS2.val": 1.5,
+            "[0].DURATION": 12,
+            "[0].STACKS": 40
+          }
+        },
+        {
+          "rank": 3,
+          "values": {
+            "[0].BONUS1.val": 1,
+            "[0].BONUS2.val": 2,
+            "[0].DURATION": 12,
+            "[0].STACKS": 40
+          }
+        },
+        {
+          "rank": 4,
+          "values": {
+            "[0].BONUS1.val": 1.25,
+            "[0].BONUS2.val": 2.5,
+            "[0].DURATION": 12,
+            "[0].STACKS": 40
+          }
+        },
+        {
+          "rank": 5,
+          "values": {
+            "[0].BONUS1.val": 1.5,
+            "[0].BONUS2.val": 3,
+            "[0].DURATION": 12,
+            "[0].STACKS": 40
+          }
+        }
+      ]
+    },
+    {
+      "id": "SeekerProjOnHeadshotKill",
+      "key": "SeekerProjOnHeadshotKill",
+      "name": {
+        "en": "Pax Seeker",
+        "zh": "和平·追寻者"
+      },
+      "category": "kitgun",
+      "prefix": "和平·",
+      "maxRank": 3,
+      "rarity": "RARE",
+      "effectKind": "special",
+      "bucket": null,
+      "description": {
+        "en": "On Headshot Kill: 4 projectiles burst from the target and seek the heads of nearby enemies.",
+        "zh": "爆头击杀时： 在目标身上炸裂出 4 发自动导向邻近敌人头部的飞射物。"
+      },
+      "levels": [
+        {
+          "rank": 0,
+          "values": {
+            "[0].BONUS.NUM": 1
+          }
+        },
+        {
+          "rank": 1,
+          "values": {
+            "[0].BONUS.NUM": 2
+          }
+        },
+        {
+          "rank": 2,
+          "values": {
+            "[0].BONUS.NUM": 3
+          }
+        },
+        {
+          "rank": 3,
+          "values": {
+            "[0].BONUS.NUM": 4
+          }
+        }
+      ]
+    },
+    {
+      "id": "ShotgunMultishotAndReloadSpeedOnCloseKill",
+      "key": "ShotgunMultishotAndReloadSpeedOnCloseKill",
+      "name": {
+        "en": "Shotgun Vendetta",
+        "zh": "霰弹·仇杀"
+      },
+      "category": "secondary",
+      "prefix": "霰弹·",
+      "maxRank": 5,
+      "rarity": "RARE",
+      "effectKind": "multishot",
+      "bucket": "multishot",
+      "description": {
+        "en": "On shotgun kill within 5m of target: +180% Multishot and +75% Reload Speed for 15s.",
+        "zh": "在目标 5 米以内使用霰弹枪击杀时： +180% 多重射击 和 +75% 装填速度，持续 15 秒。"
+      },
+      "levels": [
+        {
+          "rank": 0,
+          "values": {
+            "[0].BONUS1.val": 30,
+            "[0].BONUS2.val": 12.5,
+            "[0].DURATION": 15
+          }
+        },
+        {
+          "rank": 1,
+          "values": {
+            "[0].BONUS1.val": 60,
+            "[0].BONUS2.val": 25,
+            "[0].DURATION": 15
+          }
+        },
+        {
+          "rank": 2,
+          "values": {
+            "[0].BONUS1.val": 90,
+            "[0].BONUS2.val": 37.5,
+            "[0].DURATION": 15
+          }
+        },
+        {
+          "rank": 3,
+          "values": {
+            "[0].BONUS1.val": 120,
+            "[0].BONUS2.val": 50,
+            "[0].DURATION": 15
+          }
+        },
+        {
+          "rank": 4,
+          "values": {
+            "[0].BONUS1.val": 150,
+            "[0].BONUS2.val": 62.5,
+            "[0].DURATION": 15
+          }
+        },
+        {
+          "rank": 5,
+          "values": {
+            "[0].BONUS1.val": 180,
+            "[0].BONUS2.val": 75,
+            "[0].DURATION": 15
+          }
+        }
+      ]
+    },
+    {
+      "id": "SplitStatusProcsOnStackedStatusHit",
+      "key": "SplitStatusProcsOnStackedStatusHit",
+      "name": {
+        "en": "Primary Debilitate",
+        "zh": "主要·衰弱"
+      },
+      "category": "primary",
+      "prefix": "主要·",
+      "maxRank": 5,
+      "rarity": "RARE",
+      "effectKind": "status",
+      "bucket": "statusChance",
+      "description": {
+        "en": "If an enemy has 10 stacks of a combined Status Effect, inflicting the same Status Effect again has a 100% chance to inflict one of the base Status Effects it is composed of.",
+        "zh": "如果敌人身上叠加了 10 层复合异常状态，再次造成相同的异常状态有 100% 的几率施加组成该异常状态的基础异常状态之一。"
+      },
+      "levels": [
+        {
+          "rank": 0,
+          "values": {
+            "[0].STACKS": 10,
+            "[0].CHANCE": 50
+          }
+        },
+        {
+          "rank": 1,
+          "values": {
+            "[0].STACKS": 10,
+            "[0].CHANCE": 60
+          }
+        },
+        {
+          "rank": 2,
+          "values": {
+            "[0].STACKS": 10,
+            "[0].CHANCE": 70
+          }
+        },
+        {
+          "rank": 3,
+          "values": {
+            "[0].STACKS": 10,
+            "[0].CHANCE": 80
+          }
+        },
+        {
+          "rank": 4,
+          "values": {
+            "[0].STACKS": 10,
+            "[0].CHANCE": 90
+          }
+        },
+        {
+          "rank": 5,
+          "values": {
+            "[0].STACKS": 10,
+            "[0].CHANCE": 100
+          }
+        }
+      ]
+    },
+    {
+      "id": "StatusAndAmmoEfficiencyOnWeakpointHit",
+      "key": "StatusAndAmmoEfficiencyOnWeakpointHit",
+      "name": {
+        "en": "Primary Crux",
+        "zh": "主要·准星"
+      },
+      "category": "primary",
+      "prefix": "主要·",
+      "maxRank": 5,
+      "rarity": "RARE",
+      "effectKind": "status",
+      "bucket": "statusChance",
+      "description": {
+        "en": "On Weak Point Hit: Gain +30% Status Chance and +6% Ammo Efficiency for 10s. Stacks up to 10x.",
+        "zh": "命中弱点时：获得 +30% 触发几率和 +6% 弹药效率，持续 10 秒。最多可叠加 10 层。"
+      },
+      "levels": [
+        {
+          "rank": 0,
+          "values": {
+            "[0].STATUS_CHANCE": 5,
+            "[0].AMMO_EFF": 1,
+            "[0].DURATION": 10,
+            "[0].MAX_STACKS": 10
+          }
+        },
+        {
+          "rank": 1,
+          "values": {
+            "[0].STATUS_CHANCE": 10,
+            "[0].AMMO_EFF": 2,
+            "[0].DURATION": 10,
+            "[0].MAX_STACKS": 10
+          }
+        },
+        {
+          "rank": 2,
+          "values": {
+            "[0].STATUS_CHANCE": 15,
+            "[0].AMMO_EFF": 3,
+            "[0].DURATION": 10,
+            "[0].MAX_STACKS": 10
+          }
+        },
+        {
+          "rank": 3,
+          "values": {
+            "[0].STATUS_CHANCE": 20,
+            "[0].AMMO_EFF": 4,
+            "[0].DURATION": 10,
+            "[0].MAX_STACKS": 10
+          }
+        },
+        {
+          "rank": 4,
+          "values": {
+            "[0].STATUS_CHANCE": 25,
+            "[0].AMMO_EFF": 5,
+            "[0].DURATION": 10,
+            "[0].MAX_STACKS": 10
+          }
+        },
+        {
+          "rank": 5,
+          "values": {
+            "[0].STATUS_CHANCE": 30,
+            "[0].AMMO_EFF": 6,
+            "[0].DURATION": 10,
+            "[0].MAX_STACKS": 10
+          }
+        }
+      ]
+    },
+    {
+      "id": "StatusChannelingDamage",
+      "key": "StatusChannelingDamage",
+      "name": {
+        "en": "Exodia Triumph",
+        "zh": "神威·凯旋"
+      },
+      "category": "melee",
+      "prefix": "神威·",
+      "maxRank": 3,
+      "rarity": "UNCOMMON",
+      "effectKind": "combo",
+      "bucket": null,
+      "description": {
+        "en": "+50% Additional Combo Count Chance",
+        "zh": "+50% 额外连击数几率"
+      },
+      "levels": [
+        {
+          "rank": 0,
+          "values": {
+            "[0].val": 12.5
+          }
+        },
+        {
+          "rank": 1,
+          "values": {
+            "[0].val": 25
+          }
+        },
+        {
+          "rank": 2,
+          "values": {
+            "[0].val": 37.5
+          }
+        },
+        {
+          "rank": 3,
+          "values": {
+            "[0].val": 50
+          }
+        }
+      ]
+    },
+    {
+      "id": "StatusTriggerRadialDamage",
+      "key": "StatusTriggerRadialDamage",
+      "name": {
+        "en": "Exodia Force",
+        "zh": "神威·气力"
+      },
+      "category": "melee",
+      "prefix": "神威·",
+      "maxRank": 3,
+      "rarity": "RARE",
+      "effectKind": "status",
+      "bucket": "statusChance",
+      "description": {
+        "en": "On Status Effect: 50% chance to deal 200% Weapon Damage to enemies within 6m.",
+        "zh": "触发异常状态时： 50% 的几率对 6 米内的敌人造成 200% 的武器伤害。"
+      },
+      "levels": [
+        {
+          "rank": 0,
+          "values": {
+            "[0].BONUS.CHANCE": 50,
+            "[0].BONUS.STAT1": 50,
+            "[0].BONUS.RANGE": 6
+          }
+        },
+        {
+          "rank": 1,
+          "values": {
+            "[0].BONUS.CHANCE": 50,
+            "[0].BONUS.STAT1": 100,
+            "[0].BONUS.RANGE": 6
+          }
+        },
+        {
+          "rank": 2,
+          "values": {
+            "[0].BONUS.CHANCE": 50,
+            "[0].BONUS.STAT1": 150,
+            "[0].BONUS.RANGE": 6
+          }
+        },
+        {
+          "rank": 3,
+          "values": {
+            "[0].BONUS.CHANCE": 50,
+            "[0].BONUS.STAT1": 200,
+            "[0].BONUS.RANGE": 6
+          }
+        }
+      ]
+    },
+    {
+      "id": "BurningCystOnKill",
+      "key": "BurningCystOnKill",
+      "name": {
+        "en": "Residual Boils",
+        "zh": "残差·燃沸"
+      },
+      "category": "kitgun",
+      "prefix": "残差·",
+      "maxRank": 3,
+      "rarity": "RARE",
+      "effectKind": "elemental",
+      "bucket": "elemental",
+      "description": {
+        "en": "On Kitgun Kill: 20% chance to spawn volatile hives for 12s that explode when enemies approach for 80 <DT_FIRE_COLOR>Heat Damage in 10m. Standing in the area applies <DT_FIRE_COLOR>Heat Damage type to Theorem Arcanes.",
+        "zh": "用组合枪击杀时： 20% 几率触发 生成不稳定的巢囊，持续 12 秒，在敌人靠近时，巢囊爆炸，并在 10 米内造成 80 <DT_FIRE_COLOR>火焰伤害。站在该区域内会对定理赋能施加 <DT_FIRE_COLOR>火焰伤害。"
+      },
+      "levels": [
+        {
+          "rank": 0,
+          "values": {
+            "[0].CHANCE": 20,
+            "[0].BONUS.DURATION": 3,
+            "[0].BONUS.DAMAGE": 80,
+            "[0].BONUS.RANGE": 10
+          }
+        },
+        {
+          "rank": 1,
+          "values": {
+            "[0].CHANCE": 20,
+            "[0].BONUS.DURATION": 6,
+            "[0].BONUS.DAMAGE": 80,
+            "[0].BONUS.RANGE": 10
+          }
+        },
+        {
+          "rank": 2,
+          "values": {
+            "[0].CHANCE": 20,
+            "[0].BONUS.DURATION": 9,
+            "[0].BONUS.DAMAGE": 80,
+            "[0].BONUS.RANGE": 10
+          }
+        },
+        {
+          "rank": 3,
+          "values": {
+            "[0].CHANCE": 20,
+            "[0].BONUS.DURATION": 12,
+            "[0].BONUS.DAMAGE": 80,
+            "[0].BONUS.RANGE": 10
+          }
+        }
+      ]
+    },
+    {
+      "id": "ConvergeRadialAttackOnAim",
+      "key": "ConvergeRadialAttackOnAim",
+      "name": {
+        "en": "Primary Compression",
+        "zh": "主要·压缩"
+      },
+      "category": "primary",
+      "prefix": "主要·",
+      "maxRank": 5,
+      "rarity": "RARE",
+      "effectKind": "special",
+      "bucket": null,
+      "description": {
+        "en": "On aim: x0.2 explosion radius, +100% damage and +5.5% ammo efficiency for every 1m radius lost.",
+        "zh": "瞄准时：爆炸范围为 0.2 倍，且每缩小 1 米范围，增加 100% 伤害与 5.5% 弹药效率。"
+      },
+      "levels": [
+        {
+          "rank": 0,
+          "values": {
+            "[0].RADIUS": 0.2,
+            "[0].STAT1": 50,
+            "[0].STAT2": 3
+          }
+        },
+        {
+          "rank": 1,
+          "values": {
+            "[0].RADIUS": 0.2,
+            "[0].STAT1": 60,
+            "[0].STAT2": 3.5
+          }
+        },
+        {
+          "rank": 2,
+          "values": {
+            "[0].RADIUS": 0.2,
+            "[0].STAT1": 70,
+            "[0].STAT2": 4
+          }
+        },
+        {
+          "rank": 3,
+          "values": {
+            "[0].RADIUS": 0.2,
+            "[0].STAT1": 80,
+            "[0].STAT2": 4.5
+          }
+        },
+        {
+          "rank": 4,
+          "values": {
+            "[0].RADIUS": 0.2,
+            "[0].STAT1": 90,
+            "[0].STAT2": 5
+          }
+        },
+        {
+          "rank": 5,
+          "values": {
+            "[0].RADIUS": 0.2,
+            "[0].STAT1": 100,
+            "[0].STAT2": 5.5
+          }
+        }
+      ]
+    },
+    {
+      "id": "ExtraProcOnProc",
+      "key": "ExtraProcOnProc",
+      "name": {
+        "en": "Secondary Encumber",
+        "zh": "次要·妨害"
+      },
+      "category": "secondary",
+      "prefix": "次要·",
+      "maxRank": 5,
+      "rarity": "RARE",
+      "effectKind": "status",
+      "bucket": "statusChance",
+      "description": {
+        "en": "On Status Effect: +24% chance to trigger a second random Status Effect.",
+        "zh": "触发异常状态时：+24% 几率触发第二个随机异常状态。"
+      },
+      "levels": [
+        {
+          "rank": 0,
+          "values": {
+            "[0].BONUS.val": 4
+          }
+        },
+        {
+          "rank": 1,
+          "values": {
+            "[0].BONUS.val": 8
+          }
+        },
+        {
+          "rank": 2,
+          "values": {
+            "[0].BONUS.val": 12
+          }
+        },
+        {
+          "rank": 3,
+          "values": {
+            "[0].BONUS.val": 16
+          }
+        },
+        {
+          "rank": 4,
+          "values": {
+            "[0].BONUS.val": 20
+          }
+        },
+        {
+          "rank": 5,
+          "values": {
+            "[0].BONUS.val": 24
+          }
+        }
+      ]
+    },
+    {
+      "id": "FreezeEnemiesOnRoll",
+      "key": "FreezeEnemiesOnRoll",
+      "name": {
+        "en": "Melee Careen",
+        "zh": "近战·疾驰"
+      },
+      "category": "melee",
+      "prefix": "近战·",
+      "maxRank": 5,
+      "rarity": "RARE",
+      "effectKind": "damageBuff",
+      "bucket": null,
+      "description": {
+        "en": "x2.50 Melee Damage against Frozen enemies. On Roll: <DT_FREEZE_COLOR> Freeze enemies in a 5.5m radius with a 2s Cooldown.",
+        "zh": "对被冰冻的敌人造成近战伤害 x2.50。翻滚时：<DT_FREEZE_COLOR>冰冻 5.5 米范围内的敌人，冷却时间为 2 秒。"
+      },
+      "levels": [
+        {
+          "rank": 0,
+          "values": {
+            "[0].DAMAGE": 1.25,
+            "[0].RADIUS": 3,
+            "[0].COOLDOWN": 2
+          }
+        },
+        {
+          "rank": 1,
+          "values": {
+            "[0].DAMAGE": 1.5,
+            "[0].RADIUS": 3.5,
+            "[0].COOLDOWN": 2
+          }
+        },
+        {
+          "rank": 2,
+          "values": {
+            "[0].DAMAGE": 1.75,
+            "[0].RADIUS": 4,
+            "[0].COOLDOWN": 2
+          }
+        },
+        {
+          "rank": 3,
+          "values": {
+            "[0].DAMAGE": 2,
+            "[0].RADIUS": 4.5,
+            "[0].COOLDOWN": 2
+          }
+        },
+        {
+          "rank": 4,
+          "values": {
+            "[0].DAMAGE": 2.25,
+            "[0].RADIUS": 5,
+            "[0].COOLDOWN": 2
+          }
+        },
+        {
+          "rank": 5,
+          "values": {
+            "[0].DAMAGE": 2.5,
+            "[0].RADIUS": 5.5,
+            "[0].COOLDOWN": 2
+          }
+        }
+      ]
+    },
+    {
+      "id": "IceMistOnKill",
+      "key": "IceMistOnKill",
+      "name": {
+        "en": "Residual Malodor",
+        "zh": "残差·恶嗅"
+      },
+      "category": "kitgun",
+      "prefix": "残差·",
+      "maxRank": 3,
+      "rarity": "RARE",
+      "effectKind": "elemental",
+      "bucket": "elemental",
+      "description": {
+        "en": "On Kitgun Kill: 20% chance to create a frigid mist for 12s, dealing 40 <DT_FREEZE_COLOR>Cold Damage/s. Standing in the area applies <DT_FREEZE_COLOR>Cold Damage to Theorem Arcanes.",
+        "zh": "用组合枪击杀时： 20% 几率触发 制造一片持续时间为 12 秒的寒雾，每秒造成 40 <DT_FREEZE_COLOR>冰冻伤害。站在该区域内会对定理赋能施加 <DT_FREEZE_COLOR>冰冻伤害。"
+      },
+      "levels": [
+        {
+          "rank": 0,
+          "values": {
+            "[0].CHANCE": 20,
+            "[0].BONUS.DURATION": 3,
+            "[0].BONUS.DAMAGE": 40
+          }
+        },
+        {
+          "rank": 1,
+          "values": {
+            "[0].CHANCE": 20,
+            "[0].BONUS.DURATION": 6,
+            "[0].BONUS.DAMAGE": 40
+          }
+        },
+        {
+          "rank": 2,
+          "values": {
+            "[0].CHANCE": 20,
+            "[0].BONUS.DURATION": 9,
+            "[0].BONUS.DAMAGE": 40
+          }
+        },
+        {
+          "rank": 3,
+          "values": {
+            "[0].CHANCE": 20,
+            "[0].BONUS.DURATION": 12,
+            "[0].BONUS.DAMAGE": 40
+          }
+        }
+      ]
+    },
+    {
+      "id": "LightningStrikeOnKill",
+      "key": "LightningStrikeOnKill",
+      "name": {
+        "en": "Residual Shock",
+        "zh": "残差·电击"
+      },
+      "category": "kitgun",
+      "prefix": "残差·",
+      "maxRank": 3,
+      "rarity": "RARE",
+      "effectKind": "elemental",
+      "bucket": "elemental",
+      "description": {
+        "en": "On Kitgun Kill: 20% chance to spawn an electrified spike for 12s, dealing 200 <DT_ELECTRICITY_COLOR>Electricity Damage to enemies within 10m. Standing in the area applies <DT_ELECTRICITY_COLOR>Electricity Damage to Theorem Arcanes.",
+        "zh": "用组合枪击杀时： 20% 几率触发 生成电脉冲柱，持续 12 秒，对 10 米范围内的敌人造成 200 <DT_ELECTRICITY_COLOR>电击伤害。站在该区域内会对定理赋能施加 <DT_ELECTRICITY_COLOR>电击伤害。"
+      },
+      "levels": [
+        {
+          "rank": 0,
+          "values": {
+            "[0].CHANCE": 20,
+            "[0].BONUS.DURATION": 3,
+            "[0].BONUS.DAMAGE": 200,
+            "[0].BONUS.RANGE": 10
+          }
+        },
+        {
+          "rank": 1,
+          "values": {
+            "[0].CHANCE": 20,
+            "[0].BONUS.DURATION": 6,
+            "[0].BONUS.DAMAGE": 200,
+            "[0].BONUS.RANGE": 10
+          }
+        },
+        {
+          "rank": 2,
+          "values": {
+            "[0].CHANCE": 20,
+            "[0].BONUS.DURATION": 9,
+            "[0].BONUS.DAMAGE": 200,
+            "[0].BONUS.RANGE": 10
+          }
+        },
+        {
+          "rank": 3,
+          "values": {
+            "[0].CHANCE": 20,
+            "[0].BONUS.DURATION": 12,
+            "[0].BONUS.DAMAGE": 200,
+            "[0].BONUS.RANGE": 10
+          }
+        }
+      ]
+    },
+    {
+      "id": "ToxicBloodOnKill",
+      "key": "ToxicBloodOnKill",
+      "name": {
+        "en": "Residual Viremia",
+        "zh": "残差·毒血"
+      },
+      "category": "kitgun",
+      "prefix": "残差·",
+      "maxRank": 3,
+      "rarity": "RARE",
+      "effectKind": "elemental",
+      "bucket": "elemental",
+      "description": {
+        "en": "On Kitgun Kill: 20% chance to create pool of toxic blood for 12s, dealing 40 <DT_POISON_COLOR>Toxin Damage/s. Standing in the area applies the <DT_POISON_COLOR>Toxin Damage to Theorem Arcanes.",
+        "zh": "用组合枪击杀时： 20% 几率触发 制造持续时间为 12 秒的毒性血池，每秒造成 40 <DT_POISON_COLOR>毒素伤害。站在该区域内会对定理赋能施加 <DT_POISON_COLOR>毒素伤害。"
+      },
+      "levels": [
+        {
+          "rank": 0,
+          "values": {
+            "[0].CHANCE": 20,
+            "[0].BONUS.DURATION": 3,
+            "[0].BONUS.DAMAGE": 40
+          }
+        },
+        {
+          "rank": 1,
+          "values": {
+            "[0].CHANCE": 20,
+            "[0].BONUS.DURATION": 6,
+            "[0].BONUS.DAMAGE": 40
+          }
+        },
+        {
+          "rank": 2,
+          "values": {
+            "[0].CHANCE": 20,
+            "[0].BONUS.DURATION": 9,
+            "[0].BONUS.DAMAGE": 40
+          }
+        },
+        {
+          "rank": 3,
+          "values": {
+            "[0].CHANCE": 20,
+            "[0].BONUS.DURATION": 12,
+            "[0].BONUS.DAMAGE": 40
+          }
+        }
+      ]
+    },
+    {
+      "id": "PrimaryOnAbilityReloadSpeed",
+      "key": "PrimaryOnAbilityReloadSpeed",
+      "name": {
+        "en": "Fractalized Reset",
+        "zh": "分形·重置"
+      },
+      "category": "secondary",
+      "prefix": "分形·",
+      "maxRank": 5,
+      "rarity": "RARE",
+      "effectKind": "utility",
+      "bucket": null,
+      "description": {
+        "en": "On Ability Cast: +240% Reload Speed for 5s",
+        "zh": "使用技能后： +240% 装填速度，持续 5 秒"
+      },
+      "levels": [
+        {
+          "rank": 0,
+          "values": {
+            "[0].BONUS.val": 40,
+            "[0].DURATION": 5
+          }
+        },
+        {
+          "rank": 1,
+          "values": {
+            "[0].BONUS.val": 80,
+            "[0].DURATION": 5
+          }
+        },
+        {
+          "rank": 2,
+          "values": {
+            "[0].BONUS.val": 120,
+            "[0].DURATION": 5
+          }
+        },
+        {
+          "rank": 3,
+          "values": {
+            "[0].BONUS.val": 160,
+            "[0].DURATION": 5
+          }
+        },
+        {
+          "rank": 4,
+          "values": {
+            "[0].BONUS.val": 200,
+            "[0].DURATION": 5
+          }
+        },
+        {
+          "rank": 5,
+          "values": {
+            "[0].BONUS.val": 240,
+            "[0].DURATION": 5
+          }
+        }
+      ]
+    },
+    {
+      "id": "SecondaryOnOvershieldCritChance",
+      "key": "SecondaryOnOvershieldCritChance",
+      "name": {
+        "en": "Cascadia Overcharge",
+        "zh": "瀑流·溢能"
+      },
+      "category": "secondary",
+      "prefix": "瀑流·",
+      "maxRank": 5,
+      "rarity": "RARE",
+      "effectKind": "crit",
+      "bucket": "critChance",
+      "description": {
+        "en": "While Overshields Active: +300% Critical Chance",
+        "zh": "「过载护盾」处于激活状态时：+300% 暴击几率。"
+      },
+      "levels": [
+        {
+          "rank": 0,
+          "values": {
+            "[0].AMOUNT": 50
+          }
+        },
+        {
+          "rank": 1,
+          "values": {
+            "[0].AMOUNT": 100
+          }
+        },
+        {
+          "rank": 2,
+          "values": {
+            "[0].AMOUNT": 150
+          }
+        },
+        {
+          "rank": 3,
+          "values": {
+            "[0].AMOUNT": 200
+          }
+        },
+        {
+          "rank": 4,
+          "values": {
+            "[0].AMOUNT": 250
+          }
+        },
+        {
+          "rank": 5,
+          "values": {
+            "[0].AMOUNT": 300
+          }
+        }
+      ]
+    },
+    {
+      "id": "SecondaryOnRollCritChanceOnHeadshot",
+      "key": "SecondaryOnRollCritChanceOnHeadshot",
+      "name": {
+        "en": "Cascadia Accuracy",
+        "zh": "瀑流·精准"
+      },
+      "category": "secondary",
+      "prefix": "瀑流·",
+      "maxRank": 5,
+      "rarity": "RARE",
+      "effectKind": "crit",
+      "bucket": "critChance",
+      "description": {
+        "en": "On Roll: +300% Critical Chance on Weakpoint Hits for 4s",
+        "zh": "翻滚时： +300% 命中弱点暴击几率，持续 4 秒"
+      },
+      "levels": [
+        {
+          "rank": 0,
+          "values": {
+            "[0].BONUS.val": 50,
+            "[0].DURATION": 4
+          }
+        },
+        {
+          "rank": 1,
+          "values": {
+            "[0].BONUS.val": 100,
+            "[0].DURATION": 4
+          }
+        },
+        {
+          "rank": 2,
+          "values": {
+            "[0].BONUS.val": 150,
+            "[0].DURATION": 4
+          }
+        },
+        {
+          "rank": 3,
+          "values": {
+            "[0].BONUS.val": 200,
+            "[0].DURATION": 4
+          }
+        },
+        {
+          "rank": 4,
+          "values": {
+            "[0].BONUS.val": 250,
+            "[0].DURATION": 4
+          }
+        },
+        {
+          "rank": 5,
+          "values": {
+            "[0].BONUS.val": 300,
+            "[0].DURATION": 4
+          }
+        }
+      ]
+    },
+    {
+      "id": "SecondaryOnStatusProcBonusDamage",
+      "key": "SecondaryOnStatusProcBonusDamage",
+      "name": {
+        "en": "Cascadia Empowered",
+        "zh": "瀑流·强化"
+      },
+      "category": "secondary",
+      "prefix": "瀑流·",
+      "maxRank": 5,
+      "rarity": "RARE",
+      "effectKind": "status",
+      "bucket": "statusChance",
+      "description": {
+        "en": "On Status Effect: Deals +750 Damage matching the Damage Type of the Status Effect",
+        "zh": "触发异常状态时： 造成与异常状态类型匹配的 750 伤害"
+      },
+      "levels": [
+        {
+          "rank": 0,
+          "values": {
+            "[0].BONUS.AMOUNT": 250
+          }
+        },
+        {
+          "rank": 1,
+          "values": {
+            "[0].BONUS.AMOUNT": 350
+          }
+        },
+        {
+          "rank": 2,
+          "values": {
+            "[0].BONUS.AMOUNT": 450
+          }
+        },
+        {
+          "rank": 3,
+          "values": {
+            "[0].BONUS.AMOUNT": 550
+          }
+        },
+        {
+          "rank": 4,
+          "values": {
+            "[0].BONUS.AMOUNT": 650
+          }
+        },
+        {
+          "rank": 5,
+          "values": {
+            "[0].BONUS.AMOUNT": 750
+          }
+        }
+      ]
+    }
+  ]
+}

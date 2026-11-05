@@ -31,6 +31,11 @@ Thumbs.db
 # 参考用的第三方单文件工具（体积大且许可未确认，不入库）
 20261031紫卡模拟器V10.html
 
+# Mod 快照的本地副本（上游原始文件，体积大；清单 snapshot/manifest.json 入库）
+packages/data/src/snapshot/*.html
+packages/data/src/snapshot/*.json
+!packages/data/src/snapshot/manifest.json
+
 # 数据更新报告：只保留 latest.md，历史快照不入库
 packages/data/src/generated/reports/*.md
 !packages/data/src/generated/reports/latest.md

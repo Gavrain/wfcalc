@@ -1,0 +1,158 @@
+{
+  "generatedAt": "2026-11-05T08:28:41.938Z",
+  "sources": [
+    {
+      "name": "ZKMODS（紫卡模拟器快照）",
+      "usage": "Mod 数值、等级上限、互斥关系、条件效果"
+    },
+    {
+      "name": "ExportUpgrades.json",
+      "usage": "耗点 / 稀有度 / 极性 / 官方名称 交叉校验"
+    },
+    {
+      "name": "ExportArcanes.json",
+      "usage": "武器赋能的逐级数值（官方结构化数据）"
+    },
+    {
+      "name": "ExportModSet.json",
+      "usage": "套装加成的逐级数值"
+    },
+    {
+      "name": "dict.zh.json / dict.en.json",
+      "usage": "中文名补全、赋能/套装描述渲染"
+    },
+    {
+      "name": "WFCD Mods.json",
+      "usage": "等级上限交叉校验（可选）",
+      "license": "MIT (WFCD/warframe-items)"
+    }
+  ],
+  "counts": {
+    "weaponMods": 442,
+    "arcanes": 56,
+    "arcanesSkipped": 6,
+    "modSets": 19,
+    "stances": 61,
+    "weapons": 842
+  },
+  "coverage": {
+    "officialMatched": 442,
+    "withStats": 442,
+    "zkWeaponsMatched": 646,
+    "unresolvedWeapons": 24,
+    "meleeMissingSpecific": 44,
+    "zhMissing": 0
+  },
+  "todo": {
+    "unknownStatKeys": [],
+    "officialMissing": [],
+    "zhMissing": [],
+    "unresolvedWeapons": [
+      "SentinelFreezeRayRifle (Verglas)",
+      "SentinelFreezeRayPrimeRifle (Verglas Prime)",
+      "SentShotgun (Sweeper)",
+      "SentGlaiveWeapon (Deconstructor)",
+      "SentElecRailgun (Vulklok)",
+      "SentBioWeapon (Stinger)",
+      "PrismaBurstLaserPistol (Prisma Burst Laser)",
+      "PrimeSentShotgun (Sweeper Prime)",
+      "PrimeLaserRifle (Prime Laser Rifle)",
+      "PrimeDethMachineRifle (Deth Machine Rifle Prime)",
+      "PrimeBurstLaserPistol (Burst Laser Prime)",
+      "LaserRifle (Laser Rifle)",
+      "Gremlin (Artax)",
+      "DethMachineRifle (Deth Machine Rifle)",
+      "BurstLaserPistol (Burst Laser)",
+      "PrimeHeliosGlaiveWeapon (Deconstructor Prime)",
+      "ThermocorMoaWeapon (Vulcax)",
+      "TazronWeapon (Tazicor)",
+      "SwarmerWeapon (Helstrum)",
+      "HextraWeapon (Multron)",
+      "CryoxionWeapon (Cryotra)",
+      "ZanukaPetMeleeWeaponIP (Batoten)",
+      "ZanukaPetMeleeWeaponIS (Lacerten)",
+      "ZanukaPetMeleeWeaponPS (Akaten)"
+    ],
+    "meleeMissingSpecific": [
+      "ReaperMeleeWeapon (Shadow Claws)",
+      "SevagothShadowPrimeClawsWeapon (Shadow Claws Prime)",
+      "PacifistFist (Desert Wind)",
+      "PacifistFistPrime (Desert Wind Prime)",
+      "NinjaStormWeapon (Shadow Clones)",
+      "NinjaStormWeaponPrime (Shadow Clones Prime)",
+      "WukongPrimeStaff (Iron Staff Prime)",
+      "MonkeyKingStaff (Iron Staff)",
+      "KhoraWhipclawWeaponPrime (Whipclaw Prime)",
+      "KhoraWhipclawWeapon (Whipclaw)",
+      "GaraShankWeapon (Shattered Lash)",
+      "GaraShankWeaponPrime (Shattered Lash Prime)",
+      "GarudaPrimeClaws (Garuda Prime Talons)",
+      "GarudaClaws (Garuda Talons)",
+      "PrimeFlightSword (Diwata Prime)",
+      "FlightSword (Diwata)",
+      "DoomSwordUmbra (Exalted Umbra Blade)",
+      "DoomSwordPrime (Exalted Prime Blade)",
+      "DoomSword (Exalted Blade)",
+      "AtlasPunchWeapon (Landslide Fists)",
+      "AtlasPunchWeaponPrime (Landslide Fists Prime)",
+      "BerserkerMeleePrime (Valkyr Prime Talons)",
+      "BerserkerMelee (Valkyr Talons)",
+      "NechroTechSwordWeapon (Ironbride)",
+      "PvPVariantTipFive (Dehtat)",
+      "PvPVariantTipFour (Cyath)",
+      "PvPVariantTipOne (Balla)",
+      "PvPVariantTipSix (Kronsh)",
+      "PvPVariantTipThree (Mewan)",
+      "PvPVariantTipTwo (Ooltha)",
+      "TipFive (Dehtat)",
+      "TipFour (Cyath)",
+      "TipOne (Balla)",
+      "TipSix (Kronsh)",
+      "TipThree (Mewan)",
+      "TipTwo (Ooltha)",
+      "TipEleven (Dokrahm)",
+      "TipNine (Sepfahn)",
+      "TipTen (Rabvee)",
+      "InfestedTipOne (Plague Kripath)",
+      "InfestedTipTwo (Plague Keewar)",
+      "PvPVariantInfestedTipOne (Plague Kripath)",
+      "PvPVariantInfestedTipTwo (Plague Keewar)",
+      "TnBayonetMeleeWeapon (Vinquibus (Melee))"
+    ],
+    "zkNotInExport": [
+      "corufell_prime (Corufell Prime)",
+      "nunchasa (Nunchasa)",
+      "gaze_primary (Gaze)",
+      "rattleguts_primary (Rattleguts)",
+      "tombfinger_primary (Tombfinger)",
+      "sporelacer_primary (Sporelacer)",
+      "catchmoon_primary (Catchmoon)",
+      "vermisplicer_primary (Vermisplicer)",
+      "aksondol (Aksondol)",
+      "steflos_prime (Steflos Prime)",
+      "vinquibus_primary (Vinquibus (Primary))"
+    ],
+    "wfcdMismatch": [],
+    "rankFixes": [
+      "amanata_pressure: 原表 f=1 但数值是每级 +55%，满级 +330%，与 WFCD 6 级文本一致",
+      "gleaming_blight: 原表 f=1，WFCD 为 4 级（0~3）",
+      "justice_blades: 原表 f=1，WFCD 为 4 级（0~3）",
+      "amalgam_furax_body_count: 原表 f=1，WFCD 为 6 级（0~5）",
+      "burning_hate: 原表 f=1，WFCD 为 6 级（0~5）",
+      "vulcan_blitz: 原表 f=1，WFCD 为 6 级（0~5）",
+      "blade_of_truth: 原表 f=1，WFCD 为 4 级（0~3）",
+      "entropy_flight: 原表 f=1，WFCD 为 4 级（0~3）",
+      "toxic_blight: 原表 f=1，WFCD 为 4 级（0~3）",
+      "entropy_detonation: 原表 f=1，WFCD 为 4 级（0~3）",
+      "bright_purity: 原表 f=1，WFCD 为 4 级（0~3）"
+    ],
+    "arcanesNeedingManualBucket": [
+      "神威·狩猎 (GroundSlamPull)",
+      "神威·触染 (MeleeArcaneProjectileOnJump)",
+      "神威·流行病 (MeleeArcaneShockwaveOnJump)",
+      "近战·刃影 (ReplayLightCritHits)",
+      "和平·追寻者 (SeekerProjOnHeadshotKill)",
+      "主要·压缩 (ConvergeRadialAttackOnAim)"
+    ]
+  }
+}

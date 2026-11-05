@@ -1,0 +1,852 @@
+{
+  "generatedAt": "2026-11-05T08:28:41.937Z",
+  "source": "ExportModSet.json（官方套装逐级数值）",
+  "note": "装 2 件及以上同系列模组生效；levels 索引 = 已装件数 - 2。私法的暴击强化按等效绝对值暴击率放在固定加算区",
+  "count": 19,
+  "sets": [
+    {
+      "id": "Amar",
+      "name": {
+        "en": "Amar",
+        "zh": "Amar"
+      },
+      "modCount": 3,
+      "memberMods": [],
+      "effect": {
+        "kind": "other",
+        "bucket": null,
+        "note": "Amar：重击瞬移，位移效果"
+      },
+      "description": {
+        "en": "Teleport to a target within 30m on using a Heavy Attack.",
+        "zh": "使用重击时可瞬移至在 30 米内目标的身边。"
+      },
+      "levels": [
+        {
+          "rank": 0,
+          "values": {
+            "RANGE": 10
+          }
+        },
+        {
+          "rank": 1,
+          "values": {
+            "RANGE": 20
+          }
+        },
+        {
+          "rank": 2,
+          "values": {
+            "RANGE": 30
+          }
+        }
+      ]
+    },
+    {
+      "id": "Ashen",
+      "name": {
+        "en": "Ashen",
+        "zh": "Ashen"
+      },
+      "modCount": 3,
+      "memberMods": [],
+      "effect": {
+        "kind": "other",
+        "bucket": null,
+        "note": "Ashen：降低敌人精准度+免疫异常，防御效果"
+      },
+      "description": {
+        "en": "Killing an enemy with a Heavy Attack reduces Enemy Accuracy against Warframe by 30% and grants immunity to Status Effects for 6s",
+        "zh": "通过重击击杀敌人可以使敌人对战甲的精准度降低 30%，并免疫异常状态，持续 6 秒"
+      },
+      "levels": [
+        {
+          "rank": 0,
+          "values": {
+            "STAT1": 10,
+            "STAT2": 2
+          }
+        },
+        {
+          "rank": 1,
+          "values": {
+            "STAT1": 20,
+            "STAT2": 4
+          }
+        },
+        {
+          "rank": 2,
+          "values": {
+            "STAT1": 30,
+            "STAT2": 6
+          }
+        }
+      ]
+    },
+    {
+      "id": "Augur",
+      "name": {
+        "en": "Augur",
+        "zh": "预言"
+      },
+      "modCount": 6,
+      "memberMods": [],
+      "effect": {
+        "kind": "energyToShield",
+        "bucket": null,
+        "note": "Augur：能量转护盾，属战甲生存层"
+      },
+      "description": {
+        "en": "240% Energy spent on abilities is converted to Shields.",
+        "zh": "240% 用在技能上的能量将转化成护盾。"
+      },
+      "levels": [
+        {
+          "rank": 0,
+          "values": {
+            "STAT1": 40
+          }
+        },
+        {
+          "rank": 1,
+          "values": {
+            "STAT1": 80
+          }
+        },
+        {
+          "rank": 2,
+          "values": {
+            "STAT1": 120
+          }
+        },
+        {
+          "rank": 3,
+          "values": {
+            "STAT1": 160
+          }
+        },
+        {
+          "rank": 4,
+          "values": {
+            "STAT1": 200
+          }
+        },
+        {
+          "rank": 5,
+          "values": {
+            "STAT1": 240
+          }
+        }
+      ]
+    },
+    {
+      "id": "Boneblade",
+      "name": {
+        "en": "Boneblade",
+        "zh": "Boneblade"
+      },
+      "modCount": 3,
+      "memberMods": [],
+      "effect": {
+        "kind": "other",
+        "bucket": null,
+        "note": "Boneblade：震地生成卷须，独立伤害源"
+      },
+      "description": {
+        "en": "Slam attacks manifest Tendrils to lash enemies within 10m, stunning them for 3s and dealing 75 <DT_PUNCTURE_COLOR>Puncture Damage. Cooldown: 6s",
+        "zh": "震地攻击产生卷须，来抽打 10 米内的敌人，击晕敌人 3 秒，并造成 75 <DT_PUNCTURE_COLOR>穿刺伤害。冷却时间：6 秒"
+      },
+      "levels": [
+        {
+          "rank": 0,
+          "values": {
+            "STAT1": 3,
+            "STAT3": 1,
+            "STAT2": 25,
+            "STAT4": 12
+          }
+        },
+        {
+          "rank": 1,
+          "values": {
+            "STAT1": 6,
+            "STAT3": 2,
+            "STAT2": 50,
+            "STAT4": 9
+          }
+        },
+        {
+          "rank": 2,
+          "values": {
+            "STAT1": 10,
+            "STAT3": 3,
+            "STAT2": 75,
+            "STAT4": 6
+          }
+        }
+      ]
+    },
+    {
+      "id": "Boreal",
+      "name": {
+        "en": "Boreal",
+        "zh": "Boreal"
+      },
+      "modCount": 3,
+      "memberMods": [],
+      "effect": {
+        "kind": "damageReduction",
+        "bucket": null,
+        "note": "Boreal：空中受到的伤害减免，不影响输出"
+      },
+      "description": {
+        "en": "Reduces damage by +60% when Airborne.",
+        "zh": "在空中时减少 +60% 受到的伤害。"
+      },
+      "levels": [
+        {
+          "rank": 0,
+          "values": {
+            "val": 20
+          }
+        },
+        {
+          "rank": 1,
+          "values": {
+            "val": 40
+          }
+        },
+        {
+          "rank": 2,
+          "values": {
+            "val": 60
+          }
+        }
+      ]
+    },
+    {
+      "id": "Femur",
+      "name": {
+        "en": "Femur",
+        "zh": "Femur"
+      },
+      "modCount": 3,
+      "memberMods": [],
+      "effect": {
+        "kind": "other",
+        "bucket": null,
+        "note": "Femur：击飞敌人死亡爆炸，独立伤害源"
+      },
+      "description": {
+        "en": "Lifted enemies explode on death, dealing 30% Enemy Max Health as <DT_IMPACT_COLOR>Impact Damage in a 12m radius. Cooldown: 6s",
+        "zh": "击飞的敌人在死亡时爆炸，对 12 米范围内的敌人造成最大生命值的 30% 的 <DT_IMPACT_COLOR>冲击伤害。 冷却时间：6 秒"
+      },
+      "levels": [
+        {
+          "rank": 0,
+          "values": {
+            "STAT1": 10,
+            "STAT2": 4,
+            "DURATION": 6
+          }
+        },
+        {
+          "rank": 1,
+          "values": {
+            "STAT1": 20,
+            "STAT2": 8,
+            "DURATION": 6
+          }
+        },
+        {
+          "rank": 2,
+          "values": {
+            "STAT1": 30,
+            "STAT2": 12,
+            "DURATION": 6
+          }
+        }
+      ]
+    },
+    {
+      "id": "Gladiator",
+      "name": {
+        "en": "Gladiator",
+        "zh": "角斗士"
+      },
+      "modCount": 6,
+      "memberMods": [],
+      "effect": {
+        "kind": "critChancePerCombo",
+        "bucket": "critChance",
+        "note": "角斗士：每层连击倍率增加近战暴击率，同样走暴击率乘区（与急进猛突同类）"
+      },
+      "description": {
+        "en": "60% Melee Critical Chance per Combo Multiplier",
+        "zh": "连击倍率可叠加 60% 近战暴击几率"
+      },
+      "levels": [
+        {
+          "rank": 0,
+          "values": {
+            "STAT1": 10
+          }
+        },
+        {
+          "rank": 1,
+          "values": {
+            "STAT1": 20
+          }
+        },
+        {
+          "rank": 2,
+          "values": {
+            "STAT1": 30
+          }
+        },
+        {
+          "rank": 3,
+          "values": {
+            "STAT1": 40
+          }
+        },
+        {
+          "rank": 4,
+          "values": {
+            "STAT1": 50
+          }
+        },
+        {
+          "rank": 5,
+          "values": {
+            "STAT1": 60
+          }
+        }
+      ]
+    },
+    {
+      "id": "Hawk",
+      "name": {
+        "en": "Hawk",
+        "zh": "Hawk"
+      },
+      "modCount": 3,
+      "memberMods": [],
+      "effect": {
+        "kind": "other",
+        "bucket": null,
+        "note": "Hawk：飞身瞄准后的睡眠，控制效果"
+      },
+      "description": {
+        "en": "Damage enemies while Aim Gliding and put up to 5 of them to Sleep for 9s on landing.",
+        "zh": "在飞身瞄准时对敌人造成伤害后，落地时将使最多 5 名敌人进入9 秒的睡眠状态。"
+      },
+      "levels": [
+        {
+          "rank": 0,
+          "values": {
+            "val": 3
+          }
+        },
+        {
+          "rank": 1,
+          "values": {
+            "val": 6
+          }
+        },
+        {
+          "rank": 2,
+          "values": {
+            "val": 9
+          }
+        }
+      ]
+    },
+    {
+      "id": "Hunter",
+      "name": {
+        "en": "Hunter",
+        "zh": "猎人"
+      },
+      "modCount": 6,
+      "memberMods": [],
+      "effect": {
+        "kind": "companionDamage",
+        "bucket": null,
+        "note": "Hunter：只提升同伴伤害，不影响玩家武器"
+      },
+      "description": {
+        "en": "+150% Companion Damage on enemies affected by <DT_SLASH_COLOR>Slash.",
+        "zh": "同伴对受到 <DT_SLASH_COLOR>切割状态影响的敌人造成 +150% 伤害。"
+      },
+      "levels": [
+        {
+          "rank": 0,
+          "values": {
+            "STAT1": 25
+          }
+        },
+        {
+          "rank": 1,
+          "values": {
+            "STAT1": 50
+          }
+        },
+        {
+          "rank": 2,
+          "values": {
+            "STAT1": 75
+          }
+        },
+        {
+          "rank": 3,
+          "values": {
+            "STAT1": 100
+          }
+        },
+        {
+          "rank": 4,
+          "values": {
+            "STAT1": 125
+          }
+        },
+        {
+          "rank": 5,
+          "values": {
+            "STAT1": 150
+          }
+        }
+      ]
+    },
+    {
+      "id": "Mecha",
+      "name": {
+        "en": "Mecha",
+        "zh": "Mecha"
+      },
+      "modCount": 4,
+      "memberMods": [],
+      "effect": {
+        "kind": "other",
+        "bucket": null,
+        "note": "Mecha：同伴标记与异常扩散"
+      },
+      "description": {
+        "en": "Companion marks a target every 15s for 12s. Killing the target applies their Status Effects to all enemies within 30m.",
+        "zh": "每隔 15 秒同伴将会标记一名目标，持续 12 秒。击杀被标记的目标会将其身上所受的状态作用于 30 米范围内的所有敌人。"
+      },
+      "levels": [
+        {
+          "rank": 0,
+          "values": {
+            "COOLDOWN": 60,
+            "DURATION": 3,
+            "RANGE": 7.5
+          }
+        },
+        {
+          "rank": 1,
+          "values": {
+            "COOLDOWN": 45,
+            "DURATION": 6,
+            "RANGE": 15
+          }
+        },
+        {
+          "rank": 2,
+          "values": {
+            "COOLDOWN": 30,
+            "DURATION": 9,
+            "RANGE": 22.5
+          }
+        },
+        {
+          "rank": 3,
+          "values": {
+            "COOLDOWN": 15,
+            "DURATION": 12,
+            "RANGE": 30
+          }
+        }
+      ]
+    },
+    {
+      "id": "Nira",
+      "name": {
+        "en": "Nira",
+        "zh": "Nira"
+      },
+      "modCount": 3,
+      "memberMods": [],
+      "effect": {
+        "kind": "slamDamage",
+        "bucket": "baseDamage",
+        "note": "Nira：增加震地攻击伤害"
+      },
+      "description": {
+        "en": "Increase damage from Slam Attacks by +450%.",
+        "zh": "增加 +450% 震地攻击伤害。"
+      },
+      "levels": [
+        {
+          "rank": 0,
+          "values": {
+            "val": 150
+          }
+        },
+        {
+          "rank": 1,
+          "values": {
+            "val": 300
+          }
+        },
+        {
+          "rank": 2,
+          "values": {
+            "val": 450
+          }
+        }
+      ]
+    },
+    {
+      "id": "Raptor",
+      "name": {
+        "en": "Raptor",
+        "zh": "Raptor"
+      },
+      "modCount": 3,
+      "memberMods": [],
+      "effect": {
+        "kind": "other",
+        "bucket": null,
+        "note": "Raptor：空中免疫击倒几率"
+      },
+      "description": {
+        "en": "+100% chance to become immune to Knockdown effects while airborne.",
+        "zh": "在空中时有 +100% 几率免疫击倒效果。"
+      },
+      "levels": [
+        {
+          "rank": 0,
+          "values": {
+            "val": 33
+          }
+        },
+        {
+          "rank": 1,
+          "values": {
+            "val": 67
+          }
+        },
+        {
+          "rank": 2,
+          "values": {
+            "val": 100
+          }
+        }
+      ]
+    },
+    {
+      "id": "Sacrifice",
+      "name": {
+        "en": "Sacrifice",
+        "zh": "牺牲"
+      },
+      "modCount": 2,
+      "memberMods": [],
+      "effect": {
+        "kind": "enhanceOwnMods",
+        "bucket": null,
+        "note": "牺牲：提高本套 Mod 自身数值（压迫点/斩铁），按比例放大本体效果"
+      },
+      "description": {
+        "en": "Enhance mods in this set.",
+        "zh": "增强这个组合中的 MOD。"
+      },
+      "levels": [
+        {
+          "rank": 0,
+          "values": {}
+        },
+        {
+          "rank": 1,
+          "values": {}
+        }
+      ]
+    },
+    {
+      "id": "Spider",
+      "name": {
+        "en": "Spider",
+        "zh": "Spider"
+      },
+      "modCount": 3,
+      "memberMods": [],
+      "effect": {
+        "kind": "damageReduction",
+        "bucket": null,
+        "note": "Spider：壁面攀附期间伤害减免，不影响输出"
+      },
+      "description": {
+        "en": "During a Wall Latch gain +50% Damage Reduction",
+        "zh": "壁面攀附期间获得 +50% 伤害减免"
+      },
+      "levels": [
+        {
+          "rank": 0,
+          "values": {
+            "val": 17
+          }
+        },
+        {
+          "rank": 1,
+          "values": {
+            "val": 33
+          }
+        },
+        {
+          "rank": 2,
+          "values": {
+            "val": 50
+          }
+        }
+      ]
+    },
+    {
+      "id": "Strain",
+      "name": {
+        "en": "Strain",
+        "zh": "菌株"
+      },
+      "modCount": 4,
+      "memberMods": [],
+      "effect": {
+        "kind": "other",
+        "bucket": null,
+        "note": "Strain：召唤蛆虫，同伴层"
+      },
+      "description": {
+        "en": "Grows up to 8 Cysts over 24s that erupt every 25s to spawn a maggot.",
+        "zh": "在 24 秒内生长至多 8 颗包囊，包囊每 25 秒会爆裂并生出一只蛆虫。"
+      },
+      "levels": [
+        {
+          "rank": 0,
+          "values": {
+            "COUNT": 2,
+            "COOLDOWN": 6,
+            "DELAY": 25
+          }
+        },
+        {
+          "rank": 1,
+          "values": {
+            "COUNT": 4,
+            "COOLDOWN": 12,
+            "DELAY": 25
+          }
+        },
+        {
+          "rank": 2,
+          "values": {
+            "COUNT": 6,
+            "COOLDOWN": 18,
+            "DELAY": 25
+          }
+        },
+        {
+          "rank": 3,
+          "values": {
+            "COUNT": 8,
+            "COOLDOWN": 24,
+            "DELAY": 25
+          }
+        }
+      ]
+    },
+    {
+      "id": "Synth",
+      "name": {
+        "en": "Synth",
+        "zh": "合成"
+      },
+      "modCount": 4,
+      "memberMods": [],
+      "effect": {
+        "kind": "other",
+        "bucket": null,
+        "note": "Synth：收起武器时自动装填，手感"
+      },
+      "description": {
+        "en": "Holstering Primary and Secondary Weapons reload 20% of Magazine/s.",
+        "zh": "收起主要武器/次要武器时，每秒自动装填 20% 的弹匣。"
+      },
+      "levels": [
+        {
+          "rank": 0,
+          "values": {
+            "val": 5
+          }
+        },
+        {
+          "rank": 1,
+          "values": {
+            "val": 10
+          }
+        },
+        {
+          "rank": 2,
+          "values": {
+            "val": 15
+          }
+        },
+        {
+          "rank": 3,
+          "values": {
+            "val": 20
+          }
+        }
+      ]
+    },
+    {
+      "id": "Tek",
+      "name": {
+        "en": "Tek",
+        "zh": "技法"
+      },
+      "modCount": 4,
+      "memberMods": [],
+      "effect": {
+        "kind": "other",
+        "bucket": null,
+        "note": "Tek：地面区域伤害，独立结算"
+      },
+      "description": {
+        "en": "Mark a 12m zone every 15s that inflicts 200 Damage/s to enemies.",
+        "zh": "每 15 秒创造一个半径 12 米的区域并造成每秒 200 的伤害。"
+      },
+      "levels": [
+        {
+          "rank": 0,
+          "values": {
+            "RADIUS": 3,
+            "COOLDOWN": 60,
+            "DAMAGE": 50
+          }
+        },
+        {
+          "rank": 1,
+          "values": {
+            "RADIUS": 6,
+            "COOLDOWN": 45,
+            "DAMAGE": 100
+          }
+        },
+        {
+          "rank": 2,
+          "values": {
+            "RADIUS": 9,
+            "COOLDOWN": 30,
+            "DAMAGE": 150
+          }
+        },
+        {
+          "rank": 3,
+          "values": {
+            "RADIUS": 12,
+            "COOLDOWN": 15,
+            "DAMAGE": 200
+          }
+        }
+      ]
+    },
+    {
+      "id": "Umbra",
+      "name": {
+        "en": "Umbra",
+        "zh": "Umbra"
+      },
+      "modCount": 3,
+      "memberMods": [],
+      "effect": {
+        "kind": "enhanceOwnMods",
+        "bucket": null,
+        "note": "Umbra：提高本套 Mod 自身数值"
+      },
+      "description": {
+        "en": "Enhance mods in this set.",
+        "zh": "增强这个组合中的 MOD。"
+      },
+      "levels": [
+        {
+          "rank": 0,
+          "values": {}
+        },
+        {
+          "rank": 1,
+          "values": {}
+        },
+        {
+          "rank": 2,
+          "values": {}
+        }
+      ]
+    },
+    {
+      "id": "Vigilante",
+      "name": {
+        "en": "Vigilante",
+        "zh": "私法"
+      },
+      "modCount": 6,
+      "memberMods": [],
+      "effect": {
+        "kind": "critChanceFlat",
+        "bucket": "critChance",
+        "note": "私法：按几率强化主武器暴击，等效为「固定加算区」的绝对暴击率（第 2.0 节的 +固定加算值）"
+      },
+      "description": {
+        "en": "30% chance to enhance Critical Hits from Primary Weapons.",
+        "zh": "30% 的几率强化主要武器的暴击。"
+      },
+      "levels": [
+        {
+          "rank": 0,
+          "values": {
+            "STAT1": 5
+          }
+        },
+        {
+          "rank": 1,
+          "values": {
+            "STAT1": 10
+          }
+        },
+        {
+          "rank": 2,
+          "values": {
+            "STAT1": 15
+          }
+        },
+        {
+          "rank": 3,
+          "values": {
+            "STAT1": 20
+          }
+        },
+        {
+          "rank": 4,
+          "values": {
+            "STAT1": 25
+          }
+        },
+        {
+          "rank": 5,
+          "values": {
+            "STAT1": 30
+          }
+        }
+      ]
+    }
+  ]
+}
