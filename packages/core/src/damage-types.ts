@@ -23,6 +23,10 @@ export const DAMAGE_TYPES = [
   'viral',
   // 特殊
   'void',
+  // 第 14 种：Tau（官方导出键 DT_SENTIENT）。
+  // 不提供任何伤害类型倍率；其异常状态是"触发几率易受性"，
+  // 见 status-resistance.ts 的 tauStatusChanceMultiplier。
+  'tau',
 ] as const;
 
 export type DamageType = (typeof DAMAGE_TYPES)[number];
@@ -35,6 +39,12 @@ export const COMPOUND_TYPES: readonly DamageType[] = ['blast', 'gas', 'magnetic'
 
 /** 既非物理、也非复合元素的基础元素 */
 export const BASE_ELEMENTAL_TYPES: readonly DamageType[] = ['heat', 'cold', 'electric', 'toxin'];
+
+/**
+ * 不提供任何伤害类型倍率的类型（不对任何派系增伤/减伤）。
+ * 它们只可能通过异常状态机制影响最终伤害。
+ */
+export const NO_DAMAGE_MULTIPLIER_TYPES: readonly DamageType[] = ['void', 'tau'];
 
 /** 官方导出中 DT_* 键 → 本项目 DamageType */
 export const DT_KEY_MAP: Readonly<Record<string, DamageType>> = {
@@ -52,6 +62,7 @@ export const DT_KEY_MAP: Readonly<Record<string, DamageType>> = {
   DT_CORROSIVE: 'corrosive',
   DT_VIRAL: 'viral',
   DT_VOID: 'void',
+  DT_SENTIENT: 'tau',
 };
 
 /** 伤害分布：未出现的类型视为 0 */
