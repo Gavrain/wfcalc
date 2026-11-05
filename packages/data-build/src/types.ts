@@ -29,6 +29,8 @@ export interface ExportWeapon {
   parentName?: string;
   productCategory?: string;
   holsterCategory?: string;
+  /** 变体类型：VT_NORMAL / VT_PRIME / VT_KUVA / VT_SYNDICATE 等 */
+  variantType?: string;
   compatibilityTags?: string[];
   damagePerShot?: number[];
   totalDamage?: number;

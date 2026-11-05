@@ -1,0 +1,6690 @@
+{
+  "generatedAt": "2026-11-05T07:26:30.404Z",
+  "category": "secondary",
+  "count": 147,
+  "note": "暴率/触发为 0~1 小数；伤害分布为绝对值；procChance 同为 0~1；kuva 表示需用户在计算器里选元素与加成（25%~60%）",
+  "weapons": [
+    {
+      "id": "1999EntHybridPistolWeapon",
+      "name": "/Lotus/Language/Weapons/1999EntHybridPistolName",
+      "category": "secondary",
+      "critChance": 0.26,
+      "critMultiplier": 2.2,
+      "statusChance": 0.26,
+      "fireRate": 8,
+      "magazineSize": 16,
+      "reloadTime": 1.24,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 10,
+                "puncture": 10,
+                "slash": 20
+              },
+              "procChance": 0.06
+            },
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "puncture": 12
+              },
+              "procChance": 0.26
+            },
+            {
+              "kind": "explosiveAttack",
+              "aoe": true,
+              "damage": {
+                "blast": 48
+              },
+              "procChance": 0.26
+            },
+            {
+              "kind": "embedDeathAttack",
+              "aoe": true,
+              "damage": {
+                "blast": 48
+              },
+              "procChance": 0.26
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "1999InfSporePistolWeapon",
+      "name": "/Lotus/Language/1999Echoes/1999InfSporePistolWeaponName",
+      "category": "secondary",
+      "critChance": 0.25,
+      "critMultiplier": 2.4,
+      "statusChance": 0.28,
+      "fireRate": 6,
+      "magazineSize": 160,
+      "reloadTime": 2.33,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "puncture": 17.5,
+                "slash": 32.5
+              },
+              "procChance": 0.28
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "AHAkbolto",
+      "name": "/Lotus/Language/Items/AHAkboltoName",
+      "category": "secondary",
+      "variant": "syndicate",
+      "critChance": 0.13,
+      "critMultiplier": 2,
+      "statusChance": 0.29,
+      "fireRate": 5,
+      "magazineSize": 30,
+      "reloadTime": 2,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "semi",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "impact": 7,
+                "puncture": 63
+              },
+              "procChance": 0.29
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "AcidDartPistol",
+      "name": "/Lotus/Language/ClanTech/Acrid",
+      "category": "secondary",
+      "critChance": 0.05,
+      "critMultiplier": 2,
+      "statusChance": 0.1,
+      "fireRate": 5,
+      "magazineSize": 15,
+      "reloadTime": 1.2,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "semi",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "toxin": 43
+              },
+              "procChance": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "AkJagaraPrime",
+      "name": "/Lotus/Language/Primes/AkJagaraPrimeName",
+      "category": "secondary",
+      "variant": "prime",
+      "critChance": 0.18,
+      "critMultiplier": 2.2,
+      "statusChance": 0.32,
+      "fireRate": 10,
+      "magazineSize": 40,
+      "reloadTime": 1.4,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "burst",
+          "bullets": 1,
+          "multishot": 1,
+          "burst": {
+            "count": 2,
+            "delay": 0
+          },
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 3.8,
+                "puncture": 3.8,
+                "slash": 30.4
+              },
+              "procChance": 0.32
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "AkLexPistols",
+      "name": "/Lotus/Language/Items/AklexName",
+      "category": "secondary",
+      "critChance": 0.2,
+      "critMultiplier": 2,
+      "statusChance": 0.1,
+      "fireRate": 1.5833,
+      "magazineSize": 12,
+      "reloadTime": 3,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "semi",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 13,
+                "puncture": 104,
+                "slash": 13
+              },
+              "procChance": 0.1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "AkLexPrimePistols",
+      "name": "/Lotus/Language/Primes/PrimeAkLexName",
+      "category": "secondary",
+      "variant": "prime",
+      "critChance": 0.25,
+      "critMultiplier": 2,
+      "statusChance": 0.25,
+      "fireRate": 2.6667,
+      "magazineSize": 16,
+      "reloadTime": 3,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "semi",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 15,
+                "puncture": 120,
+                "slash": 15
+              },
+              "procChance": 0.25
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "AkPrimeVastoPistol",
+      "name": "/Lotus/Language/Primes/AkvastoPrimeName",
+      "category": "secondary",
+      "variant": "prime",
+      "critChance": 0.22,
+      "critMultiplier": 2.4,
+      "statusChance": 0.22,
+      "fireRate": 3.3333,
+      "magazineSize": 12,
+      "reloadTime": 1.4,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "semi",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 16.5,
+                "puncture": 16.5,
+                "slash": 77
+              },
+              "procChance": 0.22
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "AkimboAutoPistols",
+      "name": "/Lotus/Language/Items/AkimboAutoPistolName",
+      "category": "secondary",
+      "critChance": 0.05,
+      "critMultiplier": 2,
+      "statusChance": 0.12,
+      "fireRate": 12.5,
+      "magazineSize": 70,
+      "reloadTime": 2,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 3,
+                "puncture": 14,
+                "slash": 3
+              },
+              "procChance": 0.12
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "AkimboBolto",
+      "name": "/Lotus/Language/Items/AkimboBoltoName",
+      "category": "secondary",
+      "critChance": 0.16,
+      "critMultiplier": 2.4,
+      "statusChance": 0.022,
+      "fireRate": 4.5,
+      "magazineSize": 30,
+      "reloadTime": 2.6,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "semi",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "impact": 6.4,
+                "puncture": 57.6
+              },
+              "procChance": 0.022
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "AkimboPistol",
+      "name": "/Lotus/Language/Items/AkimboPistolName",
+      "category": "secondary",
+      "critChance": 0.1,
+      "critMultiplier": 1.8,
+      "statusChance": 0.06,
+      "fireRate": 5,
+      "magazineSize": 30,
+      "reloadTime": 2.4,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "semi",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 6,
+                "puncture": 10,
+                "slash": 24
+              },
+              "procChance": 0.06
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "AkimboShotGun",
+      "name": "/Lotus/Language/Items/AkimboHandCannonsName",
+      "category": "secondary",
+      "critChance": 0.06,
+      "critMultiplier": 2,
+      "statusChance": 0.0314,
+      "fireRate": 5,
+      "magazineSize": 4,
+      "reloadTime": 2,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "semi",
+          "bullets": 7,
+          "multishot": 7,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 33.6,
+                "puncture": 4.2,
+                "slash": 4.2
+              },
+              "procChance": 0.22
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "AkimboSomaPistols",
+      "name": "/Lotus/Language/Items/AkimboSomaPistolsName",
+      "category": "secondary",
+      "critChance": 0.24,
+      "critMultiplier": 3,
+      "statusChance": 0.08,
+      "fireRate": 12.5,
+      "magazineSize": 70,
+      "reloadTime": 1.4,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 1.8,
+                "puncture": 7.2,
+                "slash": 9
+              },
+              "procChance": 0.08
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "AkimboViperPistols",
+      "name": "/Lotus/Language/Items/AkimboViperPistolName",
+      "category": "secondary",
+      "critChance": 0.15,
+      "critMultiplier": 1.5,
+      "statusChance": 0.11,
+      "fireRate": 25,
+      "magazineSize": 28,
+      "reloadTime": 2,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 10.2,
+                "puncture": 1.7,
+                "slash": 5.1
+              },
+              "procChance": 0.11
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "AllNew1hSG",
+      "name": "/Lotus/Language/Primes/Prime1HShotgunName",
+      "category": "secondary",
+      "critChance": 0.3,
+      "critMultiplier": 2.5,
+      "statusChance": 0.02,
+      "fireRate": 1.5,
+      "magazineSize": 5,
+      "reloadTime": 2,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "semi",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 15,
+                "puncture": 120,
+                "slash": 15
+              },
+              "procChance": 0.1
+            },
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "impact": 292.5,
+                "puncture": 16.25,
+                "slash": 16.25
+              },
+              "procChance": 0.02
+            }
+          ]
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "semi",
+          "bullets": 10,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 4.4,
+                "puncture": 17.6,
+                "slash": 66
+              },
+              "procChance": 0.9
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "AutoCrossBow",
+      "name": "/Lotus/Language/Items/AutoCrossBowName",
+      "category": "secondary",
+      "critChance": 0.025,
+      "critMultiplier": 1.5,
+      "statusChance": 0.1,
+      "fireRate": 3.3333,
+      "magazineSize": 16,
+      "reloadTime": 2,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "charge",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "impact": 6.25,
+                "puncture": 12.5,
+                "slash": 6.25
+              },
+              "procChance": 0.025
+            }
+          ]
+        },
+        {
+          "id": "charged",
+          "role": "charged",
+          "trigger": "charge",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "impact": 10,
+                "puncture": 80,
+                "slash": 10
+              },
+              "procChance": 0
+            }
+          ]
+        },
+        {
+          "id": "mode3",
+          "role": "normal",
+          "trigger": "burst",
+          "bullets": 1,
+          "multishot": 1,
+          "burst": {
+            "count": 4,
+            "delay": 0.05
+          },
+          "segments": [
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "impact": 6.25,
+                "puncture": 12.5,
+                "slash": 6.25
+              },
+              "procChance": 0.025
+            }
+          ]
+        },
+        {
+          "id": "incarnon",
+          "role": "incarnon",
+          "trigger": "charge",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "slash": 640
+              },
+              "procChance": 0.2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "AutoPistol",
+      "name": "/Lotus/Language/Items/AutoPistolName",
+      "category": "secondary",
+      "critChance": 0.05,
+      "critMultiplier": 2,
+      "statusChance": 0.12,
+      "fireRate": 10,
+      "magazineSize": 35,
+      "reloadTime": 1.4,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 3,
+                "puncture": 14,
+                "slash": 3
+              },
+              "procChance": 0.12
+            }
+          ]
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "unknown",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "heat": 100
+              },
+              "procChance": 0.24
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "BroncoPrime",
+      "name": "/Lotus/Language/Items/BroncoPrimeName",
+      "category": "secondary",
+      "variant": "prime",
+      "critChance": 0.06,
+      "critMultiplier": 2,
+      "statusChance": 0.1286,
+      "fireRate": 4.1667,
+      "magazineSize": 4,
+      "reloadTime": 2,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "semi",
+          "bullets": 7,
+          "multishot": 7,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 40,
+                "puncture": 5,
+                "slash": 5
+              },
+              "procChance": 0.9
+            }
+          ]
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "semi",
+          "bullets": 7,
+          "multishot": 7,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 27.2,
+                "puncture": 3.4,
+                "slash": 3.4
+              },
+              "procChance": 1.8
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "BurstPistol",
+      "name": "/Lotus/Language/Items/BurstPistolName",
+      "category": "secondary",
+      "critChance": 0.16,
+      "critMultiplier": 2,
+      "statusChance": 0.06,
+      "fireRate": 7.3944,
+      "magazineSize": 15,
+      "reloadTime": 2,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "burst",
+          "bullets": 1,
+          "multishot": 1,
+          "burst": {
+            "count": 3,
+            "delay": 0.04
+          },
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 21,
+                "puncture": 4.5,
+                "slash": 4.5
+              },
+              "procChance": 0.06
+            }
+          ]
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "burst",
+          "bullets": 1,
+          "multishot": 1,
+          "burst": {
+            "count": 3,
+            "delay": 0.04
+          },
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 28,
+                "puncture": 6,
+                "slash": 6
+              },
+              "procChance": 0.2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "CSDroidArray",
+      "name": "/Lotus/Language/Items/ReconnasorName",
+      "category": "secondary",
+      "critChance": 0.08,
+      "critMultiplier": 1.8,
+      "statusChance": 0.2,
+      "fireRate": 12,
+      "magazineSize": 60,
+      "reloadTime": 1.4,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "unknown",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "magnetic": 16
+              },
+              "procChance": 0.2
+            }
+          ]
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "unknown",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "impact": 80
+              },
+              "procChance": 0.22
+            },
+            {
+              "kind": "embedDeathAttack",
+              "aoe": true,
+              "damage": {
+                "cold": 660
+              },
+              "procChance": 0.22
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "CSSynoidGammacor",
+      "name": "/Lotus/Language/Items/CSReconnasorName",
+      "category": "secondary",
+      "variant": "syndicate",
+      "critChance": 0.2,
+      "critMultiplier": 2,
+      "statusChance": 0.28,
+      "fireRate": 12,
+      "magazineSize": 80,
+      "reloadTime": 1.8,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "unknown",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "magnetic": 21
+              },
+              "procChance": 0.28
+            }
+          ]
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "unknown",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "impact": 100
+              },
+              "procChance": 0.28
+            },
+            {
+              "kind": "embedDeathAttack",
+              "aoe": true,
+              "damage": {
+                "cold": 800
+              },
+              "procChance": 0.28
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "CodaCatabolyst",
+      "name": "/Lotus/Language/1999Echoes/CodaCatabolystName",
+      "category": "secondary",
+      "variant": "kuva",
+      "kuva": {
+        "bonusRange": [
+          0.25,
+          0.6
+        ],
+        "elements": [
+          "impact",
+          "puncture",
+          "slash",
+          "heat",
+          "cold",
+          "electric",
+          "toxin"
+        ]
+      },
+      "critChance": 0.11,
+      "critMultiplier": 2.9,
+      "statusChance": 0.5,
+      "fireRate": 12,
+      "magazineSize": 37,
+      "reloadTime": 1.7,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "unknown",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "corrosive": 56
+              },
+              "procChance": 0.5
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "CodaPox",
+      "name": "/Lotus/Language/1999Echoes/CodaPoxName",
+      "category": "secondary",
+      "variant": "kuva",
+      "kuva": {
+        "bonusRange": [
+          0.25,
+          0.6
+        ],
+        "elements": [
+          "impact",
+          "puncture",
+          "slash",
+          "heat",
+          "cold",
+          "electric",
+          "toxin"
+        ]
+      },
+      "critChance": 0.1,
+      "critMultiplier": 2.2,
+      "statusChance": 0.45,
+      "fireRate": 2.0833,
+      "magazineSize": 8,
+      "reloadTime": 1,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "toxin": 77
+              },
+              "procChance": 0.25
+            },
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "toxin": 55
+              },
+              "procChance": 0.45
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "CodaTysis",
+      "name": "/Lotus/Language/1999Echoes/CodaTysisName",
+      "category": "secondary",
+      "variant": "kuva",
+      "kuva": {
+        "bonusRange": [
+          0.25,
+          0.6
+        ],
+        "elements": [
+          "impact",
+          "puncture",
+          "slash",
+          "heat",
+          "cold",
+          "electric",
+          "toxin"
+        ]
+      },
+      "critChance": 0.13,
+      "critMultiplier": 2,
+      "statusChance": 0.5,
+      "fireRate": 2.5,
+      "magazineSize": 18,
+      "reloadTime": 1.2,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "semi",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "impact": 18,
+                "puncture": 32,
+                "slash": 26
+              },
+              "procChance": 0.5
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ConclaveLeverPistol",
+      "name": "/Lotus/Language/Weapons/SybarisPistolName",
+      "category": "secondary",
+      "critChance": 0.08,
+      "critMultiplier": 2,
+      "statusChance": 0.26,
+      "fireRate": 1.5,
+      "magazineSize": 8,
+      "reloadTime": 1.2,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "semi",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 44.8,
+                "puncture": 16.8,
+                "slash": 78.4
+              },
+              "procChance": 0.26
+            }
+          ]
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "charge",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 160,
+                "puncture": 240
+              },
+              "procChance": 0.4
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "CorpusHandCannon",
+      "name": "/Lotus/Language/Items/CorpusHandCannonName",
+      "category": "secondary",
+      "critChance": 0.04,
+      "critMultiplier": 1.5,
+      "statusChance": 0.1286,
+      "fireRate": 3.3333,
+      "magazineSize": 5,
+      "reloadTime": 1.05,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "semi",
+          "bullets": 7,
+          "multishot": 7,
+          "segments": [
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "radiation": 40
+              },
+              "procChance": 0.9
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "CorpusHandRocketLauncher",
+      "name": "/Lotus/Language/Items/CorpusHandRocketLauncherName",
+      "category": "secondary",
+      "critChance": 0.16,
+      "critMultiplier": 2,
+      "statusChance": 0.22,
+      "fireRate": 2,
+      "magazineSize": 1,
+      "reloadTime": 2.5,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "charge",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "blast": 200
+              },
+              "procChance": 0.22
+            },
+            {
+              "kind": "explosiveAttack",
+              "aoe": true,
+              "damage": {
+                "blast": 250
+              },
+              "procChance": 0.22
+            }
+          ]
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 10
+              },
+              "procChance": 0.1
+            },
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "heat": 30
+              },
+              "procChance": 0.18
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "CorpusMinigun",
+      "name": "/Lotus/Language/Items/CorpusMinigunName",
+      "category": "secondary",
+      "critChance": 0.06,
+      "critMultiplier": 1.6,
+      "statusChance": 0.2,
+      "fireRate": 8.3333,
+      "magazineSize": 60,
+      "reloadTime": 2,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "impact": 5.2,
+                "puncture": 20.8
+              },
+              "procChance": 0.2
+            }
+          ]
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "impact": 10,
+                "puncture": 40
+              },
+              "procChance": 0.18
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "CrossBow",
+      "name": "/Lotus/Language/Items/CrossBoltName",
+      "category": "secondary",
+      "critChance": 0.16,
+      "critMultiplier": 2.4,
+      "statusChance": 0.022,
+      "fireRate": 3.3333,
+      "magazineSize": 15,
+      "reloadTime": 1.3,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "semi",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "impact": 6.4,
+                "puncture": 57.6
+              },
+              "procChance": 0.022
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "CrpAirPistolArray",
+      "name": "/Lotus/Language/Items/CrpAirPistolArrayName",
+      "category": "secondary",
+      "critChance": 0.1,
+      "critMultiplier": 2,
+      "statusChance": 0,
+      "fireRate": 1.25,
+      "magazineSize": 15,
+      "reloadTime": 3,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "semi",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 150
+              },
+              "procChance": 0
+            },
+            {
+              "kind": "explosiveAttack",
+              "aoe": true,
+              "damage": {
+                "impact": 50
+              },
+              "procChance": 0.25
+            },
+            {
+              "kind": "embedDeathAttack",
+              "aoe": true,
+              "damage": {
+                "impact": 100
+              },
+              "procChance": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "CrpBECycron",
+      "name": "/Lotus/Language/Weapons/CrpBECycronName",
+      "category": "secondary",
+      "variant": "kuva",
+      "kuva": {
+        "bonusRange": [
+          0.25,
+          0.6
+        ],
+        "elements": [
+          "impact",
+          "puncture",
+          "slash",
+          "heat",
+          "cold",
+          "electric",
+          "toxin"
+        ]
+      },
+      "critChance": 0.2,
+      "critMultiplier": 1.8,
+      "statusChance": 0.4,
+      "fireRate": 12,
+      "magazineSize": 40,
+      "reloadTime": 1.5,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "unknown",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "heat": 22
+              },
+              "procChance": 0.4
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "CrpBEDetron",
+      "name": "/Lotus/Language/Weapons/CrpBEDetronName",
+      "category": "secondary",
+      "variant": "kuva",
+      "kuva": {
+        "bonusRange": [
+          0.25,
+          0.6
+        ],
+        "elements": [
+          "impact",
+          "puncture",
+          "slash",
+          "heat",
+          "cold",
+          "electric",
+          "toxin"
+        ]
+      },
+      "critChance": 0.18,
+      "critMultiplier": 2,
+      "statusChance": 0.1,
+      "fireRate": 3.3333,
+      "magazineSize": 6,
+      "reloadTime": 1,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "semi",
+          "bullets": 10,
+          "multishot": 10,
+          "segments": [
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "radiation": 26
+              },
+              "procChance": 1
+            }
+          ]
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "burst",
+          "bullets": 10,
+          "multishot": 10,
+          "segments": [
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "radiation": 26
+              },
+              "procChance": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "CrpBEPlinxWeapon",
+      "name": "/Lotus/Language/Weapons/CrpBEPlinxName",
+      "category": "secondary",
+      "variant": "kuva",
+      "kuva": {
+        "bonusRange": [
+          0.25,
+          0.6
+        ],
+        "elements": [
+          "impact",
+          "puncture",
+          "slash",
+          "heat",
+          "cold",
+          "electric",
+          "toxin"
+        ]
+      },
+      "critChance": 0.44,
+      "critMultiplier": 3,
+      "statusChance": 0.12,
+      "fireRate": 3.3333,
+      "magazineSize": 10,
+      "reloadTime": 1.3,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "semi",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "heat": 30,
+                "puncture": 40
+              },
+              "procChance": 0.12
+            }
+          ]
+        },
+        {
+          "id": "charged",
+          "role": "charged",
+          "trigger": "charge",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "impact": 100
+              },
+              "procChance": 0.2
+            },
+            {
+              "kind": "explosiveAttack",
+              "aoe": true,
+              "damage": {
+                "radiation": 500
+              },
+              "procChance": 0.2
+            },
+            {
+              "kind": "embedDeathAttack",
+              "aoe": true,
+              "damage": {
+                "radiation": 100
+              },
+              "procChance": 0.5
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "CrpBlastorWeapon",
+      "name": "/Lotus/Language/Weapons/CrpBlastorWeaponName",
+      "category": "secondary",
+      "critChance": 0.32,
+      "critMultiplier": 3,
+      "statusChance": 0.04,
+      "fireRate": 3.3333,
+      "magazineSize": 10,
+      "reloadTime": 1.3,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "semi",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "heat": 20,
+                "puncture": 26
+              },
+              "procChance": 0.04
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "CrpBriefcaseAkimboPistol",
+      "name": "/Lotus/Language/Weapons/CrpBriefcaseAkimboPistolName",
+      "category": "secondary",
+      "critChance": 0.36,
+      "critMultiplier": 2.2,
+      "statusChance": 0.14,
+      "fireRate": 9.6667,
+      "magazineSize": 92,
+      "reloadTime": 2.8,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "impact": 11.2,
+                "puncture": 8.96,
+                "slash": 7.84
+              },
+              "procChance": 0.14
+            }
+          ]
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "semi",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 11.61,
+                "puncture": 2.7,
+                "slash": 12.69
+              },
+              "procChance": 0.31
+            },
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "impact": 11.2,
+                "puncture": 8.96,
+                "slash": 7.84
+              },
+              "procChance": 0.14
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "CrpChargeGun",
+      "name": "/Lotus/Language/Weapons/CrpChargeGunName",
+      "category": "secondary",
+      "critChance": 0.12,
+      "critMultiplier": 1.8,
+      "statusChance": 0.3,
+      "fireRate": 12,
+      "magazineSize": 40,
+      "reloadTime": 2,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "unknown",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "puncture": 8,
+                "radiation": 10,
+                "slash": 5
+              },
+              "procChance": 0.3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "CrpElectroMag",
+      "name": "/Lotus/Language/Items/CrpElectroMag",
+      "category": "secondary",
+      "critChance": 0.14,
+      "critMultiplier": 2.2,
+      "statusChance": 0.28,
+      "fireRate": 3.5,
+      "magazineSize": 12,
+      "reloadTime": 1.5,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "charge",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "radiation": 44
+              },
+              "procChance": 0.28
+            },
+            {
+              "kind": "explosiveAttack",
+              "aoe": true,
+              "damage": {
+                "radiation": 88
+              },
+              "procChance": 0.28
+            }
+          ]
+        },
+        {
+          "id": "charged",
+          "role": "charged",
+          "trigger": "charge",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "radiation": 44
+              },
+              "procChance": 0.28
+            },
+            {
+              "kind": "explosiveAttack",
+              "aoe": true,
+              "damage": {
+                "radiation": 106
+              },
+              "procChance": 0.28
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "CrpIgniterPistol",
+      "name": "/Lotus/Language/Weapons/CrpIgniterPistolName",
+      "category": "secondary",
+      "critChance": 0.26,
+      "critMultiplier": 2.4,
+      "statusChance": 0.4,
+      "fireRate": 2.3333,
+      "magazineSize": 8,
+      "reloadTime": 2.4,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "semi",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "heat": 60,
+                "impact": 40,
+                "puncture": 20
+              },
+              "procChance": 0.4
+            },
+            {
+              "kind": "explosiveAttack",
+              "aoe": true,
+              "damage": {
+                "heat": 80
+              },
+              "procChance": 0.4
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "CrpLaserPistol",
+      "name": "/Lotus/Language/ClanTech/SpectraCorpusLaserPistolName",
+      "category": "secondary",
+      "critChance": 0.14,
+      "critMultiplier": 2,
+      "statusChance": 0.22,
+      "fireRate": 12,
+      "magazineSize": 60,
+      "reloadTime": 1.8,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "unknown",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "puncture": 7.56,
+                "slash": 10.44
+              },
+              "procChance": 0.22
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "CrpLaserPistolVandal",
+      "name": "/Lotus/Language/Weapons/CrpLaserPistolVandalName",
+      "category": "secondary",
+      "variant": "variant",
+      "critChance": 0.2,
+      "critMultiplier": 2,
+      "statusChance": 0.28,
+      "fireRate": 12,
+      "magazineSize": 80,
+      "reloadTime": 1.2,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "unknown",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "puncture": 9.24,
+                "slash": 12.76
+              },
+              "procChance": 0.28
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "CrpScopeGun",
+      "name": "/Lotus/Language/Weapons/CrpScopeGun",
+      "category": "secondary",
+      "critChance": 0.18,
+      "critMultiplier": 1.6,
+      "statusChance": 0.26,
+      "fireRate": 4.6667,
+      "magazineSize": 36,
+      "reloadTime": 2.2,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "semi",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "puncture": 36,
+                "slash": 24
+              },
+              "procChance": 0.26
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "CrpSentAmalgPistol",
+      "name": "/Lotus/Language/Weapons/CrpSentAmlgPistolName",
+      "category": "secondary",
+      "critChance": 0.08,
+      "critMultiplier": 1.4,
+      "statusChance": 0.32,
+      "fireRate": 4.6667,
+      "magazineSize": 11,
+      "reloadTime": 2.2,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "impact": 50
+              },
+              "procChance": 0.32
+            },
+            {
+              "kind": "explosiveAttack",
+              "aoe": true,
+              "damage": {
+                "gas": 41
+              },
+              "procChance": 0.32
+            },
+            {
+              "kind": "embedDeathAttack",
+              "aoe": true,
+              "damage": {
+                "gas": 100
+              },
+              "procChance": 0.32
+            }
+          ]
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "burst",
+          "bullets": 1,
+          "multishot": 1,
+          "burst": {
+            "count": 3,
+            "delay": 0.08
+          },
+          "segments": [
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "impact": 2.88,
+                "puncture": 30.24,
+                "slash": 38.88
+              },
+              "procChance": 0.32
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "CrpSentExperimentPistol",
+      "name": "/Lotus/Language/SolarisVenus/CrpSentExperiementPistol",
+      "category": "secondary",
+      "critChance": 0.16,
+      "critMultiplier": 1.8,
+      "statusChance": 0.24,
+      "fireRate": 12,
+      "magazineSize": 60,
+      "reloadTime": 1.6,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "unknown",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "puncture": 1,
+                "radiation": 10
+              },
+              "procChance": 0.24
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "DexFuris",
+      "name": "/Lotus/Language/Items/DexFurisName",
+      "category": "secondary",
+      "variant": "variant",
+      "critChance": 0.14,
+      "critMultiplier": 2,
+      "statusChance": 0.28,
+      "fireRate": 20,
+      "magazineSize": 100,
+      "reloadTime": 2,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 2.4,
+                "puncture": 11.2,
+                "slash": 2.4
+              },
+              "procChance": 0.28
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "DualCorpusMinigun",
+      "name": "/Lotus/Language/Items/DualCorpusMinigunName",
+      "category": "secondary",
+      "critChance": 0.06,
+      "critMultiplier": 1.6,
+      "statusChance": 0.2,
+      "fireRate": 18.75,
+      "magazineSize": 120,
+      "reloadTime": 3.5,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "impact": 5.2,
+                "puncture": 20.8
+              },
+              "procChance": 0.2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "DualMagnus",
+      "name": "/Lotus/Language/Items/AkmagnusName",
+      "category": "secondary",
+      "critChance": 0.22,
+      "critMultiplier": 2,
+      "statusChance": 0.22,
+      "fireRate": 5,
+      "magazineSize": 16,
+      "reloadTime": 3.2,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "semi",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 44.1,
+                "puncture": 26.95,
+                "slash": 26.95
+              },
+              "procChance": 0.22
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "DualMagnusPrime",
+      "name": "/Lotus/Language/Primes/AkmagnusPrimeName",
+      "category": "secondary",
+      "variant": "prime",
+      "critChance": 0.28,
+      "critMultiplier": 2.8,
+      "statusChance": 0.28,
+      "fireRate": 5.6667,
+      "magazineSize": 16,
+      "reloadTime": 2.8,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "semi",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 44.1,
+                "puncture": 26.95,
+                "slash": 26.95
+              },
+              "procChance": 0.28
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "DualVastos",
+      "name": "/Lotus/Language/Items/DualVastosName",
+      "category": "secondary",
+      "critChance": 0.16,
+      "critMultiplier": 1.8,
+      "statusChance": 0.12,
+      "fireRate": 3.3333,
+      "magazineSize": 12,
+      "reloadTime": 1.6,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "semi",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 22.5,
+                "puncture": 22.5,
+                "slash": 45
+              },
+              "procChance": 0.12
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "EntratiWristGunWeapon",
+      "name": "/Lotus/Language/Weapons/EntratiWristGunWeaponName",
+      "category": "secondary",
+      "critChance": 0.26,
+      "critMultiplier": 2.4,
+      "statusChance": 0.22,
+      "fireRate": 1.4,
+      "magazineSize": 20,
+      "reloadTime": 2,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "puncture": 220
+              },
+              "procChance": 0.22
+            }
+          ]
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "unknown",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "radiation": 30
+              },
+              "procChance": 0.18
+            }
+          ]
+        },
+        {
+          "id": "mode3",
+          "role": "normal",
+          "trigger": "unknown",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "heat": 2200
+              },
+              "procChance": 0.26
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "GLAPistol",
+      "name": "/Lotus/Language/Items/GLAPistolName",
+      "category": "secondary",
+      "critChance": 0.15,
+      "critMultiplier": 1.5,
+      "statusChance": 0.3,
+      "fireRate": 2,
+      "magazineSize": 6,
+      "reloadTime": 1.667,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "semi",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 80,
+                "puncture": 16,
+                "slash": 64
+              },
+              "procChance": 0.3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "GlassKunaiWeapon",
+      "name": "/Lotus/Language/Weapons/GlassKunaiName",
+      "category": "secondary",
+      "critChance": 0.23,
+      "critMultiplier": 1.7,
+      "statusChance": 0.29,
+      "fireRate": 2.8333,
+      "magazineSize": 6,
+      "reloadTime": 0.8,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "puncture": 30.8,
+                "slash": 46.2
+              },
+              "procChance": 0.29
+            }
+          ]
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "semi",
+          "bullets": 3,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "puncture": 30.8,
+                "slash": 46.2
+              },
+              "procChance": 0.37
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "GrineerAkimboPistol",
+      "name": "/Lotus/Language/Items/GrineerAkimboPistolName",
+      "category": "secondary",
+      "critChance": 0.15,
+      "critMultiplier": 1.5,
+      "statusChance": 0.15,
+      "fireRate": 5,
+      "magazineSize": 30,
+      "reloadTime": 1.1,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 2.4,
+                "puncture": 16.8,
+                "slash": 4.8
+              },
+              "procChance": 0.15
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "GrineerGooGun",
+      "name": "/Lotus/Language/Items/GrineerGooGunName",
+      "category": "secondary",
+      "critChance": 0.05,
+      "critMultiplier": 1.5,
+      "statusChance": 0,
+      "fireRate": 4,
+      "magazineSize": 20,
+      "reloadTime": 2,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "explosiveAttack",
+              "aoe": true,
+              "damage": {
+                "corrosive": 75
+              },
+              "procChance": 0
+            },
+            {
+              "kind": "embedDeathAttack",
+              "aoe": true,
+              "damage": {
+                "corrosive": 75
+              },
+              "procChance": 0
+            }
+          ]
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "charge",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "explosiveAttack",
+              "aoe": true,
+              "damage": {
+                "corrosive": 75
+              },
+              "procChance": 0
+            },
+            {
+              "kind": "embedDeathAttack",
+              "aoe": true,
+              "damage": {
+                "corrosive": 75
+              },
+              "procChance": 0
+            }
+          ]
+        },
+        {
+          "id": "mode3",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "explosiveAttack",
+              "aoe": true,
+              "damage": {
+                "corrosive": 200
+              },
+              "procChance": 0.2
+            },
+            {
+              "kind": "embedDeathAttack",
+              "aoe": true,
+              "damage": {
+                "corrosive": 200
+              },
+              "procChance": 0.2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "GrineerHandCannon",
+      "name": "/Lotus/Language/Items/GrineerHandCannonName",
+      "category": "secondary",
+      "critChance": 0.17,
+      "critMultiplier": 2,
+      "statusChance": 0.051,
+      "fireRate": 5,
+      "magazineSize": 5,
+      "reloadTime": 1.05,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "semi",
+          "bullets": 10,
+          "multishot": 10,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 9,
+                "puncture": 5,
+                "slash": 6
+              },
+              "procChance": 0.51
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "GrineerLightPistol",
+      "name": "/Lotus/Language/Items/GrineerLightPistolName",
+      "category": "secondary",
+      "critChance": 0.15,
+      "critMultiplier": 1.5,
+      "statusChance": 0.11,
+      "fireRate": 14.3833,
+      "magazineSize": 14,
+      "reloadTime": 0.7,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 10.2,
+                "puncture": 1.7,
+                "slash": 5.1
+              },
+              "procChance": 0.11
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "GrnAmphisPistol",
+      "name": "/Lotus/Language/Weapons/GrnAmphisPistolName",
+      "category": "secondary",
+      "critChance": 0.13,
+      "critMultiplier": 1.5,
+      "statusChance": 0.27,
+      "fireRate": 15,
+      "magazineSize": 72,
+      "reloadTime": 2.7,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "electric": 11,
+                "impact": 9,
+                "puncture": 2,
+                "slash": 7
+              },
+              "procChance": 0.27
+            }
+          ]
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "burst",
+          "bullets": 1,
+          "multishot": 1,
+          "burst": {
+            "count": 4,
+            "delay": 0
+          },
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "electric": 11,
+                "impact": 9,
+                "puncture": 2,
+                "slash": 7
+              },
+              "procChance": 0.19
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "GrnHeatGun",
+      "name": "/Lotus/Language/Items/GrnHeatGunName",
+      "category": "secondary",
+      "critChance": 0.15,
+      "critMultiplier": 1.7,
+      "statusChance": 0.21,
+      "fireRate": 8,
+      "magazineSize": 70,
+      "reloadTime": 2,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "unknown",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "heat": 29
+              },
+              "procChance": 0.21
+            }
+          ]
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "semi",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "impact": 100
+              },
+              "procChance": 0.41
+            },
+            {
+              "kind": "explosiveAttack",
+              "aoe": true,
+              "damage": {
+                "blast": 450
+              },
+              "procChance": 0.41
+            },
+            {
+              "kind": "embedDeathAttack",
+              "aoe": true,
+              "damage": {
+                "blast": 500
+              },
+              "procChance": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "GrnHeavyPistol",
+      "name": "/Lotus/Language/Items/GrineerHeavyPistolName",
+      "category": "secondary",
+      "critChance": 0.05,
+      "critMultiplier": 2,
+      "statusChance": 0.13,
+      "fireRate": 4.4156,
+      "magazineSize": 14,
+      "reloadTime": 2.45,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "burst",
+          "bullets": 1,
+          "multishot": 1,
+          "burst": {
+            "count": 2,
+            "delay": 0.05
+          },
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 36.75,
+                "puncture": 6.125,
+                "slash": 6.125
+              },
+              "procChance": 0.13
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "GrnKohmPistol",
+      "name": "/Lotus/Language/Items/GrnWindUpPistolName",
+      "category": "secondary",
+      "critChance": 0.11,
+      "critMultiplier": 2,
+      "statusChance": 0.138,
+      "fireRate": 5,
+      "magazineSize": 40,
+      "reloadTime": 2,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 5,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 3,
+                "puncture": 3,
+                "slash": 9
+              },
+              "procChance": 0.69
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "GrnMicrowavePistol",
+      "name": "/Lotus/Language/Items/GrineerMicrowavePistolName",
+      "category": "secondary",
+      "critChance": 0.03,
+      "critMultiplier": 4,
+      "statusChance": 0.29,
+      "fireRate": 10,
+      "magazineSize": 50,
+      "reloadTime": 2,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "unknown",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "radiation": 22
+              },
+              "procChance": 0.29
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "GrnOrokinPistol",
+      "name": "/Lotus/Language/Weapons/GrnOrokinPistolName",
+      "category": "secondary",
+      "critChance": 0.3,
+      "critMultiplier": 2.2,
+      "statusChance": 0.01,
+      "fireRate": 12.3333,
+      "magazineSize": 75,
+      "reloadTime": 1.6,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 6.3,
+                "puncture": 8.5,
+                "slash": 12
+              },
+              "procChance": 0.01
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "GrnQueenGuardDualPistols",
+      "name": "/Lotus/Language/Weapons/GrnQueenGuardDualPistolsName",
+      "category": "secondary",
+      "critChance": 0.1,
+      "critMultiplier": 2,
+      "statusChance": 0.066,
+      "fireRate": 2.5,
+      "magazineSize": 2,
+      "reloadTime": 1.5,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "semi",
+          "bullets": 15,
+          "multishot": 15,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 18.8,
+                "puncture": 23.5,
+                "slash": 4.7
+              },
+              "procChance": 0.99
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "GrnTorpedoPistol",
+      "name": "/Lotus/Language/Items/GrnTorpedoPistolName",
+      "category": "secondary",
+      "critChance": 0.17,
+      "critMultiplier": 2.3,
+      "statusChance": 0.19,
+      "fireRate": 2,
+      "magazineSize": 3,
+      "reloadTime": 2,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "active",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "impact": 200
+              },
+              "procChance": 0.19
+            },
+            {
+              "kind": "explosiveAttack",
+              "aoe": true,
+              "damage": {
+                "blast": 300
+              },
+              "procChance": 0.19
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "GrnTwinKohmaks",
+      "name": "/Lotus/Language/Items/TwinKohmakName",
+      "category": "secondary",
+      "critChance": 0.11,
+      "critMultiplier": 2,
+      "statusChance": 0.138,
+      "fireRate": 6.6667,
+      "magazineSize": 80,
+      "reloadTime": 2.2,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 5,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 3,
+                "puncture": 3,
+                "slash": 9
+              },
+              "procChance": 0.69
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "GrnUziWeapon",
+      "name": "/Lotus/Language/Weapons/GrnUziName",
+      "category": "secondary",
+      "critChance": 0.23,
+      "critMultiplier": 1.9,
+      "statusChance": 0.13,
+      "fireRate": 6.3333,
+      "magazineSize": 57,
+      "reloadTime": 1.3,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 14.19,
+                "puncture": 3.3,
+                "slash": 15.51
+              },
+              "procChance": 0.13
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "GrnVorStickyBomb",
+      "name": "/Lotus/Language/Weapons/GrnVorStickyBombName",
+      "category": "secondary",
+      "critChance": 0.37,
+      "critMultiplier": 1.9,
+      "statusChance": 0.19,
+      "fireRate": 2,
+      "magazineSize": 2,
+      "reloadTime": 1.3,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "active",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "impact": 4.5,
+                "puncture": 1.8,
+                "slash": 2.7
+              },
+              "procChance": 0.19
+            },
+            {
+              "kind": "explosiveAttack",
+              "aoe": true,
+              "damage": {
+                "blast": 797
+              },
+              "procChance": 0.19
+            },
+            {
+              "kind": "embedDeathAttack",
+              "aoe": true,
+              "damage": {
+                "blast": 797
+              },
+              "procChance": 0.19
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "HandShotGun",
+      "name": "/Lotus/Language/Items/HandCannonName",
+      "category": "secondary",
+      "critChance": 0.06,
+      "critMultiplier": 2,
+      "statusChance": 0.0943,
+      "fireRate": 4,
+      "magazineSize": 2,
+      "reloadTime": 1.05,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "semi",
+          "bullets": 7,
+          "multishot": 7,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 33.6,
+                "puncture": 4.2,
+                "slash": 4.2
+              },
+              "procChance": 0.66
+            }
+          ]
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "semi",
+          "bullets": 7,
+          "multishot": 7,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 13.2,
+                "puncture": 2.2,
+                "slash": 6.6
+              },
+              "procChance": 1.32
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "HarlequinPistols",
+      "name": "/Lotus/Language/Items/HarlequinPistolsName",
+      "category": "secondary",
+      "critChance": 0.14,
+      "critMultiplier": 2,
+      "statusChance": 0.14,
+      "fireRate": 20,
+      "magazineSize": 100,
+      "reloadTime": 2,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 1.8,
+                "puncture": 8.4,
+                "slash": 1.8
+              },
+              "procChance": 0.14
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "HeavyPistol",
+      "name": "/Lotus/Language/Items/HeavyPistolName",
+      "category": "secondary",
+      "critChance": 0.2,
+      "critMultiplier": 2,
+      "statusChance": 0.1,
+      "fireRate": 1.0833,
+      "magazineSize": 6,
+      "reloadTime": 2.35,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "semi",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 13,
+                "puncture": 104,
+                "slash": 13
+              },
+              "procChance": 0.1
+            }
+          ]
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "semi",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "impact": 300,
+                "radiation": 700
+              },
+              "procChance": 0.4
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "InfBeamPistol",
+      "name": "/Lotus/Language/Weapons/InfBeamPistolName",
+      "category": "secondary",
+      "critChance": 0.11,
+      "critMultiplier": 2.9,
+      "statusChance": 0.43,
+      "fireRate": 12,
+      "magazineSize": 31,
+      "reloadTime": 1.7,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "unknown",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "corrosive": 53
+              },
+              "procChance": 0.43
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "InfProximityStars",
+      "name": "/Lotus/Language/Items/InfProximityStarsName",
+      "category": "secondary",
+      "critChance": 0.01,
+      "critMultiplier": 2,
+      "statusChance": 0.35,
+      "fireRate": 2.0833,
+      "magazineSize": 4,
+      "reloadTime": 1,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "toxin": 77
+              },
+              "procChance": 0.25
+            },
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "toxin": 50
+              },
+              "procChance": 0.35
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "InfUziWeapon",
+      "name": "/Lotus/Language/Weapons/InfUziWeaponName",
+      "category": "secondary",
+      "critChance": 0.05,
+      "critMultiplier": 2.3,
+      "statusChance": 0.3,
+      "fireRate": 1.3333,
+      "magazineSize": 17,
+      "reloadTime": 3.2,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "semi",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 14.19,
+                "puncture": 3.3,
+                "slash": 15.51
+              },
+              "procChance": 0.13
+            },
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "impact": 9.2,
+                "puncture": 13.8
+              },
+              "procChance": 0.3
+            },
+            {
+              "kind": "explosiveAttack",
+              "aoe": true,
+              "damage": {
+                "toxin": 61
+              },
+              "procChance": 0
+            },
+            {
+              "kind": "embedDeathAttack",
+              "aoe": true,
+              "damage": {
+                "toxin": 953
+              },
+              "procChance": 0.5
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "InfVomitGunWep",
+      "name": "/Lotus/Language/Items/InfestedLexName",
+      "category": "secondary",
+      "critChance": 0.05,
+      "critMultiplier": 2,
+      "statusChance": 0.37,
+      "fireRate": 1,
+      "magazineSize": 12,
+      "reloadTime": 2.35,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "semi",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 7.5,
+                "puncture": 60,
+                "slash": 7.5
+              },
+              "procChance": 0.37
+            }
+          ]
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 15,
+                "puncture": 37.5,
+                "slash": 22.5
+              },
+              "procChance": 0.43
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "InfestedDartPistol",
+      "name": "/Lotus/Language/Items/InfestedDartPistolName",
+      "category": "secondary",
+      "critChance": 0.03,
+      "critMultiplier": 1.5,
+      "statusChance": 0.5,
+      "fireRate": 2.5,
+      "magazineSize": 11,
+      "reloadTime": 1.2,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "semi",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "impact": 9,
+                "puncture": 23,
+                "slash": 17
+              },
+              "procChance": 0.5
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "InfestedPistol",
+      "name": "/Lotus/Language/Items/InfestedPistolName",
+      "category": "secondary",
+      "critChance": 0.03,
+      "critMultiplier": 1.5,
+      "statusChance": 0.41,
+      "fireRate": 8,
+      "magazineSize": 33,
+      "reloadTime": 1.3,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "unknown",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "toxin": 35
+              },
+              "procChance": 0.41
+            }
+          ]
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "semi",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "toxin": 14
+              },
+              "procChance": 0
+            },
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "impact": 10
+              },
+              "procChance": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "Kunai",
+      "name": "/Lotus/Language/Items/KunaiName",
+      "category": "secondary",
+      "critChance": 0.08,
+      "critMultiplier": 1.6,
+      "statusChance": 0.08,
+      "fireRate": 3.3333,
+      "magazineSize": 10,
+      "reloadTime": 0.75,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "impact": 4.6,
+                "puncture": 34.5,
+                "slash": 6.9
+              },
+              "procChance": 0.08
+            }
+          ]
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 2,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "impact": 8,
+                "puncture": 14,
+                "slash": 18
+              },
+              "procChance": 0.32
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "KuvaBrakk",
+      "name": "/Lotus/Language/Weapons/KuvaBrakkName",
+      "category": "secondary",
+      "variant": "kuva",
+      "kuva": {
+        "bonusRange": [
+          0.25,
+          0.6
+        ],
+        "elements": [
+          "impact",
+          "puncture",
+          "slash",
+          "heat",
+          "cold",
+          "electric",
+          "toxin"
+        ]
+      },
+      "critChance": 0.29,
+      "critMultiplier": 2,
+      "statusChance": 0.111,
+      "fireRate": 5,
+      "magazineSize": 11,
+      "reloadTime": 1.1,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "semi",
+          "bullets": 10,
+          "multishot": 10,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 6.75,
+                "puncture": 3.75,
+                "slash": 4.5
+              },
+              "procChance": 1.11
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "KuvaKraken",
+      "name": "/Lotus/Language/Weapons/KuvaKrakenName",
+      "category": "secondary",
+      "variant": "kuva",
+      "kuva": {
+        "bonusRange": [
+          0.25,
+          0.6
+        ],
+        "elements": [
+          "impact",
+          "puncture",
+          "slash",
+          "heat",
+          "cold",
+          "electric",
+          "toxin"
+        ]
+      },
+      "critChance": 0.21,
+      "critMultiplier": 2.3,
+      "statusChance": 0.29,
+      "fireRate": 6.7729,
+      "magazineSize": 21,
+      "reloadTime": 1.5,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "burst",
+          "bullets": 1,
+          "multishot": 1,
+          "burst": {
+            "count": 3,
+            "delay": 0.03
+          },
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 32.25,
+                "puncture": 5.375,
+                "slash": 5.375
+              },
+              "procChance": 0.29
+            }
+          ]
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "burst",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 32.25,
+                "puncture": 5.375,
+                "slash": 5.375
+              },
+              "procChance": 0.29
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "KuvaNukor",
+      "name": "/Lotus/Language/Weapons/KuvaNukorName",
+      "category": "secondary",
+      "variant": "kuva",
+      "kuva": {
+        "bonusRange": [
+          0.25,
+          0.6
+        ],
+        "elements": [
+          "impact",
+          "puncture",
+          "slash",
+          "heat",
+          "cold",
+          "electric",
+          "toxin"
+        ]
+      },
+      "critChance": 0.07,
+      "critMultiplier": 5,
+      "statusChance": 0.5,
+      "fireRate": 10,
+      "magazineSize": 77,
+      "reloadTime": 2,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "unknown",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "radiation": 21
+              },
+              "procChance": 0.5
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "KuvaSeer",
+      "name": "/Lotus/Language/Weapons/KuvaSeerName",
+      "category": "secondary",
+      "variant": "kuva",
+      "kuva": {
+        "bonusRange": [
+          0.25,
+          0.6
+        ],
+        "elements": [
+          "impact",
+          "puncture",
+          "slash",
+          "heat",
+          "cold",
+          "electric",
+          "toxin"
+        ]
+      },
+      "critChance": 0.21,
+      "critMultiplier": 1.9,
+      "statusChance": 0.33,
+      "fireRate": 2.5,
+      "magazineSize": 9,
+      "reloadTime": 2.3,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "semi",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "impact": 26.2,
+                "puncture": 68.12,
+                "slash": 36.68
+              },
+              "procChance": 0.33
+            },
+            {
+              "kind": "explosiveAttack",
+              "aoe": true,
+              "damage": {
+                "corrosive": 69
+              },
+              "procChance": 0.33
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "KuvaStubba",
+      "name": "/Lotus/Language/Weapons/KuvaStubbaName",
+      "category": "secondary",
+      "kuva": {
+        "bonusRange": [
+          0.25,
+          0.6
+        ],
+        "elements": [
+          "impact",
+          "puncture",
+          "slash",
+          "heat",
+          "cold",
+          "electric",
+          "toxin"
+        ]
+      },
+      "critChance": 0.23,
+      "critMultiplier": 1.9,
+      "statusChance": 0.31,
+      "fireRate": 10,
+      "magazineSize": 114,
+      "reloadTime": 2.7,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 11.61,
+                "puncture": 2.7,
+                "slash": 12.69
+              },
+              "procChance": 0.31
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "LasGooPistolPlayerWeapon",
+      "name": "/Lotus/Language/Weapons/LasGooPistolWeaponName",
+      "category": "secondary",
+      "critChance": 0.27,
+      "critMultiplier": 2.1,
+      "statusChance": 0.17,
+      "fireRate": 6.5,
+      "magazineSize": 15,
+      "reloadTime": 1.667,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "semi",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 20,
+                "puncture": 55
+              },
+              "procChance": 0.17
+            }
+          ]
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "charge",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 20
+              },
+              "procChance": 0.1
+            }
+          ]
+        },
+        {
+          "id": "charged",
+          "role": "charged",
+          "trigger": "charge",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "corrosive": 35
+              },
+              "procChance": 0.33
+            },
+            {
+              "kind": "explosiveAttack",
+              "aoe": true,
+              "damage": {
+                "corrosive": 313
+              },
+              "procChance": 0.33
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "LasSilencedPistolWeapon",
+      "name": "/Lotus/Language/Weapons/LasSilencedPistolWeaponName",
+      "category": "secondary",
+      "critChance": 0.24,
+      "critMultiplier": 2.6,
+      "statusChance": 0.26,
+      "fireRate": 2.0833,
+      "magazineSize": 8,
+      "reloadTime": 2.35,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "semi",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 72,
+                "puncture": 108
+              },
+              "procChance": 0.26
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "LatoPrime",
+      "name": "/Lotus/Language/Items/LatoPrimeName",
+      "category": "secondary",
+      "variant": "prime",
+      "critChance": 0.3,
+      "critMultiplier": 2.6,
+      "statusChance": 0.2,
+      "fireRate": 5,
+      "magazineSize": 20,
+      "reloadTime": 1,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "semi",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 6,
+                "puncture": 12,
+                "slash": 42
+              },
+              "procChance": 0.2
+            }
+          ]
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "semi",
+          "bullets": 2,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 19.5,
+                "puncture": 19.5,
+                "slash": 39
+              },
+              "procChance": 0.3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "LatoVandal",
+      "name": "/Lotus/Language/Items/VIPPistolName",
+      "category": "secondary",
+      "variant": "variant",
+      "critChance": 0.26,
+      "critMultiplier": 2.4,
+      "statusChance": 0.1,
+      "fireRate": 5,
+      "magazineSize": 15,
+      "reloadTime": 1,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "semi",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 6.9,
+                "puncture": 11.5,
+                "slash": 27.6
+              },
+              "procChance": 0.1
+            }
+          ]
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "semi",
+          "bullets": 2,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 19,
+                "puncture": 19,
+                "slash": 38
+              },
+              "procChance": 0.2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "LiDagger",
+      "name": "/Lotus/Language/Items/LiDaggerName",
+      "category": "secondary",
+      "critChance": 0.3,
+      "critMultiplier": 2,
+      "statusChance": 0.08,
+      "fireRate": 2.5,
+      "magazineSize": 10,
+      "reloadTime": 1,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 0.6,
+                "puncture": 5.1,
+                "slash": 0.3
+              },
+              "procChance": 0.1
+            },
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "impact": 8.2,
+                "puncture": 49.2,
+                "slash": 24.6
+              },
+              "procChance": 0.08
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "MK1Furis",
+      "name": "/Lotus/Language/Items/MK1Furis",
+      "category": "secondary",
+      "variant": "starter",
+      "critChance": 0.05,
+      "critMultiplier": 2,
+      "statusChance": 0.01,
+      "fireRate": 8.3333,
+      "magazineSize": 35,
+      "reloadTime": 1.4,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 1.95,
+                "puncture": 9.1,
+                "slash": 1.95
+              },
+              "procChance": 0.01
+            }
+          ]
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "unknown",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "heat": 60
+              },
+              "procChance": 0.08
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "MK1Kunai",
+      "name": "/Lotus/Language/Items/MK1Kunai",
+      "category": "secondary",
+      "variant": "starter",
+      "critChance": 0.05,
+      "critMultiplier": 2,
+      "statusChance": 0.025,
+      "fireRate": 3.3333,
+      "magazineSize": 10,
+      "reloadTime": 0.75,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "impact": 4,
+                "puncture": 30,
+                "slash": 6
+              },
+              "procChance": 0.025
+            }
+          ]
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 2,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "impact": 4.8,
+                "puncture": 8.4,
+                "slash": 10.8
+              },
+              "procChance": 0.1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "Magnum",
+      "name": "/Lotus/Language/Items/MagnumName",
+      "category": "secondary",
+      "critChance": 0.22,
+      "critMultiplier": 2,
+      "statusChance": 0.22,
+      "fireRate": 4.3333,
+      "magazineSize": 8,
+      "reloadTime": 1.8,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "semi",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 44.1,
+                "puncture": 26.95,
+                "slash": 26.95
+              },
+              "procChance": 0.22
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "NLCastanas",
+      "name": "/Lotus/Language/Items/NLCastanasName",
+      "category": "secondary",
+      "variant": "syndicate",
+      "critChance": 0.24,
+      "critMultiplier": 2,
+      "statusChance": 0.34,
+      "fireRate": 3.3333,
+      "magazineSize": 2,
+      "reloadTime": 1,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "active",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "explosiveAttack",
+              "aoe": true,
+              "damage": {
+                "electric": 300
+              },
+              "procChance": 0.34
+            },
+            {
+              "kind": "embedDeathAttack",
+              "aoe": true,
+              "damage": {
+                "electric": 300
+              },
+              "procChance": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "PSDualCestra",
+      "name": "/Lotus/Language/Items/PSDualCestraName",
+      "category": "secondary",
+      "variant": "syndicate",
+      "critChance": 0.16,
+      "critMultiplier": 1.6,
+      "statusChance": 0.28,
+      "fireRate": 12.5,
+      "magazineSize": 120,
+      "reloadTime": 3.5,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "impact": 5.6,
+                "puncture": 22.4
+              },
+              "procChance": 0.28
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "PanderoPrimeWeapon",
+      "name": "/Lotus/Language/Primes/PanderoPrimeName",
+      "category": "secondary",
+      "variant": "prime",
+      "critChance": 0.3,
+      "critMultiplier": 2.8,
+      "statusChance": 0.24,
+      "fireRate": 3,
+      "magazineSize": 8,
+      "reloadTime": 1,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "semi",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 26,
+                "puncture": 26,
+                "slash": 52
+              },
+              "procChance": 0.24
+            }
+          ]
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "burst",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 26,
+                "puncture": 26,
+                "slash": 52
+              },
+              "procChance": 0.24
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "Pistol",
+      "name": "/Lotus/Language/Items/PistolName",
+      "category": "secondary",
+      "critChance": 0.1,
+      "critMultiplier": 1.8,
+      "statusChance": 0.06,
+      "fireRate": 4.5,
+      "magazineSize": 15,
+      "reloadTime": 1,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "semi",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 10,
+                "puncture": 10,
+                "slash": 20
+              },
+              "procChance": 0.06
+            }
+          ]
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "semi",
+          "bullets": 2,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 16,
+                "puncture": 16,
+                "slash": 32
+              },
+              "procChance": 0.12
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "PrimeAFurisWeapon",
+      "name": "/Lotus/Language/Primes/PrimeAFurisName",
+      "category": "secondary",
+      "variant": "prime",
+      "critChance": 0.16,
+      "critMultiplier": 2,
+      "statusChance": 0.3,
+      "fireRate": 12.5,
+      "magazineSize": 80,
+      "reloadTime": 1.2,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 3.9,
+                "puncture": 18.2,
+                "slash": 3.9
+              },
+              "procChance": 0.3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "PrimeAkBoltoWeapon",
+      "name": "/Lotus/Language/Primes/AkboltoPrimeName",
+      "category": "secondary",
+      "variant": "prime",
+      "critChance": 0.36,
+      "critMultiplier": 2.8,
+      "statusChance": 0.14,
+      "fireRate": 5,
+      "magazineSize": 40,
+      "reloadTime": 1.3,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "semi",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "impact": 4.4,
+                "puncture": 37.84,
+                "slash": 1.76
+              },
+              "procChance": 0.14
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "PrimeAkariusWeapon",
+      "name": "/Lotus/Language/Primes/PrimeAkariusName",
+      "category": "secondary",
+      "variant": "prime",
+      "critChance": 0.18,
+      "critMultiplier": 2,
+      "statusChance": 0.34,
+      "fireRate": 3.9007,
+      "magazineSize": 8,
+      "reloadTime": 2.4,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "burst",
+          "bullets": 1,
+          "multishot": 1,
+          "burst": {
+            "count": 2,
+            "delay": 0.12
+          },
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 15,
+                "puncture": 120,
+                "slash": 15
+              },
+              "procChance": 0.25
+            },
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "impact": 68
+              },
+              "procChance": 0.34
+            },
+            {
+              "kind": "explosiveAttack",
+              "aoe": true,
+              "damage": {
+                "blast": 509
+              },
+              "procChance": 0.34
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "PrimeAkimboShotGun",
+      "name": "/Lotus/Language/Items/PrimeDualBroncosName",
+      "category": "secondary",
+      "variant": "prime",
+      "critChance": 0.06,
+      "critMultiplier": 2,
+      "statusChance": 0.1286,
+      "fireRate": 4.3333,
+      "magazineSize": 8,
+      "reloadTime": 2.25,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "semi",
+          "bullets": 7,
+          "multishot": 7,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 40,
+                "puncture": 5,
+                "slash": 5
+              },
+              "procChance": 0.9
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "PrimeAksomati",
+      "name": "/Lotus/Language/Primes/PrimeAksomatiName",
+      "category": "secondary",
+      "variant": "prime",
+      "critChance": 0.24,
+      "critMultiplier": 3,
+      "statusChance": 0.18,
+      "fireRate": 13.3333,
+      "magazineSize": 80,
+      "reloadTime": 1.4,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 2,
+                "puncture": 8,
+                "slash": 10
+              },
+              "procChance": 0.18
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "PrimeAkstiletto",
+      "name": "/Lotus/Language/Primes/PrimeAkstilettoName",
+      "category": "secondary",
+      "variant": "prime",
+      "critChance": 0.15,
+      "critMultiplier": 2,
+      "statusChance": 0.3,
+      "fireRate": 7.0833,
+      "magazineSize": 40,
+      "reloadTime": 1.1,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 21.6,
+                "puncture": 3.6,
+                "slash": 10.8
+              },
+              "procChance": 0.3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "PrimeAthodaiPistolWeapon",
+      "name": "/Lotus/Language/Primes/AthodaiPrimeName",
+      "category": "secondary",
+      "variant": "prime",
+      "critChance": 0.4,
+      "critMultiplier": 2,
+      "statusChance": 0.1,
+      "fireRate": 5,
+      "magazineSize": 24,
+      "reloadTime": 2,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "heat": 56,
+                "puncture": 24
+              },
+              "procChance": 0.1
+            }
+          ]
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "unknown",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "heat": 100
+              },
+              "procChance": 0.35
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "PrimeBallistica",
+      "name": "/Lotus/Language/Primes/PrimeBallisticaName",
+      "category": "secondary",
+      "variant": "prime",
+      "critChance": 0.2,
+      "critMultiplier": 2,
+      "statusChance": 0.15,
+      "fireRate": 3.3333,
+      "magazineSize": 8,
+      "reloadTime": 1.2,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "charge",
+          "bullets": 4,
+          "multishot": 4,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 2.4,
+                "puncture": 11.2,
+                "slash": 2.4
+              },
+              "procChance": 0.6
+            },
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "impact": 2,
+                "puncture": 22,
+                "slash": 16
+              },
+              "procChance": 0.6
+            }
+          ]
+        },
+        {
+          "id": "charged",
+          "role": "charged",
+          "trigger": "charge",
+          "bullets": 4,
+          "multishot": 4,
+          "segments": [
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "impact": 3.8,
+                "puncture": 41.8,
+                "slash": 30.4
+              },
+              "procChance": 0.6
+            }
+          ]
+        },
+        {
+          "id": "incarnon",
+          "role": "incarnon",
+          "trigger": "charge",
+          "bullets": 1,
+          "multishot": 4,
+          "segments": [
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "slash": 830
+              },
+              "procChance": 0.3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "PrimeEpitaphSidearmWeapon",
+      "name": "/Lotus/Language/Primes/EpitaphPrimeName",
+      "category": "secondary",
+      "variant": "prime",
+      "critChance": 0.04,
+      "critMultiplier": 1.8,
+      "statusChance": 0.14,
+      "fireRate": 1.75,
+      "magazineSize": 1,
+      "reloadTime": 0.6,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "charge",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 150
+              },
+              "procChance": 0
+            },
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "impact": 40,
+                "puncture": 30,
+                "slash": 30
+              },
+              "procChance": 0.5
+            },
+            {
+              "kind": "explosiveAttack",
+              "aoe": true,
+              "damage": {
+                "blast": 30
+              },
+              "procChance": 0.5
+            },
+            {
+              "kind": "embedDeathAttack",
+              "aoe": true,
+              "damage": {
+                "radiation": 200
+              },
+              "procChance": 0.5
+            }
+          ]
+        },
+        {
+          "id": "charged",
+          "role": "charged",
+          "trigger": "charge",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "impact": 126,
+                "puncture": 47.25,
+                "slash": 141.75
+              },
+              "procChance": 0.14
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "PrimeHikou",
+      "name": "/Lotus/Language/Items/NextPromoSecondaryName",
+      "category": "secondary",
+      "variant": "prime",
+      "critChance": 0.06,
+      "critMultiplier": 1.8,
+      "statusChance": 0.28,
+      "fireRate": 5.8333,
+      "magazineSize": 26,
+      "reloadTime": 0.5,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "impact": 3.6,
+                "puncture": 30.6,
+                "slash": 1.8
+              },
+              "procChance": 0.28
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "PrimeHystrixWeapon",
+      "name": "/Lotus/Language/Weapons/PrimeHystrixName",
+      "category": "secondary",
+      "variant": "prime",
+      "critChance": 0.28,
+      "critMultiplier": 2.2,
+      "statusChance": 0.2,
+      "fireRate": 7,
+      "magazineSize": 16,
+      "reloadTime": 1.6,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 21.6,
+                "puncture": 3.6,
+                "slash": 10.8
+              },
+              "procChance": 0.3
+            },
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "impact": 2.76,
+                "puncture": 39.56,
+                "slash": 3.68
+              },
+              "procChance": 0.2
+            }
+          ]
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "impact": 2.76,
+                "puncture": 39.56,
+                "slash": 3.68
+              },
+              "procChance": 0.2
+            }
+          ]
+        },
+        {
+          "id": "mode3",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "impact": 2.76,
+                "puncture": 39.56,
+                "slash": 3.68
+              },
+              "procChance": 0.2
+            }
+          ]
+        },
+        {
+          "id": "mode4",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "impact": 2.76,
+                "puncture": 39.56,
+                "slash": 3.68
+              },
+              "procChance": 0.2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "PrimeKnellWeapon",
+      "name": "/Lotus/Language/Weapons/PrimeKnellName",
+      "category": "secondary",
+      "variant": "prime",
+      "critChance": 0.4,
+      "critMultiplier": 2,
+      "statusChance": 0.1,
+      "fireRate": 5,
+      "magazineSize": 1,
+      "reloadTime": 2,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 75.6,
+                "puncture": 82.8,
+                "slash": 21.6
+              },
+              "procChance": 0.1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "PrimeKompressa",
+      "name": "/Lotus/Language/Primes/KompressaPrimeName",
+      "category": "secondary",
+      "variant": "prime",
+      "critChance": 0.16,
+      "critMultiplier": 1.8,
+      "statusChance": 0.36,
+      "fireRate": 3.3333,
+      "magazineSize": 12,
+      "reloadTime": 1.8,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 4,
+          "multishot": 4,
+          "segments": [
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "viral": 2
+              },
+              "procChance": 1.44
+            },
+            {
+              "kind": "embedDeathAttack",
+              "aoe": true,
+              "damage": {
+                "viral": 46
+              },
+              "procChance": 1.2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "PrimeLex",
+      "name": "/Lotus/Language/Items/PrimeLexName",
+      "category": "secondary",
+      "variant": "prime",
+      "critChance": 0.25,
+      "critMultiplier": 2,
+      "statusChance": 0.25,
+      "fireRate": 2.0833,
+      "magazineSize": 8,
+      "reloadTime": 2.35,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "semi",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 18,
+                "puncture": 144,
+                "slash": 18
+              },
+              "procChance": 0.25
+            }
+          ]
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "semi",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "impact": 400,
+                "radiation": 800
+              },
+              "procChance": 0.44
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "PrimeLiDagger",
+      "name": "/Lotus/Language/Primes/PrimeLiDaggerName",
+      "category": "secondary",
+      "variant": "prime",
+      "critChance": 0.3,
+      "critMultiplier": 3,
+      "statusChance": 0.14,
+      "fireRate": 3.3333,
+      "magazineSize": 12,
+      "reloadTime": 0.75,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "impact": 6,
+                "puncture": 48,
+                "slash": 6
+              },
+              "procChance": 0.14
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "PrimeMagnusWeapon",
+      "name": "/Lotus/Language/Primes/MagnusPrimeName",
+      "category": "secondary",
+      "variant": "prime",
+      "critChance": 0.28,
+      "critMultiplier": 2.8,
+      "statusChance": 0.28,
+      "fireRate": 5,
+      "magazineSize": 8,
+      "reloadTime": 1.6,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "semi",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 44.1,
+                "puncture": 26.95,
+                "slash": 26.95
+              },
+              "procChance": 0.28
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "PrimePyranaPistol",
+      "name": "/Lotus/Language/Primes/PyranaPrimeName",
+      "category": "secondary",
+      "variant": "prime",
+      "critChance": 0.24,
+      "critMultiplier": 2.2,
+      "statusChance": 0.036,
+      "fireRate": 4,
+      "magazineSize": 12,
+      "reloadTime": 1.6,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 10,
+          "multishot": 10,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 1.92,
+                "puncture": 1.92,
+                "slash": 20.16
+              },
+              "procChance": 0.36
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "PrimeSicarusPistol",
+      "name": "/Lotus/Language/Items/PrimeSicarusName",
+      "category": "secondary",
+      "variant": "prime",
+      "critChance": 0.25,
+      "critMultiplier": 2,
+      "statusChance": 0.2,
+      "fireRate": 9.375,
+      "magazineSize": 24,
+      "reloadTime": 2,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "burst",
+          "bullets": 1,
+          "multishot": 1,
+          "burst": {
+            "count": 3,
+            "delay": 0.04
+          },
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 20,
+                "puncture": 15,
+                "slash": 15
+              },
+              "procChance": 0.2
+            }
+          ]
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "burst",
+          "bullets": 1,
+          "multishot": 1,
+          "burst": {
+            "count": 3,
+            "delay": 0.04
+          },
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 24,
+                "puncture": 18,
+                "slash": 18
+              },
+              "procChance": 0.2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "PrimeVastoPistol",
+      "name": "/Lotus/Language/Items/PrimeVastoName",
+      "category": "secondary",
+      "variant": "prime",
+      "critChance": 0.22,
+      "critMultiplier": 2.4,
+      "statusChance": 0.22,
+      "fireRate": 2.5,
+      "magazineSize": 6,
+      "reloadTime": 1,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "semi",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 16.5,
+                "puncture": 16.5,
+                "slash": 77
+              },
+              "procChance": 0.22
+            }
+          ]
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "burst",
+          "bullets": 6,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 10.5,
+                "puncture": 10.5,
+                "slash": 49
+              },
+              "procChance": 0.4
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "PrimeVeloxPistol",
+      "name": "/Lotus/Language/Primes/PrimeVeloxPistolName",
+      "category": "secondary",
+      "variant": "prime",
+      "critChance": 0.14,
+      "critMultiplier": 2,
+      "statusChance": 0.32,
+      "fireRate": 17,
+      "magazineSize": 70,
+      "reloadTime": 2.6,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 6.48,
+                "puncture": 7.56,
+                "slash": 12.96
+              },
+              "procChance": 0.32
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "PrimeZaktiPistol",
+      "name": "/Lotus/Language/Primes/ZaktiPrimeName",
+      "category": "secondary",
+      "variant": "prime",
+      "critChance": 0.08,
+      "critMultiplier": 1.8,
+      "statusChance": 0.42,
+      "fireRate": 5,
+      "magazineSize": 8,
+      "reloadTime": 1,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "semi",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 19,
+                "puncture": 19,
+                "slash": 38
+              },
+              "procChance": 0.15
+            },
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "impact": 12,
+                "puncture": 18
+              },
+              "procChance": 0.42
+            },
+            {
+              "kind": "embedDeathAttack",
+              "aoe": true,
+              "damage": {
+                "gas": 100
+              },
+              "procChance": 0.42
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "PrismaAngstrum",
+      "name": "/Lotus/Language/Weapons/PrismaAngstrumName",
+      "category": "secondary",
+      "variant": "variant",
+      "critChance": 0.18,
+      "critMultiplier": 2.2,
+      "statusChance": 0.26,
+      "fireRate": 2,
+      "magazineSize": 1,
+      "reloadTime": 1.8,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "charge",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "blast": 200
+              },
+              "procChance": 0.26
+            },
+            {
+              "kind": "explosiveAttack",
+              "aoe": true,
+              "damage": {
+                "blast": 250
+              },
+              "procChance": 0
+            }
+          ]
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 10
+              },
+              "procChance": 0.1
+            },
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "heat": 50
+              },
+              "procChance": 0.2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "PrismaTwinGremlinsWeapon",
+      "name": "/Lotus/Language/Weapons/PrismaTwinGremlinsName",
+      "category": "secondary",
+      "variant": "variant",
+      "critChance": 0.23,
+      "critMultiplier": 1.9,
+      "statusChance": 0.23,
+      "fireRate": 8.8333,
+      "magazineSize": 70,
+      "reloadTime": 0.9,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 2.4,
+                "puncture": 16.8,
+                "slash": 4.8
+              },
+              "procChance": 0.15
+            },
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "impact": 2.97,
+                "puncture": 12.69,
+                "slash": 11.34
+              },
+              "procChance": 0.23
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "QuillDartGunWeapon",
+      "name": "/Lotus/Language/Weapons/QuillDartgunName",
+      "category": "secondary",
+      "critChance": 0.24,
+      "critMultiplier": 2.2,
+      "statusChance": 0.1,
+      "fireRate": 7,
+      "magazineSize": 16,
+      "reloadTime": 1.7,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 21.6,
+                "puncture": 3.6,
+                "slash": 10.8
+              },
+              "procChance": 0.3
+            },
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "impact": 2.16,
+                "puncture": 30.96,
+                "slash": 2.88
+              },
+              "procChance": 0.1
+            }
+          ]
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "impact": 2.4,
+                "puncture": 34.4,
+                "slash": 3.2
+              },
+              "procChance": 0.1
+            }
+          ]
+        },
+        {
+          "id": "mode3",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "impact": 2.4,
+                "puncture": 34.4,
+                "slash": 3.2
+              },
+              "procChance": 0.1
+            }
+          ]
+        },
+        {
+          "id": "mode4",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "impact": 2.16,
+                "puncture": 30.96,
+                "slash": 2.88
+              },
+              "procChance": 0.1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "RVBallistica",
+      "name": "/Lotus/Language/Items/RVBallisticaName",
+      "category": "secondary",
+      "variant": "syndicate",
+      "critChance": 0.05,
+      "critMultiplier": 1.5,
+      "statusChance": 0.1,
+      "fireRate": 3.3333,
+      "magazineSize": 20,
+      "reloadTime": 2,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "charge",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "impact": 18.75,
+                "puncture": 37.5,
+                "slash": 18.75
+              },
+              "procChance": 0.05
+            }
+          ]
+        },
+        {
+          "id": "charged",
+          "role": "charged",
+          "trigger": "charge",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "impact": 15,
+                "puncture": 270,
+                "slash": 15
+              },
+              "procChance": 0
+            }
+          ]
+        },
+        {
+          "id": "mode3",
+          "role": "normal",
+          "trigger": "burst",
+          "bullets": 1,
+          "multishot": 1,
+          "burst": {
+            "count": 4,
+            "delay": 0.05
+          },
+          "segments": [
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "impact": 18.75,
+                "puncture": 37.5,
+                "slash": 18.75
+              },
+              "procChance": 0.05
+            }
+          ]
+        },
+        {
+          "id": "incarnon",
+          "role": "incarnon",
+          "trigger": "charge",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "slash": 734
+              },
+              "procChance": 0.25
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "RevolverPistol",
+      "name": "/Lotus/Language/Items/TennoRevolverName",
+      "category": "secondary",
+      "critChance": 0.2,
+      "critMultiplier": 1.8,
+      "statusChance": 0.08,
+      "fireRate": 2.5,
+      "magazineSize": 6,
+      "reloadTime": 1,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "semi",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 22.5,
+                "puncture": 22.5,
+                "slash": 45
+              },
+              "procChance": 0.08
+            }
+          ]
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "burst",
+          "bullets": 6,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 7.5,
+                "puncture": 7.5,
+                "slash": 15
+              },
+              "procChance": 0.16
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "SMMarelok",
+      "name": "/Lotus/Language/Items/SMMarelokName",
+      "category": "secondary",
+      "variant": "syndicate",
+      "critChance": 0.2,
+      "critMultiplier": 1.5,
+      "statusChance": 0.35,
+      "fireRate": 2,
+      "magazineSize": 10,
+      "reloadTime": 1.667,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "semi",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 96,
+                "puncture": 16,
+                "slash": 48
+              },
+              "procChance": 0.35
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "SapientPistol",
+      "name": "/Lotus/Language/Weapons/SapientPistolName",
+      "category": "secondary",
+      "critChance": 0.06,
+      "critMultiplier": 1.8,
+      "statusChance": 0.28,
+      "fireRate": 4.2484,
+      "magazineSize": 10,
+      "reloadTime": 3.4,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "burst",
+          "bullets": 1,
+          "multishot": 1,
+          "burst": {
+            "count": 2,
+            "delay": 0.12
+          },
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 15,
+                "puncture": 120,
+                "slash": 15
+              },
+              "procChance": 0.25
+            },
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "impact": 68
+              },
+              "procChance": 0.28
+            },
+            {
+              "kind": "explosiveAttack",
+              "aoe": true,
+              "damage": {
+                "blast": 419
+              },
+              "procChance": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "StalkerKunai",
+      "name": "/Lotus/Language/Items/StalkerKunaiName",
+      "category": "secondary",
+      "critChance": 0.16,
+      "critMultiplier": 1.6,
+      "statusChance": 0.16,
+      "fireRate": 3.3333,
+      "magazineSize": 10,
+      "reloadTime": 0.75,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "impact": 2.9,
+                "puncture": 46.4,
+                "slash": 8.7
+              },
+              "procChance": 0.16
+            }
+          ]
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "impact": 3,
+                "puncture": 48,
+                "slash": 9
+              },
+              "procChance": 0.2
+            },
+            {
+              "kind": "embedDeathAttack",
+              "aoe": true,
+              "damage": {
+                "heat": 160
+              },
+              "procChance": 0.3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "StickyBombs",
+      "name": "/Lotus/Language/Items/StickyBombName",
+      "category": "secondary",
+      "critChance": 0.08,
+      "critMultiplier": 1.5,
+      "statusChance": 0.22,
+      "fireRate": 3.3333,
+      "magazineSize": 2,
+      "reloadTime": 1,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "active",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "explosiveAttack",
+              "aoe": true,
+              "damage": {
+                "electric": 160
+              },
+              "procChance": 0.22
+            },
+            {
+              "kind": "embedDeathAttack",
+              "aoe": true,
+              "damage": {
+                "electric": 160
+              },
+              "procChance": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "SundialPistol",
+      "name": "/Lotus/Language/Items/SundialPistolName",
+      "category": "secondary",
+      "critChance": 0.16,
+      "critMultiplier": 2,
+      "statusChance": 0.16,
+      "fireRate": 10,
+      "magazineSize": 75,
+      "reloadTime": 1.4,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 2,
+                "puncture": 5,
+                "slash": 13
+              },
+              "procChance": 0.16
+            }
+          ]
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "semi",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "blast": 75
+              },
+              "procChance": 0.1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "TennoHandShotgun",
+      "name": "/Lotus/Language/Items/TennoHandShotgunName",
+      "category": "secondary",
+      "critChance": 0.2,
+      "critMultiplier": 2,
+      "statusChance": 0.025,
+      "fireRate": 4.1667,
+      "magazineSize": 10,
+      "reloadTime": 2,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 12,
+          "multishot": 12,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 2.2,
+                "puncture": 2.2,
+                "slash": 17.6
+              },
+              "procChance": 0.3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "TennoStars",
+      "name": "/Lotus/Language/Items/TennoShurikenName",
+      "category": "secondary",
+      "critChance": 0.04,
+      "critMultiplier": 1.6,
+      "statusChance": 0.1,
+      "fireRate": 6.6667,
+      "magazineSize": 20,
+      "reloadTime": 0.75,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "impact": 2.6,
+                "puncture": 15.6,
+                "slash": 7.8
+              },
+              "procChance": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "TennoUzi",
+      "name": "/Lotus/Language/Items/TennoUziName",
+      "category": "secondary",
+      "critChance": 0.18,
+      "critMultiplier": 1.8,
+      "statusChance": 0.18,
+      "fireRate": 10,
+      "magazineSize": 28,
+      "reloadTime": 1.1,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 16.8,
+                "puncture": 2.8,
+                "slash": 8.4
+              },
+              "procChance": 0.18
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ThanotechPistol",
+      "name": "/Lotus/Language/Weapons/ThanoTechPistolName",
+      "category": "secondary",
+      "critChance": 0.3,
+      "critMultiplier": 2.2,
+      "statusChance": 0.14,
+      "fireRate": 3.6667,
+      "magazineSize": 90,
+      "reloadTime": 4,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "burst",
+          "bullets": 1,
+          "multishot": 1,
+          "burst": {
+            "count": 2,
+            "delay": 0
+          },
+          "segments": [
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "impact": 9.6,
+                "puncture": 26.88,
+                "slash": 11.52
+              },
+              "procChance": 0.14
+            },
+            {
+              "kind": "explosiveAttack",
+              "aoe": true,
+              "damage": {
+                "heat": 46
+              },
+              "procChance": 0.14
+            }
+          ]
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "unknown",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "impact": 19.2,
+                "puncture": 53.76,
+                "slash": 23.04
+              },
+              "procChance": 0.26
+            },
+            {
+              "kind": "explosiveAttack",
+              "aoe": true,
+              "damage": {
+                "heat": 480
+              },
+              "procChance": 0.26
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "TnBardPistolGun",
+      "name": "/Lotus/Language/Weapons/TnBardPistolName",
+      "category": "secondary",
+      "critChance": 0.3,
+      "critMultiplier": 2.8,
+      "statusChance": 0.1,
+      "fireRate": 3,
+      "magazineSize": 8,
+      "reloadTime": 1,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "semi",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 18,
+                "puncture": 18,
+                "slash": 36
+              },
+              "procChance": 0.1
+            }
+          ]
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "burst",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 18,
+                "puncture": 18,
+                "slash": 36
+              },
+              "procChance": 0.1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "TnChoirframeKunai",
+      "name": "/Lotus/Language/Items/TnChoirframeKunaiName",
+      "category": "secondary",
+      "critChance": 0.18,
+      "critMultiplier": 2,
+      "statusChance": 0.22,
+      "fireRate": 3.3333,
+      "magazineSize": 6,
+      "reloadTime": 1.2,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "puncture": 27,
+                "slash": 63
+              },
+              "procChance": 0.22
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "TnDoppelgangerGrimoire",
+      "name": "/Lotus/Language/Weapons/GrimoireName",
+      "category": "secondary",
+      "critChance": 0.08,
+      "critMultiplier": 1.6,
+      "statusChance": 0.1,
+      "fireRate": 1.5,
+      "reloadTime": 2,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 8.4,
+                "puncture": 3.6
+              },
+              "procChance": 0.1
+            },
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "impact": 17.5,
+                "puncture": 7.5
+              },
+              "procChance": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "TnGrimoire",
+      "name": "/Lotus/Language/Weapons/GrimoireName",
+      "category": "secondary",
+      "critChance": 0.2,
+      "critMultiplier": 2,
+      "statusChance": 0.26,
+      "fireRate": 1.5,
+      "reloadTime": 0.01,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "electric": 100
+              },
+              "procChance": 0.26
+            },
+            {
+              "kind": "explosiveAttack",
+              "aoe": true,
+              "damage": {
+                "electric": 50
+              },
+              "procChance": 0.26
+            }
+          ]
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "semi",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "electric": 350
+              },
+              "procChance": 0.26
+            },
+            {
+              "kind": "explosiveAttack",
+              "aoe": true,
+              "damage": {
+                "electric": 250
+              },
+              "procChance": 0.26
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "TnGuandoPistolGun",
+      "name": "/Lotus/Language/Weapons/TnGuandaoPistolName",
+      "category": "secondary",
+      "critChance": 0.02,
+      "critMultiplier": 1.5,
+      "statusChance": 0.2,
+      "fireRate": 5,
+      "magazineSize": 3,
+      "reloadTime": 0.8,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "semi",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 19,
+                "puncture": 19,
+                "slash": 38
+              },
+              "procChance": 0.15
+            },
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "impact": 12,
+                "puncture": 18
+              },
+              "procChance": 0.2
+            },
+            {
+              "kind": "embedDeathAttack",
+              "aoe": true,
+              "damage": {
+                "gas": 80
+              },
+              "procChance": 0.2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "TnJetTurbinePistolWeapon",
+      "name": "/Lotus/Language/Weapons/TnJetTurbinePistolName",
+      "category": "secondary",
+      "critChance": 0.32,
+      "critMultiplier": 2,
+      "statusChance": 0.08,
+      "fireRate": 5,
+      "magazineSize": 24,
+      "reloadTime": 2,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "heat": 48,
+                "puncture": 22
+              },
+              "procChance": 0.08
+            }
+          ]
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "unknown",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "heat": 88
+              },
+              "procChance": 0.24
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "TnOdaliskSmgPistol",
+      "name": "/Lotus/Language/Weapons/TnOdaliskSmgPistolName",
+      "category": "secondary",
+      "critChance": 0.14,
+      "critMultiplier": 1.8,
+      "statusChance": 0.22,
+      "fireRate": 15,
+      "magazineSize": 62,
+      "reloadTime": 2.6,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 4.32,
+                "puncture": 8.16,
+                "slash": 11.52
+              },
+              "procChance": 0.22
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "TnOraxiaFlechette",
+      "name": "/Lotus/Language/Weapons/TnOraxiaFlechetteName",
+      "category": "secondary",
+      "critChance": 0.24,
+      "critMultiplier": 2.4,
+      "statusChance": 0.18,
+      "fireRate": 2.4,
+      "magazineSize": 40,
+      "reloadTime": 1.6,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 4,
+          "multishot": 4,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "toxin": 56
+              },
+              "procChance": 0.1
+            },
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "puncture": 8,
+                "toxin": 32
+              },
+              "procChance": 0.72
+            }
+          ]
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "semi",
+          "bullets": 1,
+          "multishot": 4,
+          "segments": [
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "toxin": 40
+              },
+              "procChance": 0.32
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "TnPriestPistolWeapon",
+      "name": "/Lotus/Language/Weapons/TnPriestPistolName",
+      "category": "secondary",
+      "critChance": 0.2,
+      "critMultiplier": 1.5,
+      "statusChance": 0.05,
+      "fireRate": 4,
+      "magazineSize": 1,
+      "reloadTime": 2,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 63,
+                "puncture": 69,
+                "slash": 18
+              },
+              "procChance": 0.05
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "TnWraitheSidearmWeapon",
+      "name": "/Lotus/Language/Weapons/TnWraitheSidearmName",
+      "category": "secondary",
+      "critChance": 0.02,
+      "critMultiplier": 1.2,
+      "statusChance": 0.04,
+      "fireRate": 1.5,
+      "magazineSize": 1,
+      "reloadTime": 0.6,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "charge",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 150
+              },
+              "procChance": 0
+            },
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "impact": 40,
+                "puncture": 30,
+                "slash": 30
+              },
+              "procChance": 0.5
+            },
+            {
+              "kind": "explosiveAttack",
+              "aoe": true,
+              "damage": {
+                "blast": 20
+              },
+              "procChance": 0.5
+            },
+            {
+              "kind": "embedDeathAttack",
+              "aoe": true,
+              "damage": {
+                "radiation": 200
+              },
+              "procChance": 0.5
+            }
+          ]
+        },
+        {
+          "id": "charged",
+          "role": "charged",
+          "trigger": "charge",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "impact": 120,
+                "puncture": 45,
+                "slash": 135
+              },
+              "procChance": 0.04
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "TnYareliPistolWeapon",
+      "name": "/Lotus/Language/Weapons/TnBubbleGunName",
+      "category": "secondary",
+      "critChance": 0.06,
+      "critMultiplier": 1.8,
+      "statusChance": 0.3,
+      "fireRate": 3.3333,
+      "magazineSize": 12,
+      "reloadTime": 1.8,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 4,
+          "multishot": 4,
+          "segments": [
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "viral": 2
+              },
+              "procChance": 1.2
+            },
+            {
+              "kind": "embedDeathAttack",
+              "aoe": true,
+              "damage": {
+                "viral": 42
+              },
+              "procChance": 1.2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "TnoBladedPistols",
+      "name": "/Lotus/Language/Items/TnoBladedPistolsName",
+      "category": "secondary",
+      "critChance": 0.06,
+      "critMultiplier": 2,
+      "statusChance": 0.28,
+      "fireRate": 10,
+      "magazineSize": 36,
+      "reloadTime": 2.25,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "burst",
+          "bullets": 1,
+          "multishot": 1,
+          "burst": {
+            "count": 2,
+            "delay": 0
+          },
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 5.4,
+                "puncture": 5.4,
+                "slash": 25.2
+              },
+              "procChance": 0.28
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "TwinGrakatas",
+      "name": "/Lotus/Language/Items/TwinGrakatasName",
+      "category": "secondary",
+      "critChance": 0.25,
+      "critMultiplier": 2.7,
+      "statusChance": 0.165,
+      "fireRate": 20,
+      "magazineSize": 60,
+      "reloadTime": 3,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 2,
+          "multishot": 2,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 4,
+                "puncture": 3.3333,
+                "slash": 2.6667
+              },
+              "procChance": 0.33
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "U18throwingknives",
+      "name": "/Lotus/Language/Items/U18ThrowingKnivesName",
+      "category": "secondary",
+      "critChance": 0.22,
+      "critMultiplier": 2,
+      "statusChance": 0.26,
+      "fireRate": 3.3333,
+      "magazineSize": 4,
+      "reloadTime": 1,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "active",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "explosiveAttack",
+              "aoe": true,
+              "damage": {
+                "blast": 120
+              },
+              "procChance": 0
+            },
+            {
+              "kind": "embedDeathAttack",
+              "aoe": true,
+              "damage": {
+                "blast": 250
+              },
+              "procChance": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "VTDetron",
+      "name": "/Lotus/Language/Items/VTDetronName",
+      "category": "secondary",
+      "variant": "variant",
+      "critChance": 0.08,
+      "critMultiplier": 1.5,
+      "statusChance": 0.1371,
+      "fireRate": 3.3333,
+      "magazineSize": 8,
+      "reloadTime": 1.05,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "semi",
+          "bullets": 7,
+          "multishot": 7,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 7.5,
+                "puncture": 3.75,
+                "slash": 3.75
+              },
+              "procChance": 0.1
+            },
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "radiation": 40
+              },
+              "procChance": 0.96
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "WraithSingleViper",
+      "name": "/Lotus/Language/Items/WraithSingleViperName",
+      "category": "secondary",
+      "variant": "variant",
+      "critChance": 0.19,
+      "critMultiplier": 2,
+      "statusChance": 0.09,
+      "fireRate": 14.3833,
+      "magazineSize": 20,
+      "reloadTime": 0.8,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 14.4,
+                "puncture": 1.8,
+                "slash": 1.8
+              },
+              "procChance": 0.09
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "WraithTwinVipers",
+      "name": "/Lotus/Language/Items/WraithTwinVipersName",
+      "category": "secondary",
+      "variant": "variant",
+      "critChance": 0.19,
+      "critMultiplier": 2,
+      "statusChance": 0.09,
+      "fireRate": 25,
+      "magazineSize": 40,
+      "reloadTime": 2,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 14.4,
+                "puncture": 1.8,
+                "slash": 1.8
+              },
+              "procChance": 0.09
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ZarimanHeavyPistol",
+      "name": "/Lotus/Language/Weapons/ZarimanHeavyPistolName",
+      "category": "secondary",
+      "critChance": 0.22,
+      "critMultiplier": 2.2,
+      "statusChance": 0.22,
+      "fireRate": 2.5,
+      "magazineSize": 12,
+      "reloadTime": 2,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "semi",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 15,
+                "puncture": 120,
+                "slash": 15
+              },
+              "procChance": 0.25
+            },
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "impact": 64,
+                "slash": 96
+              },
+              "procChance": 0.22
+            }
+          ]
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "impact": 100
+              },
+              "procChance": 0.22
+            },
+            {
+              "kind": "explosiveAttack",
+              "aoe": true,
+              "damage": {
+                "radiation": 300
+              },
+              "procChance": 0.22
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ZylokPrimePistol",
+      "name": "/Lotus/Language/Primes/ZylokPrimeName",
+      "category": "secondary",
+      "variant": "prime",
+      "critChance": 0.12,
+      "critMultiplier": 2.4,
+      "statusChance": 0.36,
+      "fireRate": 1.5,
+      "magazineSize": 12,
+      "reloadTime": 1.2,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "semi",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 63,
+                "puncture": 21,
+                "slash": 126
+              },
+              "procChance": 0.36
+            }
+          ]
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "charge",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 200,
+                "puncture": 300
+              },
+              "procChance": 0.4
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,335 @@
+{
+  "generatedAt": "2026-11-05T07:26:30.409Z",
+  "category": "archmelee",
+  "count": 11,
+  "note": "暴率/触发为 0~1 小数；伤害分布为绝对值；procChance 同为 0~1；kuva 表示需用户在计算器里选元素与加成（25%~60%）",
+  "weapons": [
+    {
+      "id": "ArchAxeWeapon",
+      "name": "/Lotus/Language/Items/ArchAxeName",
+      "category": "archmelee",
+      "critChance": 0.15,
+      "critMultiplier": 1.25,
+      "statusChance": 0.05,
+      "fireRate": 1,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "unknown",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 123.6,
+                "puncture": 82.4,
+                "slash": 206
+              },
+              "procChance": 0.05
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ArchHammer",
+      "name": "/Lotus/Language/Items/ArchHammerName",
+      "category": "archmelee",
+      "critChance": 0.2,
+      "critMultiplier": 2,
+      "statusChance": 0.12,
+      "fireRate": 0.9167,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "unknown",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 360,
+                "puncture": 67.5,
+                "slash": 22.5
+              },
+              "procChance": 0.12
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ArchHookSwordWeapon",
+      "name": "/Lotus/Language/Items/ArchHookSwordName",
+      "category": "archmelee",
+      "critChance": 0.05,
+      "critMultiplier": 1.5,
+      "statusChance": 0.15,
+      "fireRate": 1,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "unknown",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 65.4,
+                "puncture": 305.2,
+                "slash": 65.4
+              },
+              "procChance": 0.15
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ArchScythe",
+      "name": "/Lotus/Language/Items/ArchScytheName",
+      "category": "archmelee",
+      "critChance": 0.15,
+      "critMultiplier": 2,
+      "statusChance": 0.2,
+      "fireRate": 1,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "unknown",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 19.6,
+                "puncture": 313.6,
+                "slash": 58.8
+              },
+              "procChance": 0.2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ArchSwordShield",
+      "name": "/Lotus/Language/Items/ArchSwordShieldName",
+      "category": "archmelee",
+      "critChance": 0.25,
+      "critMultiplier": 2,
+      "statusChance": 0.2,
+      "fireRate": 1.0833,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "unknown",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 37.6,
+                "puncture": 75.2,
+                "slash": 263.2
+              },
+              "procChance": 0.2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ArchSwordWeapon",
+      "name": "/Lotus/Language/Items/ArchSwordName",
+      "category": "archmelee",
+      "critChance": 0.05,
+      "critMultiplier": 1.5,
+      "statusChance": 0.1,
+      "fireRate": 0.8333,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "unknown",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 70.5,
+                "puncture": 70.5,
+                "slash": 329
+              },
+              "procChance": 0.1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "GrnArchHandWeapon",
+      "name": "/Lotus/Language/Items/GrnArchHandName",
+      "category": "archmelee",
+      "critChance": 0.13,
+      "critMultiplier": 2,
+      "statusChance": 0.3,
+      "fireRate": 1,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "unknown",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 400.5,
+                "puncture": 22.25,
+                "slash": 22.25
+              },
+              "procChance": 0.3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "VTArchSwordWeapon",
+      "name": "/Lotus/Language/Items/PrismaArchSwordName",
+      "category": "archmelee",
+      "critChance": 0.3,
+      "critMultiplier": 2,
+      "statusChance": 0.2,
+      "fireRate": 1,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "unknown",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 59.1,
+                "puncture": 59.1,
+                "slash": 275.8
+              },
+              "procChance": 0.2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ZanukaPetMeleeWeaponIP",
+      "name": "/Lotus/Language/Pets/ZanukaPetMeleeWeaponIPName",
+      "category": "archmelee",
+      "critChance": 0.1,
+      "critMultiplier": 3,
+      "statusChance": 0.15,
+      "fireRate": 1,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "unknown",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 150,
+                "puncture": 150
+              },
+              "procChance": 0.15
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ZanukaPetMeleeWeaponIS",
+      "name": "/Lotus/Language/Pets/ZanukaPetMeleeWeaponISName",
+      "category": "archmelee",
+      "critChance": 0.1,
+      "critMultiplier": 3,
+      "statusChance": 0.15,
+      "fireRate": 1,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "unknown",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 150,
+                "slash": 150
+              },
+              "procChance": 0.15
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ZanukaPetMeleeWeaponPS",
+      "name": "/Lotus/Language/Pets/ZanukaPetMeleeWeaponPSName",
+      "category": "archmelee",
+      "critChance": 0.1,
+      "critMultiplier": 3,
+      "statusChance": 0.15,
+      "fireRate": 1,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "unknown",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "puncture": 150,
+                "slash": 150
+              },
+              "procChance": 0.15
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

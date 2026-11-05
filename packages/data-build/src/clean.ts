@@ -215,14 +215,35 @@ export function isIncarnonBehaviour(b: ExportBehaviour, hasSiblingNormal: boolea
 }
 
 /** 分类到 WeaponPanel.category */
+/**
+ * 分类映射。
+ *
+ * 导出的 productCategory 取值实测有：
+ *   LongGuns / Pistols / Melee / SpecialItems（战甲技能武器）/
+ *   SentinelWeapons（同伴）/ SpaceGuns / SpaceMelee（空战）
+ *
+ * 空战与同伴武器分别归到 archgun / archmelee / companion，
+ * 而不是一律丢进 unknown——它们同样需要计算，只是 mod 规则不同。
+ */
 export function toCategory(w: ExportWeapon): WeaponPanel['category'] {
   const cat = w.productCategory ?? '';
   const holster = w.holsterCategory ?? '';
+
   if (cat === 'LongGuns') return 'primary';
   if (cat === 'Pistols') return 'secondary';
-  if (cat === 'Melee') return 'melee';
-  if (/Archgun|ArchGun/i.test(holster) || /Archgun/i.test(cat)) return 'archgun';
+  if (cat === 'Melee' || cat === 'SpecialItems') return 'melee';
+
+  // 空战
+  if (cat === 'SpaceGuns') return 'archgun';
+  if (cat === 'SpaceMelee') return 'archmelee';
+  if (/Archgun|ArchGun/i.test(holster)) return 'archgun';
   if (/Archmelee|ArchMelee/i.test(holster)) return 'archmelee';
+
+  // 同伴武器（守护/宠物）
+  if (cat === 'SentinelWeapons') {
+    return /melee/i.test(holster) ? 'archmelee' : 'companion';
+  }
+
   return 'unknown';
 }
 

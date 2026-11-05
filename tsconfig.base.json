@@ -13,18 +13,11 @@
     "isolatedModules": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
     "resolveJsonModule": true,
     "allowImportingTsExtensions": true,
     "erasableSyntaxOnly": true,
-    "rewriteRelativeImportExtensions": true,
-    "composite": true,
-    "noEmit": true
+    "noEmit": true,
+    "types": ["node"]
   },
-  "references": [
-    { "path": "./packages/core" },
-    { "path": "./packages/data" }
-  ]
+  "include": ["packages/*/src/**/*.ts", "packages/*/test/**/*.ts"]
 }

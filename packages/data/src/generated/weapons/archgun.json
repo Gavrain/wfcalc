@@ -1,0 +1,1012 @@
+{
+  "generatedAt": "2026-11-05T07:26:30.408Z",
+  "category": "archgun",
+  "count": 19,
+  "note": "暴率/触发为 0~1 小数；伤害分布为绝对值；procChance 同为 0~1；kuva 表示需用户在计算器里选元素与加成（25%~60%）",
+  "weapons": [
+    {
+      "id": "ArchBurstGun",
+      "name": "/Lotus/Language/Items/ArchBurstGunName",
+      "category": "archgun",
+      "critChance": 0.2,
+      "critMultiplier": 2.2,
+      "statusChance": 0.3,
+      "fireRate": 9.0909,
+      "magazineSize": 30,
+      "reloadTime": 1.25,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "burst",
+          "bullets": 1,
+          "multishot": 1,
+          "burst": {
+            "count": 3,
+            "delay": 0.06
+          },
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 39.6,
+                "puncture": 39.6,
+                "slash": 40.8
+              },
+              "procChance": 0.3
+            },
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "impact": 39.6,
+                "puncture": 39.6,
+                "slash": 40.8
+              },
+              "procChance": 0.3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ArchCannon",
+      "name": "/Lotus/Language/Items/ArchCannonName",
+      "category": "archgun",
+      "critChance": 0.4,
+      "critMultiplier": 2.6,
+      "statusChance": 0.13,
+      "fireRate": 2,
+      "magazineSize": 25,
+      "reloadTime": 8,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "charge",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 43.2,
+                "puncture": 5.4,
+                "slash": 5.4
+              },
+              "procChance": 0.2
+            },
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "heat": 240,
+                "impact": 200
+              },
+              "procChance": 0.13
+            }
+          ]
+        },
+        {
+          "id": "charged",
+          "role": "charged",
+          "trigger": "charge",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "heat": 480,
+                "impact": 400
+              },
+              "procChance": 0.13
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ArchGRNAAGun",
+      "name": "/Lotus/Language/Items/GrnAntiAirGunName",
+      "category": "archgun",
+      "critChance": 0.25,
+      "critMultiplier": 2,
+      "statusChance": 0.25,
+      "fireRate": 6.25,
+      "magazineSize": 30,
+      "reloadTime": 4,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 16,
+                "puncture": 14,
+                "slash": 10
+              },
+              "procChance": 0.05
+            },
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "impact": 22.5,
+                "puncture": 180,
+                "slash": 22.5
+              },
+              "procChance": 0.25
+            },
+            {
+              "kind": "explosiveAttack",
+              "aoe": true,
+              "damage": {
+                "blast": 310
+              },
+              "procChance": 0.25
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ArchHeavyPistols",
+      "name": "/Lotus/Language/Items/ArchHeavyPistolsName",
+      "category": "archgun",
+      "critChance": 0.28,
+      "critMultiplier": 2.2,
+      "statusChance": 0.14,
+      "fireRate": 10.4167,
+      "magazineSize": 64,
+      "reloadTime": 1.53,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 27,
+                "puncture": 16.5,
+                "slash": 16.5
+              },
+              "procChance": 0.1
+            },
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "impact": 49.5,
+                "puncture": 30.25,
+                "slash": 30.25
+              },
+              "procChance": 0.14
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ArchLongRifle",
+      "name": "/Lotus/Language/Items/ArchLongRifleName",
+      "category": "archgun",
+      "critChance": 0.14,
+      "critMultiplier": 2,
+      "statusChance": 0.3,
+      "fireRate": 18.75,
+      "magazineSize": 240,
+      "reloadTime": 5.05,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 11.25,
+                "puncture": 29.25,
+                "slash": 4.5
+              },
+              "procChance": 0.25
+            },
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "impact": 14,
+                "puncture": 36.4,
+                "slash": 5.6
+              },
+              "procChance": 0.3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ArchMachineGun",
+      "name": "/Lotus/Language/Items/ArchMachinegunName",
+      "category": "archgun",
+      "critChance": 0.24,
+      "critMultiplier": 2,
+      "statusChance": 0.12,
+      "fireRate": 16.6667,
+      "magazineSize": 200,
+      "reloadTime": 4.25,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 16,
+                "puncture": 14,
+                "slash": 10
+              },
+              "procChance": 0.08
+            },
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "impact": 20,
+                "puncture": 17.5,
+                "slash": 12.5
+              },
+              "procChance": 0.12
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ArchMachineGunVandal",
+      "name": "/Lotus/Language/Items/ImperatorVandalName",
+      "category": "archgun",
+      "critChance": 0.28,
+      "critMultiplier": 2.4,
+      "statusChance": 0.12,
+      "fireRate": 25,
+      "magazineSize": 300,
+      "reloadTime": 4.15,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 16,
+                "puncture": 14,
+                "slash": 10
+              },
+              "procChance": 0.1
+            },
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "impact": 20,
+                "puncture": 17.5,
+                "slash": 12.5
+              },
+              "procChance": 0.12
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ArchRailgun",
+      "name": "/Lotus/Language/Items/ArchRailgunName",
+      "category": "archgun",
+      "critChance": 0.3,
+      "critMultiplier": 2,
+      "statusChance": 0.25,
+      "fireRate": 5,
+      "magazineSize": 10,
+      "reloadTime": 1.4,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "charge",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 16,
+                "puncture": 14,
+                "slash": 10
+              },
+              "procChance": 0.05
+            },
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "impact": 150,
+                "magnetic": 150,
+                "puncture": 150,
+                "slash": 150
+              },
+              "procChance": 0.25
+            }
+          ]
+        },
+        {
+          "id": "charged",
+          "role": "charged",
+          "trigger": "charge",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "impact": 400,
+                "magnetic": 400,
+                "puncture": 400,
+                "slash": 400
+              },
+              "procChance": 0.25
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ArchRocketCrossbow",
+      "name": "/Lotus/Language/Items/ArchRocketCrossbowName",
+      "category": "archgun",
+      "critChance": 0.22,
+      "critMultiplier": 2,
+      "statusChance": 0.16,
+      "fireRate": 5,
+      "magazineSize": 40,
+      "reloadTime": 5,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "semi",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 3.5,
+                "puncture": 3.5,
+                "slash": 28
+              },
+              "procChance": 0.1
+            },
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "impact": 50,
+                "puncture": 25,
+                "slash": 175
+              },
+              "procChance": 0.16
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "GrnHeavyGrenadeLauncher",
+      "name": "/Lotus/Language/Weapons/GrnHeavyGrenadeLauncherName",
+      "category": "archgun",
+      "critChance": 0.35,
+      "critMultiplier": 2,
+      "statusChance": 0.2,
+      "fireRate": 4.5833,
+      "magazineSize": 33,
+      "reloadTime": 1.2,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 5,
+                "puncture": 5,
+                "slash": 40
+              },
+              "procChance": 0.2
+            },
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "impact": 87
+              },
+              "procChance": 0.2
+            },
+            {
+              "kind": "explosiveAttack",
+              "aoe": true,
+              "damage": {
+                "blast": 187
+              },
+              "procChance": 0.2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "KuvaGrattler",
+      "name": "/Lotus/Language/Weapons/KuvaGrattlerName",
+      "category": "archgun",
+      "kuva": {
+        "bonusRange": [
+          0.25,
+          0.6
+        ],
+        "elements": [
+          "impact",
+          "puncture",
+          "slash",
+          "heat",
+          "cold",
+          "electric",
+          "toxin"
+        ]
+      },
+      "critChance": 0.27,
+      "critMultiplier": 2.1,
+      "statusChance": 0.27,
+      "fireRate": 5.55,
+      "magazineSize": 60,
+      "reloadTime": 4,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 16,
+                "puncture": 14,
+                "slash": 10
+              },
+              "procChance": 0.05
+            },
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "impact": 5,
+                "puncture": 40,
+                "slash": 5
+              },
+              "procChance": 0.27
+            },
+            {
+              "kind": "explosiveAttack",
+              "aoe": true,
+              "damage": {
+                "blast": 155
+              },
+              "procChance": 0.27
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "PrimeCorvasWeapon",
+      "name": "/Lotus/Language/Weapons/PrimeCorvasName",
+      "category": "archgun",
+      "critChance": 0.44,
+      "critMultiplier": 3,
+      "statusChance": 0.3,
+      "fireRate": 2,
+      "magazineSize": 20,
+      "reloadTime": 2,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "charge",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 43.2,
+                "puncture": 5.4,
+                "slash": 5.4
+              },
+              "procChance": 0.2
+            },
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "heat": 330,
+                "impact": 230
+              },
+              "procChance": 0.2
+            }
+          ]
+        },
+        {
+          "id": "charged",
+          "role": "charged",
+          "trigger": "charge",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "heat": 530,
+                "impact": 430
+              },
+              "procChance": 0.3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "PrimeLarkspurWeapon",
+      "name": "/Lotus/Language/Weapons/PrimeLarkspurName",
+      "category": "archgun",
+      "critChance": 0.14,
+      "critMultiplier": 1.6,
+      "statusChance": 0.5,
+      "fireRate": 12,
+      "magazineSize": 100,
+      "reloadTime": 4.5,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "unknown",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 10,
+                "radiation": 80
+              },
+              "procChance": 0.5
+            }
+          ]
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "charge",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "blast": 180,
+                "impact": 140,
+                "radiation": 100
+              },
+              "procChance": 0.38
+            },
+            {
+              "kind": "explosiveAttack",
+              "aoe": true,
+              "damage": {
+                "blast": 400,
+                "radiation": 400
+              },
+              "procChance": 0.34
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "PrismaArchHeavyPistols",
+      "name": "/Lotus/Language/Weapons/PrismaArchHeavyPistolsName",
+      "category": "archgun",
+      "critChance": 0.3,
+      "critMultiplier": 2.2,
+      "statusChance": 0.24,
+      "fireRate": 12.5,
+      "magazineSize": 64,
+      "reloadTime": 1.53,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 27,
+                "puncture": 16.5,
+                "slash": 16.5
+              },
+              "procChance": 0.1
+            },
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "impact": 49.5,
+                "puncture": 30.25,
+                "slash": 30.25
+              },
+              "procChance": 0.24
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ThanoTechArchGun",
+      "name": "/Lotus/Language/Weapons/ThanoTechArchGunName",
+      "category": "archgun",
+      "critChance": 0.2,
+      "critMultiplier": 1.9,
+      "statusChance": 0.4,
+      "fireRate": 12,
+      "magazineSize": 100,
+      "reloadTime": 3,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "unknown",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "heat": 90
+              },
+              "procChance": 0.4
+            }
+          ]
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "active",
+          "bullets": 3,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "impact": 10
+              },
+              "procChance": 0.5
+            },
+            {
+              "kind": "explosiveAttack",
+              "aoe": true,
+              "damage": {
+                "blast": 1000
+              },
+              "procChance": 0.5
+            },
+            {
+              "kind": "embedDeathAttack",
+              "aoe": true,
+              "damage": {
+                "heat": 1000
+              },
+              "procChance": 0.5
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ThanoTechGrenadeLauncher",
+      "name": "/Lotus/Language/Weapons/ThanoTechGrenadeLauncherName",
+      "category": "archgun",
+      "critChance": 0.3,
+      "critMultiplier": 2.2,
+      "statusChance": 0.28,
+      "fireRate": 6,
+      "magazineSize": 100,
+      "reloadTime": 3,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "unknown",
+          "bullets": 1,
+          "multishot": 1,
+          "burst": {
+            "count": 2,
+            "delay": 0
+          },
+          "segments": [
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "impact": 32
+              },
+              "procChance": 0.28
+            },
+            {
+              "kind": "explosiveAttack",
+              "aoe": true,
+              "damage": {
+                "blast": 164
+              },
+              "procChance": 0.28
+            },
+            {
+              "kind": "embedDeathAttack",
+              "aoe": true,
+              "damage": {
+                "blast": 175
+              },
+              "procChance": 0
+            }
+          ]
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "semi",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "impact": 100
+              },
+              "procChance": 0.5
+            },
+            {
+              "kind": "explosiveAttack",
+              "aoe": true,
+              "damage": {
+                "blast": 1200,
+                "impact": 600,
+                "puncture": 800,
+                "slash": 1000
+              },
+              "procChance": 0.5
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ThanoTechLongGun",
+      "name": "/Lotus/Language/Weapons/ThanoTechLongGunName",
+      "category": "archgun",
+      "critChance": 0.3,
+      "critMultiplier": 2.2,
+      "statusChance": 0.26,
+      "fireRate": 8.3333,
+      "magazineSize": 300,
+      "reloadTime": 5.5,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "heat": 50,
+                "impact": 24,
+                "puncture": 46
+              },
+              "procChance": 0.26
+            }
+          ]
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "charge",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "heat": 500,
+                "impact": 100,
+                "puncture": 400
+              },
+              "procChance": 0.5
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "TnConcreteArchgunWeapon",
+      "name": "/Lotus/Language/Weapons/TnConcreteArchgunName",
+      "category": "archgun",
+      "critChance": 0.25,
+      "critMultiplier": 2,
+      "statusChance": 0.15,
+      "fireRate": 3,
+      "magazineSize": 30,
+      "reloadTime": 3,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "charge",
+          "bullets": 8,
+          "multishot": 8,
+          "segments": [
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "impact": 25,
+                "puncture": 15,
+                "radiation": 40,
+                "slash": 10
+              },
+              "procChance": 1.2
+            }
+          ]
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "charge",
+          "bullets": 1,
+          "multishot": 8,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "heat": 300,
+                "puncture": 200,
+                "radiation": 400
+              },
+              "procChance": 0.2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "TnShieldFrameArchGun",
+      "name": "/Lotus/Language/Weapons/TnShieldFameArchGunName",
+      "category": "archgun",
+      "critChance": 0.1,
+      "critMultiplier": 1.4,
+      "statusChance": 0.5,
+      "fireRate": 12,
+      "magazineSize": 100,
+      "reloadTime": 4.5,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "unknown",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 10,
+                "radiation": 80
+              },
+              "procChance": 0.5
+            }
+          ]
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "charge",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "blast": 180,
+                "impact": 140,
+                "radiation": 100
+              },
+              "procChance": 0.34
+            },
+            {
+              "kind": "explosiveAttack",
+              "aoe": true,
+              "damage": {
+                "blast": 400,
+                "radiation": 400
+              },
+              "procChance": 0.34
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

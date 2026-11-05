@@ -1,0 +1,700 @@
+{
+  "generatedAt": "2026-11-05T07:26:30.410Z",
+  "category": "companion",
+  "count": 19,
+  "note": "暴率/触发为 0~1 小数；伤害分布为绝对值；procChance 同为 0~1；kuva 表示需用户在计算器里选元素与加成（25%~60%）",
+  "weapons": [
+    {
+      "id": "BurstLaserPistol",
+      "name": "/Lotus/Language/Items/BurstLaserPistolStoreItemName",
+      "category": "companion",
+      "critChance": 0.15,
+      "critMultiplier": 2,
+      "statusChance": 0.1,
+      "fireRate": 1.6071,
+      "magazineSize": 15,
+      "reloadTime": 0.01,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "burst",
+          "bullets": 1,
+          "multishot": 1,
+          "burst": {
+            "count": 3,
+            "delay": 0.4
+          },
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 2,
+                "puncture": 17,
+                "slash": 1
+              },
+              "procChance": 0.1
+            },
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "impact": 2,
+                "puncture": 17,
+                "slash": 1
+              },
+              "procChance": 0.1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "CryoxionWeapon",
+      "name": "/Lotus/Language/SolarisVenus/CryoxionWeapon",
+      "category": "companion",
+      "critChance": 0.1,
+      "critMultiplier": 1.75,
+      "statusChance": 0.1,
+      "fireRate": 0.6667,
+      "magazineSize": 3,
+      "reloadTime": 5,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "semi",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 10
+              },
+              "procChance": 0.1
+            },
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "impact": 10
+              },
+              "procChance": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "DethMachineRifle",
+      "name": "/Lotus/Language/Items/DethMachineRifleName",
+      "category": "companion",
+      "critChance": 0.05,
+      "critMultiplier": 2,
+      "statusChance": 0.01,
+      "fireRate": 8.3333,
+      "magazineSize": 100,
+      "reloadTime": 2,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 1.5,
+                "puncture": 0.75,
+                "slash": 12.75
+              },
+              "procChance": 0.01
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "Gremlin",
+      "name": "/Lotus/Language/Weapons/SentinelGremlinName",
+      "category": "companion",
+      "critChance": 0.02,
+      "critMultiplier": 1.5,
+      "statusChance": 0.35,
+      "fireRate": 16.6667,
+      "magazineSize": 100,
+      "reloadTime": 1.5,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "unknown",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "cold": 5
+              },
+              "procChance": 0.35
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "HextraWeapon",
+      "name": "/Lotus/Language/SolarisVenus/HextraWeapon",
+      "category": "companion",
+      "critChance": 0.15,
+      "critMultiplier": 2,
+      "statusChance": 0.22,
+      "fireRate": 1.875,
+      "magazineSize": 3,
+      "reloadTime": 3,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "burst",
+          "bullets": 1,
+          "multishot": 1,
+          "burst": {
+            "count": 3,
+            "delay": 0.4
+          },
+          "segments": [
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "puncture": 10
+              },
+              "procChance": 0.22
+            },
+            {
+              "kind": "embedDeathAttack",
+              "aoe": true,
+              "damage": {
+                "blast": 100
+              },
+              "procChance": 0.22
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "LaserRifle",
+      "name": "/Lotus/Language/Items/LaserRifleStoreItemName",
+      "category": "companion",
+      "critChance": 0.17,
+      "critMultiplier": 1.75,
+      "statusChance": 0.075,
+      "fireRate": 5,
+      "magazineSize": 20,
+      "reloadTime": 1,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "impact": 4.5,
+                "puncture": 36,
+                "slash": 4.5
+              },
+              "procChance": 0.075
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "PrimeBurstLaserPistol",
+      "name": "/Lotus/Language/Items/PrimeBurstLaserPistolStoreItemName",
+      "category": "companion",
+      "critChance": 0.2,
+      "critMultiplier": 2.3,
+      "statusChance": 0.15,
+      "fireRate": 3,
+      "magazineSize": 15,
+      "reloadTime": 0.01,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "burst",
+          "bullets": 1,
+          "multishot": 1,
+          "burst": {
+            "count": 5,
+            "delay": 0.2
+          },
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 2.5,
+                "puncture": 21.25,
+                "slash": 1.25
+              },
+              "procChance": 0.1
+            },
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "impact": 2.5,
+                "puncture": 21.25,
+                "slash": 1.25
+              },
+              "procChance": 0.15
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "PrimeDethMachineRifle",
+      "name": "/Lotus/Language/Primes/PrimeDethMachineRifleName",
+      "category": "companion",
+      "critChance": 0.1,
+      "critMultiplier": 2,
+      "statusChance": 0.04,
+      "fireRate": 10,
+      "magazineSize": 100,
+      "reloadTime": 2,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 2,
+                "puncture": 1,
+                "slash": 17
+              },
+              "procChance": 0.04
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "PrimeLaserRifle",
+      "name": "/Lotus/Language/Items/PrimeLaserRifleStoreItemName",
+      "category": "companion",
+      "critChance": 0.2,
+      "critMultiplier": 2,
+      "statusChance": 0.1,
+      "fireRate": 5,
+      "magazineSize": 20,
+      "reloadTime": 1,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "impact": 5.5,
+                "puncture": 38.5,
+                "slash": 11
+              },
+              "procChance": 0
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "PrimeSentShotgun",
+      "name": "/Lotus/Language/Items/PrimeSentinelShotgunName",
+      "category": "companion",
+      "critChance": 0.1,
+      "critMultiplier": 2.25,
+      "statusChance": 0.05,
+      "fireRate": 1,
+      "magazineSize": 20,
+      "reloadTime": 2,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 6,
+          "multishot": 6,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 38.25,
+                "puncture": 2.25,
+                "slash": 4.5
+              },
+              "procChance": 0.3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "PrismaBurstLaserPistol",
+      "name": "/Lotus/Language/Items/PrismaBurstLaserPistolStoreItemName",
+      "category": "companion",
+      "critChance": 0.18,
+      "critMultiplier": 2.15,
+      "statusChance": 0.1,
+      "fireRate": 2.1429,
+      "magazineSize": 15,
+      "reloadTime": 0.01,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "burst",
+          "bullets": 1,
+          "multishot": 1,
+          "burst": {
+            "count": 4,
+            "delay": 0.3
+          },
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 2.2,
+                "puncture": 18.7,
+                "slash": 1.1
+              },
+              "procChance": 0.15
+            },
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "impact": 2.2,
+                "puncture": 18.7,
+                "slash": 1.1
+              },
+              "procChance": 0.1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "SentBioWeapon",
+      "name": "/Lotus/Language/Items/SentinelBioWeaponName",
+      "category": "companion",
+      "critChance": 0.025,
+      "critMultiplier": 1.5,
+      "statusChance": 0.2,
+      "fireRate": 3.3333,
+      "magazineSize": 4,
+      "reloadTime": 1.2,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "semi",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 4,
+                "puncture": 4,
+                "slash": 4
+              },
+              "procChance": 0.2
+            },
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "toxin": 15
+              },
+              "procChance": 0.2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "SentElecRailgun",
+      "name": "/Lotus/Language/Items/SentElecRailgunName",
+      "category": "companion",
+      "critChance": 0.35,
+      "critMultiplier": 2.5,
+      "statusChance": 0.25,
+      "fireRate": 0.15,
+      "magazineSize": 10,
+      "reloadTime": 2,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 10
+              },
+              "procChance": 0.1
+            },
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "electric": 175
+              },
+              "procChance": 0.25
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "SentShotgun",
+      "name": "/Lotus/Language/Items/SentinelShotgunName",
+      "category": "companion",
+      "critChance": 0.1,
+      "critMultiplier": 1.75,
+      "statusChance": 0.045,
+      "fireRate": 1,
+      "magazineSize": 10,
+      "reloadTime": 2.3,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 6,
+          "multishot": 6,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 29.75,
+                "puncture": 1.75,
+                "slash": 3.5
+              },
+              "procChance": 0.27
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "SentinelFreezeRayPrimeRifle",
+      "name": "/Lotus/Language/Primes/FreezeRayPrimeName",
+      "category": "companion",
+      "variant": "prime",
+      "critChance": 0.14,
+      "critMultiplier": 2.2,
+      "statusChance": 0.36,
+      "fireRate": 12,
+      "magazineSize": 80,
+      "reloadTime": 1.6,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "unknown",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "cold": 32
+              },
+              "procChance": 0.36
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "SentinelFreezeRayRifle",
+      "name": "/Lotus/Language/Weapons/SentinelFreezeRayRifleName",
+      "category": "companion",
+      "critChance": 0.08,
+      "critMultiplier": 2,
+      "statusChance": 0.34,
+      "fireRate": 12,
+      "magazineSize": 80,
+      "reloadTime": 2.2,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "unknown",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "cold": 26
+              },
+              "procChance": 0.34
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "SwarmerWeapon",
+      "name": "/Lotus/Language/SolarisVenus/SwarmerWeapon",
+      "category": "companion",
+      "critChance": 0.05,
+      "critMultiplier": 1.5,
+      "statusChance": 0.3,
+      "fireRate": 0.9091,
+      "reloadTime": 2,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "burst",
+          "bullets": 1,
+          "multishot": 1,
+          "burst": {
+            "count": 4,
+            "delay": 0.1
+          },
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "impact": 1,
+                "puncture": 1,
+                "slash": 1
+              },
+              "procChance": 0.2
+            },
+            {
+              "kind": "attack",
+              "aoe": false,
+              "damage": {
+                "impact": 5.5,
+                "puncture": 4.5
+              },
+              "procChance": 0.3
+            },
+            {
+              "kind": "explosiveAttack",
+              "aoe": true,
+              "damage": {
+                "heat": 24,
+                "impact": 6
+              },
+              "procChance": 0.3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "TazronWeapon",
+      "name": "/Lotus/Language/SolarisVenus/TazronWeapon",
+      "category": "companion",
+      "critChance": 0.05,
+      "critMultiplier": 1.5,
+      "statusChance": 0.25,
+      "fireRate": 12,
+      "magazineSize": 40,
+      "reloadTime": 2,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "unknown",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "electric": 5
+              },
+              "procChance": 0.25
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ThermocorMoaWeapon",
+      "name": "/Lotus/Language/SolarisVenus/ThermocorWeapon",
+      "category": "companion",
+      "critChance": 0.2,
+      "critMultiplier": 2.5,
+      "statusChance": 0.1,
+      "fireRate": 1,
+      "magazineSize": 1,
+      "reloadTime": 3,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "charge",
+          "bullets": 1,
+          "multishot": 1,
+          "segments": [
+            {
+              "kind": "impact",
+              "aoe": false,
+              "damage": {
+                "heat": 500
+              },
+              "procChance": 0.1
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

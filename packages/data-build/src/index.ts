@@ -16,12 +16,16 @@ import { join, resolve } from 'node:path';
 import { FetchError, fetchSource } from './fetch.ts';
 import { cleanWeapons, EXCLUDED_CATEGORIES } from './clean.ts';
 import { diffWeapons, formatDiffReport, type DiffReport } from './diff.ts';
+import { applyOverrides, type AppliedOverride } from './overrides.ts';
+import { toEmitWeapon, type EmitWeapon } from './emit.ts';
+import { WEAPON_OVERRIDES } from '../../data/src/manual/overrides.ts';
 import type { ExportWeapons } from './types.ts';
-import type { WeaponPanel } from '../../core/src/weapon.ts';
+import type { AttackMode, WeaponPanel } from '../../core/src/weapon.ts';
 
 const repoRoot = resolve(import.meta.dirname, '../../..');
 const GENERATED_DIR = join(repoRoot, 'packages/data/src/generated');
-const GENERATED_FILE = join(GENERATED_DIR, 'weapons.json');
+const SPLIT_DIR = join(GENERATED_DIR, 'weapons');
+const INDEX_FILE = join(SPLIT_DIR, 'index.json');
 const REPORT_DIR = join(repoRoot, 'packages/data/src/generated/reports');
 
 interface Args {
@@ -36,14 +40,54 @@ function parseArgs(argv: string[]): Args {
   };
 }
 
+/**
+ * 读取上一版产出（按分类拆分的多个文件），合并回 WeaponPanel[] 用于 diff。
+ * 无上一版时返回 null（首次生成）。
+ */
 function loadPrevious(): WeaponPanel[] | null {
-  if (!existsSync(GENERATED_FILE)) return null;
-  try {
-    const data = JSON.parse(readFileSync(GENERATED_FILE, 'utf8')) as { weapons?: WeaponPanel[] };
-    return data.weapons ?? null;
-  } catch {
-    return null;
+  if (!existsSync(SPLIT_DIR)) return null;
+
+  const merged: WeaponPanel[] = [];
+  for (const cat of ['primary', 'secondary', 'melee', 'archgun', 'archmelee', 'companion', 'unknown']) {
+    const file = join(SPLIT_DIR, `${cat}.json`);
+    if (!existsSync(file)) continue;
+    try {
+      const data = JSON.parse(readFileSync(file, 'utf8')) as { weapons?: EmitWeapon[] };
+      for (const w of data.weapons ?? []) merged.push(emitToPanel(w));
+    } catch {
+      // 单个文件损坏时跳过，不阻断整体流程
+    }
   }
+  return merged.length > 0 ? merged : null;
+}
+
+/** 产出格式 → WeaponPanel（仅用于 diff 比较） */
+function emitToPanel(w: EmitWeapon): WeaponPanel {
+  return {
+    id: w.id,
+    name: { en: w.name },
+    category: w.category as WeaponPanel['category'],
+    critChance: w.critChance,
+    critMultiplier: w.critMultiplier,
+    statusChance: w.statusChance,
+    fireRate: w.fireRate,
+    ...(w.magazineSize != null ? { magazineSize: w.magazineSize } : {}),
+    ...(w.reloadTime != null ? { reloadTime: w.reloadTime } : {}),
+    modes: w.modes.map((m) => ({
+      id: m.id,
+      role: m.role as 'normal' | 'charged' | 'incarnon',
+      trigger: m.trigger as AttackMode['trigger'],
+      bullets: m.bullets,
+      baseMultishot: m.multishot,
+      ...(m.burst ? { burst: m.burst } : {}),
+      segments: m.segments.map((s) => ({
+        kind: s.kind as 'impact' | 'attack' | 'explosiveAttack' | 'embedDeathAttack',
+        damage: s.damage,
+        procChance: s.procChance,
+        isAoe: s.aoe,
+      })),
+    })),
+  };
 }
 
 function formatStats(stats: ReturnType<typeof cleanWeapons>['stats']): string {
@@ -132,6 +176,13 @@ async function main(): Promise<number> {
   const statsLine = formatStats(clean.stats);
   console.log(statsLine);
 
+  // 应用人工覆盖层（蓄力时间反推射速等）
+  const applied: AppliedOverride[] = applyOverrides(clean.weapons, WEAPON_OVERRIDES);
+  if (applied.length > 0) {
+    console.log(`\n人工覆盖已应用 ${applied.length} 处：`);
+    for (const a of applied) console.log(`  ${a.weaponId}.${a.field}: ${a.from ?? '(无)'} → ${a.to}  （${a.reason}）`);
+  }
+
   console.log('[3/4] 对比上一版...');
   const previous = loadPrevious();
   const diff = previous
@@ -156,18 +207,60 @@ async function main(): Promise<number> {
 
   console.log('\n写入产出...');
   mkdirSync(GENERATED_DIR, { recursive: true });
-  const payload = {
-    generatedAt: new Date().toISOString(),
-    source: 'https://browse.wf/warframe-public-export-plus/ExportWeapons.json',
-    stats: clean.stats,
-    weapons: clean.weapons,
-  };
-  writeFileSync(GENERATED_FILE, JSON.stringify(payload, null, 2) + '\n');
+
+  // 按分类拆分输出，便于人工按武器类型查找与修改
+  const files: Record<string, EmitWeapon[]> = { primary: [], secondary: [], melee: [], archgun: [], archmelee: [], companion: [], unknown: [] };
+  for (const w of clean.weapons) {
+    const exportKey = findExportKey(raw, w.id);
+    const variantType = exportKey ? raw[exportKey]?.variantType : undefined;
+    files[w.category]!.push(toEmitWeapon(w, applied, { variantType }));
+  }
+
+  mkdirSync(SPLIT_DIR, { recursive: true });
+  const counts: Record<string, number> = {};
+  for (const [cat, list] of Object.entries(files)) {
+    counts[cat] = list.length;
+    const body = {
+      generatedAt: new Date().toISOString(),
+      category: cat,
+      count: list.length,
+      note: '暴率/触发为 0~1 小数；伤害分布为绝对值；procChance 同为 0~1；kuva 表示需用户在计算器里选元素与加成（25%~60%）',
+      weapons: list,
+    };
+    writeFileSync(join(SPLIT_DIR, `${cat}.json`), JSON.stringify(body, null, 2) + '\n');
+  }
+
+  // 索引文件：汇总各分类与统计
+  writeFileSync(
+    join(SPLIT_DIR, 'index.json'),
+    JSON.stringify(
+      {
+        generatedAt: new Date().toISOString(),
+        source: 'https://browse.wf/warframe-public-export-plus/ExportWeapons.json',
+        stats: clean.stats,
+        categories: counts,
+        manualOverrides: applied.length,
+      },
+      null,
+      2,
+    ) + '\n',
+  );
+
   writeReports(statsLine, clean.warnings, diff);
-  console.log(`已写入 ${GENERATED_FILE}`);
+  console.log('分类产出：');
+  for (const [cat, list] of Object.entries(files)) console.log(`  ${cat.padEnd(12)} ${list.length} 把  → ${cat}.json`);
+  console.log('索引：index.json');
   console.log(`报告已写入 ${REPORT_DIR}`);
 
   return 0;
+}
+
+/** 由武器 id 反查导出键（用于取 variantType 等元数据） */
+function findExportKey(raw: ExportWeapons, id: string): string {
+  for (const key of Object.keys(raw)) {
+    if ((key.split('/').pop() ?? '') === id) return key;
+  }
+  return '';
 }
 
 try {

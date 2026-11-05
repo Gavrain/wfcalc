@@ -1,0 +1,25 @@
+{
+  "generatedAt": "2026-11-05T07:26:30.412Z",
+  "source": "https://browse.wf/warframe-public-export-plus/ExportWeapons.json",
+  "stats": {
+    "totalWeapons": 842,
+    "keptWeapons": 637,
+    "droppedPlaceholderBehaviours": 40,
+    "keptBehaviours": 861,
+    "weaponsWithMultipleModes": 203,
+    "weaponsWithAoe": 126,
+    "weaponsWithUnknownDamageType": 0,
+    "excludedByCategory": 7,
+    "droppedNoValidMode": 198
+  },
+  "categories": {
+    "primary": 192,
+    "secondary": 147,
+    "melee": 249,
+    "archgun": 19,
+    "archmelee": 11,
+    "companion": 19,
+    "unknown": 0
+  },
+  "manualOverrides": 1
+}
