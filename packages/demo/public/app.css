@@ -1,0 +1,413 @@
+/* wfcalc demo 样式 —— 目标是可读、信息密度高，不追求视觉效果 */
+:root {
+  --bg: #14171c;
+  --panel: #1c2027;
+  --panel-2: #232830;
+  --panel-3: #2b313b;
+  --line: #2f3540;
+  --text: #d8dee8;
+  --muted: #8a93a3;
+  --accent: #4a9eff;
+  --pos: #5fd07a;
+  --neg: #e06060;
+  --warn: #d8a44a;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 13px/1.5 "Segoe UI", "Microsoft YaHei", system-ui, sans-serif;
+}
+
+.topbar {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  padding: 10px 18px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--line);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.logo { font-weight: 700; color: var(--accent); font-size: 16px; }
+.tagline { color: var(--muted); font-size: 12px; }
+.weapon-title { font-size: 16px; font-weight: 600; }
+.weapon-meta { color: var(--muted); font-size: 12px; }
+
+.layout {
+  display: grid;
+  grid-template-columns: 320px minmax(560px, 1fr) 380px;
+  gap: 14px;
+  padding: 14px;
+  align-items: start;
+}
+.col { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 12px; }
+.col-main { background: transparent; border: none; padding: 0; display: flex; flex-direction: column; gap: 14px; }
+.col-right { position: sticky; top: 62px; max-height: calc(100vh - 76px); overflow: auto; }
+
+.section-title {
+  margin: 0 0 6px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--accent);
+  letter-spacing: 0.04em;
+}
+.col > .section-title:not(:first-child) { margin-top: 12px; }
+.muted { color: var(--muted); font-size: 12px; }
+
+/* 左栏整体压缩：行高与间距收紧 */
+.col-left { font-size: 12px; }
+.col-left .section-title { margin-bottom: 4px; }
+.col-left .panel-row { padding: 2px 5px; }
+
+/* 输出口径：只读数值 + 单位 */
+.output-list { display: flex; flex-direction: column; gap: 1px; margin-top: 4px; }
+.output-row {
+  display: flex; align-items: baseline; justify-content: space-between;
+  padding: 3px 7px; border-radius: 3px; background: var(--panel-2);
+  font-variant-numeric: tabular-nums;
+}
+.output-name { color: var(--muted); font-size: 11.5px; }
+.output-unit { margin-left: 5px; font-size: 10.5px; color: #5d6674; }
+.output-val { font-weight: 700; color: var(--accent); }
+.dot-note { padding: 1px 7px; font-size: 11px; }
+.dot-row { padding: 1px 6px; font-size: 11.5px; }
+
+.metric-picker-inline {
+  margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--line);
+}
+
+/* 右栏赋能在拆解上方：多列网格，只显示名字（D-034） */
+.col-right .arcane-area { margin-bottom: 12px; }
+.arcane-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
+  gap: 5px;
+  max-height: 150px;
+  overflow: auto;
+  padding-right: 3px;
+}
+.arcane-list .cand { min-height: 0; padding: 4px 6px; gap: 0; cursor: grab; }
+.arcane-list .cand-name {
+  font-size: 11.5px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+/* 面板表 */
+.panel-table { display: flex; flex-direction: column; gap: 2px; }
+.panel-row {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr;
+  gap: 8px;
+  padding: 4px 6px;
+  border-radius: 4px;
+  font-variant-numeric: tabular-nums;
+}
+.panel-row:nth-child(even) { background: var(--panel-2); }
+.panel-head { color: var(--muted); font-size: 11px; font-weight: 600; }
+.panel-total { border-top: 1px solid var(--line); margin-top: 4px; font-weight: 600; }
+.c-base { color: var(--muted); }
+.c-val { color: var(--text); }
+/* 「当前」列与「基础」列不同时高亮（蓝色 = 被 Mod 改变了） */
+.c-after.changed { color: var(--accent); font-weight: 600; }
+.dt-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
+
+/* 控件 */
+.controls-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; font-size: 12px; }
+.controls-row select, .controls-row input[type="number"] {
+  background: var(--panel-2); color: var(--text); border: 1px solid var(--line);
+  border-radius: 4px; padding: 2px 6px;
+}
+.kuva-controls { display: flex; gap: 12px; align-items: center; font-size: 12px; margin-bottom: 8px; }
+.kuva-controls select { background: var(--panel-2); color: var(--text); border: 1px solid var(--line); border-radius: 4px; padding: 2px 6px; }
+.co-controls { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--line); }
+.co-controls .controls-row { margin-bottom: 4px; }
+.co-controls select { background: var(--panel-2); color: var(--text); border: 1px solid var(--line); border-radius: 4px; padding: 2px 6px; }
+
+.metric-list { display: flex; flex-direction: column; gap: 2px; margin-top: 10px; }
+.metric-row { display: flex; gap: 8px; padding: 4px 6px; border-radius: 4px; cursor: pointer; }
+.metric-row:hover { background: var(--panel-2); }
+.metric-row input { margin-top: 3px; }
+.metric-text { display: grid; grid-template-columns: 1fr auto; gap: 0 10px; flex: 1; }
+.metric-name { font-weight: 600; }
+.metric-val { font-variant-numeric: tabular-nums; color: var(--accent); }
+.metric-desc { grid-column: 1 / -1; font-size: 11px; color: var(--muted); }
+
+.dot-list { margin-top: 8px; display: flex; flex-direction: column; gap: 2px; }
+.dot-row { display: flex; gap: 8px; align-items: center; font-size: 12px; padding: 2px 6px; }
+.dot-name { width: 48px; }
+.dot-stacks { color: var(--muted); }
+.dot-val { margin-left: auto; font-variant-numeric: tabular-nums; }
+
+/* 槽位 */
+.slot-area, .cand-area { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 12px; }
+.slot-area-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+
+/* 武器面板标题行：左侧标题 + 右侧模式切换按钮（D-042） */
+.panel-head-row {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 10px; margin-top: 12px;
+}
+.panel-head-row .section-title { margin: 0 0 6px; }
+.mode-switch { display: inline-flex; gap: 0; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+.mode-switch:empty { display: none; }
+.mode-btn {
+  appearance: none; border: 0; border-right: 1px solid var(--line);
+  background: var(--panel-2); color: var(--muted);
+  font: inherit; font-size: 11.5px; padding: 4px 10px; cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+}
+.mode-btn:last-child { border-right: 0; }
+.mode-btn:hover { background: var(--panel-3); color: var(--text); }
+.mode-btn.active { background: var(--accent); color: #10141a; font-weight: 600; }
+.slot-area-actions { display: inline-flex; align-items: center; gap: 8px; }
+
+/* 「全部卸下」等次要操作按钮 */
+.btn-ghost {
+  appearance: none;
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--muted);
+  font: inherit;
+  font-size: 11.5px;
+  line-height: 1;
+  padding: 5px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s, border-color 0.12s;
+  white-space: nowrap;
+}
+.btn-ghost:hover { background: var(--panel-3); color: var(--text); border-color: var(--muted); }
+.btn-ghost:active { background: var(--panel-2); }
+.slot-wrap { display: flex; gap: 14px; }
+.slot-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; flex: 1; }
+.side-column { display: flex; flex-direction: column; gap: 12px; width: 210px; }
+.side-group { display: flex; flex-direction: column; gap: 6px; }
+.arcane-slots, .side-slots { display: flex; flex-direction: column; gap: 6px; }
+.side-label { font-size: 11px; color: var(--muted); }
+
+.slot {
+  background: var(--panel-2);
+  border: 1px dashed var(--line);
+  border-radius: 5px;
+  padding: 6px;
+  min-height: 84px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: border-color 0.12s, background 0.12s;
+}
+.slot.exilus { border-color: #4a5a70; }
+.slot.arcane { border-color: #6a5a80; }
+/* 赋能槽固定高度，装入后不撑高 Mod 配置区；文字溢出用省略号（D-034） */
+.slot.arcane { min-height: 70px; max-height: 86px; overflow: hidden; }
+.slot.arcane .slot-name,
+.slot.arcane .slot-desc,
+.slot-name {
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.slot.arcane .slot-desc { display: block; }
+.slot.drop-target { border-color: var(--accent); background: #1e2b3d; border-style: solid; }
+.slot-title { font-size: 10px; color: var(--muted); text-transform: uppercase; }
+.slot-body { display: flex; flex-direction: column; gap: 3px; flex: 1; }
+.slot-name { font-weight: 600; font-size: 12.5px; }
+.slot-stats { display: flex; flex-wrap: wrap; gap: 3px; }
+.slot-stat { font-size: 10.5px; background: #2a3039; border-radius: 3px; padding: 1px 4px; color: #b9c3d2; }
+.slot-empty { color: #555d6b; font-size: 12px; margin: auto 0; text-align: center; }
+.slot-desc { font-size: 11px; color: var(--muted); }
+.btn-remove {
+  margin-top: auto; align-self: flex-start;
+  background: transparent; color: var(--neg); border: 1px solid #5a3030;
+  border-radius: 3px; font-size: 11px; padding: 1px 6px; cursor: pointer;
+}
+.btn-remove:hover { background: #3a2020; }
+
+/* 备选 Mod */
+.cand-toolbar { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; font-size: 12px; }
+.filter-label { display: flex; align-items: center; gap: 6px; }
+.cand-toolbar select, .search-input {
+  background: var(--panel-2); color: var(--text); border: 1px solid var(--line);
+  border-radius: 4px; padding: 3px 8px; font-size: 12px;
+}
+.search-input { flex: 0 1 180px; }
+.cand-hint { margin-left: auto; }
+
+/* 筛选按钮组：单选语义，当前项高亮（D-035） */
+.filter-group {
+  display: inline-flex; flex-wrap: wrap; gap: 0;
+  border: 1px solid var(--line); border-radius: 6px; overflow: hidden;
+}
+.filter-btn {
+  appearance: none; border: 0; border-right: 1px solid var(--line);
+  background: var(--panel-2); color: var(--muted);
+  font: inherit; font-size: 12px; padding: 4px 11px; cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+}
+.filter-btn:last-child { border-right: 0; }
+.filter-btn:hover { background: var(--panel-3); color: var(--text); }
+.filter-btn.active {
+  background: var(--accent); color: #10141a; font-weight: 600;
+}
+.filter-btn.active:hover { background: var(--accent); color: #10141a; }
+
+.cand-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.candidate-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(196px, 1fr));
+  gap: 8px;
+  max-height: 60vh;
+  overflow: auto;
+  padding-right: 4px;
+}
+.cand {
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  padding: 7px 8px;
+  cursor: grab;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-height: 96px;
+}
+.cand:hover { border-color: var(--accent); }
+.cand.dragging { opacity: 0.45; }
+.cand-top { display: flex; align-items: center; gap: 6px; }
+.cand-name { font-weight: 600; flex: 1; }
+.pol { font-size: 10px; padding: 0 4px; border-radius: 3px; }
+.pol-r { background: #5a2a2a; color: #ffb0b0; }
+.pol-d { background: #2a3a5a; color: #a0c0ff; }
+.pol-- { background: #333; color: #aaa; }
+.tag { font-size: 10px; padding: 0 4px; border-radius: 3px; background: #3a3320; color: var(--warn); }
+.cand-stats { font-size: 11px; color: #a8b2c0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.cand-gain { display: flex; justify-content: space-between; align-items: baseline; margin-top: auto; }
+.gain-label { font-size: 11px; color: var(--muted); }
+.gain-val { font-variant-numeric: tabular-nums; font-weight: 700; font-size: 14px; }
+.gain-val.pos, .pos { color: var(--pos); }
+.gain-val.neg, .neg { color: var(--neg); }
+
+.metric-picker { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+/* 增幅基准沿用筛选按钮组样式（D-042）；.filter-group 由 JS 挂上 */
+.metric-options { display: flex; flex-wrap: wrap; }
+.opt { display: flex; align-items: center; gap: 4px; font-size: 11px; background: var(--panel-2); border: 1px solid var(--line); border-radius: 4px; padding: 2px 7px; cursor: pointer; }
+.opt:has(input:checked) { border-color: var(--accent); color: var(--accent); }
+
+/* 详情 */
+#detail h3 { margin: 0 0 8px; font-size: 14px; }
+.detail-list { margin: 0 0 8px; padding-left: 18px; }
+.detail-list li { margin-bottom: 2px; }
+.detail-table { width: 100%; border-collapse: collapse; margin: 8px 0; font-variant-numeric: tabular-nums; }
+.detail-table th { text-align: left; font-size: 11px; color: var(--muted); border-bottom: 1px solid var(--line); padding: 3px 4px; }
+.detail-table td { padding: 3px 4px; border-bottom: 1px solid #252a33; }
+/* 拆解表格：当前基准那行用加粗+左侧标记，不用蓝色（蓝色留给"增加/减少"之外的中性信息） */
+.detail-table tr.highlight td { font-weight: 600; }
+.detail-table tr.highlight td:first-child { box-shadow: inset 2px 0 0 var(--muted); padding-left: 6px; }
+.merge-box { background: var(--panel-2); border-radius: 4px; padding: 8px; margin-top: 8px; font-size: 12px; }
+.merge-src, .merge-out { color: #a8b2c0; }
+.section-title + .merge-box { margin-top: 0; }
+
+/* toast */
+.toast {
+  position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%) translateY(20px);
+  background: #3a2020; color: #ffb0b0; border: 1px solid #6a3030;
+  padding: 7px 16px; border-radius: 5px; opacity: 0; pointer-events: none;
+  transition: opacity 0.18s, transform 0.18s;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+@media (max-width: 1180px) {
+  .layout { grid-template-columns: 1fr; }
+  .col-right { position: static; max-height: none; }
+}
+
+/* ─────────────────────────────────────────────────────────────
+   武器编辑器（D-044，仅开发态）
+   ───────────────────────────────────────────────────────────── */
+.panel-head-actions { display: inline-flex; align-items: center; gap: 8px; }
+.modified-badge {
+  font-size: 10.5px; padding: 2px 7px; border-radius: 4px;
+  background: rgba(216, 164, 74, 0.16); color: var(--warn);
+  border: 1px solid rgba(216, 164, 74, 0.4); white-space: nowrap;
+}
+
+.btn-primary {
+  appearance: none; border: 0; border-radius: 5px; cursor: pointer;
+  background: var(--accent); color: #10141a; font: inherit;
+  font-size: 12px; font-weight: 600; padding: 6px 14px;
+}
+.btn-primary:hover { filter: brightness(1.1); }
+.btn-tiny { font-size: 10.5px; padding: 3px 7px; }
+
+.editor-overlay {
+  position: fixed; inset: 0; background: rgba(8, 10, 14, 0.72);
+  display: flex; align-items: center; justify-content: center; z-index: 100; padding: 24px;
+}
+.editor-panel {
+  background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+  width: min(760px, 100%); max-height: 86vh; display: flex; flex-direction: column;
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.5);
+}
+.editor-head { display: flex; align-items: center; gap: 10px; padding: 14px 18px; border-bottom: 1px solid var(--line); }
+.editor-head h2 { margin: 0; font-size: 14px; color: var(--text); }
+.editor-hint { flex: 1; font-size: 11px; }
+.editor-body { padding: 16px 20px 20px; overflow: auto; flex: 1; }
+/* 纵向节奏统一：分区标题上留大间隔，其余元素 8~12px（D-051） */
+.editor-section {
+  font-size: 11.5px; color: var(--accent); font-weight: 600;
+  margin: 22px 0 10px; padding-bottom: 6px; border-bottom: 1px solid var(--line);
+}
+.editor-section:first-child { margin-top: 0; }
+.editor-sub { font-size: 11px; color: var(--muted); margin: 14px 0 8px; }
+.editor-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 10px 20px; }
+.editor-field { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+/* 词条名统一宽度，让右侧控件在所有行对齐（D-051） */
+.editor-label { color: var(--muted); flex: 0 0 auto; width: 64px; }
+.editor-input {
+  background: var(--panel-2); color: var(--text); border: 1px solid var(--line);
+  border-radius: 4px; padding: 4px 8px; font: inherit; font-size: 12px; width: 96px;
+  font-variant-numeric: tabular-nums;
+}
+.editor-input:focus { outline: 1px solid var(--accent); }
+.editor-field select {
+  background: var(--panel-2); color: var(--text); border: 1px solid var(--line);
+  border-radius: 4px; padding: 4px 8px; font: inherit; font-size: 12px;
+}
+.editor-dmg-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 6px; }
+.editor-dmg-row { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+/* 与 .editor-label 同宽，伤害分布与上方面板数值对齐 */
+.editor-dmg-name { color: var(--muted); flex: 0 0 auto; width: 64px; }
+/* 面板总伤：与上方内容拉开距离 */
+.editor-total {
+  display: flex; align-items: baseline; gap: 8px; margin-top: 8px;
+  padding: 10px 14px; background: var(--panel-2); border-radius: 5px; font-size: 12px;
+}
+.editor-total-val { font-weight: 700; color: var(--accent); font-variant-numeric: tabular-nums; }
+.editor-foot {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 18px; border-top: 1px solid var(--line);
+}
+.editor-msg { flex: 1; font-size: 11.5px; color: var(--muted); }
+.editor-msg.pos { color: var(--pos); }
+.editor-msg.neg { color: var(--neg); }
+/* 模式元信息行：发射器类型 / 触发几率并排，与伤害分布左对齐 */
+.editor-meta-row {
+  display: flex; flex-wrap: wrap; align-items: center;
+  gap: 10px 28px; margin: 6px 0 18px;
+}
+.editor-meta-row .editor-field { min-width: 200px; }
+
+/* 「添加伤害类型」：下拉选类型 + 按钮，在面板总伤上方 */
+.editor-add-row {
+  display: flex; align-items: center; gap: 8px;
+  margin: 14px 0 16px;
+}
+.editor-add-row .editor-add-select {
+  background: var(--panel-2); color: var(--text); border: 1px solid var(--line);
+  border-radius: 4px; padding: 5px 8px; font: inherit; font-size: 12px; min-width: 130px;
+}
+.editor-add-row .editor-add-select:focus { outline: 1px solid var(--accent); }
+

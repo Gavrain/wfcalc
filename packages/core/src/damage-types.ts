@@ -27,7 +27,7 @@ export const DAMAGE_TYPES = [
   // 不提供任何伤害类型倍率；其异常状态是"触发几率易受性"，
   // 见 status-resistance.ts 的 tauStatusChanceMultiplier。
   'tau',
-] as const;
+];
 
 export type DamageType = (typeof DAMAGE_TYPES)[number];
 
@@ -73,9 +73,10 @@ export const isCompound = (t: DamageType): boolean => COMPOUND_TYPES.includes(t)
 
 /** 分布求和 */
 export function spreadTotal(s: DamageSpread): number {
-  let total = 0;
-  for (const k in s) {
-    const v = s[k as DamageType];
+  let total: number = 0;
+  const keys = Object.keys(s);
+  for (const k of keys) {
+    const v = s[k];
     if (v) total += v;
   }
   return total;
@@ -96,9 +97,10 @@ export function spreadTotalAfterMods(
   physical: Readonly<Partial<Record<DamageType, number>>> = {},
   elemental: Readonly<Partial<Record<DamageType, number>>> = {},
 ): number {
-  let total = 0;
-  for (const k in spread) {
-    const t = k as DamageType;
+  let total: number = 0;
+  const keys = Object.keys(spread);
+  for (const k of keys) {
+    const t: DamageType = k;
     const v = spread[t];
     if (!v) continue;
     // 物理与元素分别按各自的占比放大（例如 4.1 校验例 1：新面板总伤 = 100×2 + 100×1 = 300）
@@ -110,11 +112,12 @@ export function spreadTotalAfterMods(
 
 /** 分布按比例缩放；总和为 0 时原样返回 */
 export function scaleSpread(s: DamageSpread, factor: number): DamageSpread {
-  const total = spreadTotal(s);
+  const total: number = spreadTotal(s);
   if (total <= 0) return { ...s };
   const out: DamageSpread = {};
-  for (const k in s) {
-    const t = k as DamageType;
+  const keys = Object.keys(s);
+  for (const k of keys) {
+    const t: DamageType = k;
     const v = s[t];
     if (v) out[t] = (v * factor);
   }

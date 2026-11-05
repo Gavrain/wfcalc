@@ -39,3 +39,6 @@ packages/data/src/snapshot/*.json
 # 数据更新报告：只保留 latest.md，历史快照不入库
 packages/data/src/generated/reports/*.md
 !packages/data/src/generated/reports/latest.md
+
+# demo 验证脚本的临时编译产物
+.demo-check/

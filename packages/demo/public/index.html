@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>wfcalc · 赤毒·卡拉克</title>
+    <link rel="stylesheet" href="/app.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">
+        <span class="logo">wfcalc</span>
+        <span class="tagline">伤害计算内核</span>
+      </div>
+      <div id="weapon-title" class="weapon-title">加载中…</div>
+      <div id="weapon-meta" class="weapon-meta"></div>
+    </header>
+
+    <main class="layout">
+      <!-- 左：武器面板 -->
+      <section class="col col-left">
+        <h2 class="section-title">玄骸加成</h2>
+        <div class="kuva-controls" id="kuva-controls">
+          <label>元素
+            <select id="kuva-element"></select>
+          </label>
+          <label>加成
+            <input id="kuva-ratio" type="range" min="25" max="60" step="1"
+              value="60" />
+            <span id="kuva-ratio-val">60%</span>
+          </label>
+        </div>
+
+        <div class="panel-head-row">
+          <h2 class="section-title">武器面板</h2>
+          <div class="panel-head-actions">
+            <span id="modified-badge" class="modified-badge" style="display:none">已修改</span>
+            <div id="mode-switch" class="mode-switch"></div>
+            <button id="open-editor" class="btn-ghost dev-only" type="button" style="display:none">编辑</button>
+          </div>
+        </div>
+        <div id="panel-table" class="panel-table"></div>
+
+        <h2 class="section-title">伤害分布</h2>
+        <div id="damage-table" class="panel-table"></div>
+
+        <h2 class="section-title">伤害</h2>
+        <div id="output-list" class="output-list"></div>
+
+        <h2 class="section-title">暴击分档</h2>
+        <div id="crit-tiers" class="panel-table"></div>
+
+        <h2 class="section-title">异常状态</h2>
+        <div id="dot-detail" class="dot-list"></div>
+
+        <div id="splash-damage"></div>
+
+        <h2 class="section-title">配置</h2>
+        <div class="controls-row">
+          <label>目标派系 <select id="faction-select"></select></label>
+          <label><input id="headshot-toggle" type="checkbox" /> 爆头倍率
+            <select id="headshot-mult">
+              <option value="1">×1</option>
+              <option value="2">×2</option>
+              <option value="3" selected>×3</option>
+            </select>
+          </label>
+        </div>
+        <div id="co-controls" class="co-controls"></div>
+      </section>
+
+      <!-- 中：槽位 + 备选 + 赋能 -->
+      <section class="col col-main">
+        <div class="slot-area" id="slot-area">
+          <div class="slot-area-head">
+            <h2 class="section-title">Mod 配置</h2>
+            <span class="slot-area-actions">
+              <span id="slot-info" class="muted"></span>
+              <button id="unequip-all" class="btn-ghost" type="button">全部卸下</button>
+            </span>
+          </div>
+          <div class="slot-wrap">
+            <div id="slot-grid" class="slot-grid"></div>
+            <div class="side-column">
+              <div class="side-group">
+                <div class="side-label">赋能</div>
+                <div id="arcane-slots" class="arcane-slots"></div>
+              </div>
+              <div class="side-group">
+                <div class="side-label">劣化</div>
+                <div id="side-slots" class="side-slots"></div>
+              </div>
+            </div>
+          </div>
+          <div class="metric-picker metric-picker-inline">
+            <span class="muted">增幅基准</span>
+            <div id="metric-options" class="metric-options"></div>
+          </div>
+        </div>
+
+        <div class="cand-area">
+          <div class="cand-head">
+            <h2 class="section-title">备选 Mod <span id="candidate-count" class="muted"></span></h2>
+          </div>
+
+          <div class="cand-toolbar">
+            <div id="candidate-filter" class="filter-group"></div>
+            <input id="candidate-search" class="search-input" type="search" placeholder="搜索名称" />
+            <span class="cand-hint muted">拖入槽位装备，拖回此处卸下</span>
+          </div>
+
+          <div id="candidate-list" class="candidate-list"></div>
+        </div>
+      </section>
+
+      <!-- 右：赋能 + 拆解 -->
+      <aside class="col col-right">
+        <div class="arcane-area">
+          <div class="cand-head">
+            <h2 class="section-title">赋能 <span id="arcane-count" class="muted"></span></h2>
+            <span class="cand-hint muted">拖到赋能槽</span>
+          </div>
+          <div id="arcane-list" class="arcane-list"></div>
+        </div>
+
+        <h2 class="section-title">拆解</h2>
+        <div id="detail"></div>
+      </aside>
+    </main>
+
+    <div id="toast" class="toast"></div>
+
+    <!-- 武器编辑器（仅开发态显示，D-044） -->
+    <div id="editor-overlay" class="editor-overlay" style="display:none">
+      <div class="editor-panel">
+        <div class="editor-head">
+          <h2 id="editor-title">编辑武器数据</h2>
+          <span class="muted editor-hint">仅开发态可用 · 保存写入 manual/weapon-overrides.json</span>
+          <button id="editor-close" class="btn-ghost" type="button">关闭</button>
+        </div>
+        <div id="editor-body" class="editor-body"></div>
+        <div class="editor-foot">
+          <span id="editor-msg" class="editor-msg"></span>
+          <button id="editor-reset" class="btn-ghost" type="button">撤销全部修改</button>
+          <button id="editor-save" class="btn-primary" type="button">保存</button>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="/packages/demo/public/app.js"></script>
+  </body>
+</html>

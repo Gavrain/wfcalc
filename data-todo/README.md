@@ -136,6 +136,33 @@
 - [ ] 剩余 24 把是哨兵 / 猎犬武器（Artax、Sweeper、Deconstructor、Batoten 等），
       它们走伙伴武器自己的 Mod 池，需要单独建模
 
+## 4c. 镀层类（A-03 / D-024）
+
+> 规则已于 2026-11-05 确认：**镀层加量 = x% × a × y**
+> （x = 每层百分比、a = 目标身上异常状态的**种类数**、y = 叠层上限）。
+> 数据层的 `stats[].key === 'co'` 标识镀层类；`conditions[].maxStacks` 就是 `y`。
+
+已核对 4 个镀层 Mod，3 个可直接驱动下拉框：
+
+| Mod | 槽位 | x | y (maxStacks) | 状态 |
+|---|---|---|---|---|
+| 镀层 步枪才能 `galvanized_aptitude` | rifle | 20% | 2 | ✅ |
+| 镀层 准确射手 `galvanized_shot` | pistol | 30% | 3 | ✅ |
+| 镀层 通晓霰弹枪 `galvanized_savvy` | shotgun | 20% | 2 | ✅ |
+| 异况超量 `condition_overload` | melee | 80% | **1（常驻生效）** | ✅ |
+
+> 需求方 2026-11-05 确认：**异况超量常驻生效、只有 1 层**，所以它 `conditions` 为空是正常的。
+> `adapter.ts` 的 `conditionOverloadMaxStacks()` 对常驻型返回 1。
+
+- [ ] **类镀层被动的武器**（需求方 2026-11-05 指示：列入 todo，后续再维护）：
+      `packages/data/src/manual/weapon-effects.ts` 仍是空表。
+      按 D-000 教训不按名字猜，需逐把人工确认（武器 id + 每层百分比 + 叠层上限 + 来源）。
+
+## 4d. 劣化槽（Exilus）判定
+
+- [ ] 数据层**没有**官方 `EXILUS` 标记，demo 目前用"是否改变伤害"反推（D-021）。
+      若能从导出补抓 `EXILUS` 兼容标签，应改为读该字段。
+
 ## 5. 中文名与本地化
 
 **已解决**：官方导出虽然只有语言包键，但 `browse.wf` 提供 `dict.zh.json` / `dict.en.json`
