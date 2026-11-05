@@ -1,12 +1,13 @@
 {
-  "generatedAt": "2026-11-05T07:26:30.410Z",
+  "generatedAt": "2026-11-05T07:32:35.627Z",
   "category": "companion",
   "count": 19,
   "note": "暴率/触发为 0~1 小数；伤害分布为绝对值；procChance 同为 0~1；kuva 表示需用户在计算器里选元素与加成（25%~60%）",
   "weapons": [
     {
       "id": "BurstLaserPistol",
-      "name": "/Lotus/Language/Items/BurstLaserPistolStoreItemName",
+      "name": "Burst Laser",
+      "nameZh": "激光点发",
       "category": "companion",
       "critChance": 0.15,
       "critMultiplier": 2,
@@ -52,7 +53,8 @@
     },
     {
       "id": "CryoxionWeapon",
-      "name": "/Lotus/Language/SolarisVenus/CryoxionWeapon",
+      "name": "Cryotra",
+      "nameZh": "急冻喷枪",
       "category": "companion",
       "critChance": 0.1,
       "critMultiplier": 1.75,
@@ -90,7 +92,8 @@
     },
     {
       "id": "DethMachineRifle",
-      "name": "/Lotus/Language/Items/DethMachineRifleName",
+      "name": "Deth Machine Rifle",
+      "nameZh": "死亡机枪",
       "category": "companion",
       "critChance": 0.05,
       "critMultiplier": 2,
@@ -122,7 +125,8 @@
     },
     {
       "id": "Gremlin",
-      "name": "/Lotus/Language/Weapons/SentinelGremlinName",
+      "name": "Artax",
+      "nameZh": "阿塔克斯",
       "category": "companion",
       "critChance": 0.02,
       "critMultiplier": 1.5,
@@ -152,7 +156,8 @@
     },
     {
       "id": "HextraWeapon",
-      "name": "/Lotus/Language/SolarisVenus/HextraWeapon",
+      "name": "Multron",
+      "nameZh": "多连穿甲枪",
       "category": "companion",
       "critChance": 0.15,
       "critMultiplier": 2,
@@ -194,7 +199,8 @@
     },
     {
       "id": "LaserRifle",
-      "name": "/Lotus/Language/Items/LaserRifleStoreItemName",
+      "name": "Laser Rifle",
+      "nameZh": "激光步枪",
       "category": "companion",
       "critChance": 0.17,
       "critMultiplier": 1.75,
@@ -226,7 +232,8 @@
     },
     {
       "id": "PrimeBurstLaserPistol",
-      "name": "/Lotus/Language/Items/PrimeBurstLaserPistolStoreItemName",
+      "name": "Burst Laser Prime",
+      "nameZh": "激光点发 Prime",
       "category": "companion",
       "critChance": 0.2,
       "critMultiplier": 2.3,
@@ -272,7 +279,8 @@
     },
     {
       "id": "PrimeDethMachineRifle",
-      "name": "/Lotus/Language/Primes/PrimeDethMachineRifleName",
+      "name": "Deth Machine Rifle Prime",
+      "nameZh": "死亡机枪 Prime",
       "category": "companion",
       "critChance": 0.1,
       "critMultiplier": 2,
@@ -304,7 +312,8 @@
     },
     {
       "id": "PrimeLaserRifle",
-      "name": "/Lotus/Language/Items/PrimeLaserRifleStoreItemName",
+      "name": "Prime Laser Rifle",
+      "nameZh": "激光步枪 Prime",
       "category": "companion",
       "critChance": 0.2,
       "critMultiplier": 2,
@@ -336,7 +345,8 @@
     },
     {
       "id": "PrimeSentShotgun",
-      "name": "/Lotus/Language/Items/PrimeSentinelShotgunName",
+      "name": "Sweeper Prime",
+      "nameZh": "扫除者 Prime",
       "category": "companion",
       "critChance": 0.1,
       "critMultiplier": 2.25,
@@ -368,7 +378,8 @@
     },
     {
       "id": "PrismaBurstLaserPistol",
-      "name": "/Lotus/Language/Items/PrismaBurstLaserPistolStoreItemName",
+      "name": "Prisma Burst Laser",
+      "nameZh": "棱晶 激光点发",
       "category": "companion",
       "critChance": 0.18,
       "critMultiplier": 2.15,
@@ -414,7 +425,8 @@
     },
     {
       "id": "SentBioWeapon",
-      "name": "/Lotus/Language/Items/SentinelBioWeaponName",
+      "name": "Stinger",
+      "nameZh": "毒刺",
       "category": "companion",
       "critChance": 0.025,
       "critMultiplier": 1.5,
@@ -454,7 +466,8 @@
     },
     {
       "id": "SentElecRailgun",
-      "name": "/Lotus/Language/Items/SentElecRailgunName",
+      "name": "Vulklok",
+      "nameZh": "金工火枪",
       "category": "companion",
       "critChance": 0.35,
       "critMultiplier": 2.5,
@@ -492,7 +505,8 @@
     },
     {
       "id": "SentShotgun",
-      "name": "/Lotus/Language/Items/SentinelShotgunName",
+      "name": "Sweeper",
+      "nameZh": "扫除者",
       "category": "companion",
       "critChance": 0.1,
       "critMultiplier": 1.75,
@@ -524,7 +538,8 @@
     },
     {
       "id": "SentinelFreezeRayPrimeRifle",
-      "name": "/Lotus/Language/Primes/FreezeRayPrimeName",
+      "name": "Verglas Prime",
+      "nameZh": "冰凇 Prime",
       "category": "companion",
       "variant": "prime",
       "critChance": 0.14,
@@ -555,7 +570,8 @@
     },
     {
       "id": "SentinelFreezeRayRifle",
-      "name": "/Lotus/Language/Weapons/SentinelFreezeRayRifleName",
+      "name": "Verglas",
+      "nameZh": "冰凇",
       "category": "companion",
       "critChance": 0.08,
       "critMultiplier": 2,
@@ -585,7 +601,8 @@
     },
     {
       "id": "SwarmerWeapon",
-      "name": "/Lotus/Language/SolarisVenus/SwarmerWeapon",
+      "name": "Helstrum",
+      "nameZh": "赫尔斯壮",
       "category": "companion",
       "critChance": 0.05,
       "critMultiplier": 1.5,
@@ -638,7 +655,8 @@
     },
     {
       "id": "TazronWeapon",
-      "name": "/Lotus/Language/SolarisVenus/TazronWeapon",
+      "name": "Tazicor",
+      "nameZh": "泰瑟步枪",
       "category": "companion",
       "critChance": 0.05,
       "critMultiplier": 1.5,
@@ -668,7 +686,8 @@
     },
     {
       "id": "ThermocorMoaWeapon",
-      "name": "/Lotus/Language/SolarisVenus/ThermocorWeapon",
+      "name": "Vulcax",
+      "nameZh": "金工火舌",
       "category": "companion",
       "critChance": 0.2,
       "critMultiplier": 2.5,

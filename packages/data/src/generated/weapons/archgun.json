@@ -1,12 +1,13 @@
 {
-  "generatedAt": "2026-11-05T07:26:30.408Z",
+  "generatedAt": "2026-11-05T07:32:35.625Z",
   "category": "archgun",
   "count": 19,
   "note": "暴率/触发为 0~1 小数；伤害分布为绝对值；procChance 同为 0~1；kuva 表示需用户在计算器里选元素与加成（25%~60%）",
   "weapons": [
     {
       "id": "ArchBurstGun",
-      "name": "/Lotus/Language/Items/ArchBurstGunName",
+      "name": "Cyngas",
+      "nameZh": "合成燃气炮",
       "category": "archgun",
       "critChance": 0.2,
       "critMultiplier": 2.2,
@@ -52,7 +53,8 @@
     },
     {
       "id": "ArchCannon",
-      "name": "/Lotus/Language/Items/ArchCannonName",
+      "name": "Corvas",
+      "nameZh": "黑鸦",
       "category": "archgun",
       "critChance": 0.4,
       "critMultiplier": 2.6,
@@ -111,7 +113,8 @@
     },
     {
       "id": "ArchGRNAAGun",
-      "name": "/Lotus/Language/Items/GrnAntiAirGunName",
+      "name": "Grattler",
+      "nameZh": "葛拉特勒",
       "category": "archgun",
       "critChance": 0.25,
       "critMultiplier": 2,
@@ -161,7 +164,8 @@
     },
     {
       "id": "ArchHeavyPistols",
-      "name": "/Lotus/Language/Items/ArchHeavyPistolsName",
+      "name": "Dual Decurion",
+      "nameZh": "什长双枪",
       "category": "archgun",
       "critChance": 0.28,
       "critMultiplier": 2.2,
@@ -203,7 +207,8 @@
     },
     {
       "id": "ArchLongRifle",
-      "name": "/Lotus/Language/Items/ArchLongRifleName",
+      "name": "Phaedra",
+      "nameZh": "菲德菈",
       "category": "archgun",
       "critChance": 0.14,
       "critMultiplier": 2,
@@ -245,7 +250,8 @@
     },
     {
       "id": "ArchMachineGun",
-      "name": "/Lotus/Language/Items/ArchMachinegunName",
+      "name": "Imperator",
+      "nameZh": "凯旋将军",
       "category": "archgun",
       "critChance": 0.24,
       "critMultiplier": 2,
@@ -287,7 +293,8 @@
     },
     {
       "id": "ArchMachineGunVandal",
-      "name": "/Lotus/Language/Items/ImperatorVandalName",
+      "name": "Imperator Vandal",
+      "nameZh": "凯旋将军·破坏者",
       "category": "archgun",
       "critChance": 0.28,
       "critMultiplier": 2.4,
@@ -329,7 +336,8 @@
     },
     {
       "id": "ArchRailgun",
-      "name": "/Lotus/Language/Items/ArchRailgunName",
+      "name": "Velocitus",
+      "nameZh": "极速电磁步枪",
       "category": "archgun",
       "critChance": 0.3,
       "critMultiplier": 2,
@@ -392,7 +400,8 @@
     },
     {
       "id": "ArchRocketCrossbow",
-      "name": "/Lotus/Language/Items/ArchRocketCrossbowName",
+      "name": "Fluctus",
+      "nameZh": "巨浪",
       "category": "archgun",
       "critChance": 0.22,
       "critMultiplier": 2,
@@ -434,7 +443,8 @@
     },
     {
       "id": "GrnHeavyGrenadeLauncher",
-      "name": "/Lotus/Language/Weapons/GrnHeavyGrenadeLauncherName",
+      "name": "Kuva Ayanga",
+      "nameZh": "赤毒·怒雷",
       "category": "archgun",
       "critChance": 0.35,
       "critMultiplier": 2,
@@ -482,7 +492,8 @@
     },
     {
       "id": "KuvaGrattler",
-      "name": "/Lotus/Language/Weapons/KuvaGrattlerName",
+      "name": "Kuva Grattler",
+      "nameZh": "赤毒·葛拉特勒",
       "category": "archgun",
       "kuva": {
         "bonusRange": [
@@ -547,7 +558,8 @@
     },
     {
       "id": "PrimeCorvasWeapon",
-      "name": "/Lotus/Language/Weapons/PrimeCorvasName",
+      "name": "Corvas Prime",
+      "nameZh": "黑鸦 Prime",
       "category": "archgun",
       "critChance": 0.44,
       "critMultiplier": 3,
@@ -606,7 +618,8 @@
     },
     {
       "id": "PrimeLarkspurWeapon",
-      "name": "/Lotus/Language/Weapons/PrimeLarkspurName",
+      "name": "Larkspur Prime",
+      "nameZh": "翠雀 Prime",
       "category": "archgun",
       "critChance": 0.14,
       "critMultiplier": 1.6,
@@ -665,7 +678,8 @@
     },
     {
       "id": "PrismaArchHeavyPistols",
-      "name": "/Lotus/Language/Weapons/PrismaArchHeavyPistolsName",
+      "name": "Prisma Dual Decurions",
+      "nameZh": "棱晶·什长双枪",
       "category": "archgun",
       "critChance": 0.3,
       "critMultiplier": 2.2,
@@ -707,7 +721,8 @@
     },
     {
       "id": "ThanoTechArchGun",
-      "name": "/Lotus/Language/Weapons/ThanoTechArchGunName",
+      "name": "Cortege",
+      "nameZh": "送葬者",
       "category": "archgun",
       "critChance": 0.2,
       "critMultiplier": 1.9,
@@ -770,7 +785,8 @@
     },
     {
       "id": "ThanoTechGrenadeLauncher",
-      "name": "/Lotus/Language/Weapons/ThanoTechGrenadeLauncherName",
+      "name": "Morgha",
+      "nameZh": "置灵者",
       "category": "archgun",
       "critChance": 0.3,
       "critMultiplier": 2.2,
@@ -848,7 +864,8 @@
     },
     {
       "id": "ThanoTechLongGun",
-      "name": "/Lotus/Language/Weapons/ThanoTechLongGunName",
+      "name": "Mausolon",
+      "nameZh": "惩戒者",
       "category": "archgun",
       "critChance": 0.3,
       "critMultiplier": 2.2,
@@ -899,7 +916,8 @@
     },
     {
       "id": "TnConcreteArchgunWeapon",
-      "name": "/Lotus/Language/Weapons/TnConcreteArchgunName",
+      "name": "Mandonel",
+      "nameZh": "辐光弩炮",
       "category": "archgun",
       "critChance": 0.25,
       "critMultiplier": 2,
@@ -951,7 +969,8 @@
     },
     {
       "id": "TnShieldFrameArchGun",
-      "name": "/Lotus/Language/Weapons/TnShieldFameArchGunName",
+      "name": "Larkspur",
+      "nameZh": "翠雀",
       "category": "archgun",
       "critChance": 0.1,
       "critMultiplier": 1.4,

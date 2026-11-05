@@ -1,12 +1,13 @@
 {
-  "generatedAt": "2026-11-05T07:26:30.398Z",
+  "generatedAt": "2026-11-05T07:32:35.617Z",
   "category": "primary",
   "count": 192,
   "note": "暴率/触发为 0~1 小数；伤害分布为绝对值；procChance 同为 0~1；kuva 表示需用户在计算器里选元素与加成（25%~60%）",
   "weapons": [
     {
       "id": "1999InfShotgunWeapon",
-      "name": "/Lotus/Language/1999Echoes/1999InfShotgunWeaponName",
+      "name": "Coda Bassocyst",
+      "nameZh": "终幕·低音爆囊",
       "category": "primary",
       "critChance": 0.18,
       "critMultiplier": 2.2,
@@ -45,7 +46,8 @@
     },
     {
       "id": "AHBoltor",
-      "name": "/Lotus/Language/Items/AHBoltorName",
+      "name": "Telos Boltor",
+      "nameZh": "终极·螺钉步枪",
       "category": "primary",
       "variant": "syndicate",
       "critChance": 0.3,
@@ -96,7 +98,8 @@
     },
     {
       "id": "AntlerBow",
-      "name": "/Lotus/Language/Items/AntlerBowName",
+      "name": "Cernos",
+      "nameZh": "西诺斯",
       "category": "primary",
       "critChance": 0.36,
       "critMultiplier": 2,
@@ -147,7 +150,8 @@
     },
     {
       "id": "AstillaPrimeWeapon",
-      "name": "/Lotus/Language/Weapons/PrimeAstillaName",
+      "name": "Astilla Prime",
+      "nameZh": "碎裂者 Prime",
       "category": "primary",
       "variant": "prime",
       "critChance": 0.21,
@@ -204,7 +208,8 @@
     },
     {
       "id": "AsymetricalBow",
-      "name": "/Lotus/Language/Items/AsymmetricBowName",
+      "name": "Daikyu",
+      "nameZh": "大久和弓",
       "category": "primary",
       "critChance": 0.34,
       "critMultiplier": 2,
@@ -236,7 +241,8 @@
     },
     {
       "id": "BioWeapon",
-      "name": "/Lotus/Language/ClanTech/Torid",
+      "name": "Torid",
+      "nameZh": "托里德",
       "category": "primary",
       "critChance": 0.15,
       "critMultiplier": 2,
@@ -291,7 +297,8 @@
     },
     {
       "id": "BoltoRifle",
-      "name": "/Lotus/Language/Items/BoltoRifleName",
+      "name": "Boltor",
+      "nameZh": "螺钉步枪",
       "category": "primary",
       "critChance": 0.1,
       "critMultiplier": 1.8,
@@ -342,7 +349,8 @@
     },
     {
       "id": "BratonPrime",
-      "name": "/Lotus/Language/Items/BratonPrimeName",
+      "name": "Braton Prime",
+      "nameZh": "布莱顿 Prime",
       "category": "primary",
       "variant": "prime",
       "critChance": 0.12,
@@ -394,7 +402,8 @@
     },
     {
       "id": "BurstRifle",
-      "name": "/Lotus/Language/Items/BurstRifleName",
+      "name": "Burston",
+      "nameZh": "伯斯顿",
       "category": "primary",
       "critChance": 0.06,
       "critMultiplier": 1.6,
@@ -447,7 +456,8 @@
     },
     {
       "id": "CarminePenta",
-      "name": "/Lotus/Language/Items/PentaLoginRewardName",
+      "name": "Carmine Penta",
+      "nameZh": "嫣红·潘塔",
       "category": "primary",
       "variant": "variant",
       "critChance": 0.1,
@@ -502,7 +512,8 @@
     },
     {
       "id": "ChainLightningRifle",
-      "name": "/Lotus/Language/Items/ChainLightningRifleName",
+      "name": "Amprex",
+      "nameZh": "安培克斯",
       "category": "primary",
       "critChance": 0.32,
       "critMultiplier": 2.2,
@@ -532,7 +543,8 @@
     },
     {
       "id": "CodaBubonicoCannon",
-      "name": "/Lotus/Language/Weapons/CodaBubonicoCannonName",
+      "name": "Coda Bubonico",
+      "nameZh": "终幕·横痃重炮",
       "category": "primary",
       "variant": "kuva",
       "kuva": {
@@ -621,7 +633,8 @@
     },
     {
       "id": "CodaHema",
-      "name": "/Lotus/Language/1999Echoes/CodaHemaName",
+      "name": "Coda Hema",
+      "nameZh": "终幕·血肢",
       "category": "primary",
       "variant": "kuva",
       "kuva": {
@@ -681,7 +694,8 @@
     },
     {
       "id": "CodaSporothrix",
-      "name": "/Lotus/Language/1999Echoes/CodaSporothrixName",
+      "name": "Coda Sporothrix",
+      "nameZh": "终幕·孢丝感染枪",
       "category": "primary",
       "variant": "kuva",
       "kuva": {
@@ -738,7 +752,8 @@
     },
     {
       "id": "CodaSynapse",
-      "name": "/Lotus/Language/1999Echoes/CodaSynapseName",
+      "name": "Coda Synapse",
+      "nameZh": "终幕·突触生化枪",
       "category": "primary",
       "variant": "kuva",
       "kuva": {
@@ -784,7 +799,8 @@
     },
     {
       "id": "CorpusRailgun",
-      "name": "/Lotus/Language/Weapons/CorpusSpearGunName",
+      "name": "Ferrox",
+      "nameZh": "铁晶磁轨炮",
       "category": "primary",
       "critChance": 0.32,
       "critMultiplier": 2.8,
@@ -845,7 +861,8 @@
     },
     {
       "id": "CorpusUMP",
-      "name": "/Lotus/Language/Items/CorpusUMPName",
+      "name": "Tetra",
+      "nameZh": "特拉",
       "category": "primary",
       "critChance": 0.04,
       "critMultiplier": 1.5,
@@ -876,7 +893,8 @@
     },
     {
       "id": "CrpArSniperRifle",
-      "name": "/Lotus/Language/Weapons/CrpArSniperName",
+      "name": "Ambassador",
+      "nameZh": "使节",
       "category": "primary",
       "critChance": 0.14,
       "critMultiplier": 2.8,
@@ -923,7 +941,8 @@
     },
     {
       "id": "CrpBEArcaPlasmor",
-      "name": "/Lotus/Language/Weapons/CrpBEArcaPlasmorName",
+      "name": "Tenet Arca Plasmor",
+      "nameZh": "信条·弧电离子枪",
       "category": "primary",
       "variant": "kuva",
       "kuva": {
@@ -977,7 +996,8 @@
     },
     {
       "id": "CrpBEFerrox",
-      "name": "/Lotus/Language/Weapons/CrpBEFerroxName",
+      "name": "Tenet Ferrox",
+      "nameZh": "信条·铁晶磁轨炮",
       "category": "primary",
       "variant": "kuva",
       "kuva": {
@@ -1054,7 +1074,8 @@
     },
     {
       "id": "CrpBEFluxRifle",
-      "name": "/Lotus/Language/Weapons/CrpBEFluxRifleName",
+      "name": "Tenet Flux Rifle",
+      "nameZh": "信条·通量步枪",
       "category": "primary",
       "variant": "kuva",
       "kuva": {
@@ -1101,7 +1122,8 @@
     },
     {
       "id": "CrpBEGlaxion",
-      "name": "/Lotus/Language/Weapons/CrpBEGlaxionName",
+      "name": "Tenet Glaxion",
+      "nameZh": "信条·冷冻光束步枪",
       "category": "primary",
       "variant": "kuva",
       "kuva": {
@@ -1147,7 +1169,8 @@
     },
     {
       "id": "CrpBEQuanta",
-      "name": "/Lotus/Language/Weapons/CrpBEQuantaName",
+      "name": "Tenet Quanta",
+      "nameZh": "信条·量子切割器",
       "category": "primary",
       "variant": "kuva",
       "kuva": {
@@ -1226,7 +1249,8 @@
     },
     {
       "id": "CrpBETetra",
-      "name": "/Lotus/Language/Weapons/CrpBETetraName",
+      "name": "Tenet Tetra",
+      "nameZh": "信条·特拉",
       "category": "primary",
       "variant": "kuva",
       "kuva": {
@@ -1299,7 +1323,8 @@
     },
     {
       "id": "CrpBFG",
-      "name": "/Lotus/Language/Items/CrpBfgName",
+      "name": "Opticor",
+      "nameZh": "奥堤克光子枪",
       "category": "primary",
       "critChance": 0.2,
       "critMultiplier": 2.5,
@@ -1331,7 +1356,8 @@
     },
     {
       "id": "CrpBow",
-      "name": "/Lotus/Language/Weapons/CrpBowName",
+      "name": "Lenz",
+      "nameZh": "楞次弓",
       "category": "primary",
       "critChance": 0.5,
       "critMultiplier": 2,
@@ -1377,7 +1403,8 @@
     },
     {
       "id": "CrpBriefcaseLauncher",
-      "name": "/Lotus/Language/Weapons/CrpBriefcaseLauncherName",
+      "name": "Tenet Envoy",
+      "nameZh": "信条·典客",
       "category": "primary",
       "critChance": 0.28,
       "critMultiplier": 2.6,
@@ -1415,7 +1442,8 @@
     },
     {
       "id": "CrpFreezeRayRifle",
-      "name": "/Lotus/Language/Items/CrpFreezeRayRifleName",
+      "name": "Glaxion",
+      "nameZh": "冷冻光束步枪",
       "category": "primary",
       "critChance": 0.08,
       "critMultiplier": 2,
@@ -1445,7 +1473,8 @@
     },
     {
       "id": "CrpFreezeRayVandalRifle",
-      "name": "/Lotus/Language/Weapons/CrpFreezeRayVandalName",
+      "name": "Glaxion Vandal",
+      "nameZh": "冷冻光束步枪·破坏者",
       "category": "primary",
       "variant": "variant",
       "critChance": 0.14,
@@ -1476,7 +1505,8 @@
     },
     {
       "id": "CrpHeavyRifle",
-      "name": "/Lotus/Language/ClanTech/CrpHeavyRifleName",
+      "name": "Supra",
+      "nameZh": "苏普拉",
       "category": "primary",
       "critChance": 0.12,
       "critMultiplier": 1.8,
@@ -1508,7 +1538,8 @@
     },
     {
       "id": "CrpLaserRifle",
-      "name": "/Lotus/Language/ClanTech/CrpLaserRifleName",
+      "name": "Flux Rifle",
+      "nameZh": "通量步枪",
       "category": "primary",
       "critChance": 0.1,
       "critMultiplier": 2,
@@ -1539,7 +1570,8 @@
     },
     {
       "id": "CrpRubanRifle",
-      "name": "/Lotus/Language/Weapons/CrpRubanRifleName",
+      "name": "Stahlta",
+      "nameZh": "钢刃步枪",
       "category": "primary",
       "critChance": 0.24,
       "critMultiplier": 1.8,
@@ -1598,7 +1630,8 @@
     },
     {
       "id": "CrpSentAmlgSniper",
-      "name": "/Lotus/Language/Weapons/CrpSentAmlgSniperName",
+      "name": "Komorex",
+      "nameZh": "猛毒",
       "category": "primary",
       "critChance": 0.16,
       "critMultiplier": 2.1,
@@ -1638,7 +1671,8 @@
     },
     {
       "id": "CrpSentExperimentRifle",
-      "name": "/Lotus/Language/SolarisVenus/CrpSentExperiementRifle",
+      "name": "Battacor",
+      "nameZh": "武使之力",
       "category": "primary",
       "critChance": 0.32,
       "critMultiplier": 2.4,
@@ -1698,7 +1732,8 @@
     },
     {
       "id": "CrpShapeBlastShotgun",
-      "name": "/Lotus/Language/Weapons/CrpShapeBlastName",
+      "name": "Exergis",
+      "nameZh": "晶能放射器",
       "category": "primary",
       "critChance": 0.08,
       "critMultiplier": 1.4,
@@ -1731,7 +1766,8 @@
     },
     {
       "id": "CrpShockRifle",
-      "name": "/Lotus/Language/Items/CrpShockRifleName",
+      "name": "Quanta",
+      "nameZh": "量子切割器",
       "category": "primary",
       "critChance": 0.16,
       "critMultiplier": 2.2,
@@ -1794,7 +1830,8 @@
     },
     {
       "id": "CrpShotgun",
-      "name": "/Lotus/Language/Weapons/CrpShotgunName",
+      "name": "Arca Plasmor",
+      "nameZh": "弧电离子枪",
       "category": "primary",
       "critChance": 0.22,
       "critMultiplier": 1.6,
@@ -1832,7 +1869,8 @@
     },
     {
       "id": "CrpSplitLaser",
-      "name": "/Lotus/Language/Items/CrpSplitLaserName",
+      "name": "Convectrix",
+      "nameZh": "导热聚焦枪",
       "category": "primary",
       "critChance": 0.16,
       "critMultiplier": 2.4,
@@ -1882,7 +1920,8 @@
     },
     {
       "id": "DaxDuviriAsymmetricalLongBowPlayerWeapon",
-      "name": "/Lotus/Language/Weapons/DaxDuviriAsymmetricalLongBowPlayerWeaponName",
+      "name": "Cinta",
+      "nameZh": "遂心",
       "category": "primary",
       "critChance": 0.2,
       "critMultiplier": 2,
@@ -1931,7 +1970,8 @@
     },
     {
       "id": "DeraVandal",
-      "name": "/Lotus/Language/Items/DeraVandalName",
+      "name": "Dera Vandal",
+      "nameZh": "德拉·破坏者",
       "category": "primary",
       "variant": "variant",
       "critChance": 0.08,
@@ -1984,7 +2024,8 @@
     },
     {
       "id": "DerelictCernos",
-      "name": "/Lotus/Language/Weapons/DerelictCernosName",
+      "name": "Proboscis Cernos",
+      "nameZh": "刺吸西诺斯",
       "category": "primary",
       "critChance": 0.07,
       "critMultiplier": 1.9,
@@ -2024,7 +2065,8 @@
     },
     {
       "id": "DexTheThird",
-      "name": "/Lotus/Language/Items/DexTheThirdName",
+      "name": "Dex Sybaris",
+      "nameZh": "Dex 席芭莉丝",
       "category": "primary",
       "variant": "variant",
       "critChance": 0.35,
@@ -2084,7 +2126,8 @@
     },
     {
       "id": "DoubleBarrelShotgun",
-      "name": "/Lotus/Language/Items/GrineerDoubleBarrellName",
+      "name": "Sobek",
+      "nameZh": "鳄神",
       "category": "primary",
       "critChance": 0.11,
       "critMultiplier": 2,
@@ -2116,7 +2159,8 @@
     },
     {
       "id": "DrakeRifle",
-      "name": "/Lotus/Language/Items/DrakeRifleName",
+      "name": "Tiberon",
+      "nameZh": "狂鲨",
       "category": "primary",
       "critChance": 0.26,
       "critMultiplier": 2.4,
@@ -2152,7 +2196,8 @@
     },
     {
       "id": "EnergyRifle",
-      "name": "/Lotus/Language/Items/EnergyRifleName",
+      "name": "Dera",
+      "nameZh": "德拉",
       "category": "primary",
       "critChance": 0.08,
       "critMultiplier": 1.6,
@@ -2204,7 +2249,8 @@
     },
     {
       "id": "FiveShotSniper",
-      "name": "/Lotus/Language/Items/FiveShotSniperRifleName",
+      "name": "Rubico",
+      "nameZh": "绝路",
       "category": "primary",
       "critChance": 0.3,
       "critMultiplier": 3,
@@ -2236,7 +2282,8 @@
     },
     {
       "id": "FlakCannon",
-      "name": "/Lotus/Language/Items/GrineerFlakCannonName",
+      "name": "Drakgoon",
+      "nameZh": "龙骑兵",
       "category": "primary",
       "critChance": 0.05,
       "critMultiplier": 2,
@@ -2287,7 +2334,8 @@
     },
     {
       "id": "FlameThrower",
-      "name": "/Lotus/Language/ClanTech/FlameThrower",
+      "name": "Ignis",
+      "nameZh": "伊格尼斯",
       "category": "primary",
       "critChance": 0.11,
       "critMultiplier": 2,
@@ -2317,7 +2365,8 @@
     },
     {
       "id": "FlameThrowerWraith",
-      "name": "/Lotus/Language/Weapons/FlamethrowerWraithName",
+      "name": "Ignis Wraith",
+      "nameZh": "伊格尼斯·亡魂",
       "category": "primary",
       "variant": "variant",
       "critChance": 0.17,
@@ -2348,7 +2397,8 @@
     },
     {
       "id": "FullAutoShotgun",
-      "name": "/Lotus/Language/Items/AutoShotgunName",
+      "name": "Boar",
+      "nameZh": "野猪",
       "category": "primary",
       "critChance": 0.1,
       "critMultiplier": 1.5,
@@ -2397,7 +2447,8 @@
     },
     {
       "id": "GLARifle",
-      "name": "/Lotus/Language/Items/GLARifleName",
+      "name": "Grinlok",
+      "nameZh": "葛恩火枪",
       "category": "primary",
       "critChance": 0.15,
       "critMultiplier": 2.5,
@@ -2429,7 +2480,8 @@
     },
     {
       "id": "GarudaCrossbow",
-      "name": "/Lotus/Language/Weapons/GarudaCrossbowName",
+      "name": "Nagantaka",
+      "nameZh": "噬蛇弩",
       "category": "primary",
       "critChance": 0.15,
       "critMultiplier": 2.3,
@@ -2502,7 +2554,8 @@
     },
     {
       "id": "GrenadeLauncher",
-      "name": "/Lotus/Language/ClanTech/GrenadeLauncherName",
+      "name": "Penta",
+      "nameZh": "潘塔",
       "category": "primary",
       "critChance": 0.1,
       "critMultiplier": 2,
@@ -2556,7 +2609,8 @@
     },
     {
       "id": "GrineerM16Rifle",
-      "name": "/Lotus/Language/Items/GrineerM16RifleName",
+      "name": "Karak",
+      "nameZh": "卡拉克",
       "category": "primary",
       "critChance": 0.09,
       "critMultiplier": 1.5,
@@ -2588,7 +2642,8 @@
     },
     {
       "id": "GrnAssaultRifle",
-      "name": "/Lotus/Language/Items/GrineerAssaultRifleName",
+      "name": "Grakata",
+      "nameZh": "葛拉卡达",
       "category": "primary",
       "critChance": 0.25,
       "critMultiplier": 2,
@@ -2639,7 +2694,8 @@
     },
     {
       "id": "GrnBowWeapon",
-      "name": "/Lotus/Language/Weapons/KuvaGrnBowName",
+      "name": "Kuva Bramma",
+      "nameZh": "赤毒·布拉玛",
       "category": "primary",
       "critChance": 0.35,
       "critMultiplier": 2.1,
@@ -2685,7 +2741,8 @@
     },
     {
       "id": "GrnBurstRifle",
-      "name": "/Lotus/Language/Items/HindName",
+      "name": "Hind",
+      "nameZh": "雌鹿",
       "category": "primary",
       "critChance": 0.07,
       "critMultiplier": 1.5,
@@ -2740,7 +2797,8 @@
     },
     {
       "id": "GrnCannonWeapon",
-      "name": "/Lotus/Language/Weapons/GrnCannonName",
+      "name": "Zarr",
+      "nameZh": "沙皇",
       "category": "primary",
       "critChance": 0.17,
       "critMultiplier": 2.5,
@@ -2805,7 +2863,8 @@
     },
     {
       "id": "GrnFlameSpear",
-      "name": "/Lotus/Language/Weapons/GrnFlameSpearName",
+      "name": "Javlok",
+      "nameZh": "燃焰标枪",
       "category": "primary",
       "critChance": 0.2,
       "critMultiplier": 2,
@@ -2878,7 +2937,8 @@
     },
     {
       "id": "GrnFourBarrelRifleWeapon",
-      "name": "/Lotus/Language/Weapons/GrnFourBarrelRifleName",
+      "name": "Quartakk",
+      "nameZh": "夸塔克",
       "category": "primary",
       "critChance": 0.19,
       "critMultiplier": 2.3,
@@ -2914,7 +2974,8 @@
     },
     {
       "id": "GrnGorgSniperRifle",
-      "name": "/Lotus/Language/Items/GrnGorgSniperRifleName",
+      "name": "Buzlok",
+      "nameZh": "巴兹火枪",
       "category": "primary",
       "critChance": 0.23,
       "critMultiplier": 2.5,
@@ -2981,7 +3042,8 @@
     },
     {
       "id": "GrnGrenadeLauncher",
-      "name": "/Lotus/Language/Items/GrnGrenadeLauncherName",
+      "name": "Tonkor",
+      "nameZh": "征服榴炮",
       "category": "primary",
       "critChance": 0.25,
       "critMultiplier": 2.5,
@@ -3035,7 +3097,8 @@
     },
     {
       "id": "GrnHarpoonGun",
-      "name": "/Lotus/Language/Items/GrnHarpoonGunName",
+      "name": "Harpak",
+      "nameZh": "哈帕克",
       "category": "primary",
       "critChance": 0.2,
       "critMultiplier": 2.3,
@@ -3108,7 +3171,8 @@
     },
     {
       "id": "GrnKuvaLichRifleWeapon",
-      "name": "/Lotus/Language/Weapons/GrnKuvaLichRifleName",
+      "name": "Kuva Chakkhurr",
+      "nameZh": "赤毒·邪眼",
       "category": "primary",
       "critChance": 0.5,
       "critMultiplier": 2.3,
@@ -3158,7 +3222,8 @@
     },
     {
       "id": "GrnOrokinRifleWeapon",
-      "name": "/Lotus/Language/Weapons/GrnOrokinRifleWeaponName",
+      "name": "Gotva Prime",
+      "nameZh": "骨葬 Prime",
       "category": "primary",
       "critChance": 0.23,
       "critMultiplier": 2.5,
@@ -3188,7 +3253,8 @@
     },
     {
       "id": "GrnSniperRifle",
-      "name": "/Lotus/Language/Items/GrineerSniperRifleName",
+      "name": "Vulkar",
+      "nameZh": "金工火神",
       "category": "primary",
       "critChance": 0.2,
       "critMultiplier": 2,
@@ -3220,7 +3286,8 @@
     },
     {
       "id": "GrnSparkRifle",
-      "name": "/Lotus/Language/Items/GrnSparkRifleName",
+      "name": "Kohm",
+      "nameZh": "寇恩热能枪",
       "category": "primary",
       "critChance": 0.11,
       "critMultiplier": 2.3,
@@ -3252,7 +3319,8 @@
     },
     {
       "id": "GyreRifleWeapon",
-      "name": "/Lotus/Language/Weapons/GyreRifleName",
+      "name": "Alternox",
+      "nameZh": "电幻步枪",
       "category": "primary",
       "critChance": 0.14,
       "critMultiplier": 2.2,
@@ -3327,7 +3395,8 @@
     },
     {
       "id": "HeavyRifle",
-      "name": "/Lotus/Language/Items/HeavyRifleName",
+      "name": "Gorgon",
+      "nameZh": "蛇发女妖",
       "category": "primary",
       "critChance": 0.17,
       "critMultiplier": 1.5,
@@ -3386,7 +3455,8 @@
     },
     {
       "id": "HuntingBow",
-      "name": "/Lotus/Language/Items/HuntingBowName",
+      "name": "Paris",
+      "nameZh": "帕里斯",
       "category": "primary",
       "critChance": 0.3,
       "critMultiplier": 2,
@@ -3455,7 +3525,8 @@
     },
     {
       "id": "InfArmCannon",
-      "name": "/Lotus/Language/Weapons/InfArmCannonName",
+      "name": "Bubonico",
+      "nameZh": "横痃重炮",
       "category": "primary",
       "critChance": 0.25,
       "critMultiplier": 2.3,
@@ -3527,7 +3598,8 @@
     },
     {
       "id": "InfCernos",
-      "name": "/Lotus/Language/Items/InfestedBowName",
+      "name": "Mutalist Cernos",
+      "nameZh": "异融西诺斯",
       "category": "primary",
       "critChance": 0.15,
       "critMultiplier": 2,
@@ -3578,7 +3650,8 @@
     },
     {
       "id": "InfCrpShockSwarmRifle",
-      "name": "/Lotus/Language/Items/InfCrpShockSwarmRifleName",
+      "name": "Mutalist Quanta",
+      "nameZh": "异融量子枪",
       "category": "primary",
       "critChance": 0.025,
       "critMultiplier": 1.5,
@@ -3635,7 +3708,8 @@
     },
     {
       "id": "InfQuantaRifle",
-      "name": "/Lotus/Language/Items/InfQuantaRifleName",
+      "name": "Paracyst",
+      "nameZh": "附肢寄生者",
       "category": "primary",
       "critChance": 0.1,
       "critMultiplier": 2,
@@ -3694,7 +3768,8 @@
     },
     {
       "id": "InfSniperRifle",
-      "name": "/Lotus/Language/Weapons/InfSniperRifleName",
+      "name": "Sporothrix",
+      "nameZh": "孢丝感染枪",
       "category": "primary",
       "critChance": 0.01,
       "critMultiplier": 3,
@@ -3735,7 +3810,8 @@
     },
     {
       "id": "InfestedBurstRifle",
-      "name": "/Lotus/Language/Weapons/InfestedBurstRifleName",
+      "name": "Hema",
+      "nameZh": "血肢",
       "category": "primary",
       "critChance": 0.11,
       "critMultiplier": 2,
@@ -3779,7 +3855,8 @@
     },
     {
       "id": "InfestedRifle",
-      "name": "/Lotus/Language/Items/InfestedRifleName",
+      "name": "Synapse",
+      "nameZh": "突触生化枪",
       "category": "primary",
       "critChance": 0.39,
       "critMultiplier": 2.7,
@@ -3809,7 +3886,8 @@
     },
     {
       "id": "InfestedShotgun",
-      "name": "/Lotus/Language/Items/InfestedShotgunName",
+      "name": "Phage",
+      "nameZh": "噬菌者",
       "category": "primary",
       "critChance": 0.19,
       "critMultiplier": 2,
@@ -3839,7 +3917,8 @@
     },
     {
       "id": "KarakWraith",
-      "name": "/Lotus/Language/Items/KarakWraithName",
+      "name": "Karak Wraith",
+      "nameZh": "卡拉克·亡魂",
       "category": "primary",
       "variant": "variant",
       "critChance": 0.13,
@@ -3872,7 +3951,8 @@
     },
     {
       "id": "KuvaDrakgoon",
-      "name": "/Lotus/Language/Weapons/KuvaDrakgoonName",
+      "name": "Kuva Drakgoon",
+      "nameZh": "赤毒·龙骑兵",
       "category": "primary",
       "variant": "kuva",
       "kuva": {
@@ -3939,7 +4019,8 @@
     },
     {
       "id": "KuvaHekWeapon",
-      "name": "/Lotus/Language/Weapons/KuvaHekName",
+      "name": "Kuva Hek",
+      "nameZh": "赤毒·海克",
       "category": "primary",
       "variant": "kuva",
       "kuva": {
@@ -4006,7 +4087,8 @@
     },
     {
       "id": "KuvaHind",
-      "name": "/Lotus/Language/Weapons/KuvaHindName",
+      "name": "Kuva Hind",
+      "nameZh": "赤毒·雌鹿",
       "category": "primary",
       "variant": "kuva",
       "kuva": {
@@ -4096,7 +4178,8 @@
     },
     {
       "id": "KuvaKarak",
-      "name": "/Lotus/Language/Weapons/KuvaKarakName",
+      "name": "Kuva Karak",
+      "nameZh": "赤毒·卡拉克",
       "category": "primary",
       "variant": "kuva",
       "kuva": {
@@ -4144,7 +4227,8 @@
     },
     {
       "id": "KuvaKohm",
-      "name": "/Lotus/Language/Weapons/KuvaKohmName",
+      "name": "Kuva Kohm",
+      "nameZh": "赤毒·寇恩热能枪",
       "category": "primary",
       "variant": "kuva",
       "kuva": {
@@ -4192,7 +4276,8 @@
     },
     {
       "id": "KuvaOgris",
-      "name": "/Lotus/Language/Weapons/KuvaOgrisName",
+      "name": "Kuva Ogris",
+      "nameZh": "赤毒·食人女魔",
       "category": "primary",
       "variant": "kuva",
       "kuva": {
@@ -4265,7 +4350,8 @@
     },
     {
       "id": "KuvaQuartakk",
-      "name": "/Lotus/Language/Weapons/KuvaQuartakkName",
+      "name": "Kuva Quartakk",
+      "nameZh": "赤毒·夸塔克",
       "category": "primary",
       "variant": "kuva",
       "kuva": {
@@ -4336,7 +4422,8 @@
     },
     {
       "id": "KuvaSobek",
-      "name": "/Lotus/Language/Weapons/KuvaSobekName",
+      "name": "Kuva Sobek",
+      "nameZh": "赤毒·鳄神",
       "category": "primary",
       "variant": "kuva",
       "kuva": {
@@ -4384,7 +4471,8 @@
     },
     {
       "id": "KuvaTonkor",
-      "name": "/Lotus/Language/Weapons/KuvaTonkorName",
+      "name": "Kuva Tonkor",
+      "nameZh": "赤毒·征服榴炮",
       "category": "primary",
       "variant": "kuva",
       "kuva": {
@@ -4456,7 +4544,8 @@
     },
     {
       "id": "KuvaZarr",
-      "name": "/Lotus/Language/Weapons/KuvaZarrName",
+      "name": "Kuva Zarr",
+      "nameZh": "赤毒·沙皇",
       "category": "primary",
       "variant": "kuva",
       "kuva": {
@@ -4537,7 +4626,8 @@
     },
     {
       "id": "LasGooAKPlayerWeapon",
-      "name": "/Lotus/Language/Weapons/LasGooAKName",
+      "name": "EFV-5 Jupiter",
+      "nameZh": "艾弗旺-5 木星",
       "category": "primary",
       "critChance": 0.21,
       "critMultiplier": 2.3,
@@ -4588,7 +4678,8 @@
     },
     {
       "id": "LaserAimRifle",
-      "name": "/Lotus/Language/Weapons/LaserAimRifleName",
+      "name": "Argonak",
+      "nameZh": "氩格纳克",
       "category": "primary",
       "critChance": 0.27,
       "critMultiplier": 2.3,
@@ -4639,7 +4730,8 @@
     },
     {
       "id": "LasrianNoxPlayerWeapon",
-      "name": "/Lotus/Language/Weapons/LasrianNoxPlayerWeaponName",
+      "name": "Purgator 1",
+      "nameZh": "净化者 1",
       "category": "primary",
       "critChance": 0.31,
       "critMultiplier": 2.3,
@@ -4678,7 +4770,8 @@
     },
     {
       "id": "LatronPrime",
-      "name": "/Lotus/Language/Items/LatronPrimeName",
+      "name": "Latron Prime",
+      "nameZh": "拉特昂 Prime",
       "category": "primary",
       "variant": "prime",
       "critChance": 0.22,
@@ -4745,7 +4838,8 @@
     },
     {
       "id": "MK1Paris",
-      "name": "/Lotus/Language/Items/MK1Paris",
+      "name": "MK1-Paris",
+      "nameZh": "MK1-帕里斯",
       "category": "primary",
       "variant": "starter",
       "critChance": 0.3,
@@ -4815,7 +4909,8 @@
     },
     {
       "id": "MK1Strun",
-      "name": "/Lotus/Language/Items/MK1Strun",
+      "name": "MK1-Strun",
+      "nameZh": "MK1-斯特朗",
       "category": "primary",
       "variant": "starter",
       "critChance": 0.075,
@@ -4875,7 +4970,8 @@
     },
     {
       "id": "NLTigris",
-      "name": "/Lotus/Language/Items/NLTigrisName",
+      "name": "Sancti Tigris",
+      "nameZh": "圣洁·猛虎",
       "category": "primary",
       "variant": "syndicate",
       "critChance": 0.15,
@@ -4908,7 +5004,8 @@
     },
     {
       "id": "OmicrusPlayerWep",
-      "name": "/Lotus/Language/Weapons/OmicrusName",
+      "name": "Nataruk",
+      "nameZh": "太始弓",
       "category": "primary",
       "critChance": 0.2,
       "critMultiplier": 1.8,
@@ -4966,7 +5063,8 @@
     },
     {
       "id": "PSPenta",
-      "name": "/Lotus/Language/Items/PSPentaName",
+      "name": "Secura Penta",
+      "nameZh": "保障·潘塔",
       "category": "primary",
       "variant": "syndicate",
       "critChance": 0.26,
@@ -5021,7 +5119,8 @@
     },
     {
       "id": "PaxDuviricusShotgun",
-      "name": "/Lotus/Language/Weapons/TnDuviriShotgunName",
+      "name": "Rauta",
+      "nameZh": "锐铁",
       "category": "primary",
       "critChance": 0.06,
       "critMultiplier": 2,
@@ -5053,7 +5152,8 @@
     },
     {
       "id": "PhantasmaPrimeShotgun",
-      "name": "/Lotus/Language/Weapons/PrimeRevenantShotgunName",
+      "name": "Phantasma Prime",
+      "nameZh": "幻离子 Prime",
       "category": "primary",
       "variant": "prime",
       "critChance": 0.11,
@@ -5110,7 +5210,8 @@
     },
     {
       "id": "PrimeAcceltraWeapon",
-      "name": "/Lotus/Language/Primes/PrimeAcceltraName",
+      "name": "Acceltra Prime",
+      "nameZh": "迅发电浆炮 Prime",
       "category": "primary",
       "variant": "prime",
       "critChance": 0.34,
@@ -5159,7 +5260,8 @@
     },
     {
       "id": "PrimeAfentisWeapon",
-      "name": "/Lotus/Language/Primes/AfentisPrimeName",
+      "name": "Afentis Prime",
+      "nameZh": "圣英 Prime",
       "category": "primary",
       "variant": "prime",
       "critChance": 0.26,
@@ -5228,7 +5330,8 @@
     },
     {
       "id": "PrimeAlternoxWeapon",
-      "name": "/Lotus/Language/Primes/PrimeAlternoxWeaponName",
+      "name": "Alternox Prime",
+      "nameZh": "电幻步枪 Prime",
       "category": "primary",
       "variant": "prime",
       "critChance": 0.2,
@@ -5304,7 +5407,8 @@
     },
     {
       "id": "PrimeBazaGun",
-      "name": "/Lotus/Language/Primes/PrimeBazaName",
+      "name": "Baza Prime",
+      "nameZh": "苍鹰 Prime",
       "category": "primary",
       "variant": "prime",
       "critChance": 0.28,
@@ -5337,7 +5441,8 @@
     },
     {
       "id": "PrimeBoar",
-      "name": "/Lotus/Language/Items/BoarPrimeName",
+      "name": "Boar Prime",
+      "nameZh": "野猪 Prime",
       "category": "primary",
       "variant": "prime",
       "critChance": 0.15,
@@ -5387,7 +5492,8 @@
     },
     {
       "id": "PrimeBoltor",
-      "name": "/Lotus/Language/Items/BoltorPrimeName",
+      "name": "Boltor Prime",
+      "nameZh": "螺钉步枪 Prime",
       "category": "primary",
       "variant": "prime",
       "critChance": 0.12,
@@ -5438,7 +5544,8 @@
     },
     {
       "id": "PrimeBurston",
-      "name": "/Lotus/Language/Items/PrimeBurstonName",
+      "name": "Burston Prime",
+      "nameZh": "伯斯顿 Prime",
       "category": "primary",
       "variant": "prime",
       "critChance": 0.18,
@@ -5492,7 +5599,8 @@
     },
     {
       "id": "PrimeCedoWeapon",
-      "name": "/Lotus/Language/Primes/CedoPrimeName",
+      "name": "Cedo Prime",
+      "nameZh": "塞多 Prime",
       "category": "primary",
       "variant": "prime",
       "critChance": 0.24,
@@ -5564,7 +5672,8 @@
     },
     {
       "id": "PrimeCernos",
-      "name": "/Lotus/Language/Primes/PrimeCernosName",
+      "name": "Cernos Prime",
+      "nameZh": "西诺斯 Prime",
       "category": "primary",
       "variant": "prime",
       "critChance": 0.35,
@@ -5654,7 +5763,8 @@
     },
     {
       "id": "PrimeCorinth",
-      "name": "/Lotus/Language/Primes/CorinthPrimeName",
+      "name": "Corinth Prime",
+      "nameZh": "科林斯 Prime",
       "category": "primary",
       "variant": "prime",
       "critChance": 0.3,
@@ -5712,7 +5822,8 @@
     },
     {
       "id": "PrimeDaikyuBow",
-      "name": "/Lotus/Language/Primes/DaikyuPrimeName",
+      "name": "Daikyu Prime",
+      "nameZh": "大久和弓 Prime",
       "category": "primary",
       "variant": "prime",
       "critChance": 0.4,
@@ -5764,7 +5875,8 @@
     },
     {
       "id": "PrimeFulmin",
-      "name": "/Lotus/Language/Primes/FulminPrimeName",
+      "name": "Fulmin Prime",
+      "nameZh": "雷霆 Prime",
       "category": "primary",
       "variant": "prime",
       "critChance": 0.3,
@@ -5824,7 +5936,8 @@
     },
     {
       "id": "PrimeHuntingBow",
-      "name": "/Lotus/Language/Items/ParisPrimeName",
+      "name": "Paris Prime",
+      "nameZh": "帕里斯 Prime",
       "category": "primary",
       "variant": "prime",
       "critChance": 0.45,
@@ -5894,7 +6007,8 @@
     },
     {
       "id": "PrimeLightningGun",
-      "name": "/Lotus/Language/Primes/PrimeLightningGunName",
+      "name": "Vadarya Prime",
+      "nameZh": "瓦德雅 Prime",
       "category": "primary",
       "critChance": 0.4,
       "critMultiplier": 2.8,
@@ -5924,7 +6038,8 @@
     },
     {
       "id": "PrimeNagantakaWeapon",
-      "name": "/Lotus/Language/Weapons/PrimeNagantakaName",
+      "name": "Nagantaka Prime",
+      "nameZh": "噬蛇弩 Prime",
       "category": "primary",
       "variant": "prime",
       "critChance": 0.25,
@@ -5998,7 +6113,8 @@
     },
     {
       "id": "PrimePanthera",
-      "name": "/Lotus/Language/Primes/PantheraPrimeName",
+      "name": "Panthera Prime",
+      "nameZh": "猎豹 Prime",
       "category": "primary",
       "variant": "prime",
       "critChance": 0.18,
@@ -6064,7 +6180,8 @@
     },
     {
       "id": "PrimePerigaleSniper",
-      "name": "/Lotus/Language/Primes/PrimePerigaleSniperName",
+      "name": "Perigale Prime",
+      "nameZh": "月面狂风 Prime",
       "category": "primary",
       "variant": "prime",
       "critChance": 0.32,
@@ -6101,7 +6218,8 @@
     },
     {
       "id": "PrimeScourgeWeapon",
-      "name": "/Lotus/Language/Weapons/PrimeScourgeName",
+      "name": "Scourge Prime",
+      "nameZh": "祸根 Prime",
       "category": "primary",
       "variant": "prime",
       "critChance": 0.1,
@@ -6202,7 +6320,8 @@
     },
     {
       "id": "PrimeSomaRifle",
-      "name": "/Lotus/Language/Items/PrimeSomaName",
+      "name": "Soma Prime",
+      "nameZh": "月神 Prime",
       "category": "primary",
       "variant": "prime",
       "critChance": 0.3,
@@ -6254,7 +6373,8 @@
     },
     {
       "id": "PrimeStradavarGun",
-      "name": "/Lotus/Language/Primes/StradavarPrimeName",
+      "name": "Stradavar Prime",
+      "nameZh": "斯特拉迪瓦 Prime",
       "category": "primary",
       "variant": "prime",
       "critChance": 0.24,
@@ -6306,7 +6426,8 @@
     },
     {
       "id": "PrimeStrunWeapon",
-      "name": "/Lotus/Language/Primes/StrunPrimeName",
+      "name": "Strun Prime",
+      "nameZh": "斯特朗 Prime",
       "category": "primary",
       "variant": "prime",
       "critChance": 0.24,
@@ -6366,7 +6487,8 @@
     },
     {
       "id": "PrimeSybarisRifle",
-      "name": "/Lotus/Language/Primes/PrimeSybarisName",
+      "name": "Sybaris Prime",
+      "nameZh": "席芭莉丝 Prime",
       "category": "primary",
       "variant": "prime",
       "critChance": 0.3,
@@ -6426,7 +6548,8 @@
     },
     {
       "id": "PrimeTiberonRifle",
-      "name": "/Lotus/Language/Primes/PrimeTiberonName",
+      "name": "Tiberon Prime",
+      "nameZh": "狂鲨 Prime",
       "category": "primary",
       "variant": "prime",
       "critChance": 0.28,
@@ -6501,7 +6624,8 @@
     },
     {
       "id": "PrimeTigris",
-      "name": "/Lotus/Language/Primes/PrimeTigrisName",
+      "name": "Tigris Prime",
+      "nameZh": "猛虎 Prime",
       "category": "primary",
       "variant": "prime",
       "critChance": 0.1,
@@ -6534,7 +6658,8 @@
     },
     {
       "id": "PrimeTrumnaWeapon",
-      "name": "/Lotus/Language/Primes/PrimeTrumnaWeaponName",
+      "name": "Trumna Prime",
+      "nameZh": "灭杀者 Prime",
       "category": "primary",
       "variant": "prime",
       "critChance": 0.24,
@@ -6601,7 +6726,8 @@
     },
     {
       "id": "PrimeVectisRifle",
-      "name": "/Lotus/Language/Items/PrimeVectisName",
+      "name": "Vectis Prime",
+      "nameZh": "守望者 Prime",
       "category": "primary",
       "variant": "prime",
       "critChance": 0.3,
@@ -6659,7 +6785,8 @@
     },
     {
       "id": "PrimeZhugeCrossbow",
-      "name": "/Lotus/Language/Primes/PrimeZhugeName",
+      "name": "Zhuge Prime",
+      "nameZh": "诸葛连弩 Prime",
       "category": "primary",
       "variant": "prime",
       "critChance": 0.26,
@@ -6712,7 +6839,8 @@
     },
     {
       "id": "PrismaCorpusUMP",
-      "name": "/Lotus/Language/Items/PrismaCorpusUMPName",
+      "name": "Prisma Tetra",
+      "nameZh": "棱晶·特拉",
       "category": "primary",
       "variant": "variant",
       "critChance": 0.1,
@@ -6744,7 +6872,8 @@
     },
     {
       "id": "PrismaGrakata",
-      "name": "/Lotus/Language/Items/PrismaGrakataName",
+      "name": "Prisma Grakata",
+      "nameZh": "棱晶·葛拉卡达",
       "category": "primary",
       "variant": "variant",
       "critChance": 0.25,
@@ -6796,7 +6925,8 @@
     },
     {
       "id": "PrismaGrinlokWeapon",
-      "name": "/Lotus/Language/Weapons/PrismaGrinlokName",
+      "name": "Prisma Grinlok",
+      "nameZh": "棱晶·葛恩火枪",
       "category": "primary",
       "variant": "variant",
       "critChance": 0.21,
@@ -6829,7 +6959,8 @@
     },
     {
       "id": "PrismaLenzWeapon",
-      "name": "/Lotus/Language/Skins/PrismaLenzSkinName",
+      "name": "Prisma Lenz",
+      "nameZh": "棱晶·楞次弓",
       "category": "primary",
       "variant": "variant",
       "critChance": 0.5,
@@ -6876,7 +7007,8 @@
     },
     {
       "id": "QuadShotgun",
-      "name": "/Lotus/Language/Items/QuadShotgunName",
+      "name": "Hek",
+      "nameZh": "海克",
       "category": "primary",
       "critChance": 0.1,
       "critMultiplier": 2,
@@ -6908,7 +7040,8 @@
     },
     {
       "id": "QuantaVandal",
-      "name": "/Lotus/Language/Items/QuantaVandalName",
+      "name": "Quanta Vandal",
+      "nameZh": "量子切割器·破坏者",
       "category": "primary",
       "variant": "variant",
       "critChance": 0.22,
@@ -6972,7 +7105,8 @@
     },
     {
       "id": "RVCernos",
-      "name": "/Lotus/Language/Items/RVCernosName",
+      "name": "Rakta Cernos",
+      "nameZh": "绯红·西诺斯",
       "category": "primary",
       "variant": "syndicate",
       "critChance": 0.35,
@@ -7024,7 +7158,8 @@
     },
     {
       "id": "Railgun",
-      "name": "/Lotus/Language/ClanTech/Railgun",
+      "name": "Lanka",
+      "nameZh": "兰卡",
       "category": "primary",
       "critChance": 0.2,
       "critMultiplier": 2,
@@ -7082,7 +7217,8 @@
     },
     {
       "id": "RailjackRifleGun",
-      "name": "/Lotus/Language/Weapons/TnRailJackRifleName",
+      "name": "Quellor",
+      "nameZh": "压制者",
       "category": "primary",
       "critChance": 0.12,
       "critMultiplier": 1.6,
@@ -7133,7 +7269,8 @@
     },
     {
       "id": "RepeatingCrossbow",
-      "name": "/Lotus/Language/Items/RepeatingCrossbowName",
+      "name": "Zhuge",
+      "nameZh": "诸葛连弩",
       "category": "primary",
       "critChance": 0.2,
       "critMultiplier": 2,
@@ -7175,7 +7312,8 @@
     },
     {
       "id": "RevenantShotgun",
-      "name": "/Lotus/Language/Weapons/RevenantShotgunName",
+      "name": "Phantasma",
+      "nameZh": "幻离子",
       "category": "primary",
       "critChance": 0.03,
       "critMultiplier": 1.5,
@@ -7231,7 +7369,8 @@
     },
     {
       "id": "Rifle",
-      "name": "/Lotus/Language/Items/RifleName",
+      "name": "Braton",
+      "nameZh": "布莱顿",
       "category": "primary",
       "critChance": 0.12,
       "critMultiplier": 1.6,
@@ -7282,7 +7421,8 @@
     },
     {
       "id": "RocketLauncher",
-      "name": "/Lotus/Language/ClanTech/RocketLauncher",
+      "name": "Ogris",
+      "nameZh": "食人女魔",
       "category": "primary",
       "critChance": 0.05,
       "critMultiplier": 2,
@@ -7336,7 +7476,8 @@
     },
     {
       "id": "RubicoPrimeWeapon",
-      "name": "/Lotus/Language/Primes/RubicoPrimeName",
+      "name": "Rubico Prime",
+      "nameZh": "绝路 Prime",
       "category": "primary",
       "variant": "prime",
       "critChance": 0.38,
@@ -7369,7 +7510,8 @@
     },
     {
       "id": "SMHek",
-      "name": "/Lotus/Language/Items/SMHekName",
+      "name": "Vaykor Hek",
+      "nameZh": "勇气·海克",
       "category": "primary",
       "variant": "syndicate",
       "critChance": 0.25,
@@ -7402,7 +7544,8 @@
     },
     {
       "id": "SapientPrimaryWeapon",
-      "name": "/Lotus/Language/Weapons/SapientPrimaryName",
+      "name": "Acceltra",
+      "nameZh": "迅发电浆炮",
       "category": "primary",
       "critChance": 0.32,
       "critMultiplier": 2.8,
@@ -7450,7 +7593,8 @@
     },
     {
       "id": "SawBladeGun",
-      "name": "/Lotus/Language/Items/GrineerSawbladeGunName",
+      "name": "Miter",
+      "nameZh": "米特尔",
       "category": "primary",
       "critChance": 0.05,
       "critMultiplier": 2,
@@ -7552,7 +7696,8 @@
     },
     {
       "id": "SemiAutoRifle",
-      "name": "/Lotus/Language/Items/SemiAutoRifleName",
+      "name": "Latron",
+      "nameZh": "拉特昂",
       "category": "primary",
       "critChance": 0.12,
       "critMultiplier": 2,
@@ -7618,7 +7763,8 @@
     },
     {
       "id": "SentOctaMiniGun",
-      "name": "/Lotus/Language/Weapons/TnoOctaMiniGunName",
+      "name": "Haalvu",
+      "nameZh": "哈尔武",
       "category": "primary",
       "critChance": 0.25,
       "critMultiplier": 2.5,
@@ -7669,7 +7815,8 @@
     },
     {
       "id": "SentRifleNewWarGun",
-      "name": "/Lotus/Language/Weapons/SentRifleNewWarGunName",
+      "name": "Basmu",
+      "nameZh": "巴什穆",
       "category": "primary",
       "critChance": 0.15,
       "critMultiplier": 2,
@@ -7734,7 +7881,8 @@
     },
     {
       "id": "SheduHeavyWeapon",
-      "name": "/Lotus/Language/Weapons/SheduWeaponName",
+      "name": "Shedu",
+      "nameZh": "舍杜",
       "category": "primary",
       "critChance": 0.25,
       "critMultiplier": 2.1,
@@ -7782,7 +7930,8 @@
     },
     {
       "id": "Shotgun",
-      "name": "/Lotus/Language/Items/ShotgunName",
+      "name": "Strun",
+      "nameZh": "斯特朗",
       "category": "primary",
       "critChance": 0.075,
       "critMultiplier": 1.5,
@@ -7841,7 +7990,8 @@
     },
     {
       "id": "ShotgunVandal",
-      "name": "/Lotus/Language/Items/StrunVandalName",
+      "name": "Strun Wraith",
+      "nameZh": "斯特朗·亡魂",
       "category": "primary",
       "variant": "variant",
       "critChance": 0.18,
@@ -7901,7 +8051,8 @@
     },
     {
       "id": "ShrineMaidenGunbrellaWeapon",
-      "name": "/Lotus/Language/Weapons/GunbrellaWeaponName",
+      "name": "Higasa",
+      "nameZh": "晴日伞",
       "category": "primary",
       "critChance": 0.24,
       "critMultiplier": 2,
@@ -7963,7 +8114,8 @@
     },
     {
       "id": "SniperRifle",
-      "name": "/Lotus/Language/Items/SniperRifleName",
+      "name": "Snipetron",
+      "nameZh": "狙击特昂",
       "category": "primary",
       "critChance": 0.3,
       "critMultiplier": 1.5,
@@ -7995,7 +8147,8 @@
     },
     {
       "id": "StalkerBow",
-      "name": "/Lotus/Language/Items/StalkerBowName",
+      "name": "Dread",
+      "nameZh": "恐惧",
       "category": "primary",
       "critChance": 0.5,
       "critMultiplier": 2,
@@ -8065,7 +8218,8 @@
     },
     {
       "id": "StartingRifle",
-      "name": "/Lotus/Language/Items/StartingRifleName",
+      "name": "MK1-Braton",
+      "nameZh": "MK1-布莱顿",
       "category": "primary",
       "variant": "starter",
       "critChance": 0.08,
@@ -8117,7 +8271,8 @@
     },
     {
       "id": "SundialRifle",
-      "name": "/Lotus/Language/Weapons/SundialRifleName",
+      "name": "Zenith",
+      "nameZh": "天穹之顶",
       "category": "primary",
       "critChance": 0.1,
       "critMultiplier": 2,
@@ -8168,7 +8323,8 @@
     },
     {
       "id": "SupraVandal",
-      "name": "/Lotus/Language/Weapons/AmbulasEventVandalName",
+      "name": "Supra Vandal",
+      "nameZh": "苏普拉·破坏者",
       "category": "primary",
       "variant": "variant",
       "critChance": 0.16,
@@ -8201,7 +8357,8 @@
     },
     {
       "id": "TC2024AK47Weapon",
-      "name": "/Lotus/Language/Weapons/AK47WeaponName",
+      "name": "AX-52",
+      "nameZh": "AX-52",
       "category": "primary",
       "critChance": 0.26,
       "critMultiplier": 2.4,
@@ -8231,7 +8388,8 @@
     },
     {
       "id": "TennoAR",
-      "name": "/Lotus/Language/Items/TennoAssaultRifleName",
+      "name": "Soma",
+      "nameZh": "月神",
       "category": "primary",
       "critChance": 0.3,
       "critMultiplier": 3,
@@ -8282,7 +8440,8 @@
     },
     {
       "id": "TennoDoubleBarrelShotgun",
-      "name": "/Lotus/Language/Items/TennoDoubleBarrelShotgunName",
+      "name": "Tigris",
+      "nameZh": "猛虎",
       "category": "primary",
       "critChance": 0.1,
       "critMultiplier": 2,
@@ -8314,7 +8473,8 @@
     },
     {
       "id": "TennoSniperRifle",
-      "name": "/Lotus/Language/Items/TennoSniperRifleName",
+      "name": "Vectis",
+      "nameZh": "守望者",
       "category": "primary",
       "critChance": 0.25,
       "critMultiplier": 2,
@@ -8371,7 +8531,8 @@
     },
     {
       "id": "TennoTommyGunRifle",
-      "name": "/Lotus/Language/Items/TennoTommyGunName",
+      "name": "Stradavar",
+      "nameZh": "斯特拉迪瓦",
       "category": "primary",
       "critChance": 0.24,
       "critMultiplier": 2,
@@ -8422,7 +8583,8 @@
     },
     {
       "id": "TenoraPrimeWeapon",
-      "name": "/Lotus/Language/Primes/TenoraPrimeName",
+      "name": "Tenora Prime",
+      "nameZh": "双簧管 Prime",
       "category": "primary",
       "variant": "prime",
       "critChance": 0.3,
@@ -8474,7 +8636,8 @@
     },
     {
       "id": "ThanotechRifle",
-      "name": "/Lotus/Language/Weapons/ThanoTechRifleName",
+      "name": "Trumna",
+      "nameZh": "灭杀者",
       "category": "primary",
       "critChance": 0.24,
       "critMultiplier": 2.2,
@@ -8540,7 +8703,8 @@
     },
     {
       "id": "TnAlchemistShotgun",
-      "name": "/Lotus/Language/Weapons/TnAlchemistShotgunName",
+      "name": "Cedo",
+      "nameZh": "塞多",
       "category": "primary",
       "critChance": 0.2,
       "critMultiplier": 2.4,
@@ -8611,7 +8775,8 @@
     },
     {
       "id": "TnBardRifle",
-      "name": "/Lotus/Language/Weapons/TnBardRifleName",
+      "name": "Tenora",
+      "nameZh": "双簧管",
       "category": "primary",
       "critChance": 0.28,
       "critMultiplier": 2,
@@ -8662,7 +8827,8 @@
     },
     {
       "id": "TnBayonetRifleWeapon",
-      "name": "/Lotus/Language/Weapons/TnBayonetPrimaryWeaponName",
+      "name": "Vinquibus",
+      "nameZh": "制胜者",
       "category": "primary",
       "critChance": 0.4,
       "critMultiplier": 3.2,
@@ -8693,7 +8859,8 @@
     },
     {
       "id": "TnBeltFedRifleWeapon",
-      "name": "/Lotus/Language/Weapons/TnBeltFedRifleWeaponName",
+      "name": "Reconifex",
+      "nameZh": "侦察者",
       "category": "primary",
       "critChance": 0.28,
       "critMultiplier": 2.8,
@@ -8724,7 +8891,8 @@
     },
     {
       "id": "TnChoirBow",
-      "name": "/Lotus/Language/JadeShadows/TnChoirBowName",
+      "name": "Evensong",
+      "nameZh": "晚祷",
       "category": "primary",
       "critChance": 0.25,
       "critMultiplier": 2.2,
@@ -8782,7 +8950,8 @@
     },
     {
       "id": "TnGlassShotgunGun",
-      "name": "/Lotus/Language/Weapons/TnGlassShotgunName",
+      "name": "Astilla",
+      "nameZh": "碎裂者",
       "category": "primary",
       "critChance": 0.17,
       "critMultiplier": 1.9,
@@ -8838,7 +9007,8 @@
     },
     {
       "id": "TnHeavyShotgunGun",
-      "name": "/Lotus/Language/Weapons/TnHeavyShotgunName",
+      "name": "Corinth",
+      "nameZh": "科林斯",
       "category": "primary",
       "critChance": 0.3,
       "critMultiplier": 2.8,
@@ -8903,7 +9073,8 @@
     },
     {
       "id": "TnHopliteSpearGunWeapon",
-      "name": "/Lotus/Language/Weapons/TnHopliteSpearGunName",
+      "name": "Afentis",
+      "nameZh": "圣英",
       "category": "primary",
       "critChance": 0.26,
       "critMultiplier": 2.2,
@@ -8970,7 +9141,8 @@
     },
     {
       "id": "TnInkRifleWeapon",
-      "name": "/Lotus/Language/Weapons/TnInkRifleWeaponName",
+      "name": "Enkaus",
+      "nameZh": "绘墨",
       "category": "primary",
       "critChance": 0.16,
       "critMultiplier": 1.8,
@@ -9036,7 +9208,8 @@
     },
     {
       "id": "TnModQuestRifleWeapon",
-      "name": "/Lotus/Language/ModQuest/ModQuestRifleName",
+      "name": "Thornbak",
+      "nameZh": "棘背",
       "category": "primary",
       "critChance": 0.06,
       "critMultiplier": 1.4,
@@ -9072,7 +9245,8 @@
     },
     {
       "id": "TnPriestSpearGun",
-      "name": "/Lotus/Language/Weapons/TnPriestSpearGunName",
+      "name": "Scourge",
+      "nameZh": "祸根",
       "category": "primary",
       "critChance": 0.02,
       "critMultiplier": 1.5,
@@ -9145,7 +9319,8 @@
     },
     {
       "id": "TnQuadSniper",
-      "name": "/Lotus/Language/Weapons/TnQuadRifle",
+      "name": "Perigale",
+      "nameZh": "月面狂风",
       "category": "primary",
       "critChance": 0.28,
       "critMultiplier": 2.6,
@@ -9181,7 +9356,8 @@
     },
     {
       "id": "TnRevolverRifleGun",
-      "name": "/Lotus/Language/Weapons/TnRevolverRifleName",
+      "name": "Veldt",
+      "nameZh": "草原猎手",
       "category": "primary",
       "critChance": 0.22,
       "critMultiplier": 2.2,
@@ -9213,7 +9389,8 @@
     },
     {
       "id": "TnRifleErsatzWeapon",
-      "name": "/Lotus/Language/Weapons/DuviriRifleName",
+      "name": "Aeolak",
+      "nameZh": "风鸣",
       "category": "primary",
       "critChance": 0.21,
       "critMultiplier": 2.3,
@@ -9300,7 +9477,8 @@
     },
     {
       "id": "TnSMGWeapon",
-      "name": "/Lotus/Language/Weapons/TnSMGWeaponName",
+      "name": "Baza",
+      "nameZh": "苍鹰",
       "category": "primary",
       "critChance": 0.26,
       "critMultiplier": 3,
@@ -9332,7 +9510,8 @@
     },
     {
       "id": "TnWispRifle",
-      "name": "/Lotus/Language/Weapons/TnWispRifleName",
+      "name": "Fulmin",
+      "nameZh": "雷霆",
       "category": "primary",
       "critChance": 0.3,
       "critMultiplier": 2.2,
@@ -9391,7 +9570,8 @@
     },
     {
       "id": "TnoLeverActionRifle",
-      "name": "/Lotus/Language/Items/TennoLeverActionRifleName",
+      "name": "Sybaris",
+      "nameZh": "席芭莉丝",
       "category": "primary",
       "critChance": 0.25,
       "critMultiplier": 2,
@@ -9450,7 +9630,8 @@
     },
     {
       "id": "TnoLotusPodShotgun",
-      "name": "/Lotus/Language/Weapons/TnoLotusPodShotgunName",
+      "name": "Steflos",
+      "nameZh": "石晶之花",
       "category": "primary",
       "critChance": 0.14,
       "critMultiplier": 2.2,
@@ -9491,7 +9672,8 @@
     },
     {
       "id": "TnoMiter",
-      "name": "/Lotus/Language/Items/TnoMiterName",
+      "name": "Panthera",
+      "nameZh": "猎豹",
       "category": "primary",
       "critChance": 0.12,
       "critMultiplier": 2,
@@ -9550,7 +9732,8 @@
     },
     {
       "id": "TnoPrmryXbowWeapon",
-      "name": "/Lotus/Language/Items/TennoSilentCrossbowName",
+      "name": "Attica",
+      "nameZh": "阿提卡",
       "category": "primary",
       "critChance": 0.25,
       "critMultiplier": 3,
@@ -9592,7 +9775,8 @@
     },
     {
       "id": "VIPRifle",
-      "name": "/Lotus/Language/Items/VIPRifleName",
+      "name": "Braton Vandal",
+      "nameZh": "布莱顿·破坏者",
       "category": "primary",
       "variant": "variant",
       "critChance": 0.16,
@@ -9644,7 +9828,8 @@
     },
     {
       "id": "VTGorgon",
-      "name": "/Lotus/Language/Items/PrismaGorgonName",
+      "name": "Prisma Gorgon",
+      "nameZh": "棱晶·蛇发女妖",
       "category": "primary",
       "variant": "variant",
       "critChance": 0.3,
@@ -9704,7 +9889,8 @@
     },
     {
       "id": "VandalCrpBFG",
-      "name": "/Lotus/Language/Weapons/VandalCrpBFGName",
+      "name": "Opticor Vandal",
+      "nameZh": "奥堤克光子枪·破坏者",
       "category": "primary",
       "variant": "variant",
       "critChance": 0.24,
@@ -9737,7 +9923,8 @@
     },
     {
       "id": "VandalSniperRifle",
-      "name": "/Lotus/Language/Items/SnipetronVandalName",
+      "name": "Snipetron Vandal",
+      "nameZh": "狙击特昂·破坏者",
       "category": "primary",
       "variant": "variant",
       "critChance": 0.28,
@@ -9770,7 +9957,8 @@
     },
     {
       "id": "VulkarWraith",
-      "name": "/Lotus/Language/Items/VulkarWraithName",
+      "name": "Vulkar Wraith",
+      "nameZh": "金工火神·亡魂",
       "category": "primary",
       "variant": "variant",
       "critChance": 0.2,
@@ -9802,7 +9990,8 @@
     },
     {
       "id": "WraithGorgon",
-      "name": "/Lotus/Language/Items/GorgonWraithName",
+      "name": "Gorgon Wraith",
+      "nameZh": "蛇发女妖·亡魂",
       "category": "primary",
       "variant": "variant",
       "critChance": 0.15,
@@ -9862,7 +10051,8 @@
     },
     {
       "id": "WraithLatron",
-      "name": "/Lotus/Language/Items/WraithLatronName",
+      "name": "Latron Wraith",
+      "nameZh": "拉特昂·亡魂",
       "category": "primary",
       "variant": "variant",
       "critChance": 0.26,
@@ -9929,7 +10119,8 @@
     },
     {
       "id": "ZarimanPumpShotgun",
-      "name": "/Lotus/Language/Weapons/ZarimanPumpShotgunName",
+      "name": "Felarx",
+      "nameZh": "逐枭",
       "category": "primary",
       "critChance": 0.2,
       "critMultiplier": 2,
@@ -9997,7 +10188,8 @@
     },
     {
       "id": "ZarimanSemiAutoRifle",
-      "name": "/Lotus/Language/Weapons/ZarimanSemiAutoRifleName",
+      "name": "Phenmor",
+      "nameZh": "凤殁",
       "category": "primary",
       "critChance": 0.2,
       "critMultiplier": 2,

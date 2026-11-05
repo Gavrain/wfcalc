@@ -10,6 +10,9 @@ export const SOURCES = {
   weapons: `${EXPORT_BASE}/ExportWeapons.json`,
   upgrades: `${EXPORT_BASE}/ExportUpgrades.json`,
   recipes: `${EXPORT_BASE}/ExportRecipes.json`,
+  /** 语言包（本地化名称）：键为语言代码，如 zh / en / tc */
+  langZh: `${EXPORT_BASE}/dict.zh.json`,
+  langEn: `${EXPORT_BASE}/dict.en.json`,
 } as const;
 
 export type SourceName = keyof typeof SOURCES;

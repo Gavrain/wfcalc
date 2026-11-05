@@ -20,6 +20,9 @@ src/manual/                人工维护层，改这里
 
 | 字段 | 含义 | 单位 |
 |---|---|---|
+| `id` | **内部名，作为主键** | 如 `RocketLauncher`、`HeavyRifle` |
+| `name` | 英文显示名 | 如 `Ogris` |
+| `nameZh` | 中文显示名 | 如 `食人女魔` |
 | `critChance` | 暴击几率 | **0~1 小数**（0.45 = 45%） |
 | `critMultiplier` | 暴击倍率 | 倍数（2 = 2 倍） |
 | `statusChance` | 触发几率 | 0~1 小数 |

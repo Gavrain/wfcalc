@@ -1,4 +1,4 @@
-# 数据更新报告 2026-11-05T07-26-30-413Z
+# 数据更新报告 2026-11-05T07-32-35-630Z
 
 ## 抓取统计
 ```
@@ -19,111 +19,7 @@
 ```
 变更报告
 ============================================================
-新增武器：0 把
-移除武器：0 把
-数值变动：77 把武器，共 77 处
-  ~ ArchAxeWeapon
-      category: unknown → archmelee
-  ~ ArchBurstGun
-      category: unknown → archgun
-  ~ ArchCannon
-      category: unknown → archgun
-  ~ ArchGRNAAGun
-      category: unknown → archgun
-  ~ ArchHammer
-      category: unknown → archmelee
-  ~ ArchHeavyPistols
-      category: unknown → archgun
-  ~ ArchHookSwordWeapon
-      category: unknown → archmelee
-  ~ ArchLongRifle
-      category: unknown → archgun
-  ~ ArchMachineGun
-      category: unknown → archgun
-  ~ ArchMachineGunVandal
-      category: unknown → archgun
-  ~ ArchRailgun
-      category: unknown → archgun
-  ~ ArchRocketCrossbow
-      category: unknown → archgun
-  ~ ArchScythe
-      category: unknown → archmelee
-  ~ ArchSwordShield
-      category: unknown → archmelee
-  ~ ArchSwordWeapon
-      category: unknown → archmelee
-  ~ BerserkerMelee
-      category: unknown → melee
-  ~ BerserkerMeleePrime
-      category: unknown → melee
-  ~ BurstLaserPistol
-      category: unknown → companion
-  ~ ChoirEruptWeapon
-      category: unknown → melee
-  ~ CryoxionWeapon
-      category: unknown → companion
-  ~ DethMachineRifle
-      category: unknown → companion
-  ~ DoomSword
-      category: unknown → melee
-  ~ DoomSwordPrime
-      category: unknown → melee
-  ~ DoomSwordUmbra
-      category: unknown → melee
-  ~ ExaltedArtilleryWeapon
-      category: unknown → melee
-  ~ ExaltedBook
-      category: unknown → melee
-  ~ ExaltedSniper
-      category: unknown → melee
-  ~ FlightPistols
-      category: unknown → melee
-  ~ FlightSword
-      category: unknown → melee
-  ~ GarudaClaws
-      category: unknown → melee
-  ~ GarudaPrimeClaws
-      category: unknown → melee
-  ~ Gremlin
-      category: unknown → companion
-  ~ GrnArchHandWeapon
-      category: unknown → archmelee
-  ~ GrnHeavyGrenadeLauncher
-      category: unknown → archgun
-  ~ HextraWeapon
-      category: unknown → companion
-  ~ KhoraWhipclawWeapon
-      category: unknown → melee
-  ~ KhoraWhipclawWeaponPrime
-      category: unknown → melee
-  ~ KuvaGrattler
-      category: unknown → archgun
-  ~ LaserRifle
-      category: unknown → companion
-  ~ MonkeyKingStaff
-      category: unknown → melee
-  ~ NechroTechSwordWeapon
-      category: unknown → melee
-  ~ NinjaStormWeapon
-      category: unknown → melee
-  ~ NinjaStormWeaponPrime
-      category: unknown → melee
-  ~ PacifistFist
-      category: unknown → melee
-  ~ PacifistFistPrime
-      category: unknown → melee
-  ~ PrimeBurstLaserPistol
-      category: unknown → companion
-  ~ PrimeCorvasWeapon
-      category: unknown → archgun
-  ~ PrimeDethMachineRifle
-      category: unknown → companion
-  ~ PrimeFlightPistols
-      category: unknown → melee
-  ~ PrimeFlightSword
-      category: unknown → melee
-  ... 还有 27 把未显示
-未变动：560 把
+与上一版完全一致，无需确认。
 ```
 
 ## 警告（205 条）

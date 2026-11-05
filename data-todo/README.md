@@ -81,19 +81,13 @@
 
 ## 5. 中文名与本地化
 
-官方导出的 `name` 字段只是语言包键路径（如 `/Lotus/Language/ClanTech/RocketLauncher`），
-**不含武器显示名**。
+**已解决**：官方导出虽然只有语言包键，但 `browse.wf` 提供 `dict.zh.json` / `dict.en.json`
+语言包（中文包 36165 条），武器名命中率 **637/637 = 100%**。
 
-已尝试的映射来源：
+流水线会自动：
+1. 抓取 `dict.zh.json` / `dict.en.json`
+2. 用导出里的 `name` 语言键查询显示名
+3. 产出里的 `name`（英文）/ `nameZh`（中文）即为显示名
 
-| 来源 | 结果 |
-|---|---|
-| 参考工具（紫卡模拟器）的 `WEAPON_DB` | 有 642 条中英名，但用紫卡 ID 体系，与导出内部名对不上；图标名匹配仅 54.5% |
-| `wiki.warframe.com` / fandom / huijiwiki | 全部 403 反爬 |
-| `WFCD/warframe-items` | 仓库结构变更，raw 路径 404 |
-
-- [ ] 抓取 DE 语言包（`/Lotus/Language/...` 键解析）
-- [ ] 若语言包不可得，人工维护内部 id → 中英名映射表
-- [ ] Mod / 赋能的官方中文名
-
-> 当前演示阶段先用内部 id（如 `RocketLauncher` = 食人女魔、`HeavyRifle` = 蛇发女妖）
+- [x] 武器中英名映射（语言包自动解析）
+- [ ] Mod / 赋能的官方中文名（同样可用语言包解析，待做）

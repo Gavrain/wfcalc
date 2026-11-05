@@ -386,7 +386,9 @@ export function cleanWeapons(exportWeapons: ExportWeapons): CleanResult {
 
     weapons.push({
       id: toWeaponId(key),
+      // 此处是语言包键，稍后由 localize 阶段解析为显示名
       name: { en: w.name ?? toWeaponId(key) },
+      languageKey: w.name,
       category,
       critChance: tidy(w.criticalChance ?? 0),
       critMultiplier: tidy(w.criticalMultiplier ?? 1),

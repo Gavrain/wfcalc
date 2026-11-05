@@ -28,8 +28,12 @@ export interface EmitMode {
 }
 
 export interface EmitWeapon {
+  /** 内部名作为主键，跨版本稳定、便于检索与引用 */
   id: string;
+  /** 显示名（已由语言包解析） */
   name: string;
+  /** 中文显示名（语言包缺失时为 undefined） */
+  nameZh?: string;
   category: string;
   /** Prime / Kuva / Syndicate 等变体标记 */
   variant?: string;
@@ -84,8 +88,8 @@ export function toEmitWeapon(
 
   return {
     id: w.id,
-    // 导出只有语言键，这里保留原样，等名称映射补齐后替换
     name: w.name.en,
+    ...(w.name.zh ? { nameZh: w.name.zh } : {}),
     category: w.category,
     ...(variant && variant !== 'normal' ? { variant } : {}),
     ...(isKuva ? { kuva: { bonusRange: [KUVA_BONUS_MIN, KUVA_BONUS_MAX], elements: [...KUVA_ELEMENT_TYPES] } } : {}),

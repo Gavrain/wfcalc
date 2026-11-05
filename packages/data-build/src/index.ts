@@ -18,6 +18,7 @@ import { cleanWeapons, EXCLUDED_CATEGORIES } from './clean.ts';
 import { diffWeapons, formatDiffReport, type DiffReport } from './diff.ts';
 import { applyOverrides, type AppliedOverride } from './overrides.ts';
 import { toEmitWeapon, type EmitWeapon } from './emit.ts';
+import { resolveName, nameCoverage, type LanguageDict } from './localize.ts';
 import { WEAPON_OVERRIDES } from '../../data/src/manual/overrides.ts';
 import type { ExportWeapons } from './types.ts';
 import type { AttackMode, WeaponPanel } from '../../core/src/weapon.ts';
@@ -171,10 +172,32 @@ async function main(): Promise<number> {
   const raw = await fetchSource<ExportWeapons>('weapons', { force: args.force });
   console.log(`      导出条目：${Object.keys(raw).length}`);
 
-  console.log('[2/4] 清洗...');
+  console.log('[2/5] 清洗...');
   const clean = cleanWeapons(raw);
   const statsLine = formatStats(clean.stats);
   console.log(statsLine);
+
+  // 语言包：把导出的语言键解析成中英文显示名
+  console.log('[3/5] 解析名称（语言包）...');
+  let zhDict: LanguageDict = {};
+  let enDict: LanguageDict = {};
+  try {
+    zhDict = await fetchSource<LanguageDict>('langZh', { force: args.force });
+    enDict = await fetchSource<LanguageDict>('langEn', { force: args.force });
+    const keys = clean.weapons.map((w) => w.languageKey ?? '').filter(Boolean);
+    const coverage = nameCoverage(keys, zhDict);
+    console.log(`      中文包 ${Object.keys(zhDict).length} 条，武器名命中 ${coverage.hit}/${coverage.total}（${(coverage.ratio * 100).toFixed(1)}%）`);
+    if (coverage.missingSamples.length > 0) {
+      console.log(`      未命中样例：${coverage.missingSamples.slice(0, 5).join(', ')}`);
+    }
+  } catch (err) {
+    console.log(`      ⚠️ 语言包获取失败，名称将回退到内部名：${(err as Error).message}`);
+  }
+
+  for (const w of clean.weapons) {
+    const resolved = resolveName(w.languageKey, zhDict, enDict);
+    w.name = resolved;
+  }
 
   // 应用人工覆盖层（蓄力时间反推射速等）
   const applied: AppliedOverride[] = applyOverrides(clean.weapons, WEAPON_OVERRIDES);
@@ -183,14 +206,14 @@ async function main(): Promise<number> {
     for (const a of applied) console.log(`  ${a.weaponId}.${a.field}: ${a.from ?? '(无)'} → ${a.to}  （${a.reason}）`);
   }
 
-  console.log('[3/4] 对比上一版...');
+  console.log('[4/5] 对比上一版...');
   const previous = loadPrevious();
   const diff = previous
     ? diffWeapons(previous, clean.weapons)
     : { added: [], removed: [], changed: [], unchanged: 0, needsAttention: true };
   console.log(previous ? formatDiffReport(diff) : '（无上一版，首次生成）');
 
-  console.log('[4/4] 合理性检查...');
+  console.log('[5/5] 合理性检查...');
   const problems = sanityProblems(clean, previous?.length);
   if (problems.length > 0) {
     console.log('⚠️  发现以下问题，需要你确认：');

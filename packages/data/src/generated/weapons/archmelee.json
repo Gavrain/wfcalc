@@ -1,12 +1,13 @@
 {
-  "generatedAt": "2026-11-05T07:26:30.409Z",
+  "generatedAt": "2026-11-05T07:32:35.626Z",
   "category": "archmelee",
   "count": 11,
   "note": "暴率/触发为 0~1 小数；伤害分布为绝对值；procChance 同为 0~1；kuva 表示需用户在计算器里选元素与加成（25%~60%）",
   "weapons": [
     {
       "id": "ArchAxeWeapon",
-      "name": "/Lotus/Language/Items/ArchAxeName",
+      "name": "<ARCHWING> Onorix",
+      "nameZh": "<ARCHWING> 奥努里克斯",
       "category": "archmelee",
       "critChance": 0.15,
       "critMultiplier": 1.25,
@@ -36,7 +37,8 @@
     },
     {
       "id": "ArchHammer",
-      "name": "/Lotus/Language/Items/ArchHammerName",
+      "name": "<ARCHWING> Rathbone",
+      "nameZh": "<ARCHWING> 拉斯波恩",
       "category": "archmelee",
       "critChance": 0.2,
       "critMultiplier": 2,
@@ -66,7 +68,8 @@
     },
     {
       "id": "ArchHookSwordWeapon",
-      "name": "/Lotus/Language/Items/ArchHookSwordName",
+      "name": "<ARCHWING> Agkuza",
+      "nameZh": "<ARCHWING> 驯象钩刃",
       "category": "archmelee",
       "critChance": 0.05,
       "critMultiplier": 1.5,
@@ -96,7 +99,8 @@
     },
     {
       "id": "ArchScythe",
-      "name": "/Lotus/Language/Items/ArchScytheName",
+      "name": "<ARCHWING> Kaszas",
+      "nameZh": "<ARCHWING> 死亡使徒",
       "category": "archmelee",
       "critChance": 0.15,
       "critMultiplier": 2,
@@ -126,7 +130,8 @@
     },
     {
       "id": "ArchSwordShield",
-      "name": "/Lotus/Language/Items/ArchSwordShieldName",
+      "name": "<ARCHWING> Centaur",
+      "nameZh": "<ARCHWING> 半人马",
       "category": "archmelee",
       "critChance": 0.25,
       "critMultiplier": 2,
@@ -156,7 +161,8 @@
     },
     {
       "id": "ArchSwordWeapon",
-      "name": "/Lotus/Language/Items/ArchSwordName",
+      "name": "<ARCHWING> Veritux",
+      "nameZh": "<ARCHWING> 真理巨剑",
       "category": "archmelee",
       "critChance": 0.05,
       "critMultiplier": 1.5,
@@ -186,7 +192,8 @@
     },
     {
       "id": "GrnArchHandWeapon",
-      "name": "/Lotus/Language/Items/GrnArchHandName",
+      "name": "<ARCHWING> Knux",
+      "nameZh": "<ARCHWING> 克纳克斯",
       "category": "archmelee",
       "critChance": 0.13,
       "critMultiplier": 2,
@@ -216,7 +223,8 @@
     },
     {
       "id": "VTArchSwordWeapon",
-      "name": "/Lotus/Language/Items/PrismaArchSwordName",
+      "name": "<ARCHWING> Prisma Veritux",
+      "nameZh": "<ARCHWING> 棱晶·真理巨剑",
       "category": "archmelee",
       "critChance": 0.3,
       "critMultiplier": 2,
@@ -246,7 +254,8 @@
     },
     {
       "id": "ZanukaPetMeleeWeaponIP",
-      "name": "/Lotus/Language/Pets/ZanukaPetMeleeWeaponIPName",
+      "name": "Batoten",
+      "nameZh": "巴托腾",
       "category": "archmelee",
       "critChance": 0.1,
       "critMultiplier": 3,
@@ -275,7 +284,8 @@
     },
     {
       "id": "ZanukaPetMeleeWeaponIS",
-      "name": "/Lotus/Language/Pets/ZanukaPetMeleeWeaponISName",
+      "name": "Lacerten",
+      "nameZh": "莱斯腾",
       "category": "archmelee",
       "critChance": 0.1,
       "critMultiplier": 3,
@@ -304,7 +314,8 @@
     },
     {
       "id": "ZanukaPetMeleeWeaponPS",
-      "name": "/Lotus/Language/Pets/ZanukaPetMeleeWeaponPSName",
+      "name": "Akaten",
+      "nameZh": "阿卡腾",
       "category": "archmelee",
       "critChance": 0.1,
       "critMultiplier": 3,

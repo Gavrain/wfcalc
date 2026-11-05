@@ -84,9 +84,11 @@ export interface AttackMode {
 }
 
 export interface WeaponPanel {
-  /** 内部稳定 id（官方导出键路径的最后一段） */
+  /** 内部稳定 id（官方导出键路径的最后一段），同时作为主键 */
   id: string;
   name: { en: string; zh?: string };
+  /** 官方导出的语言包键（如 /Lotus/Language/Items/RifleName），用于重新解析显示名 */
+  languageKey?: string | undefined;
   category: 'primary' | 'secondary' | 'melee' | 'archgun' | 'archmelee' | 'companion' | 'unknown';
   critChance: number;
   critMultiplier: number;
