@@ -68,16 +68,73 @@
 
 ## 3. 武器赋能（Arcane）
 
-- [ ] 可装备于武器的赋能清单、每级数值、生效条件、最大叠层
-- [ ] 与"赋能槽位"的对应关系（主武器 / 副武器 / 近战）
+> **已解决（2026-11-05）**：官方 `ExportArcanes.json` 里**有**结构化逐级数值，
+> 只是藏在多语言模板里。已按模板拆解，产出 `packages/data/src/generated/mods/arcanes.json`。
+>
+> 收录范围（需求方选定）：主要· / 次要· / 近战· / 神威· / 和平· / 残差· /
+> 弓箭· / 霰弹· / 双枪· / 瀑流· / 联结· / 分形·，共 62 个，**剔除 6 个不影响武器伤害的**，最终 **56 个**。
+
+- [x] 可装备于武器的赋能清单、每级数值、生效条件、最大叠层
+- [x] 与"赋能槽位"的对应关系（主要 / 次要 / 近战 / Zaw / Kitgun，由名称前缀给出）
+- [ ] 6 个 `special` 类赋能（神威·触染/流行病、主要·压缩、近战·刃影、和平·追寻者、神威·狩猎）
+      产生额外攻击或伤害源，需在计算内核里单独建模
 
 ## 4. Mod 数值与乘区归属
 
-官方 `ExportUpgrades.json` **只有基础属性（极性、稀有度、耗点），没有数值**。
+> **已解决（2026-11-05）**：官方 `ExportUpgrades.json` 确实只有基础属性（极性、稀有度、耗点），
+> 没有数值。数值改从**需求方维护的紫卡模拟器 HTML 的 `ZKMODS`** 取得，并已映射到乘区。
+> 详见 `research/03-Mod数据抓取.md`，产出在 `packages/data/src/generated/mods/`。
+>
+> 结果：**442 个武器 Mod**（每个带 0 级~满级逐级数值）+ 56 个武器赋能 + 19 个套装；
+> 111 个属性键**全部**映射到乘区；与官方导出交叉校验 442/442 匹配，与 WFCD 比对 442 条 0 不一致。
 
-- [ ] 每个 Mod 的数值（按等级 0~最大）
-- [ ] 每个 Mod 影响的属性 → 乘区归属（见 `docs/乘区归属表`）
-- [ ] 套装的联动加成
+- [x] 每个 Mod 的数值（按等级 0~最大）——`mods.json` 的 `stats[].levelValues`
+- [x] 每个 Mod 影响的属性 → 乘区归属（见 `docs/乘区归属表`）
+- [x] 套装的联动加成 —— 19 个已产出，见下方第 4a 节
+- [ ] 架势不做建模（需求方确认不关注）；61 个架势仅识别，不产出
+- [x] 显赫武器的 Mod 归类 —— 近战显赫归 melee，枪械显赫归对应枪
+      （`packages/data/src/manual/exalted-slots.ts`）
+- [ ] **近战细类补齐**（决策记录 D-004：需求方已确认**全部列为 todo，暂不关心**）
+
+  279 把近战里 **230 把已有细类**，剩余 **49 把无细类**，暂不处理：
+
+  | 类别 | 数量 | 样例 | 当前状态 |
+  |---|---|---|---|
+  | 显赫武器 | 22 | Exalted Blade、Valkyr Talons、Iron Staff、Whipclaw、Landslide Fists | `broad=melee`，`specific=[]` |
+  | 天工造武 Zaw 刀身 | 22 | Dehtat、Cyath、Balla、Kronsh、Mewan、Ooltha、Dokrahm、Sepfahn、Rabvee、Plague Kripath/Keewar | `broad=melee`，`specific=[]` |
+  | 哨兵/猎犬近战 | 5 | Deconstructor (+Prime)、Batoten、Lacerten、Akaten | `unresolved=true` |
+
+  影响：这 49 把**仍可装通用近战 Mod**（`melee` 宽类），但装不了自己的专属细类 Mod
+  （如显赫圣剑刀装不了剑类 Mod）。**不会算错**，只是可选项偏少。
+
+  补齐时需要的信息：
+  - 显赫武器：按形态定细类（圣剑刀=sword、女武神爪=claws、铁棒=staff、鞭击=whip、地裂拳=fist…）
+  - Zaw 刀身：11 种刀身各自的近战类型（ZK 与官方导出都不给，只能人工认定）
+
+## 4a. 套装加成（2026-11-05 确认要收录）
+
+> 之前误判为"游戏内没有套装"。实际 `ExportModSet.json` 的 19 条就是
+> 装 2 件及以上同系列模组后生效的额外加成，产出在 `generated/mods/mod-sets.json`。
+
+- [x] 19 个套装的逐级数值（按已装件数）
+- [x] 乘区归属逐个标注（`clean-modsets.ts` 的 `SET_EFFECTS`）
+- [x] **私法套装的特殊口径**：`X% 几率强化暴击` 等价为**固定加算区的绝对暴击率**，
+      位置在 Mod 之后：`暴率 = (面板×(1+ΣMod%) + 固定加算值) × 额外乘区`
+- [x] 角斗士：每层连击倍率 +X% 近战暴率，走暴击率乘区
+- [ ] **牺牲 / Umbra 套装的具体折算倍率**（决策记录 D-002，需求方已确认列为待办）
+      - 机制：提高本套 Mod 自身数值（牺牲·压迫点、牺牲·斩铁 等）
+      - **为什么拿不到**：官方 `ExportModSet.json` 里 Sacrifice / Umbra 两条的 `levelStats`
+        全是空对象 `{}`，只有描述文本"Enhance mods in this set."，**没有给任何数值**
+      - 现有线索：ZK 的 `ZKSETS` 标了 `sacrifice` 的 `per: 25`，但来源不明、无法交叉验证
+      - 当前处理：`mod-sets.json` 保留机制标注（`enhanceOwnMods`）与原始数据，
+        **不参与计算**；UI 应标注"该套装数值未建模"
+      - 待办：等计算内核阶段，或需求方提供实测倍率后再折算
+
+## 4b. 武器 → 可装 Mod 的对应关系
+
+- [x] 842 把武器里 818 把判出可装 Mod 种类（`weapon-slots.json`）
+- [ ] 剩余 24 把是哨兵 / 猎犬武器（Artax、Sweeper、Deconstructor、Batoten 等），
+      它们走伙伴武器自己的 Mod 池，需要单独建模
 
 ## 5. 中文名与本地化
 
