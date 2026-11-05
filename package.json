@@ -12,7 +12,7 @@
     "node": ">=20"
   },
   "scripts": {
-    "test": "node --test --test-isolation=none --experimental-strip-types \"packages/*/test/**/*.test.ts\"",
+    "test": "node --test --experimental-strip-types \"packages/*/test/**/*.test.ts\"",
     "typecheck": "tsc -p tsconfig.json",
     "build:data": "node --experimental-strip-types packages/data-build/src/index.ts"
   },
