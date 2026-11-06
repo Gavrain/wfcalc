@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-11-06T13:18:56.219Z",
+  "generatedAt": "2026-11-06T17:48:09.131Z",
   "category": "melee",
-  "count": 249,
+  "count": 258,
   "note": "暴率/触发为 0~1 小数；伤害分布为绝对值；procChance 同为 0~1；kuva 表示需用户在计算器里选元素与加成（25%~60%）",
   "weapons": [
     {
@@ -354,6 +354,79 @@
                     "slash": 225
                   },
                   "procChance": 0
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "BlastWeapon",
+      "name": "Balefire Charger",
+      "nameZh": "野火充能",
+      "category": "melee",
+      "critChance": 0.05,
+      "critMultiplier": 1.5,
+      "statusChance": 0.1,
+      "fireRate": 0.8333,
+      "reloadTime": 1,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "charge",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
+            {
+              "id": "direct",
+              "label": "直接命中",
+              "segments": [
+                {
+                  "kind": "impact",
+                  "aoe": false,
+                  "damage": {
+                    "impact": 10
+                  },
+                  "procChance": 0.06
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "BlastWeaponPrime",
+      "name": "Balefire Charger Prime",
+      "nameZh": "野火充能 Prime",
+      "category": "melee",
+      "variant": "prime",
+      "critChance": 0.05,
+      "critMultiplier": 1.5,
+      "statusChance": 0.1,
+      "fireRate": 0.8333,
+      "reloadTime": 1,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "charge",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
+            {
+              "id": "direct",
+              "label": "直接命中",
+              "segments": [
+                {
+                  "kind": "impact",
+                  "aoe": false,
+                  "damage": {
+                    "impact": 10
+                  },
+                  "procChance": 0.06
                 }
               ]
             }
@@ -1798,6 +1871,32 @@
       ]
     },
     {
+      "id": "DarkSwordDaggerHybridWeapon@dual_swords",
+      "name": "(未知)",
+      "nameZh": "暗黑分合剑（双剑）",
+      "category": "melee",
+      "critChance": 0,
+      "critMultiplier": 2,
+      "statusChance": 0.1,
+      "fireRate": 1,
+      "modes": [],
+      "_manual": "export-missing",
+      "_note": "导出 behaviours 为空、游戏面板未收录；先建「双剑」版本占位，数值待补（需求方 2026-11-07）"
+    },
+    {
+      "id": "DarkSwordDaggerHybridWeapon@heavy_blade",
+      "name": "(未知)",
+      "nameZh": "暗黑分合剑（巨刃）",
+      "category": "melee",
+      "critChance": 0,
+      "critMultiplier": 2,
+      "statusChance": 0.1,
+      "fireRate": 1,
+      "modes": [],
+      "_manual": "export-missing",
+      "_note": "导出 behaviours 为空、游戏面板未收录；先建「巨刃」版本占位，数值待补（需求方 2026-11-07）"
+    },
+    {
       "id": "DaxDuviriHammerWeapon",
       "name": "Sampotes",
       "nameZh": "三宝聚",
@@ -2826,6 +2925,76 @@
       ]
     },
     {
+      "id": "EntFistIncarnon",
+      "name": "Ruvox",
+      "nameZh": "古声",
+      "category": "melee",
+      "critChance": 0.26,
+      "critMultiplier": 2.2,
+      "statusChance": 0.2,
+      "fireRate": 1,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "unknown",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
+            {
+              "id": "direct",
+              "label": "直接命中",
+              "segments": [
+                {
+                  "kind": "impact",
+                  "aoe": false,
+                  "damage": {
+                    "impact": 170
+                  },
+                  "procChance": 0.2
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "EntSphereHammer",
+      "name": "Ekhein",
+      "nameZh": "映声战锤",
+      "category": "melee",
+      "critChance": 0.3,
+      "critMultiplier": 2.4,
+      "statusChance": 0.15,
+      "fireRate": 0.7667,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "unknown",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
+            {
+              "id": "direct",
+              "label": "直接命中",
+              "segments": [
+                {
+                  "kind": "impact",
+                  "aoe": false,
+                  "damage": {
+                    "impact": 340
+                  },
+                  "procChance": 0.15
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
       "id": "EtherScytheWeapon",
       "name": "Ether Reaper",
       "nameZh": "苍穹死神",
@@ -3087,6 +3256,46 @@
           ]
         }
       ]
+    },
+    {
+      "id": "ExaltedBow",
+      "name": "Artemis Bow",
+      "nameZh": "月神狩弓",
+      "category": "melee",
+      "critChance": 0.25,
+      "critMultiplier": 2,
+      "statusChance": 0.2,
+      "fireRate": 1,
+      "reloadTime": 0.85,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "unknown",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
+            {
+              "id": "direct",
+              "label": "直接命中",
+              "segments": [
+                {
+                  "kind": "attack",
+                  "aoe": false,
+                  "damage": {
+                    "impact": 33.6,
+                    "puncture": 192,
+                    "slash": 14.4
+                  },
+                  "procChance": 0.2
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "_manual": "bible",
+      "_note": "导出为 冲 10.5 / 穿 60 / 切 4.5（合计 75）；游戏面板 冲 33.6 / 穿 192 / 切 14.4（合计 240），比例一致"
     },
     {
       "id": "ExaltedSniper",
@@ -6621,6 +6830,47 @@
       ]
     },
     {
+      "id": "PrimeExaltedBow",
+      "name": "Artemis Bow Prime",
+      "nameZh": "月神狩弓 Prime",
+      "category": "melee",
+      "variant": "prime",
+      "critChance": 0.25,
+      "critMultiplier": 2,
+      "statusChance": 0.2,
+      "fireRate": 1,
+      "reloadTime": 0.85,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "unknown",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
+            {
+              "id": "direct",
+              "label": "直接命中",
+              "segments": [
+                {
+                  "kind": "attack",
+                  "aoe": false,
+                  "damage": {
+                    "impact": 33.6,
+                    "puncture": 192,
+                    "slash": 14.4
+                  },
+                  "procChance": 0.2
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "_manual": "bible",
+      "_note": "同月神狩弓：导出 75 → 游戏面板 240（冲 33.6 / 穿 192 / 切 14.4）"
+    },
+    {
       "id": "PrimeFlightPistols",
       "name": "Dex Pixia Prime",
       "nameZh": "Dex 妖精 Prime",
@@ -10001,6 +10251,41 @@
                     "slash": 99.2
                   },
                   "procChance": 0.2
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "TnoNunchaku",
+      "name": "Shaku",
+      "nameZh": "双节尺棍",
+      "category": "melee",
+      "critChance": 0.18,
+      "critMultiplier": 2,
+      "statusChance": 0.34,
+      "fireRate": 1.1667,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "unknown",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
+            {
+              "id": "direct",
+              "label": "直接命中",
+              "segments": [
+                {
+                  "kind": "impact",
+                  "aoe": false,
+                  "damage": {
+                    "impact": 180
+                  },
+                  "procChance": 0.34
                 }
               ]
             }

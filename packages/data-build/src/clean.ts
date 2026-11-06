@@ -19,6 +19,14 @@ import { hasAoeSegment } from '../../core/src/weapon.ts';
 import type { ExportAttack, ExportBehaviour, ExportProjectile, ExportWeapon, ExportWeapons } from './types.ts';
 import { incarnonInfoOf } from '../../data/manual/incarnon.ts';
 import { incarnonStatsOf } from '../../data/manual/incarnon-stats.ts';
+import {
+  MANUAL_VARIANTS,
+  REMOVED_WEAPONS,
+  WEAPON_PATCHES,
+  WEAPON_SPLITS,
+  type ManualMode,
+  type ManualVariant,
+} from '../../data/src/manual/weapon-patches.ts';
 
 /**
  * 投射物来源：普通发射还是蓄力发射。
@@ -43,6 +51,14 @@ export interface CleanStats {
   excludedByCategory: number;
   /** 清洗后没有有效模式而被跳过的条目数 */
   droppedNoValidMode: number;
+  /** 跳过时**记录了原因**的条目数（D-142：不再静默丢弃）；其余为无 behaviours 的组件 */
+  droppedReported: number;
+  /** 应用了人工订正（`manual/weapon-patches.ts`）的武器数 */
+  patchedWeapons: number;
+  /** 由人工层整条构造的武器版本数（如暗黑分合剑的巨刃 / 双剑） */
+  manualWeapons: number;
+  /** 按需求方要求整条移除的条目数（技能类，不能配卡） */
+  removedWeapons: number;
 }
 
 /**
@@ -79,13 +95,168 @@ export type CleanedWeapon = Weapon & {
  *   - 带 projectile / chargedProjectile 的 behaviour 永不整体丢弃；
  *     其内部的等值物理模板段在段级别过滤（见 toSegments）。
  */
-export function isPlaceholder(b: ExportBehaviour): boolean {
+/**
+ * 规则 1：识别并丢弃占位 behavior（D-142 重写）。
+ *
+ * ## 为什么旧规则会出错
+ *
+ * 旧规则只有一条：「没有 projectile，且 impact 只有单类型 `DT_IMPACT`」→ 占位。
+ * 它把**真实的单类型冲击武器**一起删了（映声战锤 340、双节尺棍 180、古声 170），
+ * 因为真武器的唯一伤害完全可以是一条单类型冲击。
+ *
+ * ## 导出里的「模板」长什么样
+ *
+ * 实测同一个 4 字段指纹在几十把武器里逐字重复：
+ * ```jsonc
+ * "impact": { "DT_IMPACT": 3.33333, "DT_PUNCTURE": 3.33333, "DT_SLASH": 3.33334, "procChance": 0.1 }
+ * "impact": { "DT_IMPACT": 40, "procChance": 0.1 }
+ * ```
+ * 判断依据（需求方 2026-11-07 确认）：
+ *   · **`damagePerShot` 只描述一个模式**（多数是主模式）——横痃重炮的副模式榴弹爆炸、
+ *     风鸣的蓄力直击都不在数组里；
+ *   · 模板的**伤害类型与面板类型对不上**：分离面板是「冲击 130」，而 impact 是「切 + 穿」，
+ *     面板里穿刺/切割都是 0 → 这条 impact 是废数据；
+ *   · 模板的 **`procChance` 恒为 0.1**，而真武器的 impact 用的通常是武器级触发
+ *     （映声战锤 0.15、分离 0.25、风鸣蓄力 0.27、横痃重炮副模式 0.57）。
+ *
+ * ## 现行判据（三条，缺一不可）
+ *
+ * 1. **主模式**（该武器第一个有伤害的 behavior）才做「逐类型比对」：
+ *    impact 的每一种伤害类型都必须等于 `damagePerShot` 对应位；对得上 → 真伤害。
+ * 2. **`procChance` 自洽**：impact 的 procChance 必须等于武器级 `procChance`，
+ *    否则是模板里写死的 0.1（分离 0.25 ≠ 0.1 → 判废）。
+ * 3. **兜底**：命中指纹（等值物理三元素或单类型裸冲击 + 小额 + procChance 0.1）→ 占位。
+ *
+ * 非主模式**不做面板比对**（面板描述不了它），只走 2/3 两条。
+ */
+export interface PlaceholderContext {
+  /** 该 behavior 是否是武器的**主模式**（第一个有伤害的 behavior） */
+  primary?: boolean | undefined;
+  /** 武器级 `damagePerShot`（20 格数组） */
+  damagePerShot?: readonly number[] | undefined;
+  /** 武器级 `procChance`（触发几率） */
+  weaponProcChance?: number | undefined;
+}
+
+/** impact 里所有 `DT_*` 数值之和 */
+export function impactSum(impact: ExportAttack | undefined): number {
+  if (!impact) return 0;
+  return Object.entries(impact)
+    .filter(([k, v]) => k.startsWith('DT_') && typeof v === 'number')
+    .reduce((s, [, v]) => s + (v as number), 0);
+}
+
+/**
+ * impact 的伤害类型是否与 `damagePerShot` **逐类型一致**（D-142）。
+ *
+ * 只对主模式有意义：`damagePerShot` 描述的就是那一个模式。
+ *   · 映声战锤 `[340,0,…]` vs `DT_IMPACT:340` → 一致；
+ *   · 分离         `[130,0,…]` vs `DT_IMPACT:3.33 / DT_PUNCTURE:3.33 / DT_SLASH:3.33` → 不一致（切/穿面板是 0）；
+ *   · 横痃重炮       `[2,13,19,0,…,7,…]` vs 主模式 impact `16/14/10` → 不一致（副模式的 143 病毒不在数组里）。
+ */
+export function impactTypesMatchPanel(
+  impact: ExportAttack | undefined,
+  damagePerShot: readonly number[] | undefined,
+): boolean {
+  if (!impact || !damagePerShot) return false;
+  let compared = 0;
+  for (const [key, value] of Object.entries(impact)) {
+    if (!key.startsWith('DT_') || typeof value !== 'number') continue;
+    const idx = DAMAGE_PER_SHOT_INDEX[key];
+    if (idx === undefined) return false;
+    const panel = damagePerShot[idx] ?? 0;
+    if (Math.abs(panel - value) > Math.max(0.01, Math.abs(value) * 0.002)) return false;
+    compared++;
+  }
+  return compared > 0;
+}
+
+/** 等值物理三元素 + procChance 0.1 + 数额极小：模板指纹 */
+function isUniformPhysicalTiny(impact: ExportAttack): boolean {
+  const imp = impact['DT_IMPACT'];
+  const pun = impact['DT_PUNCTURE'];
+  const sla = impact['DT_SLASH'];
+  if (imp == null || pun == null || sla == null) return false;
+  const otherKeys = Object.keys(impact).filter(
+    (k) => k !== 'DT_IMPACT' && k !== 'DT_PUNCTURE' && k !== 'DT_SLASH' && k !== 'procChance',
+  );
+  if (otherKeys.length > 0) return false;
+  const proc = impact['procChance'];
+  return Math.abs(imp - pun) < 1e-3 && Math.abs(pun - sla) < 1e-3 && imp <= 40 && (proc == null || Math.abs(proc - 0.1) < 1e-6);
+}
+
+/** impact 是否命中「单一类型裸冲击 + 小额 + procChance 0.1」指纹 */
+function isBareImpactTiny(impact: ExportAttack): boolean {
+  const types = Object.keys(impact).filter((k) => k.startsWith('DT_') && typeof impact[k] === 'number');
+  if (types.length !== 1 || types[0] !== 'DT_IMPACT') return false;
+  const proc = impact['procChance'];
+  return (impact['DT_IMPACT'] ?? 0) <= 40 && (proc == null || Math.abs(proc - 0.1) < 1e-6);
+}
+
+/** 规则 1 的单一入口：这条 behavior 是否整体丢弃 */
+export function isPlaceholder(b: ExportBehaviour, ctx: PlaceholderContext = {}): boolean {
   if (b.projectile || b.chargedProjectile) return false;
   if (b.burst && !b.stateName) return false;
   if (!b.impact) return true;
 
-  const types = Object.keys(b.impact).filter((k) => k.startsWith('DT_') && b.impact![k] !== undefined);
-  return types.length === 1 && types[0] === 'DT_IMPACT';
+  const impact = b.impact;
+  const small = impactSum(impact) <= 40;
+  const proc = impact['procChance'];
+  const weaponProc = ctx.weaponProcChance;
+  const { damagePerShot } = ctx;
+  const hasProjectile = Boolean(b.projectile || b.chargedProjectile);
+  const fingerprint = isUniformPhysicalTiny(impact) || isBareImpactTiny(impact);
+
+  // (1) 主模式：与 `damagePerShot` **逐类型一致** → impact 是真伤害
+  //     （映声战锤 340 / 双节尺棍 180 / 古声 170 / 预言者 33.67×3）。
+  if (ctx.primary && impactTypesMatchPanel(impact, damagePerShot)) return false;
+
+  // (2) 小额模板指纹（等值物理三元素 / 单类型裸冲击）
+  if (small && fingerprint) return true;
+
+  // (3) procChance 自洽性：模板恒为 0.1，真武器用武器级触发。
+  //     · 分离：面板 0.25 vs impact 0.1 → 模板（需求方 2026-11-07 确认导出是废数据，面板另补）；
+  //     · 雷霆第二模式 `穿 8 + 电 25 @0.1`：面板 0.16/0.22 → 模板。
+  //     ⚠ 但要注意：雷霆第一模式（主模式，projectile 提供真伤害）有两个 impact 候选，
+  //       删掉的要是「主模式的 impact」会让面板倒挂，所以只对**命中模板指纹**的 impact 生效。
+  if (
+    fingerprint &&
+    !hasProjectile &&
+    proc != null &&
+    Math.abs(proc - 0.1) < 1e-6 &&
+    weaponProc != null &&
+    Math.abs(weaponProc - 0.1) > 1e-6
+  ) {
+    return true;
+  }
+
+  // (4) 雷霆的第二模式（`穿 8 + 电 25`）：**无投射组、又不在面板里**，但它是这个 behavior 的全部伤害。
+  //     判据：非主模式 + 无投射组 + 命中模板指纹 + procChance 0.1 → 模板；其余保留。
+  if (!hasProjectile && !ctx.primary && fingerprint) return true;
+
+  return false;
+}
+
+/**
+ * 主模式下标（D-142）：只对**主模式**做 `damagePerShot` 比对，因为那个数组只描述一个模式。
+ *
+ * 判定顺序：
+ *   1. 第一个带**真实投射伤害**（`projectile.attack` / `explosiveAttack` 有值）的 behavior；
+ *   2. 否则第一个有 `impact` 的 behavior；
+ *   3. 都没有就取 0。
+ */
+export function primaryBehaviourIndex(behaviours: readonly ExportBehaviour[]): number {
+  const hasReal = (a: unknown): boolean => Boolean(a) && Object.keys(a as object).some((k) => k.startsWith('DT_'));
+  let firstImpactOnly = -1;
+  for (let i = 0; i < behaviours.length; i++) {
+    const b = behaviours[i]!;
+    for (const proj of [b.projectile, b.chargedProjectile]) {
+      if (!proj) continue;
+      if (hasReal(proj.attack) || hasReal(proj.explosiveAttack)) return i;
+    }
+    if (firstImpactOnly < 0 && b.impact) firstImpactOnly = i;
+  }
+  return firstImpactOnly >= 0 ? firstImpactOnly : 0;
 }
 
 /**
@@ -102,21 +273,7 @@ export function isPlaceholder(b: ExportBehaviour): boolean {
  */
 export function isUniformPhysicalPlaceholder(impact: ExportAttack | undefined): boolean {
   if (!impact) return false;
-  const imp = impact['DT_IMPACT'];
-  const pun = impact['DT_PUNCTURE'];
-  const sla = impact['DT_SLASH'];
-  if (imp == null || pun == null || sla == null) return false;
-
-  // 只允许这三个键（外加 procChance）
-  const otherKeys = Object.keys(impact).filter(
-    (k) => k !== 'DT_IMPACT' && k !== 'DT_PUNCTURE' && k !== 'DT_SLASH' && k !== 'procChance',
-  );
-  if (otherKeys.length > 0) return false;
-
-  const proc = impact['procChance'];
-  const uniform = Math.abs(imp - pun) < 1e-3 && Math.abs(pun - sla) < 1e-3;
-  const tiny = imp <= 40;
-  return uniform && tiny && (proc == null || Math.abs(proc - 0.1) < 1e-6);
+  return isUniformPhysicalTiny(impact);
 }
 
 /**
@@ -299,17 +456,25 @@ export function toSegments(
   damagePerShot?: readonly number[],
   /** 是否启用 damagePerShot 过滤（近战/空战近战关掉：它们本来就只有 impact 段，实测会整把清空） */
   usePanelFilter = true,
+  /**
+   * D-142：impact 是否就是这个 behavior 的**真实伤害**（主模式且逐类型与面板一致）。
+   *
+   * 为 true 时整段保留，不再过占位 / 面板过滤；为 false 时照旧按模板过滤。
+   * 由调用方用 `impactTypesMatchPanel` 算出。
+   */
+  impactIsReal = false,
 ): DamageSegment[] {
   const segments: DamageSegment[] = [];
 
-  const push = (kind: SegmentKind, attack: ExportAttack | undefined, aoe: boolean): void => {
+  const push = (kind: SegmentKind, attack: ExportAttack | undefined, aoe: boolean, isOnlySource = false): void => {
     if (!attack) return;
     // 段级别也要过滤占位（占位段可能和真实投射共存在同一 behaviour 内）：
     //   · 等值物理三元素（1.99/2.67/3.33…）
     //   · 单类型小额（腐蚀 3，D-079）
-    if (kind === 'impact' && isImpactPlaceholder(attack)) return;
+    // D-142：`isOnlySource`（= 主模式且与面板逐类型一致）时不过滤——那是真实伤害。
+    if (kind === 'impact' && !isOnlySource && isImpactPlaceholder(attack)) return;
     // D-095：impact 段涉及的伤害类型在官方面板 damagePerShot 里全为 0 → 不进面板
-    if (kind === 'impact' && usePanelFilter && isImpactExcludedFromPanel(attack, damagePerShot, DAMAGE_PER_SHOT_INDEX, Boolean(b.projectile?.explosiveAttack))) return;
+    if (kind === 'impact' && usePanelFilter && !isOnlySource && isImpactExcludedFromPanel(attack, damagePerShot, DAMAGE_PER_SHOT_INDEX, Boolean(b.projectile?.explosiveAttack))) return;
     const damage = toSpread(attack, warnings, `${context}/${kind}`);
     if (!hasDamage(damage)) return;
     segments.push({
@@ -320,10 +485,14 @@ export function toSegments(
     });
   };
 
-  // 命中段（impact）与投射组无关，只在读取第一组时加入，避免重复
-  if (slot === 'projectile') push('impact', b.impact, false);
-
+  // 命中段（impact）与投射组无关，只在读取第一组时加入，避免重复。
+  //
+  // D-142：`impactIsReal` 由调用方判定（**主模式** + 与 `damagePerShot` 逐类型一致），
+  // 为 true 时整段保留；否则照旧走模板 / 面板过滤（横痃重炮主模式的 16/14/10 残留、
+  // 弓的 `3.33×3 @0.1` 命中模板都会在这里被滤掉）。
   const proj = slot === 'projectile' ? b.projectile : b.chargedProjectile;
+  if (slot === 'projectile') push('impact', b.impact, false, impactIsReal);
+
   if (proj) {
     push('attack', proj.attack, false);
     push('explosiveAttack', proj.explosiveAttack, true);
@@ -526,6 +695,10 @@ export function cleanWeapons(exportWeapons: ExportWeapons): CleanResult {
     weaponsWithUnknownDamageType: 0,
     excludedByCategory: 0,
     droppedNoValidMode: 0,
+    droppedReported: 0,
+    patchedWeapons: 0,
+    manualWeapons: 0,
+    removedWeapons: 0,
   };
 
   for (const [key, w] of Object.entries(exportWeapons)) {
@@ -537,23 +710,41 @@ export function cleanWeapons(exportWeapons: ExportWeapons): CleanResult {
       continue;
     }
 
+    // 按武器整条移除（需求方判定：技能类，不能配卡，D-141）
+    const removedWhy = REMOVED_WEAPONS[toWeaponId(key)];
+    if (removedWhy) {
+      stats.removedWeapons++;
+      warnings.push(`${key}: 已移除 —— ${removedWhy}`);
+      continue;
+    }
+
     const category = toCategory(w);
 
     const behaviours = w.behaviours ?? [];
-    const usable: ExportBehaviour[] = [];
-    for (const b of behaviours) {
-      if (isPlaceholder(b)) {
+    // D-142：**主模式** = 第一个以 impact 为唯一伤害来源的 behavior（没有则第一个 behavior）。
+    // 只有主模式才与 `damagePerShot` 比对——那个数组只描述一个模式。
+    const primaryIndex = primaryBehaviourIndex(behaviours);
+    const impactIsReal = (b: ExportBehaviour, index: number): boolean =>
+      index === primaryIndex && impactTypesMatchPanel(b.impact, w.damagePerShot);
+
+    const usable: Array<{ behaviour: ExportBehaviour; index: number }> = [];
+    behaviours.forEach((b, index) => {
+      if (
+        isPlaceholder(b, {
+          primary: index === primaryIndex,
+          damagePerShot: w.damagePerShot,
+          weaponProcChance: w.procChance,
+        })
+      ) {
         stats.droppedPlaceholderBehaviours++;
-        continue;
+        return;
       }
-      usable.push(b);
-    }
+      usable.push({ behaviour: b, index });
+    });
     stats.keptBehaviours += usable.length;
 
     // 该武器是否已有能提供普通射击的 behaviour（用于灵化判定）
-    const hasSiblingNormal = usable.some(
-      (b) => b.projectile && Object.keys(b.projectile).length > 0,
-    );
+    const hasSiblingNormal = usable.some(({ behaviour }) => behaviour.projectile && Object.keys(behaviour.projectile).length > 0);
 
     const warningsBefore = warnings.length;
     const modes: AttackMode[] = [];
@@ -573,15 +764,30 @@ export function cleanWeapons(exportWeapons: ExportWeapons): CleanResult {
     // 「无投射组的 behaviour 算不算独立模式」（D-092）只对**枪械**成立。
     // 近战 / 空战近战这类本来就没有 projectile，它们的每个 behaviour 都是真模式，
     // 合并会把整把武器弄没（实测 Tenet Grigori 因此消失）。
-    const isMelee = category === 'melee' || category === 'archmelee';
+    // D-142：守护 / 同伴武器（`SENTINEL_WEAPON`，多半也是近战飞掷物）同样没有投射组，
+    // 一并按近战处理，否则它们的 behaviour 会被 D-092 吞掉。
+    const isMelee = category === 'melee' || category === 'archmelee' || category === 'companion';
     const mergeImpactOnly = !isMelee;
-    for (const b of usable) {
+    // D-142：整个事件/定时器触发的 `impact` 组（如重力奇点的 `TriggerActivated`）是**唯一的伤害来源**
+    // ——没有投射组可以承接它。如果再按 D-092 并进「爆炸变体」，整把武器会再次变成空壳。
+    const timeTriggeredOnly =
+      usable.length === 1 &&
+      !usable[0]!.behaviour.projectile &&
+      !usable[0]!.behaviour.chargedProjectile &&
+      isIncidentalImpact(usable[0]!.behaviour.stateName);
+    for (const { behaviour: b, index: behaviourIndex } of usable) {
+      // D-142：空战近战 / 守护 / 同伴类本来就没有投射，它们的 behaviour 永远是真模式，
+      // 不能被 D-092 的「只有 impact → 并进爆炸变体」吞掉（否则分离 / 分离 Prime 整把消失）。
+      if (isMelee) {
+        modeBehaviours.push(b);
+        continue;
+      }
       // ⚠ 只有**没有 projectile 且 impact 是纯物理三元素**的 behaviour 才算"附带伤害"（D-092 修正）。
       //   反例：Burston Prime 的两个 behaviour 都没有 projectile，一个是物理 burst、
       //   一个是纯火 auto —— 后者是**独立的第二种射击模式**，不能被合并掉，
       //   否则全自动模式整段消失、trigger 变成 unknown（实测 78 把武器受影响）。
-      if (!b.projectile && !b.chargedProjectile && mergeImpactOnly && isIncidentalImpact(b.stateName)) {
-        const segs = toSegments(b, warnings, `${key}#impactOnly`, 'projectile', w.damagePerShot, !isMelee);
+      if (!b.projectile && !b.chargedProjectile && mergeImpactOnly && !timeTriggeredOnly && isIncidentalImpact(b.stateName)) {
+        const segs = toSegments(b, warnings, `${key}#impactOnly`, 'projectile', w.damagePerShot, !isMelee, impactIsReal(b, behaviourIndex));
         if (segs.length > 0) impactOnly.push(segs);
         else stats.droppedPlaceholderBehaviours++;
         continue;
@@ -592,6 +798,7 @@ export function cleanWeapons(exportWeapons: ExportWeapons): CleanResult {
       // 整个武器只有这种段（极端情况），按原样当作唯一模式，不丢数据
       for (const segs of impactOnly) {
         modes.push({
+          // D-142：纯 impact 武器（空战近战 / 守护飞镖）没有 stateName，触发方式标 unknown
           id: `mode${modes.length + 1}`, role: 'normal',
           trigger: 'unknown', bullets: 1, multishot: tidy(w.multishot ?? 1),
           variants: toVariants(segs),
@@ -620,6 +827,8 @@ export function cleanWeapons(exportWeapons: ExportWeapons): CleanResult {
       warnings.push(`${key}: 人工层有灵化形态数值，最后一个 behaviour 作为灵化挂点`);
     }
     modeBehaviours.forEach((b, index) => {
+      // 原始 behaviour 下标（modeBehaviours 可能少几条，被吞并的仅-impact behaviour 不计入）
+      const behaviourIndex = behaviours.indexOf(b);
       const context = `${key}#${index}`;
       const trigger = toTriggerKind(b.stateName);
       const burst = b.burst ? { count: b.burst.count, delay: tidy(b.burst.delay) } : undefined;
@@ -652,7 +861,7 @@ export function cleanWeapons(exportWeapons: ExportWeapons): CleanResult {
             incNo += 1;
             const incId = incNo === 1 ? 'incarnon' : `incarnon${incNo}`;
             const seg: DamageSegment = {
-              kind: 'incarnon',
+              kind: 'incarnon' as SegmentKind,
               aoe: Boolean(im.aoe),
               damage: spreadFromRatio(im.damage, im.spread),
               procChance: im.statusChance,
@@ -660,7 +869,7 @@ export function cleanWeapons(exportWeapons: ExportWeapons): CleanResult {
             modes.push({
               id: incId,
               role: 'incarnon',
-              trigger: im.trigger,
+              trigger: im.trigger as TriggerKind,
               bullets: 1,
               multishot: im.multishot,
               override: {
@@ -680,9 +889,9 @@ export function cleanWeapons(exportWeapons: ExportWeapons): CleanResult {
 
         // 人工层还没填 → **复用基础面板**占位，并打上未核实标记（需求方 2026-11-06）。
         const segs =
-          toSegments(b, warnings, context, 'chargedProjectile', w.damagePerShot, !isMelee).length > 0
-            ? toSegments(b, warnings, context, 'chargedProjectile', w.damagePerShot, !isMelee)
-            : toSegments(b, warnings, context, 'projectile', w.damagePerShot, !isMelee);
+          toSegments(b, warnings, context, 'chargedProjectile', w.damagePerShot, !isMelee, impactIsReal(b, behaviourIndex)).length > 0
+            ? toSegments(b, warnings, context, 'chargedProjectile', w.damagePerShot, !isMelee, impactIsReal(b, behaviourIndex))
+            : toSegments(b, warnings, context, 'projectile', w.damagePerShot, !isMelee, impactIsReal(b, behaviourIndex));
         if (segs.length > 0) {
           const meleeNote = stats?.meleeBuff
             ? `近战灵化（不参与计算）：${stats.meleeBuff.activation}，持续 ${stats.meleeBuff.durationSeconds} 秒，` +
@@ -704,9 +913,9 @@ export function cleanWeapons(exportWeapons: ExportWeapons): CleanResult {
       }
 
       // 普通投射（含命中段）
-      const normalSegs = toSegments(b, warnings, context, 'projectile', w.damagePerShot, !isMelee);
+      const normalSegs = toSegments(b, warnings, context, 'projectile', w.damagePerShot, !isMelee, impactIsReal(b, behaviourIndex));
       const chargedSegs = b.chargedProjectile
-        ? toSegments(b, warnings, context, 'chargedProjectile', w.damagePerShot, !isMelee)
+        ? toSegments(b, warnings, context, 'chargedProjectile', w.damagePerShot, !isMelee, impactIsReal(b, behaviourIndex))
         : [];
       const hasNormal = normalSegs.length > 0;
       const hasCharged = chargedSegs.length > 0;
@@ -789,10 +998,42 @@ export function cleanWeapons(exportWeapons: ExportWeapons): CleanResult {
     const newWarnings = warnings.slice(warningsBefore);
     if (newWarnings.some((w) => w.includes('未知伤害类型'))) stats.weaponsWithUnknownDamageType++;
 
-    // 没有可解析模式的武器（例如纯数据残留条目）直接跳过，但记录
+    // 没有可解析模式的武器直接跳过。
+    // D-142：不再静默——只要导出里**有面板数值**（说明是一把真武器），就必须把原因写进 warning；
+    // 只有「无 behaviours 且面板为 0」的组件/部件（宠物头腿、增幅器组件、滑板部件）才安静跳过。
     if (modes.length === 0) {
-      stats.droppedNoValidMode++;
-      warnings.push(`${key}: 清洗后没有任何有效攻击模式，已跳过`);
+      // 人工订正表里有它的，后面会整组换上人工模式（或由人工层构造同名版本）——先留空壳，不算丢弃
+      const replacedByPatch = Boolean(WEAPON_PATCHES[toWeaponId(key)]?.modes);
+      const replacedByManual = MANUAL_VARIANTS.some((m) => m.exportId === toWeaponId(key));
+      if (!replacedByPatch && !replacedByManual) stats.droppedNoValidMode++;
+      if (replacedByPatch) {
+        weapons.push({
+          id: toWeaponId(key),
+          name: w.name ?? toWeaponId(key),
+          category,
+          critChance: tidy(w.criticalChance ?? 0),
+          critMultiplier: tidy(w.criticalMultiplier ?? 1),
+          statusChance: tidy(w.procChance ?? 0),
+          fireRate: tidy(w.fireRate ?? 0),
+          ...(w.magazineSize != null ? { magazineSize: tidy(w.magazineSize) } : {}),
+          ...(w.reloadTime != null ? { reloadTime: tidy(w.reloadTime) } : {}),
+          modes: [],
+          ...(w.name ? { languageKey: w.name } : {}),
+        });
+        stats.keptWeapons++;
+        continue;
+      }
+      if (replacedByManual) {
+        // 由人工层构造了替代版本（如暗黑分合剑的巨刃 / 双剑），原条目不再入库
+        warnings.push(`${key}: 原条目丢掉，改由人工层构造版本（见 manual/weapon-patches.ts）`);
+        continue;
+      }
+      const hasPanel = (w.totalDamage ?? 0) > 0;
+      if (hasPanel || behaviours.length > 0) {
+        stats.droppedReported++;
+        const desc = behaviours.length === 0 ? '导出 behaviours 为空' : '导出的 behaviour 均无可用伤害段';
+        warnings.push(`${key}: 清洗后没有任何有效攻击模式，已跳过（${desc}，面板伤害 ${w.totalDamage ?? 0}）`);
+      }
       continue;
     }
 
@@ -817,6 +1058,108 @@ export function cleanWeapons(exportWeapons: ExportWeapons): CleanResult {
     stats.keptWeapons++;
   }
 
+  // ── 人工订正层（D-141）：导出本身有错 / 只有空壳的武器，按游戏内白板面板改写 ──
+  // 拆版本条目（`@` 形式）不在这里处理——它们在下面由原条目 copy 出来，名称与标记在那时一并写入。
+  applyWeaponPatches(weapons, warnings, stats);
+
+  // ── 拆版本（D-141）：由原条目 copy 出人工版本，例如暗黑分合剑 → 巨刃 / 双剑 ──
+  for (const v of MANUAL_VARIANTS) {
+    const originKey = Object.keys(exportWeapons).find((k) => toWeaponId(k) === v.exportId);
+    const origin = originKey ? exportWeapons[originKey] : undefined;
+    const patch = WEAPON_PATCHES[v.id];
+    if (!origin || !patch) {
+      warnings.push(`${v.id}: 缺少原条目或订正定义，已跳过拆版本`);
+      continue;
+    }
+    if (weapons.some((w) => w.id === v.id)) {
+      warnings.push(`${v.id}: 与已有武器重名，已跳过`);
+      continue;
+    }
+    // 面板项（暴击 / 射速 / 弹匣 / 换弹）继承原条目——需求方说「其他的照旧」；
+    // 伤害段由订正表的 `modes` 决定（空数组 = 面板待补）。
+    weapons.push({
+      id: v.id,
+      name: patch.nameEn ?? v.id,
+      ...(patch.nameZh ? { nameZh: patch.nameZh } : {}),
+      category: toCategory(origin),
+      critChance: tidy(origin.criticalChance ?? 0),
+      critMultiplier: tidy(origin.criticalMultiplier ?? 1),
+      statusChance: tidy(origin.procChance ?? 0),
+      fireRate: tidy(origin.fireRate ?? 0),
+      ...(origin.magazineSize != null ? { magazineSize: tidy(origin.magazineSize) } : {}),
+      ...(origin.reloadTime != null ? { reloadTime: tidy(origin.reloadTime) } : {}),
+      modes: patch.modes ? patch.modes.map(toManualMode) : [],
+      variant: 'variant',
+      // 溯源：产出里会带上 `_manual` / `_note`，界面据此打错误标记（D-101 / D-141）
+      _manual: patch._source,
+      _note: patch.note,
+    });
+    stats.manualWeapons++;
+    warnings.push(`${v.id}: ${patch.note}`);
+  }
+
   weapons.sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
   return { weapons, stats, warnings };
+}
+
+/** 人工模式 → 产出用的 `AttackMode`（id / label 由 `label` 字段带出，见 emit） */
+function toManualMode(m: ManualMode): AttackMode {
+  const segments: DamageSegment[] = m.segments.map((s) => ({
+    kind: s.kind,
+    damage: s.damage,
+    procChance: s.procChance,
+    aoe: s.aoe,
+  }));
+  return {
+    id: m.id,
+    role: 'normal',
+    trigger: (m.trigger as TriggerKind | undefined) ?? 'unknown',
+    bullets: 1,
+    multishot: m.multishot ?? 1,
+    variants: toVariants(segments),
+    ...(m.label ? { _label: m.label } : {}),
+  };
+}
+
+/** 拆版本补丁的 key 集合（`exportId_后缀`），用于区分两次订正调用 */
+const VARIANT_PATCH_IDS = new Set(
+  WEAPON_SPLITS.flatMap((s) => s.versions.map((v) => v.id)),
+);
+
+/**
+ * 应用 `manual/weapon-patches.ts` 的武器级订正（D-141）。
+ *
+ * 只改**面板数值与整组模式**；显示名由 localize 阶段处理，这里只登记待覆盖的名称。
+ */
+function applyWeaponPatches(
+  weapons: CleanedWeapon[],
+  warnings: string[],
+  stats: CleanStats,
+): void {
+  const byId = new Map(weapons.map((w) => [w.id, w]));
+  for (const [id, patch] of Object.entries(WEAPON_PATCHES)) {
+    // 拆版本条目的名称与标记在「拆版本」循环里写入，这里跳过
+    if (VARIANT_PATCH_IDS.has(id)) continue;
+    const w = byId.get(id);
+    if (!w) {
+      warnings.push(`人工订正 ${id}: 库里没有这把武器，已跳过（检查 id 是否与导出末段一致）`);
+      continue;
+    }
+    if (patch.critChance != null) w.critChance = tidy(patch.critChance);
+    if (patch.critMultiplier != null) w.critMultiplier = tidy(patch.critMultiplier);
+    if (patch.statusChance != null) w.statusChance = tidy(patch.statusChance);
+    if (patch.fireRate != null) w.fireRate = tidy(patch.fireRate);
+    if (patch.magazineSize != null) w.magazineSize = tidy(patch.magazineSize);
+    if (patch.reloadTime != null) w.reloadTime = tidy(patch.reloadTime);
+    if (patch.modes) w.modes = patch.modes.map(toManualMode);
+    if (patch.nameZh) w.nameZh = patch.nameZh;
+    if (patch.nameEn) w.name = patch.nameEn;
+    // 名称覆盖后不再需要语言包（localize 会跳过 languageKey 缺失的条目）
+    if (patch.nameZh || patch.nameEn) delete w.languageKey;
+
+    w._manual = patch._source;
+    w._note = patch.note;
+    stats.patchedWeapons++;
+    warnings.push(`${id}: 已应用人工订正（${patch._source}）—— ${patch.note}`);
+  }
 }

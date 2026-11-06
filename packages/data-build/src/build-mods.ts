@@ -29,12 +29,14 @@ import {
   exportSubclass,
   isTrueBow,
   resolveFromExport,
+  slotsFromStanceTags,
   compatibleModKinds,
   type SlotResolution,
 } from './mods/weapon-slots.ts';
 import type { ExportWeapons } from './types.ts';
 import type { LanguageDict } from './localize.ts';
 import { lookupExaltedSlots } from '../../data/src/manual/exalted-slots.ts';
+import { MANUAL_VARIANTS, WEAPON_PATCHES } from '../../data/src/manual/weapon-patches.ts';
 
 const repoRoot = resolve(import.meta.dirname, '../../..');
 const GENERATED_DIR = join(repoRoot, 'packages/data/src/generated');
@@ -343,6 +345,8 @@ async function main(): Promise<number> {
       trueBow?: boolean;
       modKinds: string[];
       todo?: 'melee_specific';
+      /** D-141：面板尚未收录（如暗黑分合剑的巨刃 / 双剑），可选但不可算 */
+      panelPending?: boolean;
     }
   > = {};
   const unresolvedWeapons: string[] = [];
@@ -361,6 +365,8 @@ async function main(): Promise<number> {
         source: 'manual',
       };
     }
+    // D-141：人工层构造的武器版本（如暗黑分合剑的巨刃 / 双剑）在导出里没有独立条目，
+    // 它们继承原条目的元数据、但**按构造时给的架势标签**判定细类与配卡。
     if (slots.unresolved) unresolvedWeapons.push(`${id} (${enName || w.name || '?'})`);
     const zhName = w.name ? zhDict[w.name] : undefined;
     const subclass = exportSubclass({ ...w, uniqueName: key });
@@ -380,6 +386,21 @@ async function main(): Promise<number> {
         : {}),
     };
   }
+  // D-141：人工层构造的武器版本（如暗黑分合剑的巨刃 / 双剑）在导出里没有独立条目——
+  // 按人工层的架势标签补一条槽位记录，并标 `panelPending`（面板待补，界面要能选、但不能算）。
+  for (const v of MANUAL_VARIANTS) {
+    if (weaponSlots[v.id]) continue;
+    const slots = slotsFromStanceTags(v.stanceTags);
+    const patch = WEAPON_PATCHES[v.id];
+    weaponSlots[v.id] = {
+      name: patch?.nameEn ?? v.id,
+      ...(patch?.nameZh ? { nameZh: patch.nameZh } : {}),
+      slots,
+      modKinds: compatibleModKinds(slots, false),
+      panelPending: true,
+    };
+  }
+
   console.log(`      武器 ${Object.keys(weaponSlots).length} 把`);
   console.log(`      槽位无法判定 ${unresolvedWeapons.length} 把`);
 

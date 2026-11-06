@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-11-06T17:07:08.340Z",
+  "generatedAt": "2026-11-06T17:46:56.285Z",
   "note": "modKinds = 该武器能装备的 Mod 槽位种类（对应 mods.json 的 slotKind）",
-  "count": 842,
+  "count": 844,
   "weapons": {
     "VTDetron": {
       "name": "Mara Detron",
@@ -13051,7 +13051,7 @@
       "slots": {
         "broad": "melee",
         "specific": [],
-        "source": "unresolved",
+        "source": "manual",
         "basis": {
           "tags": [
             "SENTINEL_WEAPON"
@@ -13059,11 +13059,12 @@
           "productCategory": "SentinelWeapons",
           "holster": "MELEE"
         },
-        "unresolved": true
+        "unresolved": false
       },
       "modKinds": [
         "melee"
-      ]
+      ],
+      "todo": "melee_specific"
     },
     "SentElecRailgun": {
       "name": "Vulklok",
@@ -13311,7 +13312,7 @@
       "slots": {
         "broad": "melee",
         "specific": [],
-        "source": "unresolved",
+        "source": "manual",
         "basis": {
           "tags": [
             "SENTINEL_WEAPON"
@@ -13319,11 +13320,12 @@
           "productCategory": "SentinelWeapons",
           "holster": "MELEE"
         },
-        "unresolved": true
+        "unresolved": false
       },
       "modKinds": [
         "melee"
-      ]
+      ],
+      "todo": "melee_specific"
     },
     "ThermocorMoaWeapon": {
       "name": "Vulcax",
@@ -17527,6 +17529,50 @@
         "melee"
       ],
       "todo": "melee_specific"
+    },
+    "DarkSwordDaggerHybridWeapon@heavy_blade": {
+      "name": "Dark Split-Sword (Heavy Blade)",
+      "nameZh": "暗黑分合剑（巨刃）",
+      "slots": {
+        "broad": "melee",
+        "specific": [
+          "heavy_blade"
+        ],
+        "source": "stance-tags",
+        "basis": {
+          "tags": [
+            "HEAVY_BLADE_STANCE"
+          ]
+        },
+        "unresolved": false
+      },
+      "modKinds": [
+        "melee",
+        "heavy_blade"
+      ],
+      "panelPending": true
+    },
+    "DarkSwordDaggerHybridWeapon@dual_swords": {
+      "name": "Dark Split-Sword (Dual Swords)",
+      "nameZh": "暗黑分合剑（双剑）",
+      "slots": {
+        "broad": "melee",
+        "specific": [
+          "dual_swords"
+        ],
+        "source": "stance-tags",
+        "basis": {
+          "tags": [
+            "DUAL_SWORDS_STANCE"
+          ]
+        },
+        "unresolved": false
+      },
+      "modKinds": [
+        "melee",
+        "dual_swords"
+      ],
+      "panelPending": true
     }
   }
 }

@@ -72,6 +72,11 @@ export const EXALTED_SLOT_OVERRIDES: Readonly<Record<string, ExaltedSlotOverride
   'Balefire Charger Prime': { broad: 'pistol', note: '焚罪者 Prime：手枪类' },
   Glory: { broad: 'pistol', note: '荣耀：手枪类' },
   Arquebex: { broad: 'archgun', note: '远程炮台：空战枪械' },
+
+  // ---- 守护近战武器：导出带 SENTINEL_WEAPON 标签，槽位判定会给 unresolved ----
+  // D-141：需求方要求「分离 / 分离 Prime 能选能算」→ 归**近战**（吃近战类 Mod）。
+  Deconstructor: { broad: 'melee', note: '分离：赫利俄斯守护武器（近战），D-141' },
+  'Deconstructor Prime': { broad: 'melee', note: '分离 Prime：赫利俄斯守护武器（近战），D-141' },
 };
 
 /**

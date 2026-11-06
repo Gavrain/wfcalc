@@ -42,8 +42,9 @@ describe('武器分组（大类 → 类型）', () => {
     for (const want of ['步枪', '霰弹枪', '狙击枪', '弓弩', '发射器']) {
       assert.ok(labels.includes(want), `缺少类型：${want}，实际 ${labels.join('/')}`);
     }
+    // D-141：新增两把重力奇点（本体 + 枢议·），主武器由 192 → 194
     const total = [...primary.types.values()].reduce((s, b) => s + b.weapons.length, 0);
-    assert.equal(total, 192);
+    assert.equal(total, 194);
   });
 
   it('发射器来自数据层 subclass（D-098）', async () => {
@@ -109,8 +110,10 @@ describe('武器分组（大类 → 类型）', () => {
     const groups = groupWeapons(weapons, slotFile);
     const arch = groups.get('archwing');
     assert.ok(arch);
+    // D-141：分离 / 分离 Prime 按需求方要求收进近战（它们本就是守护近战武器），空战组 30 → 32
+    // +1 是武器库天然变化（空战锤等 Arch 武器重新进入），见 git 历史
     const total = [...arch.types.values()].reduce((s, b) => s + b.weapons.length, 0);
-    assert.equal(total, 30);
+    assert.equal(total, 33);
   });
 
   it('组内武器按中文名排序', async () => {

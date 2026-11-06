@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-11-06T13:18:56.222Z",
+  "generatedAt": "2026-11-06T17:48:09.136Z",
   "category": "archmelee",
-  "count": 11,
+  "count": 13,
   "note": "暴率/触发为 0~1 小数；伤害分布为绝对值；procChance 同为 0~1；kuva 表示需用户在计算器里选元素与加成（25%~60%）",
   "weapons": [
     {
@@ -262,6 +262,80 @@
           ]
         }
       ]
+    },
+    {
+      "id": "PrimeHeliosGlaiveWeapon",
+      "name": "Deconstructor Prime",
+      "nameZh": "分离 Prime",
+      "category": "archmelee",
+      "critChance": 0,
+      "critMultiplier": 1,
+      "statusChance": 0.25,
+      "fireRate": 1.3333,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "unknown",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
+            {
+              "id": "direct",
+              "label": "直接命中",
+              "segments": [
+                {
+                  "kind": "impact",
+                  "aoe": false,
+                  "damage": {
+                    "impact": 160
+                  },
+                  "procChance": 0.25
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "_manual": "bible",
+      "_note": "导出 behaviours 是判废模板（3.33×3 @0.1，与面板「冲击 160」类型不符）；按游戏面板补为冲击 160"
+    },
+    {
+      "id": "SentGlaiveWeapon",
+      "name": "Deconstructor",
+      "nameZh": "分离",
+      "category": "archmelee",
+      "critChance": 0,
+      "critMultiplier": 1,
+      "statusChance": 0.25,
+      "fireRate": 1.3333,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "unknown",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
+            {
+              "id": "direct",
+              "label": "直接命中",
+              "segments": [
+                {
+                  "kind": "impact",
+                  "aoe": false,
+                  "damage": {
+                    "impact": 130
+                  },
+                  "procChance": 0.25
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "_manual": "bible",
+      "_note": "导出 behaviours 是判废模板（3.33×3 @0.1，与面板「冲击 130」类型不符）；按游戏面板补为冲击 130"
     },
     {
       "id": "VTArchSwordWeapon",

@@ -11,7 +11,15 @@
  * 产出 JSON 直接就是内核的输入模型，中间不再做 `baseMultishot → multishot`、
  * `isAoe → aoe`、`name:{en,zh} → name + nameZh` 这类翻译。
  */
-import type { AttackMode, DamageSegment, PanelOverride, SegmentKind, Weapon } from '../../core/src/weapon.ts';
+import type {
+  AttackMode,
+  DamageSegment,
+  ModeManualFlag,
+  PanelOverride,
+  SegmentKind,
+  Weapon,
+  WeaponManualFlag,
+} from '../../core/src/weapon.ts';
 import type { DamageSpread } from '../../core/src/damage-types.ts';
 import { isKuvaFamily, KUVA_BONUS_MIN, KUVA_BONUS_MAX, KUVA_ELEMENT_TYPES } from '../../core/src/kuva.ts';
 import type { AppliedOverride } from './overrides.ts';
@@ -43,12 +51,15 @@ export interface EmitMode {
   variants: EmitVariant[];
   override?: PanelOverride;
   /**
-   * D-110：该模式的数值是否已核实。
-   * `panel-reused` = 面板是**复用基础面板**的占位值，界面会打标记。
+   * D-110 / D-141：该模式的数值来源。
+   * `panel-reused` = 面板是**复用基础面板**的占位值，界面会打标记；
+   * `bible` = 按需求方给的游戏内白板面板改写；`export-missing` = 导出不可用、人工层录入。
    */
-  _manual?: 'panel-reused' | 'entered';
+  _manual?: ModeManualFlag;
   /** D-110：人工备注（来源、待办），供溯源与界面提示 */
   _note?: string;
+  /** D-141：模式展示名（如「球体融合」），界面优先于通用模式名 */
+  _label?: string;
 }
 
 export interface EmitWeapon {
@@ -74,7 +85,16 @@ export interface EmitWeapon {
   reloadTime?: number;
   modes: EmitMode[];
   /** 人工覆盖过的字段：字段名 → 说明 */
-  _manual?: Record<string, string>;
+  _manualFields?: Record<string, string>;
+  /**
+   * D-141：整把武器的人工标记。`panel-empty` = 面板尚未收录（`modes: []`，界面标「面板待补」）。
+   *
+   * ⚠ 历史字段名 `_manual` 在**武器级**原本是「字段 → 说明」的对象，
+   * 为避免与模式级字符串标记混淆，字段级说明改用 `_manualFields`（只在这把武器被覆盖时出现）。
+   */
+  _manual?: WeaponManualFlag;
+  /** 人工备注（来源 / 待办） */
+  _note?: string;
 }
 
 const emitSegment = (s: DamageSegment): EmitSegment => ({
@@ -108,6 +128,7 @@ function toEmitMode(m: AttackMode): EmitMode {
     // D-110：把"数值是否核实"的标记与备注一并产出，界面据此打标
     ...(m._manual ? { _manual: m._manual } : {}),
     ...(m._note ? { _note: m._note } : {}),
+    ...(m._label ? { _label: m._label } : {}),
   };
 }
 
@@ -140,6 +161,8 @@ export function toEmitWeapon(
     ...(w.magazineSize != null ? { magazineSize: w.magazineSize } : {}),
     ...(w.reloadTime != null ? { reloadTime: w.reloadTime } : {}),
     modes: w.modes.map(toEmitMode),
-    ...(manual ? { _manual: manual } : {}),
+    ...(manual ? { _manualFields: manual } : {}),
+    ...(w._manual ? { _manual: w._manual } : {}),
+    ...(w._note ? { _note: w._note } : {}),
   };
 }

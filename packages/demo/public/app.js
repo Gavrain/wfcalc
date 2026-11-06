@@ -199,6 +199,7 @@ function renderHeader() {
     titleEl.classList.remove('has-issue');
   }
   $('#weapon-meta').textContent =
+    (currentMode()._label ? currentMode()._label + ' · ' : '') +
     currentMode().id + ' · ' + currentMode().role + ' · ' + currentMode().trigger +
     ' · 面板多重 ' + currentMode().multishot;
 
@@ -225,9 +226,10 @@ function renderModeSwitch() {
     const row = el('div', 'mode-row');
     for (let i = 0; i < modes.length; i++) {
       const m = modes[i];
-      const btn = el('button', 'mode-btn' + (i === state.modeIndex ? ' active' : ''), MODE_LABEL[m.id] || m.id);
+      // D-141：数据层给的中文模式名（`_label`）优先，例如重力奇点的「球体融合 / 球体爆炸」
+      const btn = el('button', 'mode-btn' + (i === state.modeIndex ? ' active' : ''), m._label || MODE_LABEL[m.id] || m.id);
       btn.type = 'button';
-      btn.title = m.id + ' · ' + m.trigger + (m._note ? '\n' + m._note : '');
+          btn.title = (m._label ? m._label + ' · ' : '') + m.id + ' · ' + m.trigger + (m._note ? '\n' + m._note : '');
       (function (idx) {
         btn.addEventListener('click', function () {
           state.modeIndex = idx;
@@ -1554,6 +1556,12 @@ function wireControls() {
 // ─────────────────────────────────────────────────────────────
 
 function renderAll() {
+  // D-141：面板尚未收录的武器（如暗黑分合剑的巨刃 / 双剑）没有 modes，无法结算。
+  // 这种武器**只渲染头部与「面板待补」提示**，不跑计算、不渲染配装区，避免半截 UI 与 NaN。
+  if (!currentMode()) {
+    renderPendingPanel();
+    return;
+  }
   const contribs = currentContributions();
   const res = runCompute(contribs);
   // 每件装备的边际贡献（需求方 2026-11-06）只算一次，供槽位卡片复用
@@ -1575,6 +1583,52 @@ function renderAll() {
 }
 
 
+
+/**
+ * 「面板待补」武器的渲染（D-141）。
+ *
+ * 这类武器是**骨架**：分类、暴击、射速有了，但伤害段还没录（例如暗黑分合剑的重剑 / 双剑两版）。
+ * 界面要让用户一眼看出「这把武器还不能算」，而不是显示一片空表或 NaN。
+ */
+function renderPendingPanel() {
+  const w = store.data.weapon;
+  const titleEl = $('#weapon-title');
+  const name = (w.nameZh || w.name) + '（' + w.name + '）';
+  titleEl.textContent = name + ' ' + ISSUE_MARK;
+  titleEl.title = w._note || '面板未收录';
+  titleEl.classList.add('has-issue');
+  const metaEl = $('#weapon-meta');
+  if (metaEl) metaEl.textContent = '面板待补 · 暂不可计算';
+  const switchBox = $('#mode-switch');
+  if (switchBox) switchBox.innerHTML = '';
+  const tipText = '这把武器的面板数据尚未收录，暂不能计算。' + (w._note ? '（' + w._note + '）' : '');
+  const tipInto = function (sel) {
+    const box = $(sel);
+    if (!box) return;
+    box.innerHTML = '';
+    const tip = el('div', 'panel-pending-tip');
+    tip.textContent = tipText;
+    box.append(tip);
+  };
+  // 面板 / 伤害分布 / 输出：全部换成提示，不留旧武器的残值
+  tipInto('#panel-table');
+  tipInto('#damage-table');
+  tipInto('#output-list');
+  // 配装区清空（不渲染可装 Mod，避免"能拖却没数"）
+  for (const sel of ['#slot-grid', '#arcane-slots', '#side-slots', '#candidate-list', '#arcane-list', '#co-controls', '#dot-detail', '#splash-damage', '#crit-tiers']) {
+    const box = $(sel);
+    if (box) box.innerHTML = '';
+  }
+  const slotInfo = $('#slot-info');
+  if (slotInfo) slotInfo.textContent = '';
+  const detail = $('#detail');
+  if (detail) {
+    detail.innerHTML = '';
+    const tip = el('div', 'panel-pending-tip');
+    tip.textContent = '面板待补：没有伤害段，无法拆解乘区。补上数值后这里会自动出现拆解。';
+    detail.append(tip);
+  }
+}
 
 /**
  * 赋能列表（D-032 / D-034 / D-123）：按**增幅**从高到低排；「无伤害词条」的排在最后。

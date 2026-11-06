@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-06T13:18:56.223Z",
+  "generatedAt": "2026-11-06T17:48:09.137Z",
   "category": "companion",
   "count": 19,
   "note": "暴率/触发为 0~1 小数；伤害分布为绝对值；procChance 同为 0~1；kuva 表示需用户在计算器里选元素与加成（25%~60%）",
@@ -156,7 +156,7 @@
         {
           "id": "primary",
           "role": "normal",
-          "trigger": "unknown",
+          "trigger": "held",
           "bullets": 1,
           "multishot": 1,
           "variants": [
@@ -505,6 +505,16 @@
               "label": "直接命中",
               "segments": [
                 {
+                  "kind": "impact",
+                  "aoe": false,
+                  "damage": {
+                    "impact": 4,
+                    "puncture": 4,
+                    "slash": 4
+                  },
+                  "procChance": 0.2
+                },
+                {
                   "kind": "attack",
                   "aoe": false,
                   "damage": {
@@ -618,7 +628,7 @@
         {
           "id": "primary",
           "role": "normal",
-          "trigger": "unknown",
+          "trigger": "held",
           "bullets": 1,
           "multishot": 1,
           "variants": [
@@ -655,7 +665,7 @@
         {
           "id": "primary",
           "role": "normal",
-          "trigger": "unknown",
+          "trigger": "held",
           "bullets": 1,
           "multishot": 1,
           "variants": [
@@ -758,7 +768,7 @@
         {
           "id": "primary",
           "role": "normal",
-          "trigger": "unknown",
+          "trigger": "held",
           "bullets": 1,
           "multishot": 1,
           "variants": [

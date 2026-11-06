@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-06T17:07:08.347Z",
+  "generatedAt": "2026-11-06T17:46:56.294Z",
   "sources": [
     {
       "name": "mods/baseline.json",
@@ -33,13 +33,13 @@
     "arcanesSkipped": 6,
     "modSets": 19,
     "stances": 61,
-    "weapons": 842
+    "weapons": 844
   },
   "coverage": {
     "officialMatched": 441,
     "withStats": 441,
-    "unresolvedWeapons": 26,
-    "meleeMissingSpecific": 31,
+    "unresolvedWeapons": 24,
+    "meleeMissingSpecific": 33,
     "zhMissing": 0
   },
   "todo": {
@@ -50,7 +50,6 @@
       "SentinelFreezeRayRifle (Verglas)",
       "SentinelFreezeRayPrimeRifle (Verglas Prime)",
       "SentShotgun (Sweeper)",
-      "SentGlaiveWeapon (Deconstructor)",
       "SentElecRailgun (Vulklok)",
       "SentBioWeapon (Stinger)",
       "PrismaBurstLaserPistol (Prisma Burst Laser)",
@@ -62,7 +61,6 @@
       "Gremlin (Artax)",
       "DethMachineRifle (Deth Machine Rifle)",
       "BurstLaserPistol (Burst Laser)",
-      "PrimeHeliosGlaiveWeapon (Deconstructor Prime)",
       "ThermocorMoaWeapon (Vulcax)",
       "TazronWeapon (Tazicor)",
       "SwarmerWeapon (Helstrum)",
@@ -83,6 +81,8 @@
       "KuvaGhoulSaw (Kuva Ghoulsaw)",
       "CrpGunbladeWeapon (Stropha)",
       "DuviriDualSwordsWeapon (Sun & Moon)",
+      "SentGlaiveWeapon (Deconstructor)",
+      "PrimeHeliosGlaiveWeapon (Deconstructor Prime)",
       "ReaperMeleeWeapon (Shadow Claws)",
       "SevagothShadowPrimeClawsWeapon (Shadow Claws Prime)",
       "PacifistFist (Desert Wind)",

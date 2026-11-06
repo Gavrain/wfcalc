@@ -260,6 +260,9 @@ const MELEE_HOLSTERS = new Set([
  *
  * 用途：近战只判出宽类 `melee` 时，用官方导出的架势标签补出细类。
  * D-001 恢复近战区分后重新启用。
+ *
+ * D-141：**人工层构造的武器版本**（如暗黑分合剑拆成巨刃 / 双剑）也走它，
+ * 由 `slotsFromStanceTags()` 直接判定。
  */
 const STANCE_TAG_TO_KIND: Record<string, ModSlotKind> = {
   SWORDS_STANCE: 'sword',
@@ -308,6 +311,28 @@ const STANCE_TAG_TO_KIND: Record<string, ModSlotKind> = {
 function isMeleeStanceTag(tag: string): boolean {
   const t = tag.toUpperCase();
   return Object.hasOwn(STANCE_TAG_TO_KIND, t) || /_STANCE(_STANCE)?$/.test(t);
+}
+
+/**
+ * 由**架势标签**直接判定近战槽位（D-141）。
+ *
+ * 用于人工层构造的武器版本（例如暗黑分合剑拆成 `@heavy_blade` / `@dual_swords`）：
+ * 这些版本没有独立的导出条目，靠构造时给的架势标签定细类。
+ * 给定一个细类就只保留那个细类——拆版本的用意就是**每版只装对应架势的 Mod**。
+ */
+export function slotsFromStanceTags(tags: string[]): SlotResolution {
+  const specific: ModSlotKind[] = [];
+  for (const t of tags) {
+    const k = STANCE_TAG_TO_KIND[t.toUpperCase()];
+    if (k && !specific.includes(k)) specific.push(k);
+  }
+  return {
+    broad: 'melee',
+    specific,
+    source: specific.length > 0 ? 'stance-tags' : 'unresolved',
+    basis: { tags },
+    unresolved: specific.length === 0,
+  };
 }
 
 /** 武器类条目（只声明用到的字段） */

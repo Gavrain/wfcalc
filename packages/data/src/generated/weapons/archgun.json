@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-11-06T13:18:56.221Z",
+  "generatedAt": "2026-11-06T17:48:09.135Z",
   "category": "archgun",
-  "count": 19,
+  "count": 20,
   "note": "暴率/触发为 0~1 小数；伤害分布为绝对值；procChance 同为 0~1；kuva 表示需用户在计算器里选元素与加成（25%~60%）",
   "weapons": [
     {
@@ -651,6 +651,59 @@
           ]
         }
       ]
+    },
+    {
+      "id": "NokkoArchGun",
+      "name": "Arbucep",
+      "nameZh": "蕈菇",
+      "category": "archgun",
+      "critChance": 0.1,
+      "critMultiplier": 2.9,
+      "statusChance": 0.349,
+      "fireRate": 1.5,
+      "magazineSize": 6,
+      "reloadTime": 1.72,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "unknown",
+          "bullets": 1,
+          "multishot": 6,
+          "variants": [
+            {
+              "id": "direct",
+              "label": "直接命中",
+              "segments": [
+                {
+                  "kind": "impact",
+                  "aoe": false,
+                  "damage": {
+                    "blast": 16
+                  },
+                  "procChance": 0.349
+                }
+              ]
+            },
+            {
+              "id": "blast",
+              "label": "爆炸",
+              "segments": [
+                {
+                  "kind": "explosiveAttack",
+                  "aoe": true,
+                  "damage": {
+                    "blast": 114
+                  },
+                  "procChance": 0.349
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "_manual": "bible",
+      "_note": "导出只有一条 DT_EXPLOSION 130；按游戏面板拆成直接命中 16 + 范围 114（火/爆炸组合元素）"
     },
     {
       "id": "PrimeCorvasWeapon",

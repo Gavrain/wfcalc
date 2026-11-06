@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-11-06T13:18:56.213Z",
+  "generatedAt": "2026-11-06T17:48:09.123Z",
   "category": "primary",
-  "count": 192,
+  "count": 194,
   "note": "暴率/触发为 0~1 小数；伤害分布为绝对值；procChance 同为 0~1；kuva 表示需用户在计算器里选元素与加成（25%~60%）",
   "weapons": [
     {
@@ -504,6 +504,71 @@
       ]
     },
     {
+      "id": "CSSimulor",
+      "name": "Synoid Simulor",
+      "nameZh": "枢议·重力奇点拟成枪",
+      "category": "primary",
+      "variant": "syndicate",
+      "critChance": 0.14,
+      "critMultiplier": 2,
+      "statusChance": 0.35,
+      "fireRate": 3.3333,
+      "magazineSize": 16,
+      "reloadTime": 2,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "unknown",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
+            {
+              "id": "direct",
+              "label": "直接命中",
+              "segments": [
+                {
+                  "kind": "impact",
+                  "aoe": false,
+                  "damage": {
+                    "magnetic": 125
+                  },
+                  "procChance": 0.35
+                }
+              ]
+            }
+          ],
+          "_label": "球体融合"
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "unknown",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
+            {
+              "id": "blast",
+              "label": "爆炸",
+              "segments": [
+                {
+                  "kind": "explosiveAttack",
+                  "aoe": true,
+                  "damage": {
+                    "magnetic": 240
+                  },
+                  "procChance": 0.35
+                }
+              ]
+            }
+          ],
+          "_label": "球体爆炸"
+        }
+      ],
+      "_manual": "bible",
+      "_note": "导出为「病毒 240」且 behaviours 为空；按游戏面板改为磁力：球体融合 125、球体爆炸 240（原面板值，类型改磁力）"
+    },
+    {
       "id": "CarminePenta",
       "name": "Carmine Penta",
       "nameZh": "嫣红·潘塔",
@@ -564,6 +629,70 @@
       ]
     },
     {
+      "id": "CephPrimary",
+      "name": "Simulor",
+      "nameZh": "重力奇点拟成枪",
+      "category": "primary",
+      "critChance": 0.12,
+      "critMultiplier": 2,
+      "statusChance": 0.3,
+      "fireRate": 3,
+      "magazineSize": 8,
+      "reloadTime": 3,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "unknown",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
+            {
+              "id": "direct",
+              "label": "直接命中",
+              "segments": [
+                {
+                  "kind": "impact",
+                  "aoe": false,
+                  "damage": {
+                    "magnetic": 100
+                  },
+                  "procChance": 0.3
+                }
+              ]
+            }
+          ],
+          "_label": "球体融合"
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "unknown",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
+            {
+              "id": "blast",
+              "label": "爆炸",
+              "segments": [
+                {
+                  "kind": "explosiveAttack",
+                  "aoe": true,
+                  "damage": {
+                    "magnetic": 200
+                  },
+                  "procChance": 0.3
+                }
+              ]
+            }
+          ],
+          "_label": "球体爆炸"
+        }
+      ],
+      "_manual": "bible",
+      "_note": "导出为「病毒 200」且 behaviours 为空；按游戏面板改为磁力：球体融合 100、球体爆炸 200（原面板值，类型改磁力）"
+    },
+    {
       "id": "ChainLightningRifle",
       "name": "Amprex",
       "nameZh": "安培克斯",
@@ -578,7 +707,7 @@
         {
           "id": "primary",
           "role": "normal",
-          "trigger": "unknown",
+          "trigger": "held",
           "bullets": 1,
           "multishot": 1,
           "variants": [
@@ -851,7 +980,7 @@
         {
           "id": "primary",
           "role": "normal",
-          "trigger": "unknown",
+          "trigger": "held",
           "bullets": 1,
           "multishot": 1,
           "variants": [
@@ -1281,7 +1410,7 @@
         {
           "id": "primary",
           "role": "normal",
-          "trigger": "unknown",
+          "trigger": "held",
           "bullets": 1,
           "multishot": 1,
           "variants": [
@@ -1626,7 +1755,7 @@
         {
           "id": "primary",
           "role": "normal",
-          "trigger": "unknown",
+          "trigger": "held",
           "bullets": 1,
           "multishot": 1,
           "variants": [
@@ -1664,7 +1793,7 @@
         {
           "id": "primary",
           "role": "normal",
-          "trigger": "unknown",
+          "trigger": "held",
           "bullets": 1,
           "multishot": 1,
           "variants": [
@@ -1740,7 +1869,7 @@
         {
           "id": "primary",
           "role": "normal",
-          "trigger": "unknown",
+          "trigger": "held",
           "bullets": 1,
           "multishot": 1,
           "variants": [
@@ -2658,7 +2787,7 @@
         {
           "id": "primary",
           "role": "normal",
-          "trigger": "unknown",
+          "trigger": "held",
           "bullets": 1,
           "multishot": 1,
           "variants": [
@@ -2696,7 +2825,7 @@
         {
           "id": "primary",
           "role": "normal",
-          "trigger": "unknown",
+          "trigger": "held",
           "bullets": 1,
           "multishot": 1,
           "variants": [
@@ -4395,7 +4524,7 @@
         {
           "id": "primary",
           "role": "normal",
-          "trigger": "unknown",
+          "trigger": "held",
           "bullets": 1,
           "multishot": 1,
           "variants": [
@@ -4432,8 +4561,8 @@
         {
           "id": "primary",
           "role": "normal",
-          "trigger": "unknown",
-          "bullets": 1,
+          "trigger": "held",
+          "bullets": 6,
           "multishot": 7,
           "variants": [
             {
@@ -8306,7 +8435,7 @@
           ]
         }
       ],
-      "_manual": {
+      "_manualFields": {
         "fireRate": "0 → 2：导出射速为 0，按蓄力 0.5s 反推为 2 发/秒（待人工核实实际蓄力时间）"
       }
     },

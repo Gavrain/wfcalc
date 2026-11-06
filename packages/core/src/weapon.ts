@@ -122,10 +122,31 @@ export interface AttackMode {
    *
    * `'panel-reused'` = 面板是占位值；`'entered'` = 人工录入的真实值。
    */
-  _manual?: 'panel-reused' | 'entered';
+  _manual?: ModeManualFlag;
   /** 人工备注（来源、待办、补充说明），仅供展示与溯源 */
   _note?: string;
+  /** 模式展示名（D-141）：有值时界面优先用它，例如重力奇点的「球体融合 / 球体爆炸」 */
+  _label?: string;
 }
+
+/**
+ * 「这个模式的数值可信吗」（D-110 / D-141）。
+ *
+ * - `panel-reused`    面板是**复用基础面板**的占位值（灵化形态没收录）
+ * - `entered`         人工录入的真实值（如扎里曼系列灵化面板）
+ * - `bible`           导出值与游戏不符，按需求方给的**游戏内白板面板**改写
+ * - `export-missing`  导出里是空壳 / 与游戏冲突，数值来自人工层
+ */
+export type ModeManualFlag = 'panel-reused' | 'entered' | 'bible' | 'export-missing';
+
+/**
+ * 整把武器的人工标记（D-141）。
+ *
+ * - `panel-empty`     面板尚未收录（例如暗黑分合剑的两个版本），界面必须标「面板待补」
+ * - `bible`           面板按需求方给的游戏内白板值改写
+ * - `export-missing`  导出数据不可用，数值来自人工层
+ */
+export type WeaponManualFlag = 'panel-empty' | 'bible' | 'export-missing';
 
 /** 当前生效的面板变体（模式内） */
 export function activeVariant(mode: AttackMode, variantId?: string): ModeVariant {
@@ -204,6 +225,13 @@ export interface Weapon {
   /** 'kuva' / 'variant' … */
   variant?: string;
   kuva?: KuvaInfo;
+  /**
+   * 人工标记（D-141）。`panel-empty` 表示**面板尚未收录**——
+   * 这种武器只有骨架（分类 / 暴击 / 射速），`modes` 为空，不能参与计算。
+   */
+  _manual?: WeaponManualFlag;
+  /** 人工备注（来源 / 待办），界面悬停可见 */
+  _note?: string;
 }
 
 /** 取武器的一个攻击模式；找不到时抛错（不静默回退到第一个模式，避免选错模式也算出结果） */
