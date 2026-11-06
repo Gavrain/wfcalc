@@ -31,7 +31,7 @@ export type BucketId =
 export type BucketableStat = Extract<
   ContribStat,
   'baseDamage' | 'multishot' | 'critChance' | 'critMultiplier' | 'statusChance' | 'fireRate' | 'faction' | 'statusDamage'
-  | 'magazine' | 'reloadSpeed'
+  | 'magazine' | 'reloadSpeed' | 'ammoEfficiency'
 >;
 
 export interface BucketDetail {
@@ -78,8 +78,7 @@ export function bucketDetail(panel: number, stat: BucketableStat, contribs: read
   };
 }
 
-/** 暴率 / 暴伤 / 射速这类"两段式"属性的面板 + 加成展示（供 UI 的「基础面板/加成后面板」对照） */
-export interface PanelPair {
+/** 暴率 / 暴伤 / 射速这类"两段式"属性的面板 + 加成展示（供 UI 的「基础面板/加成后面板」对照） */export interface PanelPair {
   stat: BucketableStat;
   base: number;
   after: number;
@@ -87,10 +86,8 @@ export interface PanelPair {
 
 export function panelPairs(panelStats: Partial<Record<BucketableStat, number>>, contribs: readonly Contribution[]): PanelPair[] {
   const out: PanelPair[] = [];
-  const entries = Object.entries(panelStats);
-  for (const [stat, base] of entries) {
-    const key: BucketableStat = stat;
-    out.push({ stat: key, base: base, after: bucket(base, key, contribs) });
+  for (const [stat, base] of Object.entries(panelStats) as [BucketableStat, number][]) {
+    out.push({ stat, base, after: bucket(base, stat, contribs) });
   }
   return out;
 }

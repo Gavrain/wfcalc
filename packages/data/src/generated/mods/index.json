@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-05T08:28:41.938Z",
+  "generatedAt": "2026-11-06T06:43:04.358Z",
   "sources": [
     {
       "name": "ZKMODS（紫卡模拟器快照）",
@@ -28,7 +28,7 @@
     }
   ],
   "counts": {
-    "weaponMods": 442,
+    "weaponMods": 441,
     "arcanes": 56,
     "arcanesSkipped": 6,
     "modSets": 19,
@@ -36,8 +36,8 @@
     "weapons": 842
   },
   "coverage": {
-    "officialMatched": 442,
-    "withStats": 442,
+    "officialMatched": 440,
+    "withStats": 440,
     "zkWeaponsMatched": 646,
     "unresolvedWeapons": 24,
     "meleeMissingSpecific": 44,

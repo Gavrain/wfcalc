@@ -4,7 +4,7 @@
  * 在 clean 之后、diff/emit 之前调用。
  * 每个覆盖都会记录到 applied 列表，便于报告里展示"哪些字段来自人工"。
  */
-import type { WeaponPanel } from '../../core/src/weapon.ts';
+import type { Weapon } from '../../core/src/weapon.ts';
 
 export interface OverrideSource {
   fireRate?: number;
@@ -39,7 +39,7 @@ export function chargeTimeToFireRate(chargeTime: number): number {
  * 把覆盖层应用到武器列表（原地修改并返回应用记录）。
  */
 export function applyOverrides(
-  weapons: WeaponPanel[],
+  weapons: Weapon[],
   overrides: Record<string, OverrideSource>,
 ): AppliedOverride[] {
   const applied: AppliedOverride[] = [];

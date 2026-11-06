@@ -59,7 +59,7 @@ describe('暴率 >100% 时爆头暴击正确生效（D-064）', () => {
       id: 'T', name: 'T', critChance: cc, critMultiplier: 2, statusChance: 0.5,
       fireRate: 10, magazineSize: 100, reloadTime: 1,
       modes: [{ id: 'primary', role: 'normal', trigger: 'auto', multishot: 1,
-        segments: [{ kind: 'physical', procChance: 0.5, damage: { slash: 100 } }] }],
+        variants: [{ id: 'direct', label: '直接命中', segments: [{ kind: 'impact', procChance: 0.5, damage: { slash: 100 } }] }] }],
     });
     const hs = { headshot: { enabled: true, multiplier: 3 } };
     const a = compute(mk(1), mk(1).modes[0], [], hs, false).segments[0].dotTicks[0].tick;

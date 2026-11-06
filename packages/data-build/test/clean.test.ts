@@ -1,6 +1,7 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { cleanWeapons, isPlaceholder, toTriggerKind, EXCLUDED_CATEGORIES } from '../src/clean.ts';
+import { allSegments } from '../../core/src/weapon.ts';
 import type { ExportWeapons } from '../src/types.ts';
 
 const weapon = (overrides: Record<string, unknown> = {}): ExportWeapons[string] => ({
@@ -67,16 +68,20 @@ describe('清洗：Tau 伤害类型', () => {
     const result = cleanWeapons({
       '/Lotus/Weapons/Sentients/SentOctaMiniGun/SentOctaMiniGun': weapon({
         totalDamage: 33,
+        // D-092：枪械的 behaviour 需要带 projectile 才算"射击模式"，
+        //  只有 impact 的会被当成同一次开火的附带伤害并入爆炸变体。
         behaviours: [
           {
             stateName: '/Lotus/Language/Menu/Loadout_TriggerAuto',
             fireIterations: 1,
+            projectile: { attack: { DT_SENTIENT: 33, procChance: 0.19 } },
             impact: { DT_SENTIENT: 33, procChance: 0.19 },
           },
           {
             stateName: '/Lotus/Language/Menu/Loadout_TriggerBurst',
             fireIterations: 1,
             burst: { count: 2, delay: 0.05 },
+            projectile: { attack: { DT_SENTIENT: 34, procChance: 0.26 } },
             impact: { DT_SENTIENT: 34, procChance: 0.26 },
           },
         ],
@@ -84,8 +89,8 @@ describe('清洗：Tau 伤害类型', () => {
     });
     const w = result.weapons[0]!;
     assert.equal(w.modes.length, 2);
-    assert.equal(w.modes[0]!.segments[0]!.damage.tau, 33);
-    assert.equal(w.modes[1]!.segments[0]!.damage.tau, 34);
+    assert.equal(allSegments(w.modes[0]!)[0]!.damage.tau, 33);
+    assert.equal(allSegments(w.modes[1]!)[0]!.damage.tau, 34);
     assert.equal(w.modes[1]!.burst!.count, 2);
     assert.equal(result.stats.weaponsWithUnknownDamageType, 0);
   });
@@ -136,10 +141,10 @@ describe('清洗：多模式与 AoE', () => {
         ],
       }),
     });
-    const segs = result.weapons[0]!.modes[0]!.segments;
+    const segs = allSegments(result.weapons[0]!.modes[0]!);
     assert.equal(segs.length, 2);
-    assert.equal(segs.find((s) => s.kind === 'attack')!.isAoe, false);
-    assert.equal(segs.find((s) => s.kind === 'explosiveAttack')!.isAoe, true);
+    assert.equal(segs.find((s) => s.kind === 'attack')!.aoe, false);
+    assert.equal(segs.find((s) => s.kind === 'explosiveAttack')!.aoe, true);
     assert.equal(segs.find((s) => s.kind === 'explosiveAttack')!.damage.blast, 400);
     assert.equal(result.stats.weaponsWithAoe, 1);
   });

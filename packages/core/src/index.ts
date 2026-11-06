@@ -2,6 +2,7 @@ export * from './damage-types.ts';
 export * from './weapon.ts';
 export * from './contributions.ts';
 export * from './buckets.ts';
+export * from './weapon-state.ts';
 export * from './status-effects.ts';
 export * from './kuva.ts';
 export * from './main.ts';

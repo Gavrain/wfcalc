@@ -19,7 +19,7 @@ const mk = (fr: number, mag = 70, reload = 1.7) => ({
   id: 'T', name: 'T', critChance: 0, critMultiplier: 2, statusChance: 1,
   fireRate: fr, magazineSize: mag, reloadTime: reload,
   modes: [{ id: 'primary', role: 'normal', trigger: 'auto', multishot: 1,
-    segments: [{ kind: 'physical', procChance: 1, damage: { slash: 100, heat: 50 } }] }],
+    variants: [{ id: 'direct', label: '直接命中', segments: [{ kind: 'impact', procChance: 1, damage: { slash: 100, heat: 50 } }] }] }],
 });
 
 const dot6s = (fr: number, mag = 70, reload = 1.7) => {
@@ -100,7 +100,8 @@ describe('毫秒精度开火占比（D-067）', () => {
     // 逐秒开火占比：1, 0, 0, 1, 0, 0
     // 用**纯切割**武器，避免热/元素合成的干扰
     const w: any = mk(10, 10, 2);
-    w.modes[0].segments[0].damage = { slash: 100 };
+    // D-080：段只属于变体——直接改变体内的段
+    w.modes[0].variants[0].segments[0].damage = { slash: 100 };
     const r = compute(w, w.modes[0], [], {}, false);
     const seg: any = r.segments[0];
     const tick = seg.dotTicks.find((t: any) => t.type === 'slash').tick;
@@ -120,15 +121,16 @@ describe('毫秒精度开火占比（D-067）', () => {
     near(r.output.lines.find((l: any) => l.id === 'dot6s').value, manual);
 
     // 装填的秒（占比 0）伤害不为 0 —— 证明在继续跳
+    // （noUncheckedIndexedAccess 下数组元素是 `number | undefined`，用 `!` 断言已取到）
     assert.equal(firingFraction(10, 10, 2, 2), 0, '第 2 秒应是装填');
-    assert.ok(perSecondDamage[1] > 0, '装填的第 2 秒伤害应大于 0');
+    assert.ok(perSecondDamage[1]! > 0, '装填的第 2 秒伤害应大于 0');
     assert.equal(firingFraction(10, 10, 2, 3), 0, '第 3 秒应是装填');
-    assert.ok(perSecondDamage[2] > 0, '装填的第 3 秒伤害应大于 0');
+    assert.ok(perSecondDamage[2]! > 0, '装填的第 3 秒伤害应大于 0');
 
     // 装填秒的伤害与前一秒相同（层数没变）
-    near(perSecondDamage[1], perSecondDamage[0]);
-    near(perSecondDamage[2], perSecondDamage[1]);
+    near(perSecondDamage[1]!, perSecondDamage[0]!);
+    near(perSecondDamage[2]!, perSecondDamage[1]!);
     // 但开火那秒层数增加，伤害变高
-    assert.ok(perSecondDamage[3] > perSecondDamage[2], '重新开火后伤害应上升');
+    assert.ok(perSecondDamage[3]! > perSecondDamage[2]!, '重新开火后伤害应上升');
   });
 });

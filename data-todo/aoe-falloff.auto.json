@@ -1,0 +1,673 @@
+{
+  "source": "wfcd@1.1276.47 attacks[].falloff",
+  "note": "只用于面板展示，不参与伤害计算（D-070）。explosion = 单一半径、由中心线性衰减；shotgun = 两段（start 内全伤害、start~end 线性降、end 外保持边缘值）",
+  "resolved": {
+    "AstillaPrimeWeapon/primary/explosiveAttack/#1": {
+      "resolved": true,
+      "model": "explosion",
+      "radius": 2.4,
+      "edgeMultiplier": 0.7,
+      "wfcdName": "Glass Explosion"
+    },
+    "CarminePenta/primary/explosiveAttack/#1": {
+      "resolved": true,
+      "model": "explosion",
+      "radius": 4,
+      "edgeMultiplier": 0.5,
+      "wfcdName": "Grenade Detonation"
+    },
+    "CodaBubonicoCannon/mode2/explosiveAttack/#1": {
+      "resolved": true,
+      "model": "explosion",
+      "radius": 7,
+      "edgeMultiplier": 0.5,
+      "wfcdName": "Radial Attack"
+    },
+    "CrpBEQuanta/mode2/explosiveAttack/#1": {
+      "resolved": true,
+      "falloff": null
+    },
+    "CrpBETetra/mode2/explosiveAttack/#1": {
+      "resolved": true,
+      "model": "explosion",
+      "radius": 8,
+      "edgeMultiplier": 0.4,
+      "wfcdName": "Grenade AoE"
+    },
+    "CrpBow/primary/explosiveAttack/#1": {
+      "resolved": true,
+      "model": "explosion",
+      "radius": 7.2,
+      "edgeMultiplier": 0.3,
+      "wfcdName": "Initial Blast"
+    },
+    "CrpBriefcaseLauncher/primary/explosiveAttack/#1": {
+      "resolved": true,
+      "model": "explosion",
+      "radius": 8,
+      "edgeMultiplier": 0.2,
+      "wfcdName": "Rocket Explosion"
+    },
+    "CrpShockRifle/mode2/explosiveAttack/#1": {
+      "resolved": true,
+      "falloff": null
+    },
+    "GrenadeLauncher/primary/explosiveAttack/#1": {
+      "resolved": true,
+      "model": "explosion",
+      "radius": 4,
+      "edgeMultiplier": 0.5,
+      "wfcdName": "Grenade Detonation"
+    },
+    "GrnBowWeapon/primary/explosiveAttack/#1": {
+      "resolved": true,
+      "model": "explosion",
+      "radius": 8.3,
+      "edgeMultiplier": 0.1,
+      "wfcdName": "Radial Attack"
+    },
+    "GrnCannonWeapon/primary/explosiveAttack/#1": {
+      "resolved": true,
+      "model": "explosion",
+      "radius": 4.9,
+      "edgeMultiplier": 0.5,
+      "wfcdName": "Cannon Mode Explosion"
+    },
+    "GrnFlameSpear/primary/explosiveAttack/#1": {
+      "resolved": true,
+      "model": "explosion",
+      "radius": 2.4,
+      "edgeMultiplier": 0.7,
+      "wfcdName": "Projectile Explosion"
+    },
+    "GrnFlameSpear/mode2/explosiveAttack/#1": {
+      "resolved": true,
+      "model": "explosion",
+      "radius": 6,
+      "edgeMultiplier": 0.4,
+      "wfcdName": "Spear Throw Explosion"
+    },
+    "GrnGrenadeLauncher/primary/explosiveAttack/#1": {
+      "resolved": true,
+      "model": "explosion",
+      "radius": 7,
+      "edgeMultiplier": 0.3,
+      "wfcdName": "Grenade Explosion"
+    },
+    "GrnKuvaLichRifleWeapon/primary/explosiveAttack/#1": {
+      "resolved": true,
+      "model": "explosion",
+      "radius": 2.9,
+      "edgeMultiplier": 0.7,
+      "wfcdName": "Explosion"
+    },
+    "InfArmCannon/mode2/explosiveAttack/#1": {
+      "resolved": true,
+      "model": "explosion",
+      "radius": 7,
+      "edgeMultiplier": 0.5,
+      "wfcdName": "Radial Attack"
+    },
+    "InfCrpShockSwarmRifle/mode2/explosiveAttack/#1": {
+      "resolved": true,
+      "model": "explosion",
+      "radius": 4.4,
+      "edgeMultiplier": 0.5,
+      "wfcdName": "Orb Explosion"
+    },
+    "KuvaOgris/primary/explosiveAttack/#1": {
+      "resolved": true,
+      "model": "explosion",
+      "radius": 7.9,
+      "edgeMultiplier": 0.2,
+      "wfcdName": "Rocket Explosion"
+    },
+    "KuvaTonkor/primary/explosiveAttack/#1": {
+      "resolved": true,
+      "model": "explosion",
+      "radius": 7,
+      "edgeMultiplier": 0.3,
+      "wfcdName": "Grenade Explosion"
+    },
+    "KuvaZarr/primary/explosiveAttack/#1": {
+      "resolved": true,
+      "model": "explosion",
+      "radius": 7,
+      "edgeMultiplier": 0.3,
+      "wfcdName": "Cannon Mode Explosion"
+    },
+    "LatronPrime/mode2/explosiveAttack/#1": {
+      "resolved": true,
+      "model": "explosion",
+      "radius": 4,
+      "edgeMultiplier": 0.8,
+      "wfcdName": "Incarnon Form AoE"
+    },
+    "MK1Strun/mode2/explosiveAttack/#1": {
+      "resolved": true,
+      "model": "explosion",
+      "radius": 4,
+      "edgeMultiplier": 0.8,
+      "wfcdName": "Incarnon Form AoE"
+    },
+    "PSPenta/primary/explosiveAttack/#1": {
+      "resolved": true,
+      "model": "explosion",
+      "radius": 6,
+      "edgeMultiplier": 0.4,
+      "wfcdName": "Grenade Detonation"
+    },
+    "PhantasmaPrimeShotgun/mode2/explosiveAttack/#1": {
+      "resolved": true,
+      "model": "explosion",
+      "radius": 4.8,
+      "edgeMultiplier": 0.5,
+      "wfcdName": "Plasma Bomb Explosion"
+    },
+    "PrimeAcceltraWeapon/primary/explosiveAttack/#1": {
+      "resolved": true,
+      "model": "explosion",
+      "radius": 5,
+      "edgeMultiplier": 0.5,
+      "wfcdName": "Rocket Explosion"
+    },
+    "PrimeCedoWeapon/mode2/explosiveAttack/#1": {
+      "resolved": true,
+      "falloff": null
+    },
+    "PrimeCorinth/mode2/explosiveAttack/#1": {
+      "resolved": true,
+      "model": "explosion",
+      "radius": 9.8,
+      "edgeMultiplier": 0.1,
+      "wfcdName": "Air Burst Explosion"
+    },
+    "PrimePanthera/primary/explosiveAttack/#1": {
+      "resolved": true,
+      "model": "explosion",
+      "radius": 1.6,
+      "edgeMultiplier": 0.8,
+      "wfcdName": "Radial Attack"
+    },
+    "PrimeScourgeWeapon/primary/explosiveAttack/#1": {
+      "resolved": true,
+      "model": "explosion",
+      "radius": 1.7,
+      "edgeMultiplier": 0.7,
+      "wfcdName": "Explosion"
+    },
+    "PrimeScourgeWeapon/mode2/explosiveAttack/#1": {
+      "resolved": true,
+      "model": "explosion",
+      "radius": 7,
+      "edgeMultiplier": 0.4,
+      "wfcdName": "Spear Explosion"
+    },
+    "PrimeScourgeWeapon/charged/explosiveAttack/#1": {
+      "resolved": true,
+      "model": "explosion",
+      "radius": 7,
+      "edgeMultiplier": 0.4,
+      "wfcdName": "Spear Explosion"
+    },
+    "PrimeStrunWeapon/mode2/explosiveAttack/#1": {
+      "resolved": true,
+      "model": "explosion",
+      "radius": 4,
+      "edgeMultiplier": 0.8,
+      "wfcdName": "Incarnon Form AoE"
+    },
+    "PrimeTrumnaWeapon/mode2/explosiveAttack/#1": {
+      "resolved": true,
+      "model": "explosion",
+      "radius": 6,
+      "edgeMultiplier": 0.6,
+      "wfcdName": "Grenade Bounce AoE"
+    },
+    "PrimeVectisRifle/mode2/explosiveAttack/#1": {
+      "resolved": true,
+      "falloff": null
+    },
+    "PrismaLenzWeapon/primary/explosiveAttack/#1": {
+      "resolved": true,
+      "model": "explosion",
+      "radius": 7.2,
+      "edgeMultiplier": 0.3,
+      "wfcdName": "Initial Blast"
+    },
+    "QuantaVandal/mode2/explosiveAttack/#1": {
+      "resolved": true,
+      "falloff": null
+    },
+    "RevenantShotgun/mode2/explosiveAttack/#1": {
+      "resolved": true,
+      "model": "explosion",
+      "radius": 4.8,
+      "edgeMultiplier": 0.5,
+      "wfcdName": "Plasma Bomb Explosion"
+    },
+    "RocketLauncher/primary/explosiveAttack/#1": {
+      "resolved": true,
+      "model": "explosion",
+      "radius": 7.1,
+      "edgeMultiplier": 0.2,
+      "wfcdName": "Rocket Explosion"
+    },
+    "SapientPrimaryWeapon/primary/explosiveAttack/#1": {
+      "resolved": true,
+      "model": "explosion",
+      "radius": 4,
+      "edgeMultiplier": 0.5,
+      "wfcdName": "Rocket Explosion"
+    },
+    "SawBladeGun/mode3/explosiveAttack/#1": {
+      "resolved": true,
+      "model": "explosion",
+      "radius": 3,
+      "edgeMultiplier": 0.8,
+      "wfcdName": "Incarnon Form Radial Attack"
+    },
+    "SemiAutoRifle/mode2/explosiveAttack/#1": {
+      "resolved": true,
+      "model": "explosion",
+      "radius": 4,
+      "edgeMultiplier": 0.8,
+      "wfcdName": "Incarnon Form AoE"
+    },
+    "SentRifleNewWarGun/primary/explosiveAttack/#1": {
+      "resolved": true,
+      "model": "explosion",
+      "radius": 1.7,
+      "edgeMultiplier": 0.8,
+      "wfcdName": "Radial Attack"
+    },
+    "Shotgun/mode2/explosiveAttack/#1": {
+      "resolved": true,
+      "model": "explosion",
+      "radius": 4,
+      "edgeMultiplier": 0.8,
+      "wfcdName": "Incarnon Form AoE"
+    },
+    "ShotgunVandal/mode2/explosiveAttack/#1": {
+      "resolved": true,
+      "model": "explosion",
+      "radius": 4,
+      "edgeMultiplier": 0.8,
+      "wfcdName": "Incarnon Form AoE"
+    },
+    "TennoSniperRifle/mode2/explosiveAttack/#1": {
+      "resolved": true,
+      "falloff": null
+    },
+    "ThanotechRifle/mode2/explosiveAttack/#1": {
+      "resolved": true,
+      "model": "explosion",
+      "radius": 6,
+      "edgeMultiplier": 0.6,
+      "wfcdName": "Grenade Bounce AoE"
+    },
+    "TnAlchemistShotgun/mode2/explosiveAttack/#1": {
+      "resolved": true,
+      "falloff": null
+    },
+    "TnChoirBow/charged/explosiveAttack/#1": {
+      "resolved": true,
+      "model": "shotgun",
+      "falloffStart": 0.9,
+      "falloffEnd": 4,
+      "edgeMultiplier": 0.3,
+      "wfcdName": "Charged Radial Attack"
+    },
+    "TnGlassShotgunGun/primary/explosiveAttack/#1": {
+      "resolved": true,
+      "model": "explosion",
+      "radius": 2.4,
+      "edgeMultiplier": 0.7,
+      "wfcdName": "Glass Explosion"
+    },
+    "TnHeavyShotgunGun/mode2/explosiveAttack/#1": {
+      "resolved": true,
+      "model": "explosion",
+      "radius": 9.4,
+      "edgeMultiplier": 0.1,
+      "wfcdName": "Air Burst Explosion"
+    },
+    "TnInkRifleWeapon/mode2/explosiveAttack/#1": {
+      "resolved": true,
+      "model": "explosion",
+      "radius": 8,
+      "edgeMultiplier": 0.5,
+      "wfcdName": "Alt-Fire Radial Attack"
+    },
+    "TnPriestSpearGun/primary/explosiveAttack/#1": {
+      "resolved": true,
+      "model": "explosion",
+      "radius": 1.7,
+      "edgeMultiplier": 0.7,
+      "wfcdName": "Explosion"
+    },
+    "TnPriestSpearGun/mode2/explosiveAttack/#1": {
+      "resolved": true,
+      "model": "explosion",
+      "radius": 1.7,
+      "edgeMultiplier": 0.7,
+      "wfcdName": "Explosion"
+    },
+    "TnRifleErsatzWeapon/charged/explosiveAttack/#1": {
+      "resolved": true,
+      "model": "explosion",
+      "radius": 7,
+      "edgeMultiplier": 0.5,
+      "wfcdName": "Alt-Fire Explosion"
+    },
+    "WraithLatron/mode2/explosiveAttack/#1": {
+      "resolved": true,
+      "model": "explosion",
+      "radius": 4,
+      "edgeMultiplier": 0.8,
+      "wfcdName": "Incarnon Form AoE"
+    },
+    "1999EntHybridPistolWeapon/primary/explosiveAttack/#1": {
+      "resolved": true,
+      "model": "explosion",
+      "radius": 1.5,
+      "edgeMultiplier": 0.5,
+      "wfcdName": "Radial Attack"
+    },
+    "CorpusHandRocketLauncher/primary/explosiveAttack/#1": {
+      "resolved": true,
+      "model": "explosion",
+      "radius": 3.6,
+      "edgeMultiplier": 0.6,
+      "wfcdName": "Single Rocket Explosion"
+    },
+    "CrpAirPistolArray/primary/explosiveAttack/#1": {
+      "resolved": true,
+      "falloff": null
+    },
+    "CrpElectroMag/primary/explosiveAttack/#1": {
+      "resolved": true,
+      "model": "explosion",
+      "radius": 2.4,
+      "edgeMultiplier": 0.7,
+      "wfcdName": "Uncharged Explosion"
+    },
+    "CrpElectroMag/charged/explosiveAttack/#1": {
+      "resolved": true,
+      "model": "explosion",
+      "radius": 9.6,
+      "edgeMultiplier": 0.1,
+      "wfcdName": "Fully Charged Explosion"
+    },
+    "CrpIgniterPistol/primary/explosiveAttack/#1": {
+      "resolved": true,
+      "model": "explosion",
+      "radius": 2,
+      "edgeMultiplier": 0.8,
+      "wfcdName": "Explosion"
+    },
+    "CrpSentAmalgPistol/primary/explosiveAttack/#1": {
+      "resolved": true,
+      "model": "explosion",
+      "radius": 0.7,
+      "edgeMultiplier": 0.8,
+      "wfcdName": "Projectile Explosion"
+    },
+    "GrineerGooGun/primary/explosiveAttack/#1": {
+      "resolved": true,
+      "model": "explosion",
+      "radius": 0.3,
+      "edgeMultiplier": 0.7,
+      "wfcdName": "Blob Explosion"
+    },
+    "GrineerGooGun/mode2/explosiveAttack/#1": {
+      "resolved": true,
+      "model": "explosion",
+      "radius": 0.3,
+      "edgeMultiplier": 0.7,
+      "wfcdName": "Blob Explosion"
+    },
+    "GrineerGooGun/mode3/explosiveAttack/#1": {
+      "resolved": true,
+      "model": "explosion",
+      "radius": 0.3,
+      "edgeMultiplier": 0.7,
+      "wfcdName": "Incarnon Form Blob Explosion"
+    },
+    "GrnHeatGun/mode2/explosiveAttack/#1": {
+      "resolved": true,
+      "model": "explosion",
+      "radius": 7.9,
+      "edgeMultiplier": 0.2,
+      "wfcdName": "Incarnon Form Radial Attack"
+    },
+    "GrnTorpedoPistol/primary/explosiveAttack/#1": {
+      "resolved": true,
+      "model": "explosion",
+      "radius": 3.9,
+      "edgeMultiplier": 0.6,
+      "wfcdName": "Rocket Explosion"
+    },
+    "GrnVorStickyBomb/primary/explosiveAttack/#1": {
+      "resolved": true,
+      "model": "explosion",
+      "radius": 9,
+      "edgeMultiplier": 0.3,
+      "wfcdName": "Detonation"
+    },
+    "InfUziWeapon/primary/explosiveAttack/#1": {
+      "resolved": true,
+      "model": "explosion",
+      "radius": 3.3,
+      "edgeMultiplier": 0.7,
+      "wfcdName": "Radial Attack"
+    },
+    "KuvaSeer/primary/explosiveAttack/#1": {
+      "resolved": true,
+      "model": "explosion",
+      "radius": 2.3,
+      "edgeMultiplier": 0.7,
+      "wfcdName": "Explosion"
+    },
+    "LasGooPistolPlayerWeapon/charged/explosiveAttack/#1": {
+      "resolved": true,
+      "model": "explosion",
+      "radius": 3,
+      "edgeMultiplier": 0.2,
+      "wfcdName": "Alt-Fire AoE"
+    },
+    "PrimeAkariusWeapon/primary/explosiveAttack/#1": {
+      "resolved": true,
+      "model": "explosion",
+      "radius": 7.8,
+      "edgeMultiplier": 0.3,
+      "wfcdName": "Rocket Detonation"
+    },
+    "PrimeEpitaphSidearmWeapon/primary/explosiveAttack/#1": {
+      "resolved": true,
+      "model": "explosion",
+      "radius": 10,
+      "edgeMultiplier": 0.2,
+      "wfcdName": "Uncharged AoE"
+    },
+    "PrismaAngstrum/primary/explosiveAttack/#1": {
+      "resolved": true,
+      "model": "explosion",
+      "radius": 3.6,
+      "edgeMultiplier": 0.6,
+      "wfcdName": "Single Rocket Explosion"
+    },
+    "SapientPistol/primary/explosiveAttack/#1": {
+      "resolved": true,
+      "model": "explosion",
+      "radius": 7.2,
+      "edgeMultiplier": 0.3,
+      "wfcdName": "Rocket Detonation"
+    },
+    "ThanotechPistol/primary/explosiveAttack/#1": {
+      "resolved": true,
+      "model": "explosion",
+      "radius": 1.6,
+      "edgeMultiplier": 0.8,
+      "wfcdName": "Radial Attack"
+    },
+    "ThanotechPistol/mode2/explosiveAttack/#1": {
+      "resolved": true,
+      "model": "explosion",
+      "radius": 3,
+      "edgeMultiplier": 0.8,
+      "wfcdName": "Lock-On Radial Attack"
+    },
+    "TnWraitheSidearmWeapon/primary/explosiveAttack/#1": {
+      "resolved": true,
+      "model": "explosion",
+      "radius": 8,
+      "edgeMultiplier": 0.2,
+      "wfcdName": "Uncharged AoE"
+    },
+    "U18throwingknives/primary/explosiveAttack/#1": {
+      "resolved": true,
+      "model": "explosion",
+      "radius": 4,
+      "edgeMultiplier": 0.5,
+      "wfcdName": "Mid-Flight Detonation"
+    },
+    "ZarimanHeavyPistol/mode2/explosiveAttack/#1": {
+      "resolved": true,
+      "model": "explosion",
+      "radius": 2,
+      "edgeMultiplier": 0.8,
+      "wfcdName": "Auto Radial Attack"
+    },
+    "BoomerangWeapon/mode2/explosiveAttack/#1": {
+      "resolved": true,
+      "model": "explosion",
+      "radius": 3.6,
+      "edgeMultiplier": 0.6,
+      "wfcdName": "Throw Bounce Explosion"
+    },
+    "CodaPathocyst/mode2/explosiveAttack/#1": {
+      "resolved": true,
+      "model": "explosion",
+      "radius": 4.9,
+      "edgeMultiplier": 0.5,
+      "wfcdName": "Throw Bounce Explosion"
+    },
+    "DaxDuviriMaceShieldWeapon/mode2/explosiveAttack/#1": {
+      "resolved": true,
+      "model": "explosion",
+      "radius": 3,
+      "edgeMultiplier": 0.6,
+      "wfcdName": "Heavy Attack Glaive AoE"
+    },
+    "HalikarWraithWeapon/mode2/explosiveAttack/#1": {
+      "resolved": true,
+      "model": "explosion",
+      "radius": 5.1,
+      "edgeMultiplier": 0.6,
+      "wfcdName": "Throw Bounce Explosion"
+    },
+    "InfBoomerangWeapon/mode2/explosiveAttack/#1": {
+      "resolved": true,
+      "model": "explosion",
+      "radius": 4.9,
+      "edgeMultiplier": 0.5,
+      "wfcdName": "Throw Bounce Explosion"
+    },
+    "LightGlaiveWeapon/mode2/explosiveAttack/#1": {
+      "resolved": true,
+      "model": "explosion",
+      "radius": 4.8,
+      "edgeMultiplier": 0.6,
+      "wfcdName": "Throw Bounce Explosion"
+    },
+    "PrimeGlaiveWeapon/mode2/explosiveAttack/#1": {
+      "resolved": true,
+      "model": "explosion",
+      "radius": 4.8,
+      "edgeMultiplier": 0.6,
+      "wfcdName": "Throw Bounce Explosion"
+    },
+    "PrimeKestrel/mode2/explosiveAttack/#1": {
+      "resolved": true,
+      "model": "explosion",
+      "radius": 3.6,
+      "edgeMultiplier": 0.6,
+      "wfcdName": "Throw Bounce Explosion"
+    },
+    "PunctureGlaiveWeapon/mode2/explosiveAttack/#1": {
+      "resolved": true,
+      "model": "explosion",
+      "radius": 4.8,
+      "edgeMultiplier": 0.7,
+      "wfcdName": "Throw Bounce Explosion"
+    },
+    "SundialBoardSword/mode2/explosiveAttack/#1": {
+      "resolved": true,
+      "model": "explosion",
+      "radius": 4,
+      "edgeMultiplier": 0,
+      "wfcdName": "Shield Throw Explosion"
+    },
+    "ThrowingHammer/mode2/explosiveAttack/#1": {
+      "resolved": true,
+      "model": "explosion",
+      "radius": 5,
+      "edgeMultiplier": 0.6,
+      "wfcdName": "Throw Bounce Explosion"
+    },
+    "GrnHeavyGrenadeLauncher/primary/explosiveAttack/#1": {
+      "resolved": true,
+      "model": "explosion",
+      "radius": 9,
+      "edgeMultiplier": 0.7,
+      "wfcdName": "Explosion"
+    },
+    "KuvaGrattler/primary/explosiveAttack/#1": {
+      "resolved": true,
+      "model": "explosion",
+      "radius": 9,
+      "edgeMultiplier": 0.3,
+      "wfcdName": "Explosion"
+    },
+    "PrimeLarkspurWeapon/mode2/explosiveAttack/#1": {
+      "resolved": true,
+      "model": "explosion",
+      "radius": 9.6,
+      "edgeMultiplier": 0.4,
+      "wfcdName": "Explosion"
+    },
+    "ThanoTechArchGun/mode2/explosiveAttack/#1": {
+      "resolved": true,
+      "model": "explosion",
+      "radius": 4,
+      "edgeMultiplier": 0.7,
+      "wfcdName": "Radial Attack"
+    },
+    "ThanoTechGrenadeLauncher/primary/explosiveAttack/#1": {
+      "resolved": true,
+      "model": "explosion",
+      "radius": 3,
+      "edgeMultiplier": 0.7,
+      "wfcdName": "Auto Burst Explosion"
+    },
+    "ThanoTechGrenadeLauncher/mode2/explosiveAttack/#1": {
+      "resolved": true,
+      "model": "explosion",
+      "radius": 20,
+      "edgeMultiplier": 0.4,
+      "wfcdName": "Charged Shot Explosion"
+    },
+    "TnShieldFrameArchGun/mode2/explosiveAttack/#1": {
+      "resolved": true,
+      "model": "explosion",
+      "radius": 9.6,
+      "edgeMultiplier": 0.4,
+      "wfcdName": "Explosion"
+    },
+    "SwarmerWeapon/primary/explosiveAttack/#1": {
+      "resolved": true,
+      "falloff": null
+    }
+  }
+}

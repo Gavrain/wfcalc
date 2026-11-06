@@ -89,7 +89,7 @@ describe('§11 校验例（来自乘区归属表与需求方裁定）', () => {
     const contribs = [pct('baseDamage', 165)];
     const after = applyBaseDamage(kuva, HIT, contribs);
     near(after.magnetic, 24 * 2.65); // 63.6
-    const total = Object.values(after).reduce((a, b) => a + (b ?? 0), 0);
+    const total = Object.values(after).reduce<number>((a, b) => a + (b ?? 0), 0);
     near(total, 169.6); // (40+24) × 2.65
   });
 });

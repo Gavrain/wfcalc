@@ -20,7 +20,7 @@ const shortMag = (reloadTime = 2) => ({
   id: 'T', name: 'T', critChance: 0, critMultiplier: 2, statusChance: 1,
   fireRate: 10, magazineSize: 12, reloadTime,
   modes: [{ id: 'primary', role: 'normal', trigger: 'auto', multishot: 1,
-    segments: [{ kind: 'physical', procChance: 1, damage: { slash: 100 } }] }],
+    variants: [{ id: 'direct', label: '直接命中', segments: [{ kind: 'impact', procChance: 1, damage: { slash: 100 } }] }] }],
 });
 
 const reloadMod = (pct: number) => [{ stat: 'reloadSpeed', form: 'pct', amount: pct, source: 'x' }];

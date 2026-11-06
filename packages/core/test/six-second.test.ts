@@ -1,4 +1,4 @@
-/**
+﻿/**
  * D-057：六秒异常状态总伤的三项规则。
  *   ① 毒气 10 层上限（§6.3）
  *   ② 火焰逐层累加基础值 → 曲线单调上升（§6.3）
@@ -18,7 +18,7 @@ const weapon: any = {
   fireRate: 10, magazineSize: 30, reloadTime: 2,
   modes: [{
     id: 'primary', role: 'normal', trigger: 'auto', multishot: 1,
-    segments: [{ kind: 'impact', procChance: 0.5, damage: { impact: 100 } }],
+    variants: [{ id: 'direct', label: '直接命中', segments: [{ kind: 'impact', procChance: 0.5, damage: { impact: 100 } }] }],
   }],
 };
 

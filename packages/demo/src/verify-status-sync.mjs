@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 触发几率同步测试（D-048）。
  * 编辑器的「触发几率」只在面板数值里，保存时必须同步到各模式分段的 procChance，
  * 否则内核读到的还是旧值 —— 这个测试专门防这个坑。
@@ -36,10 +36,10 @@ try {
   // 客户端同步（与 saveEditor 里一致）
   for (const m of draft.modes) {
     m.procChance = draft.statusChance;
-    for (const s of m.segments) s.procChance = draft.statusChance;
+    for (const s of m.variants.flatMap((v) => v.segments)) s.procChance = draft.statusChance;
   }
   check('客户端同步后模式 procChance = 0.5', draft.modes[0].procChance === 0.5);
-  check('客户端同步后分段 procChance = 0.5', draft.modes[0].segments[0].procChance === 0.5);
+  check('客户端同步后分段 procChance = 0.5', draft.modes[0].variants[0].segments[0].procChance === 0.5);
 
   const r = await fetch(`${BASE}/__save-weapon`, {
     method: 'POST', headers: { 'Content-Type': 'application/json; charset=utf-8' },
@@ -51,7 +51,7 @@ try {
   const w = written.KuvaKarak;
   check('文件里 statusChance = 0.5', w.statusChance === 0.5);
   check('文件里模式 procChance = 0.5', w.modes[0].procChance === 0.5);
-  check('文件里分段 procChance = 0.5', w.modes[0].segments[0].procChance === 0.5);
+  check('文件里分段 procChance = 0.5', w.modes[0].variants[0].segments[0].procChance === 0.5);
 
   // 合并后内核应看到 0.5
   const src = await readFile(join(ROOT, 'packages/demo/public/app.js'), 'utf8');

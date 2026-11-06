@@ -7,16 +7,18 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import * as core from '../src/index.ts';
+import { modeWithSegments } from './_helpers.ts';
 
 const { compute } = core as any;
 
 const near = (a: number, b: number, eps = 1e-9) => assert.ok(Math.abs(a - b) < eps, `${a} != ${b}`);
 
 /** 三模式武器：模拟「狂鲨」这类每个模式暴击都不同的情况 */
-function makeWeapon() {
+function makeWeapon(): core.Weapon {
   return {
     id: 'TestTriple',
     name: 'Test Triple',
+    category: 'primary',
     critChance: 0.2,
     critMultiplier: 2,
     statusChance: 0.3,
@@ -24,22 +26,26 @@ function makeWeapon() {
     magazineSize: 30,
     reloadTime: 2,
     modes: [
-      {
-        id: 'primary', role: 'normal', trigger: 'auto', multishot: 1,
-        segments: [{ kind: 'impact', procChance: 0.3, damage: { impact: 100 } }],
-      },
-      {
-        id: 'mode2', role: 'normal', trigger: 'semi', multishot: 1,
-        // 模式级覆盖部分字段
-        override: { critChance: 0.5, critMultiplier: 3, fireRate: 4 },
-        segments: [{ kind: 'impact', procChance: 0.3, damage: { impact: 100 } }],
-      },
-      {
-        id: 'incarnon', role: 'incarnon', trigger: 'auto', multishot: 1,
-        override: { critChance: 0.35, magazineSize: 12, reloadTime: 1 },
-        segments: [{ kind: 'impact', procChance: 0.3, damage: { impact: 100 } }],
-      },
-    ],
+      modeWithSegments(
+        { id: 'primary', role: 'normal', trigger: 'auto', bullets: 1, multishot: 1 },
+        [{ kind: 'impact', aoe: false, procChance: 0.3, damage: { impact: 100 } }],
+      ),
+      modeWithSegments(
+        {
+          id: 'mode2', role: 'normal', trigger: 'semi', bullets: 1, multishot: 1,
+          // 模式级覆盖部分字段
+          override: { critChance: 0.5, critMultiplier: 3, fireRate: 4 },
+        },
+        [{ kind: 'impact', aoe: false, procChance: 0.3, damage: { impact: 100 } }],
+      ),
+      modeWithSegments(
+        {
+          id: 'incarnon', role: 'incarnon', trigger: 'auto', bullets: 1, multishot: 1,
+          override: { critChance: 0.35, magazineSize: 12, reloadTime: 1 },
+        },
+        [{ kind: 'impact', aoe: false, procChance: 0.3, damage: { impact: 100 } }],
+      ),
+    ] satisfies core.AttackMode[],
   };
 }
 
@@ -102,7 +108,7 @@ describe('面板数值下沉到模式级（D-050）', () => {
 
   it('panelStats 是唯一取值入口：override 优先于武器级', () => {
     const w = makeWeapon();
-    const ps = core.panelStats(w, w.modes[1]);
+    const ps = core.panelStats(w, w.modes[1]!);
     near(ps.critChance, 0.5);
     near(ps.critMultiplier, 3);
     near(ps.fireRate, 4);

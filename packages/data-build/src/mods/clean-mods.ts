@@ -11,7 +11,7 @@
  * 这几条会在产出时逐一落成 `levelValues` 数组，计算内核不需要再推算。
  */
 import type { ZkMod, ZkBg } from './zk-source.ts';
-import { lookupStat, type StatMapping } from './stat-map.ts';
+import { MOD_VALUE_OVERRIDES, coOverloadPerStack, lookupStat, type StatMapping } from './stat-map.ts';
 
 /** 清洗后的单个属性加量 */
 export interface ModStatValue {
@@ -103,6 +103,12 @@ export function round4(v: number): number {
   return Math.round(v * 1e4) / 1e4;
 }
 
+/** 该卡"每个异常状态"能叠几层：取 `bg` 里 `g='condition_overload'` 的 `st`；没有（异况超量）即 1 */
+function coStacks(raw: ZkMod): number {
+  const hits = (raw.bg ?? []).filter((b) => b.g === 'condition_overload' && typeof b.st === 'number' && b.st > 0);
+  return hits.length ? Math.max(...hits.map((h) => h.st as number)) : 1;
+}
+
 /** bg → ModCondition */
 function toCondition(bg: ZkBg): ModCondition {
   const c: ModCondition = { kind: bg.k };
@@ -139,7 +145,14 @@ export function cleanMod(raw: ZkMod, official?: CleanMod['official']): CleanModR
       unknownKeys.push(key);
       continue;
     }
-    const values = levelValues(entry[1], maxRank, entry[2]);
+    // 镀层 / 异况类（`co`）：**满层值 = 每层值 × 叠层上限**，每层值按 Mod 描述确认
+    // （需求方 2026-11-06：步枪才能是一层 40 最多两层所以 80，其余看描述）。
+    // ZKMODS 的 p[][1] 是各卡自己的数值（20/30/80），不能当成"每层"。
+    // 产出的是**每层值**（不乘叠层上限）：内核 `overForStacks` 会乘 y，
+    // 数据层再乘一次就等于把 y 算了两次（需求方 2026-11-06 指出）。
+    const perStack = coOverloadPerStack(raw.i);
+    const maxValue = perStack !== null ? perStack : MOD_VALUE_OVERRIDES[raw.i]?.maxValue ?? entry[1];
+    const values = levelValues(maxValue, maxRank, perStack !== null ? undefined : entry[2]);
     const base: ModStatValue = {
       key,
       stat: map.stat,

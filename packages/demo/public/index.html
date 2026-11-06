@@ -12,6 +12,14 @@
         <span class="logo">wfcalc</span>
         <span class="tagline">伤害计算内核</span>
       </div>
+      <div id="weapon-picker" class="weapon-picker">
+        <!-- D-093：武器切换。大类（主要/次要/近战/空战）+ 类型 + 名称搜索 -->
+        <select id="weapon-group" title="武器大类"></select>
+        <select id="weapon-type" title="类型"></select>
+        <select id="weapon-style" title="弹道"></select>
+        <select id="weapon-select" title="武器"></select>
+        <input id="weapon-search" type="search" placeholder="搜索武器名称" />
+      </div>
       <div id="weapon-title" class="weapon-title">加载中…</div>
       <div id="weapon-meta" class="weapon-meta"></div>
     </header>
@@ -147,6 +155,7 @@
       </div>
     </div>
 
+    <script type="module" src="/packages/demo/public/weapon-picker.js"></script>
     <script type="module" src="/packages/demo/public/app.js"></script>
   </body>
 </html>

@@ -107,7 +107,11 @@ const TABLE: Record<string, StatMapping> = {
   ),
 
   // ======== 覆盖伤害的条件加成 ========
-  co: m('baseDamage', 'baseDamage', 'percent', 'conditional', '镀层/条件过载：每个异常状态 +X% 伤害；不吃灵化基伤与 AoE（第 2.1 节）'),
+  // 镀层/异况类：加量 = 每层值 × 叠层上限 × 目标身上的异常状态**种类数**。
+  // 每张卡的（每层值, 叠层上限）按 Mod 描述确认（需求方 2026-11-06）：
+  //   异况超量 80 × 1、镀层 步枪才能 40 × 2、镀层 通晓霰弹枪 40 × 2、镀层 准确射手 40 × 3。
+  // 数据层产出的 `levelValues` 满级 = 每层值 × 层数，见 `CO_OVERLOAD_PER_STACK`。
+  co: m('baseDamage', 'baseDamage', 'percent', 'conditional', '每层 × 叠层上限 × 目标异常状态种类数（不吃灵化基伤与 AoE，第 2.1 节）'),
   fac: m('faction', 'faction', 'percent', 'normal', '派系乘区；DoT 上生效两次（第 5.3 节）'),
   weak: m('weakpointDamage', null, 'percent', 'conditional', '对弱点伤害，按第 3.2 节爆头倍率结算，不进总和'),
   weakcc: m('weakpointCritChance', 'critChance', 'percent', 'conditional', '仅在命中弱点时生效'),
@@ -182,8 +186,7 @@ const TABLE: Record<string, StatMapping> = {
   tkSC: m('statusChance', null, 'percent', 'special', 'Tennokai：仅时机攻击的触发'),
   tkEvery: m('heavyDamage', null, 'flat', 'special', 'Tennokai：每 X 次攻击必出'),
   tkWin: m('heavyDamage', null, 'flat', 'special', 'Tennokai：时机窗口秒数'),
-  djRefresh: m('baseDamage', null, 'percent', 'skip'),
-  disarm: m('baseDamage', null, 'percent', 'skip'),
+  djRefresh: m('baseDamage', null, 'percent', 'skip'),  disarm: m('baseDamage', null, 'percent', 'skip'),
   explodeChance: m('explosionRadius', null, 'percent', 'special', '几率爆炸'),
   explodeKill: m('explosionRadius', null, 'percent', 'special', '击杀时爆炸，独立于面板伤害'),
   acid: m('explosionRadius', null, 'percent', 'special', '击杀爆炸按腐蚀 + 敌人最大生命'),
@@ -209,6 +212,58 @@ const TABLE: Record<string, StatMapping> = {
   abEff: m('abilityEfficiency', null, 'percent', 'special', '技能效率，属战甲层'),
   abRegen: m('energyRegen', null, 'flat', 'special', '能量回复，属战甲层'),
 };
+
+/**
+ * 镀层 / 异况类模组的**满级基伤加成**（每张卡、每种异常状态）。
+ *
+ * 需求方 2026-11-06：「镀层步枪才能应该 80% 伤害/异常状态…其他的镀层基伤 mod 也要修改下」
+ *
+ * 旧的 ZKMODS 值（20 / 30 / 80）口径各不相同，无法当成"每张卡的真实数值"，
+ * 因此在这里统一登记；流水线产出时按这个值重写 `levelValues`（第 r 级 = 80 × r / 等级上限）。
+ */
+/**
+ * 需求方指定的**数值订正**（ZKMODS id → 满级值 + 理由）。
+ * 逐级仍按线性重算（第 r 级 = 满级 × r / 等级上限）。
+ */
+export const MOD_VALUE_OVERRIDES: Readonly<Record<string, { maxValue: number; reason: string }>> = {
+  // 需求方 2026-11-06：「幽灵膛线满级是 330 对的，每级 30%」→ 0,30,60,…,330
+  spectral_serration: { maxValue: 330, reason: 'ZKMODS 的 p 只给了 0~10（把每级值当成了满级值），满级应为 +330%' },
+};
+
+/**
+ * 镀层 / 异况类模组的**每层基伤加成**（每张卡、每种异常状态，单位 %）。
+ *
+ * 需求方 2026-11-06 两轮澄清：
+ *   「镀层步枪才能应该 80% 伤害/异常状态」
+ *   「不是每张 mod 都是 80，步枪才能是因为一层 40 最多两层所以是 80，其他的也关注 mod 描述」
+ *   「准确射手是 120」→ 每层 40% × 3 层 = 120%。
+ * 所以**不能**把四张卡都写死成 80，要按各自的（每层值 × 叠层上限）算满层值：
+ *
+ * | Mod | 每层 | 叠层上限 | 满层 |
+ * |---|---|---|---|
+ * | 异况超量 Condition Overload | 80% | 1（常驻） | 80% |
+ * | 镀层 步枪才能 Galvanized Aptitude | 40% | 2 | 80% |
+ * | 镀层 通晓霰弹枪 Galvanized Savvy | 40% | 2 | 80% |
+ * | 镀层 准确射手 Galvanized Shot | 40% | 3 | **120%** |
+ *
+ * 叠层上限取自 `conditions[].maxStacks`（异况超量没有 conditions → 1）。
+ */
+export const CO_OVERLOAD_PER_STACK: Readonly<Record<string, number>> = {
+  condition_overload: 80,
+  galvanized_aptitude: 40,
+  galvanized_savvy: 40,
+  galvanized_shot: 40,
+};
+
+/** 镀层 / 异况类：每层值（未登记的卡返回 null，退回 ZKMODS 原值） */
+export function coOverloadPerStack(modId: string): number | null {
+  return CO_OVERLOAD_PER_STACK[modId] ?? null;
+}
+
+/** 该属性键是否为镀层 / 异况类基伤 */
+export function isConditionOverloadKey(key: string): boolean {
+  return key === 'co';
+}
 
 export const ALL_ELEMENT_KEYS = ELEMENT_KEYS;
 export const ALL_PHYSICAL_KEYS = PHYSICAL_KEYS;

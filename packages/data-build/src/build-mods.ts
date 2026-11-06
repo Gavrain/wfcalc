@@ -21,6 +21,7 @@ import { join, resolve } from 'node:path';
 import { fetchSource } from './fetch.ts';
 import { CACHE_DIR, MOD_SOURCES, SNAPSHOT_DIR } from './sources.ts';
 import { extractZkMods, type ZkMod } from './mods/zk-source.ts';
+import { MOD_VALUE_OVERRIDES } from './mods/stat-map.ts';
 import { cleanMod, isWeaponMod, isStanceMod, type CleanMod } from './mods/clean-mods.ts';
 import { cleanArcane, type CleanArcane } from './mods/clean-arcanes.ts';
 import { cleanModSets, type CleanModSet } from './mods/clean-modsets.ts';
@@ -42,6 +43,18 @@ const GENERATED_DIR = join(repoRoot, 'packages/data/src/generated');
 const MODS_DIR = join(GENERATED_DIR, 'mods');
 const REPORT_DIR = join(GENERATED_DIR, 'reports');
 const SNAPSHOT_ABS = join(repoRoot, SNAPSHOT_DIR);
+
+/**
+ * 需求方 2026-11-06 指定的剔除清单（ZKMODS id → 理由）。
+ *   · aerial_ace：**战甲 Mod**（"空中制霸"，效果是击杀后刷新二段跳），不是武器 Mod，
+ *     被 ZKMODS 标成 `t:"rifle"` 混进来了。
+ *
+ * 数值订正（不是剔除）见 `MOD_VALUE_OVERRIDES`。
+ */
+export const EXCLUDED_MODS: Readonly<Record<string, string>> = {
+  aerial_ace: '战甲 Mod（击杀刷新二段跳），不是武器 Mod；ZKMODS 误标为 rifle',
+};
+
 
 interface Args {
   emit: boolean;
@@ -286,8 +299,15 @@ async function main(): Promise<number> {
   let withStats = 0;
   let arcanes = 0;
   let stances = 0;
+  const excludedMods: Array<{ id: string; name: string; reason: string }> = [];
 
   for (const raw of zkMods) {
+    // 需求方 2026-11-06 指定的剔除清单（见 EXCLUDED_MODS）
+    const excl = EXCLUDED_MODS[raw.i];
+    if (excl !== undefined) {
+      excludedMods.push({ id: raw.i, name: `${raw.n} ${raw.z}`, reason: excl });
+      continue;
+    }
     // 架势先判掉：ZKMODS 的 s 字段区分不出架势，见 isStanceMod 注释
     const preMatch = officialByName.get(raw.n)?.[0];
     if (isStanceMod(raw, preMatch)) {

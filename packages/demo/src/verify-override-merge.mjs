@@ -1,4 +1,4 @@
-/**
+﻿/**
  * overrides 合并规则测试（D-046）。
  *   node packages/demo/src/verify-override-merge.mjs
  *
@@ -102,7 +102,7 @@ function makeWeapon() {
       segments: [{ kind: 'impact', aoe: false, damage: { impact: 7.13, heat: 3.5 }, procChance: 0.31 }],
     }],
   });
-  const d = w.modes[0].segments[0].damage;
+  const d = core.firstSegment(w.modes[0]).damage;
   check('新增 heat 生效', d.heat === 3.5);
   check('删除的 puncture/slash 不会复活', d.puncture === undefined && d.slash === undefined);
   check('删除是整体替换而非逐键合并', Object.keys(d).sort().join(',') === 'heat,impact');

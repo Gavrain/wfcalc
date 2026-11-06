@@ -1,5 +1,6 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
+import { allSegments } from '../../core/src/weapon.ts';
 import {
   cleanWeapons,
   isPlaceholder,
@@ -198,10 +199,10 @@ describe('灵化模式识别', () => {
     assert.deepEqual(modes.map((m) => m.role), ['normal', 'charged', 'incarnon']);
 
     // 灵化模式伤害分布正确
-    assert.deepEqual(modes[2]!.segments[0]!.damage, { impact: 100, heat: 420 });
+    assert.deepEqual(allSegments(modes[2]!)[0]!.damage, { impact: 100, heat: 420 });
 
     // 占位 impact 段被过滤，未混入普通模式
-    assert.equal(modes[0]!.segments.length, 1);
-    assert.deepEqual(modes[0]!.segments[0]!.damage, { impact: 9, puncture: 153, slash: 18 });
+    assert.equal(allSegments(modes[0]!).length, 1);
+    assert.deepEqual(allSegments(modes[0]!)[0]!.damage, { impact: 9, puncture: 153, slash: 18 });
   });
 });

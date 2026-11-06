@@ -17,11 +17,18 @@ import vm from 'node:vm';
 const ROOT = normalize(join(fileURLToPath(new URL('.', import.meta.url)), '../../..'));
 const OUT = join(ROOT, '.demo-check');
 
+/**
+ * 需要检查的 `.ts` 文件。
+ *
+ * ⚠ 新增 core 的源文件时**必须同步这里**，否则浏览器加载链会缺文件 404。
+ * 清单按 core/src/index.ts 的 `export * from` 顺序维护（index 依赖谁，这里就列谁）。
+ */
 const TS_FILES = [
   'packages/core/src/damage-types.ts',
   'packages/core/src/weapon.ts',
   'packages/core/src/contributions.ts',
   'packages/core/src/buckets.ts',
+  'packages/core/src/weapon-state.ts',
   'packages/core/src/status-effects.ts',
   'packages/core/src/kuva.ts',
   'packages/core/src/main.ts',

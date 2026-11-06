@@ -10,8 +10,7 @@
  *   · 属性键 → `ContribStat`：`elemental:heat` / `physical:impact` / `faction:grineer` …
  */
 import type { DamageType } from '../../core/src/damage-types.ts';
-import type { Contribution, ContribStat } from '../../core/src/contributions.ts';
-import type { Faction } from '../../core/src/main.ts';
+import type { Contribution, ContribStat, Faction } from '../../core/src/contributions.ts';
 
 export interface ModStat {
   key: string;
@@ -70,6 +69,9 @@ export const FACTION_LABELS: Readonly<Record<Faction, string>> = {
  */
 export function modToContributions(mod: ModRecord, rank = mod.maxRank, slot?: number): Contribution[] {
   const out: Contribution[] = [];
+  // D-091：半自动炮轰系列（Semi-*-Cannonade）的负面「Fire Rate cannot be modified」。
+  // 标记挂在**每条**贡献上，内核见到就清掉所有射速来源（正的负的都算）。
+  const locksFireRate = SEMI_CANNONADE_MODS.has(mod.id);
   // 复合元素 Mod（如「生化弹药」同时给病毒与磁力）只能生效一个，取第一个，另一个标为未生效
   let compoundSeen = false;
   for (const s of mod.stats) {
@@ -77,20 +79,68 @@ export function modToContributions(mod: ModRecord, rank = mod.maxRank, slot?: nu
     if (!stat) continue;
     const value = s.levelValues[Math.min(rank, s.levelValues.length - 1)] ?? 0;
     if (value === 0) continue;
+    // 镀层 / 异况类（`co`）的 `levelValues` 是**每层值**（步枪才能 40），内核 `overForStacks`
+    // 会乘 「异况数量 a × 叠层上限 y」，所以这里原样传，不再换算。
+    const isCo = s.key === 'co';
+    const amount = value;
     const isCompoundStat = stat.startsWith('elemental:') && isCompoundElement(stat.slice('elemental:'.length));
     const suppressed = isCompoundStat && compoundSeen;
     if (isCompoundStat) compoundSeen = true;
     out.push({
       stat,
       form: s.unit === 'flat' ? 'flat' : s.unit === 'multiplier' ? 'mul' : 'pct',
-      amount: value,
+      amount,
       source: mod.id,
       ...(slot !== undefined ? { slot } : {}),
       ...(suppressed ? { active: false } : {}),
-      label: `${mod.name.zh ?? mod.name.en} ${fmtStatValue(s, value)}${suppressed ? '（复合元素只能生效一个，已忽略）' : ''}`,
+      ...(locksFireRate ? { locksFireRate: true } : {}),
+      label: `${mod.name.zh ?? mod.name.en} ${fmtStatValue(s, value)}${isCo ? ' / 每种异常状态' : ''}${suppressed ? '（复合元素只能生效一个，已忽略）' : ''}`,
     });
   }
   return out;
+}
+
+/**
+ * 半自动炮轰系列（D-091）：Semi-Pistol / Semi-Rifle / Semi-Shotgun Cannonade。
+ *
+ * 两条规则来自 Mod 描述 `Only compatible with Semi-Auto Trigger. Fire Rate cannot be modified.`：
+ *   1. **射速锁定**：所有射速来源（含负射速）都不生效 → `Contribution.locksFireRate`；
+ *   2. **只能装在纯半自动武器上**：武器本身只有 1 个射击模式、且该模式是 semi。
+ */
+export const SEMI_CANNONADE_MODS: ReadonlySet<string> = new Set([
+  'semi_pistol_cannonade',
+  'semi_rifle_cannonade',
+  'semi_shotgun_cannonade',
+]);
+
+/** 该 Mod 是否属于"只能装纯半自动武器"的半自动炮轰系列 */
+export function isSemiCannonade(mod: { id: string }): boolean {
+  return SEMI_CANNONADE_MODS.has(mod.id);
+}
+
+/** 判定所需的武器射击模式（只取需求方关心的字段） */
+export interface TriggerModeLike {
+  trigger: string;
+  /** 灵化模式（`role === 'incarnon'`）不参与判定 */
+  role?: string;
+}
+
+/**
+ * 半自动炮轰系列的可装备性：**只考虑武器本身的射击模式**。
+ *
+ * 需求方 2026-11-06：
+ * > 「半自动系列 mod 只能装备在只有一个射击模式，且该射击模式为半自动的武器上。
+ * > 注意，只考虑武器本身的射击模式，不考虑灵化模式的射击模式，因为灵化模式是后面附加到武器上的。」
+ *
+ * 所以先把 `role === 'incarnon'` 的模式**剔掉**，剩下的必须**恰好 1 个**且 `trigger === 'semi'`。
+ *
+ * 例：Paris（普通/蓄力/灵化）→ 剔掉灵化后仍有 2 个 → 不能装；
+ *     Torid（semi + unknown）→ 2 个 → 不能装；Rubico（只有 1 个 semi）→ 能装。
+ */
+export function isSemiAutoOnlyWeapon(modes: readonly TriggerModeLike[] | undefined): boolean {
+  if (!modes) return false;
+  const own = modes.filter((m) => m.role !== 'incarnon');
+  return own.length === 1 && own[0]?.trigger === 'semi';
 }
 
 /**
@@ -124,6 +174,22 @@ function isCompoundElement(t: string): boolean {
   return COMPOUND_SET.has(t);
 }
 
+/**
+ * 镀层 / 异况类基伤（`co` 属性键）的**每张卡满级百分比**（数据层口径，0~100）。
+ *
+ * 需求方 2026-11-06：「镀层步枪才能应该 80% 伤害/异常状态…其他的镀层基伤 mod 也要修改下」
+ * —— 四张卡（异况超量 / 镀层 步枪才能 / 准确射手 / 通晓霰弹枪）统一为满级 +80%。
+ * 加量 = `80% × a`（a = 目标身上异常状态种类数），**不乘叠层上限、与配几张卡无关**。
+ */
+export const CO_OVERLOAD_PERCENT = 80;
+
+/** 数据层用的 `elemental:x` / `physical:x` 字符串 → 内核的模板字面量类型 */
+function typedDamageStat(raw: string): ContribStat | null {
+  const m = /^(elemental|physical):(.+)$/.exec(raw);
+  if (!m) return null;
+  return raw as ContribStat;
+}
+
 function fmtStatValue(s: ModStat, value: number): string {
   const sign = value > 0 ? '+' : '';
   if (s.unit === 'flat') return `${sign}${round(value)}（绝对值）`;
@@ -138,8 +204,10 @@ function round(v: number): number {
 /** 数据层的属性键 → 内核 `ContribStat`；返回 null 表示该属性不参与伤害计算 */
 export function toContribStat(s: ModStat, modId: string): ContribStat | null {
   const raw = s.stat;
-  if (raw.startsWith('elemental:')) return raw;
-  if (raw.startsWith('physical:')) return raw;
+  if (raw.startsWith('elemental:') || raw.startsWith('physical:')) {
+    const typed = typedDamageStat(raw);
+    if (typed) return typed;
+  }
   switch (raw) {
     case 'baseDamage':
       // 「镀层 / 条件过载」类走独立的 'co'（表 2.1），普通基伤走 'baseDamage'——
@@ -165,8 +233,11 @@ export function toContribStat(s: ModStat, modId: string): ContribStat | null {
       return 'reloadSpeed';
     case 'magazine':
       return 'magazine';
+    // 弹药效率（D-084）：不直接乘伤害，由内核换算成等效弹匣/最大弹药
+    case 'ammoEfficiency':
+      return 'ammoEfficiency';
     case 'faction':
-      return `faction:${factionOfMod(modId) ?? 'none'}`;
+      return `faction:${factionOfMod(modId) ?? 'none'}` as ContribStat;
     case 'weakpointDamage':
     case 'headshotDamage':
       return 'headshotDamage';
@@ -281,30 +352,278 @@ export interface ArcaneRecord {
 /**
  * 赋能 → 内核贡献。
  *
- * ⚠ 目前只处理**结构明确**的几类（百分比加成到某个乘区）；条件型/叠层型（如"击杀时 +30%，最多 12 层"）
- * 需要用户输入实际叠层数，A-04 已确认用"三选一 + 勾选"解决，这里先给出**满层上限**并把 `active` 置 false，
- * 由 demo 的勾选控制——不擅自替用户假设层数。
+ * **叠层型赋能按满层给值**（需求方 2026-11-06：「赋能直接设置满层数值，
+ * 例如无情就是满层 360% 基伤」）。当前没有"层数/等级"调节 UI，所以一律取满层。
+ *
+ * 叠层型识别：描述里有 `Stacks up to Nx`，或数值槽里有 `STACKS`。此时
+ *   `满层值 = 每层值 × N`（例：主要·无情 每层 30% × 12 层 = 360%）。
+ * 非叠层型原样取第一个数值。
+ *
+ * **单条赋能可以有多个词条**（D-084）：数值槽的键名本身就带词条名，
+ * 例如主要·准星 `[0].STATUS_CHANCE=30` + `[0].AMMO_EFF=6`。所以这里按槽名
+ * 拆成多条贡献，而不是只取第一个数（旧实现会丢掉弹药效率那一条）。
  */
 export function arcaneToContributions(arcane: ArcaneRecord, rank = arcane.maxRank, slot?: number): Contribution[] {
   const level = arcane.levels.find((l) => l.rank === rank) ?? arcane.levels[arcane.levels.length - 1];
-  if (!level || !arcane.bucket) return [];
-  const values = Object.values(level.values).filter((v) => typeof v === 'number' && Number.isFinite(v));
-  if (!values.length) return [];
-  // 取第一个数值作为该赋能的主数值（其余是上限/叠加层数，见 level.values）
-  const amount = values[0]!;
-  const stat = bucketToStat(arcane.bucket);
-  if (!stat) return [];
-  return [
-    {
+  // ⚠ 不能因 `bucket === null` 就整个返回空：双词条赋能（霜冻/毒侵/电压/仇杀/同化）
+  //   的 bucket 是 null，但它们的 `BONUS1`/`BONUS2` 由 ARCANE_BONUS_STATS 表给出属性。
+  if (!level) return [];
+  const perEntries = arcanePerStackValues(arcane, level);
+  if (!perEntries.length) return [];
+
+  if (ARCANE_IGNORED.has(arcane.key)) return [];
+  const stacks = arcaneStackCount(arcane, level);
+  const out: Contribution[] = [];
+  const primaryStat = arcane.bucket ? bucketToStat(arcane.bucket) : null;
+  const bonusStats = ARCANE_BONUS_STATS[arcane.key];
+  for (const [i, [statKey, perStack, fullSlot]] of perEntries.entries()) {
+    // 词条 → 内核属性
+    //   · 带语义的槽名（STATUS_CHANCE / AMMO_EFF / BONUS …）直接映射；
+    //   · 无数字的 `BONUS1` / `BONUS2` 这种，按赋能 id 查下表；
+    //   · 都认不出时，第一条退回 `bucket` 推断，其余忽略。
+    // 解析优先级：覆盖表 → BONUS1/BONUS2 表 → 第一条退回 bucket
+    let stat: ContribStat | null | undefined = resolveArcaneStatKey(arcane, statKey, fullSlot);
+    if (stat === undefined) {
+      const bonusIdx = /^BONUS(\d)$/i.exec(statKey)?.[1];
+      if (bonusIdx !== undefined) stat = bonusStats?.[Number(bonusIdx) - 1] ?? null;
+      else if (i === 0) stat = primaryStat;
+    }
+    // null = 明确不参与伤害计算（覆盖表标的，或 BONUS 表里就是 null）
+    if (!stat) continue;
+
+    const amount = perStack * stacks;
+    out.push({
       stat,
       form: 'pct',
       amount,
       source: arcane.key,
       ...(slot !== undefined ? { slot } : {}),
-      label: `${arcane.name.zh ?? arcane.name.en} +${amount}%`,
-    },
-  ];
+      label:
+        stacks > 1
+          ? `${arcane.name.zh ?? arcane.name.en} +${amount}%（满层：每层 ${perStack}% × ${stacks}）`
+          : `${arcane.name.zh ?? arcane.name.en} +${amount}%`,
+    });
+  }
+  return out;
 }
+
+/**
+ * `BONUS1` / `BONUS2` 这类**无语义槽名**的赋能 → 每个 BONUS 对应的内核属性。
+ *
+ * 官方导出的槽名只编号、不带词条含义，必须按 Mod 描述人工对齐（需求方要求
+ * 「确认其他赋能是否正期生效所有词条」后逐条核对过）：
+ *
+ * | 赋能 | BONUS1 | BONUS2 |
+ * |---|---|---|
+ * | 主要·霜冻 PrimaryCritDmgAndMultishotOnColdProc | 暴伤 | 多重 |
+ * | 主要·毒侵 PrimaryHeadshotCritMultOnHeadshot | 暴伤 | 多重 |
+ * | 联结·电压 SecondaryReloadSpeedAndMultishotOnElectricProc | 装填速度 | 多重 |
+ * | 霰弹·仇杀 ShotgunMultishotAndReloadSpeedOnCloseKill | 多重 | 装填速度 |
+ * | 近战·同化 HeavyAttackDamageAndShieldOnShieldBreak | 基伤 | 护盾（不影响伤害） |
+ *
+ * 注意：**不能按 `bucket` 推断**。霜冻的 `bucket` 是 `multishot`，
+ * 若照此推断，+3% 暴伤那条会被错算成多重（旧实现的 bug）。
+ */
+const ARCANE_BONUS_STATS: Readonly<Record<string, readonly (ContribStat | null)[]>> = {
+  PrimaryCritDmgAndMultishotOnColdProc: ['critMultiplier', 'multishot'],
+  PrimaryHeadshotCritMultOnHeadshot: ['critMultiplier', 'multishot'],
+  SecondaryReloadSpeedAndMultishotOnElectricProc: ['reloadSpeed', 'multishot'],
+  ShotgunMultishotAndReloadSpeedOnCloseKill: ['multishot', 'reloadSpeed'],
+  HeavyAttackDamageAndShieldOnShieldBreak: ['baseDamage', null],
+};
+
+/**
+ * **词条名 → 内核属性**的显式覆盖（按赋能 id + 词条名）。
+ *
+ * 用于两种情况，两种情况都必须按 Mod 描述人工判定：
+ * 1. 词条名没有语义（`VAL` 被过滤掉了，只能用 bucket），而 **bucket 是错的**；
+ * 2. 词条名有语义但代码认不出（`AMOUNT` / `STAT1` / `CHANCE` …）。
+ *
+ * | 赋能 | 实际问题 | 处理 |
+ * |---|---|---|
+ * | 瀑流·耀炎 | 词条是 `BONUS`（基伤），流水线 `bucket` 写成 `statusChance` | 基伤 |
+ * | 瀑流·精准 | `BONUS` = +300% **Crit Chance on Weakpoint Hits**，不是全局暴率 | 现无 weakpoint 暴率通路，**不生效** |
+ * | 次要·妨害 | `BONUS` 是"二次触发的概率"，不是状态触发率词条 | **不生效** |
+ * | 主要·激昂 | `BONUS` 是能量回复，不是状态触发率 | **不生效** |
+ * | 次要·冷颤 | 裸 `.val` = "敌人多受 45% 伤害"，是独立终伤倍率 | **不生效**（等待其乘区确认） |
+ * | 瀑流·强化 | `[BONUS,AMOUNT]` = +750 固定附加伤害（不是百分比） | **不生效** |
+ * | 弓箭·利矢 | `BONUS.DAMAGE`，只作用于"下一发" | 基伤（上限口径已简化） |
+ */
+const ARCANE_STAT_OVERRIDES: Readonly<Record<string, Readonly<Record<string, ContribStat | null>>>> = {
+  // ── bucket 标错、词条其实是基伤 ──
+  SecondaryDamageOnHeatProc: { BONUS: 'baseDamage' },
+  // ── 不是伤害词条 / 没有对应通路 → 明确不生效（null 覆盖 bucket 推断，避免误算） ──
+  SecondaryOnRollCritChanceOnHeadshot: { BONUS: null }, // +300% 暴率**仅对弱点命中**生效
+  ExtraProcOnProc: { BONUS: null }, // +24% 是"二次触发的概率"，不是状态触发率词条
+  PrimaryEnergyRegenOnImpactProc: { BONUS: null }, // 能量回复
+  // 次要·冷颤：类镀层加成，**只对冰冻层数生效**（需求方 2026-11-06）
+  SecondaryExtraDamagePerFreezeStack: { VAL: 'coFreeze' },
+  // ── 词条名可识别，但指向的乘区要人工确认 ──
+  LongbowDamageOnHeadshot: { DAMAGE: 'baseDamage' }, // "下一发"+300%
+  StatusTriggerRadialDamage: { CHANCE: null, STAT1: null, RANGE: null }, // 需求方：设置成无效果
+  BurningCystOnKill: { CHANCE: null, DAMAGE: null }, // DAMAGE 是触发物伤害，不是武器加成
+  IceMistOnKill: { CHANCE: null, DAMAGE: null },
+  LightningStrikeOnKill: { CHANCE: null, DAMAGE: null },
+  ToxicBloodOnKill: { CHANCE: null, DAMAGE: null },
+};
+
+/**
+ * 整个赋能**不参与伤害计算**的清单（数值根本不是武器伤害词条）。
+ * 用整表排除，避免"第一个词条走 bucket 兜底"又把它们算进去。
+ */
+/**
+ * **官方 \`STACKS\` 槽不可信**时的层数覆写（赋能 id → 真实层数）。
+ *
+ * 瀑流·耀炎（瀑流·耀炎）的导出是 \`[0].STACKS = 480\`，和描述 \`Stacks up to 480%\` 同源——
+ * 那是**累加上限**（每层 12% → 40 层），不是层数。需求方 2026-11-06 确认：「耀炎是 480」
+ * 指的就是那个 480%（40 层 × 12%）。
+ */
+const ARCANE_STACK_OVERRIDES: Readonly<Record<string, number>> = {
+  SecondaryDamageOnHeatProc: 40, // 每层 12% × 40 = 480%
+};
+
+const ARCANE_IGNORED = new Set<string>(['SecondaryOnStatusProcBonusDamage']);
+
+/** 解析单个赋能的某个词条 → 内核属性（null = 不参与伤害计算） */
+function resolveArcaneStatKey(
+  arcane: ArcaneRecord,
+  statKey: string,
+  fullSlot?: string,
+): ContribStat | null | undefined {
+  const override = ARCANE_STAT_OVERRIDES[arcane.key];
+  if (override) {
+    // 先按完整槽名（BONUS.AMOUNT），再按第一段（BONUS）。
+    // ⚠ 只有**表里确实登记了这个键**才返回（含显式的 null = 明确不生效）；
+    //   没登记 → undefined（未知），交给调用方继续兜底（BONUS1/BONUS2 表 / bucket）。
+    const full = fullSlot?.toUpperCase();
+    if (full !== undefined && Object.hasOwn(override, full)) return override[full];
+    const upper = statKey.toUpperCase();
+    if (Object.hasOwn(override, upper)) return override[upper];
+  }
+  return statForArcaneKey(statKey);
+}
+
+/**
+ * 赋能满级数值槽 → 每个词条的**每层值**。
+ *
+ * 槽名的结构是 `[编号].<词条名>[.<后缀>]`，**同一编号下可以有多个词条**：
+ * ```
+ * 主要·准星  [0].STATUS_CHANCE=30  [0].AMMO_EFF=6  [0].DURATION=10  [0].MAX_STACKS=10
+ * 主要·无情  [0].BONUS.val=30  [1].val=30                      ← 前者基伤、后者装填速度
+ * 弓箭·利矢  [0].BONUS.DAMAGE=300                              ← 两段都是词条名
+ * 神威·气力  [0].BONUS.CHANCE=50  [0].BONUS.STAT1=200  [0].BONUS.RANGE=6
+ * ```
+ * 规则：
+ * - 词条名取**第一段**（`BONUS` / `STATUS_CHANCE` / `AMMO_EFF` …）；单段名非词条则退到第二段
+ *   （`BONUS.DAMAGE` → `DAMAGE`）；
+ * - **裸 `.val`**（`[1].val` 这种没有任何词条名的）无法判定，忽略——
+ *   否则会把「主要·无情」的装填速度当成基伤再加一遍；
+ * - 层数 / 持续时间 / 范围 / 冷却这类名字不是词条，过滤掉。
+ */
+export function arcanePerStackValues(
+  arcane: ArcaneRecord,
+  level: { values: Record<string, number> },
+): [string, number, string][] {
+  void arcane;
+  const out: [string, number, string][] = [];
+  // 覆盖表里明确登记了 `VAL` 的赋能（如次要·冷颤）：裸 .val 就是唯一词条，放行
+  const override = ARCANE_STAT_OVERRIDES[arcane.key];
+  const allowBareVal = override !== undefined && Object.hasOwn(override, 'VAL');
+  for (const [k, v] of Object.entries(level.values)) {
+    if (typeof v !== 'number' || !Number.isFinite(v)) continue;
+    const rest = /^\[\d+\]\.(.+)$/.exec(k)?.[1];
+    if (rest === undefined) continue;
+    const parts = rest.split('.').filter((p) => !/^val$/i.test(p));
+    if (!parts.length) {
+      if (allowBareVal) out.push(['VAL', v, 'VAL']);
+      continue; // 裸 .val / [0].val（未登记时忽略，避免把装填速度当基伤）
+    }
+    const first = parts[0]!.toUpperCase();
+    if (ARCANE_NON_STAT_NAMES.has(first) || first === 'VAL') continue;
+    // `BONUS` 是容器名，真正的词条在后一段
+    const name = first === 'BONUS' ? (parts[1] ?? 'BONUS') : parts[0]!;
+    const upper = name.toUpperCase();
+    if (upper === 'VAL' || ARCANE_NON_STAT_NAMES.has(upper)) continue;
+    out.push([name, v, parts.join('.')]);
+  }
+  return out;
+}
+
+/** 数值槽里"不是词条"的名字 */
+const ARCANE_NON_STAT_NAMES = new Set(['STACKS', 'MAX_STACKS', 'DURATION', 'MAX', 'TIME', 'RANGE', 'RADIUS', 'COOLDOWN']);
+
+/** 赋能的数值槽名 → 内核属性（认不出返回 null） */
+function statForArcaneKey(key: string): ContribStat | null | undefined {
+  switch (key.toUpperCase()) {
+    case 'BONUS':
+    case 'DAMAGE':
+    case 'BASE_DAMAGE':
+      return 'baseDamage';
+    case 'STATUS_CHANCE':
+      return 'statusChance';
+    case 'CRIT_DMG':
+    case 'CRIT_DAMAGE':
+    case 'CRITICAL_DAMAGE':
+      return 'critMultiplier';
+    case 'CRIT_CHANCE':
+    case 'CRITICAL_CHANCE':
+      return 'critChance';
+    case 'MULTISHOT':
+      return 'multishot';
+    case 'FIRE_RATE':
+      return 'fireRate';
+    case 'AMMO_EFF':
+    case 'AMMO_EFFICIENCY':
+      return 'ammoEfficiency';
+    case 'RELOAD':
+    case 'RELOAD_SPEED':
+      return 'reloadSpeed';
+    default:
+      // ⚠ 必须返回 undefined 表示"未知"：null 保留给覆盖表的"明确不生效"。
+      //   两者混淆会让 BONUS1/BONUS2 之类的槽被误判成"已确定不生效"。
+      return undefined;
+  }
+}
+
+/**
+ * 叠层型赋能的层数上限。
+ *
+ * 取值顺序（每一步都要过合理性校验）：
+ * 1. 数值槽里的 `STACKS` / `MAX_STACKS`（官方导出的结构化字段）；
+ * 2. 描述里的 `Stacks up to Nx`（带 `x` 才是层数）；
+ * 3. 描述里的 `Stacks up to N%`——那是**总加成上限**，用 `上限 ÷ 每层值` 反推层数
+ *    （瀑流·耀炎：每层 12%、上限 480% → 40 层）。
+ *
+ * ⚠ 官方导出的 `STACKS` **不是每一条都填层数**：瀑流·耀炎的 `[0].STACKS` 写的是 **480**
+ * （和描述里的 480% 同源，是累加上限）。所以这里用「`STACKS` × 每层值」是否明显超过
+ * 10000% 来判断它是不是层数，不合理就回退到描述。
+ */
+export function arcaneStackCount(arcane: ArcaneRecord, level?: { values: Record<string, number> }): number {
+  const forced = ARCANE_STACK_OVERRIDES[arcane.key];
+  if (forced !== undefined) return forced;
+  const lv = level ?? arcane.levels[arcane.levels.length - 1];
+  const desc = arcane.description?.en ?? '';
+  const perStack = lv ? (arcanePerStackValues(arcane, lv)[0]?.[1] ?? 1) : 1;
+
+  if (lv) {
+    const key = Object.keys(lv.values).find((k) => /STACKS/i.test(k));
+    const n = key ? lv.values[key] : undefined;
+    // 层数 × 每层值 = 满层加成；超过 10000% 基本可以断定这个数是"上限"而不是"层数"
+    if (typeof n === 'number' && n > 1 && n * perStack <= 10000) return n;
+  }
+  const times = /Stacks up to (\d+)x/i.exec(desc);
+  if (times?.[1]) {
+    const n = Number(times[1]);
+    if (n > 1) return n;
+  }
+  const pct = /Stacks up to (\d+(?:\.\d+)?)%/i.exec(desc);
+  if (pct?.[1] && perStack > 0) {
+    const n = Math.round(Number(pct[1]) / perStack);
+    if (n > 1) return n;
+  }
+  return 1;
+}
+
 
 function bucketToStat(bucket: string): ContribStat | null {
   switch (bucket) {

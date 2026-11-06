@@ -14,14 +14,14 @@
 import { mkdirSync, writeFileSync, existsSync, readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { FetchError, fetchSource } from './fetch.ts';
-import { cleanWeapons, EXCLUDED_CATEGORIES } from './clean.ts';
+import { cleanWeapons, EXCLUDED_CATEGORIES, type CleanedWeapon } from './clean.ts';
 import { diffWeapons, formatDiffReport, type DiffReport } from './diff.ts';
 import { applyOverrides, type AppliedOverride } from './overrides.ts';
 import { toEmitWeapon, type EmitWeapon } from './emit.ts';
 import { resolveName, nameCoverage, type LanguageDict } from './localize.ts';
 import { WEAPON_OVERRIDES } from '../../data/src/manual/overrides.ts';
 import type { ExportWeapons } from './types.ts';
-import type { AttackMode, WeaponPanel } from '../../core/src/weapon.ts';
+import type { AttackMode, Weapon } from '../../core/src/weapon.ts';
 
 const repoRoot = resolve(import.meta.dirname, '../../..');
 const GENERATED_DIR = join(repoRoot, 'packages/data/src/generated');
@@ -42,13 +42,13 @@ function parseArgs(argv: string[]): Args {
 }
 
 /**
- * 读取上一版产出（按分类拆分的多个文件），合并回 WeaponPanel[] 用于 diff。
+ * 读取上一版产出（按分类拆分的多个文件），合并回 Weapon[] 用于 diff。
  * 无上一版时返回 null（首次生成）。
  */
-function loadPrevious(): WeaponPanel[] | null {
+function loadPrevious(): Weapon[] | null {
   if (!existsSync(SPLIT_DIR)) return null;
 
-  const merged: WeaponPanel[] = [];
+  const merged: Weapon[] = [];
   for (const cat of ['primary', 'secondary', 'melee', 'archgun', 'archmelee', 'companion', 'unknown']) {
     const file = join(SPLIT_DIR, `${cat}.json`);
     if (!existsSync(file)) continue;
@@ -62,32 +62,37 @@ function loadPrevious(): WeaponPanel[] | null {
   return merged.length > 0 ? merged : null;
 }
 
-/** 产出格式 → WeaponPanel（仅用于 diff 比较） */
-function emitToPanel(w: EmitWeapon): WeaponPanel {
+/**
+ * 产出格式 → Weapon（仅用于 diff 比较）。
+ *
+ * `EmitWeapon` 与 `Weapon` 逐字段同名（D-011），所以这里基本是原样透传；
+ * 保留这一层是为了在 JSON 缺字段时给出确定的默认值，避免 diff 出现假变更。
+ */
+function emitToPanel(w: EmitWeapon): Weapon {
   return {
     id: w.id,
-    name: { en: w.name },
-    category: w.category as WeaponPanel['category'],
+    name: w.name,
+    ...(w.nameZh ? { nameZh: w.nameZh } : {}),
+    category: w.category as Weapon['category'],
     critChance: w.critChance,
     critMultiplier: w.critMultiplier,
     statusChance: w.statusChance,
     fireRate: w.fireRate,
     ...(w.magazineSize != null ? { magazineSize: w.magazineSize } : {}),
     ...(w.reloadTime != null ? { reloadTime: w.reloadTime } : {}),
-    modes: w.modes.map((m) => ({
-      id: m.id,
-      role: m.role as 'normal' | 'charged' | 'incarnon',
-      trigger: m.trigger as AttackMode['trigger'],
-      bullets: m.bullets,
-      baseMultishot: m.multishot,
-      ...(m.burst ? { burst: m.burst } : {}),
-      segments: m.segments.map((s) => ({
-        kind: s.kind as 'impact' | 'attack' | 'explosiveAttack' | 'embedDeathAttack',
-        damage: s.damage,
-        procChance: s.procChance,
-        isAoe: s.aoe,
-      })),
-    })),
+    modes: w.modes.map((m) => {
+      return {
+        id: m.id,
+        role: m.role as 'normal' | 'charged' | 'incarnon',
+        trigger: m.trigger as AttackMode['trigger'],
+        bullets: m.bullets,
+        multishot: m.multishot,
+        ...(m.burst ? { burst: m.burst } : {}),
+        // D-080：段只属于变体，模式上不再有 `segments`
+        variants: m.variants,
+        ...(m.override ? { override: m.override } : {}),
+      };
+    }),
   };
 }
 
@@ -174,6 +179,8 @@ async function main(): Promise<number> {
 
   console.log('[2/5] 清洗...');
   const clean = cleanWeapons(raw);
+  // 清洗产出的武器带 `languageKey`（只在本阶段用），`Weapon` 本身没有这个字段
+  const cleaned: CleanedWeapon[] = clean.weapons;
   const statsLine = formatStats(clean.stats);
   console.log(statsLine);
 
@@ -184,7 +191,7 @@ async function main(): Promise<number> {
   try {
     zhDict = await fetchSource<LanguageDict>('langZh', { force: args.force });
     enDict = await fetchSource<LanguageDict>('langEn', { force: args.force });
-    const keys = clean.weapons.map((w) => w.languageKey ?? '').filter(Boolean);
+    const keys = cleaned.map((w) => w.languageKey ?? '').filter(Boolean);
     const coverage = nameCoverage(keys, zhDict);
     console.log(`      中文包 ${Object.keys(zhDict).length} 条，武器名命中 ${coverage.hit}/${coverage.total}（${(coverage.ratio * 100).toFixed(1)}%）`);
     if (coverage.missingSamples.length > 0) {
@@ -194,9 +201,11 @@ async function main(): Promise<number> {
     console.log(`      ⚠️ 语言包获取失败，名称将回退到内部名：${(err as Error).message}`);
   }
 
-  for (const w of clean.weapons) {
+  for (const w of cleaned) {
     const resolved = resolveName(w.languageKey, zhDict, enDict);
-    w.name = resolved;
+    w.name = resolved.en;
+    if (resolved.zh) w.nameZh = resolved.zh;
+    delete w.languageKey;
   }
 
   // 应用人工覆盖层（蓄力时间反推射速等）

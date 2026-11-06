@@ -11,7 +11,7 @@
  *
  * 每个条目都可以在 UI 里单独开关，便于对比"有/无该被动"。
  */
-import type { WeaponStat } from '../../../core/src/buckets.ts';
+import type { BucketableStat } from '../../../core/src/buckets.ts';
 
 /** 被动触发时机 */
 export type EffectTrigger =
@@ -28,7 +28,7 @@ export interface WeaponEffect {
   id: string;
   trigger: EffectTrigger;
   /** 影响的属性；unsupported 时为 null */
-  stat: WeaponStat | null;
+  stat: BucketableStat | null;
   /** 数值（百分比口径，如 0.3 表示 +30%） */
   value: number;
   /** 叠加层数上限（stacking 类） */

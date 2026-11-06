@@ -1,4 +1,4 @@
-/**
+﻿/**
  * §6.2 ①：DoT 基础值【享受暴击】（回归）。
  *
  * 文档原文：
@@ -29,7 +29,7 @@ const mode: any = {
   role: 'primary',
   trigger: 'auto',
   multishot: 1,
-  segments: [{ kind: 'physical', procChance: 0.5, damage: { slash: 100 } }],
+  variants: [{ id: 'direct', label: '直接命中', segments: [{ kind: 'physical', procChance: 0.5, damage: { slash: 100 } }] }],
 };
 
 const near = (a: number, b: number, eps = 1e-6) => assert.ok(Math.abs(a - b) < eps, `${a} != ${b}`);

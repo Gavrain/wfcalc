@@ -11,11 +11,30 @@
  */
 import type { DamageType } from './damage-types.ts';
 
-/** 可被加成的属性。元素/物理用 `` `elemental:${T}` `` / `` `physical:${T}` `` 表达。 */
+/**
+ * 派系（`docs/乘区归属表.md` 第 5 节）。
+ *
+ * 放在本文件而非 `main.ts`：`ContribStat` 的 `faction:<Faction>` 分支要引用它，
+ * 而 `main.ts` 已 import 本文件——写在 main.ts 里会形成类型层的环依赖。
+ */
+export type Faction = 'grineer' | 'corpus' | 'infested' | 'orokin' | 'murmur' | 'none';
+
+/**
+ * 可被加成的属性。
+ *
+ * 元素/物理/派系用**模板字面量**表达，而不是宽 `'faction'`：
+ * 派系乘区只认「目标所属派系」那一条（第 5.2 节，异派系 ×1），
+ * 如果键写成宽 `'faction'`，内核就无法区分是打 Grineer 还是打 Corpus 的加成。
+ */
 export type ContribStat =
   | 'baseDamage'
   | 'innateBaseDamage'
   | 'co'
+  /**
+   * 类镀层、但**只认冰冻层数**（D-086，次要·冷颤）：
+   * 每层冰冻 +45% 伤害，只吃直接非灵化伤害。
+   */
+  | 'coFreeze'
   | 'multishot'
   | 'critChance'
   | 'critMultiplier'
@@ -24,14 +43,16 @@ export type ContribStat =
   | 'fireRate'
   | 'magazine'
   | 'reloadSpeed'
-  | 'faction'
+  /** 弹药效率（D-084）：**不**直接乘伤害，只通过 `effectiveAmmo` 换算成等效弹匣/最大弹药 */
+  | 'ammoEfficiency'
   | 'headshotDamage'
   | 'weakpointCritChance'
   | 'weakpointDamage'
   | 'targetSlot'
   | 'utility'
   | `elemental:${DamageType}`
-  | `physical:${DamageType}`;
+  | `physical:${DamageType}`
+  | `faction:${Faction}`;
 
 export type ContribForm = 'pct' | 'flat' | 'mul';
 export type ContribScope = 'hit' | 'dot' | 'both';
@@ -51,6 +72,14 @@ export interface Contribution {
   active?: boolean;
   /** 展示用的中文说明，如「膛线 +165%」 */
   label?: string;
+  /**
+   * 锁定射速（D-091）。
+   *
+   * 半自动炮轰系列（Semi-Pistol/Rifle/Shotgun Cannonade）的负面效果：
+   * 「Fire Rate cannot be modified」。挂上这个标记后，
+   * **所有射速来源（正的和负的）都不生效**，射速恒为基础射速。
+   */
+  locksFireRate?: boolean;
 }
 
 export interface ContributionFilter {

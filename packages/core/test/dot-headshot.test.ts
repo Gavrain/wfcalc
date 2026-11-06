@@ -1,4 +1,4 @@
-/**
+﻿/**
  * D-062：爆头 / 爆头暴击作用在 **DoT 基础值**上。
  *
  * 需求方口径：
@@ -26,7 +26,7 @@ function makeWeapon() {
     fireRate: 10, magazineSize: 100, reloadTime: 1,
     modes: [{
       id: 'primary', role: 'normal', trigger: 'auto', multishot: 1,
-      segments: [{ kind: 'physical', procChance: 0.5, damage: { slash: 100 } }],
+      variants: [{ id: 'direct', label: '直接命中', segments: [{ kind: 'physical', procChance: 0.5, damage: { slash: 100 } }] }],
     }],
   };
 }
@@ -98,7 +98,8 @@ describe('爆头作用在 DoT 基础值上（D-062 / D-063）', () => {
   it('爆炸与 DoT 用同一套基础值倍率（不重复乘）', () => {
     const w: any = makeWeapon();
     w.critChance = 1;
-    w.modes[0].segments[0].damage = { impact: 100 };
+    // D-080：段只属于变体——直接改变体内的段
+    w.modes[0].variants[0].segments[0].damage = { impact: 100 };
     const mods = [
       { stat: 'elemental:heat', form: 'pct', amount: 90, source: 'h' },
       { stat: 'elemental:cold', form: 'pct', amount: 90, source: 'c' },

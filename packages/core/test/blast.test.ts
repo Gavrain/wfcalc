@@ -8,7 +8,7 @@ import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { BLAST, applyElements, applyKuvaBonus, blastDetail } from '../src/index.ts';
 
-const near = (a, b, eps = 1e-9) => assert.ok(Math.abs(a - b) < eps, `${a} != ${b}`);
+const near = (a: number, b: number, eps = 1e-9) => assert.ok(Math.abs(a - b) < eps, `${a} != ${b}`);
 const QUIET = { factionPct: 0, statusDamagePct: 0, critDamageMul: 1, headshotMul: 1 };
 
 describe('爆炸异常（D-031）', () => {
@@ -29,7 +29,7 @@ describe('爆炸异常（D-031）', () => {
     // 每秒 8 层 → 10/8 = 1.25 秒 ≤ 1.5 秒
     const d = blastDetail(100, 8, QUIET);
     assert.equal(d.reachesMaxInWindow, true);
-    near(d.timeToMaxSeconds, 1.25);
+    near(d.timeToMaxSeconds!, 1.25);
     assert.equal(d.splashActive, true);
     near(d.splashPerSecond, 300 * BLAST.maxStacks); // 每层 300 × 10 层
   });
@@ -73,16 +73,16 @@ describe('爆炸异常（D-031）', () => {
     // +100% 冲击 Mod → 冲击 = 150 × 2 = 300
     const contribs = [{ stat: 'physical:impact' as const, form: 'pct' as const, amount: 100, source: 'm' }];
     const withKuva = applyElements(applyKuvaBonus({ impact: 100 }, { type: 'impact', ratio: 0.5 }), contribs, 'hit');
-    near(withKuva.v.impact, 300);
+    near(withKuva.v.impact!, 300);
     // 无玄骸时：100 × 2 = 200
     const noKuva = applyElements({ impact: 100 }, contribs, 'hit');
-    near(noKuva.v.impact, 200);
+    near(noKuva.v.impact!, 200);
   });
 
   it('D-022：玄骸是元素（火）时，不被物理 %Mod 放大', () => {
     const contribs = [{ stat: 'physical:impact' as const, form: 'pct' as const, amount: 100, source: 'm' }];
     const r = applyElements(applyKuvaBonus({ impact: 100 }, { type: 'heat', ratio: 0.5 }), contribs, 'hit');
-    near(r.v.impact, 200); // 面板冲击 100 × 2
-    near(r.v.heat, 50); // 玄骸火 50，不受冲击 Mod 影响
+    near(r.v.impact!, 200); // 面板冲击 100 × 2
+    near(r.v.heat!, 50); // 玄骸火 50，不受冲击 Mod 影响
   });
 });

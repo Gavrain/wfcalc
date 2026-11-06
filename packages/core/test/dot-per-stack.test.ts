@@ -1,4 +1,4 @@
-/**
+﻿/**
  * D-043：「每层秒伤」= 单层 DoT 每秒伤害，**与层数、射速、多重都无关**。
  * 「六秒总伤」才乘层数（触发率 × 元素占比 × 多重 × 射速）。
  */
@@ -21,7 +21,7 @@ const mode: any = {
   role: 'primary',
   trigger: 'auto',
   multishot: 1,
-  segments: [{ kind: 'physical', procChance: 0.5, damage: { slash: 100 } }],
+  variants: [{ id: 'direct', label: '直接命中', segments: [{ kind: 'physical', procChance: 0.5, damage: { slash: 100 } }] }],
 };
 
 const near = (a: number, b: number, eps = 1e-9) => assert.ok(Math.abs(a - b) < eps, `${a} != ${b}`);

@@ -35,6 +35,19 @@ body {
 }
 .logo { font-weight: 700; color: var(--accent); font-size: 16px; }
 .tagline { color: var(--muted); font-size: 12px; }
+.weapon-picker { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.weapon-picker select,
+.weapon-picker input {
+  background: #1c2027; color: var(--fg);
+  border: 1px solid #2f3742; border-radius: 4px;
+  font-size: 12px; padding: 3px 6px; max-width: 200px;
+}
+.weapon-picker select:disabled { opacity: 0.45; cursor: not-allowed; }
+.weapon-picker option:disabled { color: #666; }
+.weapon-picker input { max-width: 160px; }
+.weapon-picker input::placeholder { color: #5b6472; }
+.weapon-title.has-issue { color: #e0a860; }
+.weapon-picker option { color: var(--fg); }
 .weapon-title { font-size: 16px; font-weight: 600; }
 .weapon-meta { color: var(--muted); font-size: 12px; }
 
@@ -153,8 +166,18 @@ body {
   gap: 10px; margin-top: 12px;
 }
 .panel-head-row .section-title { margin: 0 0 6px; }
-.mode-switch { display: inline-flex; gap: 0; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+/* 模式切换栏：第一排 = 模式，第二排 = 该模式内的面板变体（D-080） */
+.mode-switch { display: inline-flex; flex-direction: column; align-items: flex-end; gap: 4px; }
 .mode-switch:empty { display: none; }
+/* 每一排（模式组 / 变体组）各自带圆角边框 */
+.mode-switch > .mode-row,
+.mode-switch > .variant-row {
+  display: inline-flex; border: 1px solid var(--line); border-radius: 6px; overflow: hidden;
+}
+/* 单排模式（未包 .mode-row 时）也保持原样式 */
+.mode-switch > .mode-btn { border: 1px solid var(--line); border-radius: 0; }
+.mode-switch > .mode-btn:first-child { border-radius: 6px 0 0 6px; }
+.mode-switch > .mode-btn:last-child { border-radius: 0 6px 6px 0; }
 .mode-btn {
   appearance: none; border: 0; border-right: 1px solid var(--line);
   background: var(--panel-2); color: var(--muted);
@@ -218,6 +241,13 @@ body {
 .slot-stats { display: flex; flex-wrap: wrap; gap: 3px; }
 .slot-stat { font-size: 10.5px; background: #2a3039; border-radius: 3px; padding: 1px 4px; color: #b9c3d2; }
 .slot-empty { color: #555d6b; font-size: 12px; margin: auto 0; text-align: center; }
+
+/* 已装 Mod / 赋能的贡献幅度（需求方 2026-11-06）：相对「不上这张」时当前指标的提升 */
+.slot-gain { margin-top: 1px; }
+.slot-gain-val { font-size: 12px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.slot-gain-val.up { color: var(--pos); }
+.slot-gain-val.down { color: var(--neg); }
+.slot-gain-val.flat { color: var(--muted); }
 .slot-desc { font-size: 11px; color: var(--muted); }
 .btn-remove {
   margin-top: auto; align-self: flex-start;

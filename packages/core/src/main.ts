@@ -28,16 +28,19 @@ import {
   spreadTotal,
 } from './damage-types.ts';
 import type { AttackMode, DamageSegment, Weapon } from './weapon.ts';
-import { panelStats } from './weapon.ts';
-import type { Contribution } from './contributions.ts';
+import { allSegments, firstSegment, panelStats } from './weapon.ts';
+import type { Contribution, Faction } from './contributions.ts';
 import { contributionsFor, productMul, sumFlat, sumPct } from './contributions.ts';
 import { bucket, bucketDetail } from './buckets.ts';
+import type { WeaponState } from './weapon-state.ts';
+import { buildWeaponState, overForStacks } from './weapon-state.ts';
 
 // ─────────────────────────────────────────────────────────────
 // 上下文
 // ─────────────────────────────────────────────────────────────
 
-export type Faction = 'grineer' | 'corpus' | 'infested' | 'orokin' | 'murmur' | 'none';
+/** 派系定义在 `contributions.ts`（`ContribStat` 的 `faction:*` 分支要用），此处原样转出 */
+export type { Faction };
 
 export interface HeadshotOptions {
   /** 爆头开关（D-008 / D-020）：不勾选时整项不存在 */
@@ -125,7 +128,7 @@ export function pairOf(a: DamageType, b: DamageType): DamageType | null {
  * 多重统一在 L6 乘（射线例外，见 §2.2）。
  */
 export function buildVectors(mode: AttackMode): DamageSpread[] {
-  return mode.segments.map((seg) => ({ ...seg.damage }));
+  return allSegments(mode).map((seg) => ({ ...seg.damage }));
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -153,30 +156,10 @@ export function applyKuvaBonus(panel: DamageSpread, kuva: Ctx['options']['kuva']
 /**
  * 镀层类伤害乘区（A-03 已定案，见 `docs/decisions.md` D-024）。
  *
- * 规则原文：「目标每具有 1 种异常状态 +x% 伤害，最多叠加 y 次」⇒
- * ```
- * 镀层加量 = x% × a × y
- *   x = 每层百分比（Mod 的 +X%，已在 Contribution.amount 里）
- *   y = 叠加上限（击杀后获得的 buff 层数，默认取 Mod 描述的最大值）
- *   a = 目标身上异常状态的**种类数**（不是层数：中毒 5 层只算 1 种）
- * ```
- * 返回值是**小数口径**（1.2 = +120%），直接进基伤括号。
- *
- * @param contribs 全部贡献（其中 `stat: 'co'` 的即镀层类）
- * @param coStacks 实际生效的叠层数 `y`（UI 下拉框，默认 = maxStacks）
- * @param statusTypes 目标身上的异常状态**种类数** `a`（UI 下拉框）
+ * 实现已移到 `weapon-state.ts`（`基伤面板` 这个 computed 要用它，
+ * 放这里会形成 main ↔ weapon-state 的循环依赖），此处原样转出以保持导出面不变。
  */
-export function overForStacks(
-  contribs: readonly Contribution[],
-  coStacks: number,
-  statusTypes = 0,
-): number {
-  if (coStacks <= 0 || statusTypes <= 0) return 0;
-  const co: Contribution[] = contributionsFor(contribs, 'co').filter((c) => c.form === 'pct');
-  let total: number = 0;
-  for (const c of co) total += (c.amount / 100) * statusTypes * coStacks;
-  return total;
-}
+export { overForStacks } from './weapon-state.ts';
 
 /**
  * §5.2：基伤双基本值。
@@ -200,9 +183,28 @@ export function applyBaseDamage(
   return scaleSpread(panelWithKuva, k);
 }
 
-/** §2.2：多重独立乘区，与基伤相乘、绝不相加 */
-export function multishot(contribs: readonly Contribution[]): number {
-  return 1 + sumPct(contribs, 'multishot');
+/**
+ * §2.2：多重独立乘区，与基伤相乘、绝不相加。
+ *
+ * ```
+ * 当前多重 = 面板多重 × (1 + Σ多重%Mod) + Σ多重绝对值
+ * ```
+ *
+ * ⚠ **面板多重不能写死成 1**：57 把武器自带多重（Twin Rogga 15、Brakk / Tenet Detron /
+ * Drakgoon 10、Boar 8…），霰弹枪尤其明显。之前这里从常量 `1` 起算，
+ * 等于把这些武器的面板多重整个丢掉（Twin Rogga 单次射击少了 15 倍）。
+ * 面板值经 `panelStats(weapon, mode)` 取（D-050：模式 override 优先）。
+ *
+ * @param weapon 武器（取面板多重）；不传时退化为"无面板多重"（仅用于旧调用点）
+ * @param mode   攻击模式（面板多重在模式上）
+ */
+export function multishot(
+  contribs: readonly Contribution[],
+  weapon?: Weapon,
+  mode?: AttackMode,
+): number {
+  const panel = weapon && mode ? panelStats(weapon, mode).multishot : (weapon?.modes[0]?.multishot ?? 1);
+  return bucket(panel, 'multishot', contribs);
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -365,7 +367,7 @@ export function mergePairwise(slots: readonly ElementSlot[]): {
     if (s.fromMod) {
       hit.fromMod = true;
       hit.source = 'mod';
-      if (hit.sourceId === undefined) hit.sourceId = s.sourceId;
+      if (hit.sourceId === undefined && s.sourceId !== undefined) hit.sourceId = s.sourceId;
     }
   }
 
@@ -628,6 +630,9 @@ export function share(t: DamageType, v: DamageSpread): number {
 /**
  * §0.3 ③④：单次射击某元素的期望层数 = 总触发率 × 元素占比 × 多重。
  * 射线**不重复乘多重**（多重已并进触发率）。
+ *
+ * @param multishotValue 当前多重（含面板多重）。不传则按「有面板多重的武器」处理时
+ *   必须显式传入——见 {@link multishot}
  */
 export function stacksPerShot(
   t: DamageType,
@@ -635,8 +640,10 @@ export function stacksPerShot(
   procChance: number,
   contribs: readonly Contribution[],
   beam: boolean,
+  multishotValue?: number,
 ): number {
-  return totalProcChance(procChance, contribs, beam) * share(t, v) * (beam ? 1 : multishot(contribs));
+  const ms = multishotValue ?? multishot(contribs);
+  return totalProcChance(procChance, contribs, beam) * share(t, v) * (beam ? 1 : ms);
 }
 
 export interface DotTickDetail {
@@ -719,13 +726,12 @@ export function dotTick(
 // 派系乘区（D-013：命中结算前乘一次、DoT 每跳再乘一次）
 // ─────────────────────────────────────────────────────────────
 
-const FACTION_STATS: Readonly<Record<Faction, `faction:${Faction}`>> = {
+const FACTION_STATS: Readonly<Record<Exclude<Faction, 'none'>, `faction:${Faction}`>> = {
   grineer: 'faction:grineer',
   corpus: 'faction:corpus',
   infested: 'faction:infested',
   orokin: 'faction:orokin',
   murmur: 'faction:murmur',
-  none: 'faction:none',
 };
 
 export function factionFor(faction: Faction, contribs: readonly Contribution[]): number {
@@ -763,7 +769,7 @@ export function buildContext(
 // ─────────────────────────────────────────────────────────────
 
 export interface SegmentResult {
-  kind: Segment['kind'] | string;
+  kind: DamageSegment['kind'] | string;
   /** L0 面板向量 */
   panel: DamageSpread;
   /** ① 玄骸并入后的面板 */
@@ -791,22 +797,26 @@ export interface SegmentResult {
  * 结算一个伤害段。**不作任何取整**，浮点原样返回，展示层再格式化。
  *
  * 注意：这里的"命中伤害"是**单弹头**口径；单次射击要再乘 `multishot()`（L6 / 表 0.1）。
+ *
+ * @param upstream 上游已算好的 `新面板` / `基伤面板`（D-075 的 computed）。
+ *   传了就直接用，**不再重复走玄骸与基伤**；不传则自己算（独立调用 `resolveSegment` 时用）。
+ *   这样 `compute()` 里 state 与逐段结算共用同一份中间结果，不会出现两份数字对不上的情况。
  */
-export function resolveSegment(ctx: Ctx, seg: DamageSegment): SegmentResult {
+export function resolveSegment(
+  ctx: Ctx,
+  seg: DamageSegment,
+  upstream?: { 新面板: DamageSpread; 基伤面板: DamageSpread },
+): SegmentResult {
   const { weapon, contribs } = ctx;
   const panel: DamageSpread = { ...seg.damage };
 
   // ① 玄骸（在基伤之前，D-017）
-  const panelWithKuva: DamageSpread = applyKuvaBonus(panel, ctx.options.kuva);
-
   // ② 基伤
-  const baseAfterBaseDamage: DamageSpread = applyBaseDamage(
-    panelWithKuva,
-    seg,
-    contribs,
-    ctx.coStacks,
-    ctx.coStatusTypes,
-  );
+  //   上游给过就直接取 computed，避免重复计算（数值同一份）
+  const panelWithKuva: DamageSpread = upstream ? upstream.新面板 : applyKuvaBonus(panel, ctx.options.kuva);
+  const baseAfterBaseDamage: DamageSpread = upstream
+    ? upstream.基伤面板
+    : applyBaseDamage(panelWithKuva, seg, contribs, ctx.coStacks, ctx.coStatusTypes);
 
   // ③④⑤⑥ 元素 / 物理加量
   const elementDetail: ApplyElementsResult = applyElements(baseAfterBaseDamage, contribs, 'hit');
@@ -1068,7 +1078,8 @@ export function expectedHitMultiplier(
  * @param stacksPerSecond 每秒叠层（已含触发率 × 元素占比 × 多重 × 射速）
  * @param perStackPerSecond 单层每秒伤害（= `tick.tick`）
  * @param window 窗口长度（秒，默认 6）
- * @param firing 每秒是否在开火（由弹匣/射速/装填推出），默认全程开火
+ * @param firing 每秒的开火占比（0~1，由弹匣/射速/装填推出），默认全程开火。
+ *   兼容旧的布尔签名：`true` 视为 1、`false` 视为 0（见下方 `frac` 归一化）。
  * @param stacksPerShot 单发期望层数（D-059：电击/毒气第 0 拍用它）
  */
 export function dotSixSecondCurve(
@@ -1076,7 +1087,7 @@ export function dotSixSecondCurve(
   stacksPerSecond: number,
   perStackPerSecond: number,
   window = 6,
-  firing?: (second: number) => boolean,
+  firing?: (second: number) => boolean | number,
   stacksPerShot = 0,
 ): number {
   const cap = DOT_MAX_STOCKS_FIX(t);
@@ -1131,7 +1142,7 @@ export function sixSecondTotal(
   stacksPerSecond: number,
   perStackPerSecond: number,
   window = 6,
-  firing?: (second: number) => boolean,
+  firing?: (second: number) => boolean | number,
 ): number {
   return dotSixSecondCurve(t, stacksPerSecond, perStackPerSecond, window, firing);
 }
@@ -1176,9 +1187,10 @@ export interface OutputBreakdown {
  * · DoT        = Σ 各类型（每秒叠层 × 每跳）
  */
 export function buildOutput(weapon: Weapon, mode: AttackMode, contribs: readonly Contribution[], res: SegmentResult, ctx: Ctx): OutputBreakdown {
-  // D-050：面板数值一律取**该模式**的（模式 override → 武器级回退）
+  // D-050：面板数值一律取**该模式**的（模式 override → 武器级回退）——多重同理，
+  // 面板多重来自 `mode.multishot`，不能写死 1
   const ps = panelStats(weapon, mode);
-  const ms = multishot(contribs);
+  const ms = multishot(contribs, weapon, mode);
   const fr = fireRateFinal(weapon, contribs, mode);
   const pelletPerHit = res.line.average;
   const perShot = pelletPerHit * ms;
@@ -1196,12 +1208,12 @@ export function buildOutput(weapon: Weapon, mode: AttackMode, contribs: readonly
   const reload: number = reloadBase > 0 && reloadSpeedMul > 0 ? reloadBase / reloadSpeedMul : reloadBase;
   const sustained: number = mag > 0 && fr > 0 ? (perShot * mag) / (mag / fr + reload) : 0;
 
-  const seg: DamageSegment = mode.segments[0]!;
+  const seg: DamageSegment = firstSegment(mode)!;
   const dotPerType: Partial<Record<DoTType, number>> = {};
   const stacksPerType: Partial<Record<DoTType, number>> = {};
   // 开火时间线（D-058 / D-067）：打满弹匣后要装填，期间不叠层。
   // D-067 改为**毫秒精度的开火占比**，否则射速提升会产生阶梯式负收益。
-  const firingTimeline = (sec: number) => firingFraction(mag, fr, reload, sec);
+  const firingTimeline = (sec: number): number => firingFraction(mag, fr, reload, sec);
   // D-061：加权**只在有 DoT 的类型之间**分配。
   // 冲击/穿刺/辐射/腐蚀/病毒等没有 DoT 的伤害类型**不参与**加权 ——
   // 它们虽然也占触发池，但不会产生持续伤害，不该摊薄 DoT 的份。
@@ -1236,7 +1248,8 @@ export function buildOutput(weapon: Weapon, mode: AttackMode, contribs: readonly
 
     // ── 口径二：**六秒异常状态总伤**（D-043 / D-057 修订）──
     // 这里才乘"每秒叠层"：单发层数 = 触发率 × 元素占比 × 多重；每秒叠层 = 单发层数 × 射速。
-    const stacksPerShotOfType = stacksPerShot(tick.type, res.finalHit, seg.procChance, contribs, ctx.beam);
+    // 多重传 `ms`（含面板多重），否则 Twin Rogga 这类武器叠层会被低估 15 倍。
+    const stacksPerShotOfType = stacksPerShot(tick.type, res.finalHit, seg.procChance, contribs, ctx.beam, ms);
     const stacksPerSecond = stacksPerShotOfType * fr;
     stacksPerType[tick.type] = stacksPerSecond;
 
@@ -1265,7 +1278,7 @@ export function buildOutput(weapon: Weapon, mode: AttackMode, contribs: readonly
   //   合成（火+冰、火+电），dotBase 里根本没有 blast 这一项 → 恒为 0。
   //   按 §6.2 ①，DoT 基础值是「**全类型之和**」，爆炸同样适用。
   const blastBase = hasDotElement(res.finalHit, 'blast') ? spreadTotal(res.dotBase) : 0;
-  const blastStacks = stacksPerShot('blast', res.finalHit, seg.procChance, contribs, ctx.beam);
+  const blastStacks = stacksPerShot('blast', res.finalHit, seg.procChance, contribs, ctx.beam, ms);
   const blast = blastDetail(blastBase, blastStacks * fr, {
     factionPct: factionFor(ctx.faction, contribs),
     statusDamagePct: sumPct(contribs, 'statusDamage'),
@@ -1313,6 +1326,25 @@ export function buildOutput(weapon: Weapon, mode: AttackMode, contribs: readonly
 export interface ComputeResult {
   ctx: Ctx;
   segments: SegmentResult[];
+  /**
+   * 计算链状态树（D-075）：输入层 / computed 层。
+   *
+   * 下游（UI、报告脚本、增幅分析）应当读这里，而不是自己从 面板 + Mod 重算：
+   *   · `state.computed.当前暴击率` / `当前暴击伤害` / `当前多重` …
+   *   · `state.computed.新面板`（玄骸加成后的数组形态）
+   *   · `state.computed.元素槽位`（合成前的独立槽位数组）
+   *
+   * 取的是**第一个（主）段**；每段各自的完整 computed 见 `perSegment`。
+   */
+  state: WeaponState;
+  /**
+   * 逐段的 `WeaponState`（与 `segments` 一一对应）。
+   *
+   * 多段武器（60 把，如 Astilla Prime 的 impact/attack/explosiveAttack/embedDeathAttack）
+   * 每段的面板不同，`新面板` / `基伤面板` / `元素槽位` / `命中分布` 都各有一份。
+   * 单段武器时 `perSegment[0] === state` 的等价内容。
+   */
+  perSegment: WeaponState[];
   /** 主段（第一个段）的输出口径 */
   output: OutputBreakdown;
   /** 面板 → 加成后面板 的对照 */
@@ -1327,8 +1359,17 @@ export interface ComputeResult {
     /** D-066：装填**时间**（吃 `reloadSpeed` Mod，速度越快时间越短） */
     reloadTime: { base: number; after: number };
   };
-  /** 加成后的伤害分布（各段之和） */
+  /** 加成后的伤害分布（**所有变体所有段**之和） */
   totalSpread: DamageSpread;
+  /**
+   * **按变体分组**的加成后伤害分布（D-096）。
+   *
+   * `totalSpread` 是把命中段和爆炸段一起加起来的，直接拿它和"当前变体的基础分布"
+   * 并列显示会让两个面板混同（巴什穆 / 巴兹火枪）。UI 要按变体对照，读这里。
+   *
+   * 数组顺序与 `mode.variants` 一一对应。
+   */
+  spreadByVariant: DamageSpread[];
   /** 加成后面板总伤（单弹头，未乘暴击） */
   moddedPanelTotal: number;
 }
@@ -1341,7 +1382,18 @@ export function compute(
   beam = false,
 ): ComputeResult {
   const ctx: Ctx = buildContext(weapon, mode, contribs, options, beam);
-  const segments: SegmentResult[] = mode.segments.map((seg) => resolveSegment(ctx, seg));
+
+  // D-080：段只属于变体，模式上不再有 `segments`。这里把各变体的段摊平：
+  // 每个段仍独立结算（各自可能属于不同面板变体），结果按变体顺序排列。
+  const segs: DamageSegment[] = allSegments(mode);
+
+  // ── 每段的上游 computed 只算一次；逐段结算与 state 共用这一份（D-075）──
+  // 之前 `resolveSegment()` 与 `buildState()` 各算一遍玄骸→基伤，
+  // 主段被计算两次，且 state 只覆盖第一段（60 把多段武器受影响）。
+  const ups = segs.map((seg) => segmentUpstream(weapon, mode, contribs, ctx, seg));
+  const segments: SegmentResult[] = segs.map((seg, i) =>
+    resolveSegment(ctx, seg, { 新面板: ups[i]!.state.computed.新面板, 基伤面板: ups[i]!.state.computed.基伤面板 }),
+  );
 
   const totalSpread: DamageSpread = {};
   for (const s of segments) {
@@ -1351,34 +1403,98 @@ export function compute(
   }
   const moddedPanelTotal = spreadTotal(totalSpread);
 
+  // 按变体分组累计（D-096）：段顺序 = allSegments(mode) = 各变体段按序拼接
+  const spreadByVariant: DamageSpread[] = [];
+  {
+    let cursor = 0;
+    for (const variant of mode.variants) {
+      const acc: DamageSpread = {};
+      for (let i = 0; i < variant.segments.length; i++) {
+        const segRes = segments[cursor + i];
+        if (!segRes) continue;
+        for (const [k, v] of Object.entries(segRes.finalHit) as [DamageType, number][]) {
+          acc[k] = (acc[k] ?? 0) + (v ?? 0);
+        }
+      }
+      cursor += variant.segments.length;
+      spreadByVariant.push(acc);
+    }
+  }
+
   const output: OutputBreakdown = buildOutput(weapon, mode, contribs, segments[0]!, ctx);
-  const ps: ReturnType<typeof panelStats> = panelStats(weapon, mode);
+
+  // ── 计算链状态树：主段（D-075），downstream 一律从这里取值 ──
+  const state: WeaponState = buildState(weapon, mode, contribs, ctx, segs[0]!, ups[0]);
+
+  // ── 每个段各自的 computed（多段武器逐段可见）──
+  const perSegment: WeaponState[] = ups.map((u, i) => buildState(weapon, mode, contribs, ctx, segs[i]!, u));
+  const c = state.computed;
+  const p = state.inputs.panel;
 
   return {
     ctx,
     segments,
     output,
+    state,
+    perSegment,
     panelPairs: {
-      critChance: { base: ps.critChance, after: bucket(ps.critChance, 'critChance', contribs) },
-      critMultiplier: { base: ps.critMultiplier, after: bucket(ps.critMultiplier, 'critMultiplier', contribs) },
-      statusChance: { base: ps.statusChance, after: bucket(ps.statusChance, 'statusChance', contribs) },
-      fireRate: { base: ps.fireRate, after: fireRateFinal(weapon, contribs, mode) },
-      multishot: { base: ps.multishot, after: ps.multishot * multishot(contribs) },
-      // D-066：弹匣与装填也要出现在面板对照里（之前漏了，导致 Mod 看不到效果）
-      magazineSize: {
-        base: ps.magazineSize,
-        after: bucket(ps.magazineSize, 'magazine', contribs),
-      },
-      reloadTime: {
-        base: ps.reloadTime,
-        // 装填**速度** % → 装填**时间**：时间 = 面板时间 ÷ (1 + Σ装填速度%)
-        after: ps.reloadTime > 0 && 1 + sumPct(contribs, 'reloadSpeed') > 0
-          ? ps.reloadTime / (1 + sumPct(contribs, 'reloadSpeed'))
-          : ps.reloadTime,
-      },
+      critChance: { base: p.critChance, after: c.当前暴击率 },
+      critMultiplier: { base: p.critMultiplier, after: c.当前暴击伤害 },
+      statusChance: { base: p.statusChance, after: c.当前触发率 },
+      fireRate: { base: p.fireRate, after: c.当前射速 },
+      multishot: { base: p.multishot, after: c.当前多重 },
+      magazineSize: { base: p.magazineSize, after: c.当前弹匣 },
+      reloadTime: { base: p.reloadTime, after: c.当前装填时间 },
     },
     totalSpread,
+    spreadByVariant,
     moddedPanelTotal,
+  };
+}
+
+/**
+ * 计算某一段的上游 computed（玄骸 → 基伤）。
+ *
+ * 多段武器每段的面板不同，所以**每段各有一份** `新面板` / `基伤面板`；
+ * 面板数值（暴击、多重…）是全武器共享的，不随段变化。
+ */
+function segmentUpstream(
+  weapon: Weapon,
+  mode: AttackMode,
+  contribs: readonly Contribution[],
+  ctx: Ctx,
+  seg: DamageSegment,
+) {
+  return buildWeaponState(weapon, mode, contribs, {
+    beam: ctx.beam,
+    faction: ctx.faction,
+    coStacks: ctx.coStacks,
+    coStatusTypes: ctx.coStatusTypes,
+    kuva: ctx.options.kuva,
+    segment: seg,
+  });
+}
+
+/** 把 `buildWeaponState` 的产物补全元素合成部分，得到完整 `WeaponState` */
+function buildState(
+  weapon: Weapon,
+  mode: AttackMode,
+  contribs: readonly Contribution[],
+  ctx: Ctx,
+  seg: DamageSegment,
+  partialResult?: ReturnType<typeof segmentUpstream>,
+): WeaponState {
+  const { state: partial } = partialResult ?? segmentUpstream(weapon, mode, contribs, ctx, seg);
+  // 元素合成依赖本文件的 applyElements（与结算链共用同一个实现，保证一致）
+  const el: ApplyElementsResult = applyElements(partial.computed.基伤面板, contribs, 'hit');
+  return {
+    ...partial,
+    computed: {
+      ...partial.computed,
+      元素槽位: el.slots,
+      命中分布: el.v,
+      命中分布总伤: spreadTotal(el.v),
+    },
   };
 }
 

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-05T07:32:35.627Z",
+  "generatedAt": "2026-11-06T09:06:11.265Z",
   "category": "companion",
   "count": 19,
   "note": "暴率/触发为 0~1 小数；伤害分布为绝对值；procChance 同为 0~1；kuva 表示需用户在计算器里选元素与加成（25%~60%）",
@@ -26,26 +26,32 @@
             "count": 3,
             "delay": 0.4
           },
-          "segments": [
+          "variants": [
             {
-              "kind": "impact",
-              "aoe": false,
-              "damage": {
-                "impact": 2,
-                "puncture": 17,
-                "slash": 1
-              },
-              "procChance": 0.1
-            },
-            {
-              "kind": "attack",
-              "aoe": false,
-              "damage": {
-                "impact": 2,
-                "puncture": 17,
-                "slash": 1
-              },
-              "procChance": 0.1
+              "id": "direct",
+              "label": "直接命中",
+              "segments": [
+                {
+                  "kind": "impact",
+                  "aoe": false,
+                  "damage": {
+                    "impact": 2,
+                    "puncture": 17,
+                    "slash": 1
+                  },
+                  "procChance": 0.1
+                },
+                {
+                  "kind": "attack",
+                  "aoe": false,
+                  "damage": {
+                    "impact": 2,
+                    "puncture": 17,
+                    "slash": 1
+                  },
+                  "procChance": 0.1
+                }
+              ]
             }
           ]
         }
@@ -69,22 +75,28 @@
           "trigger": "semi",
           "bullets": 1,
           "multishot": 1,
-          "segments": [
+          "variants": [
             {
-              "kind": "impact",
-              "aoe": false,
-              "damage": {
-                "impact": 10
-              },
-              "procChance": 0.1
-            },
-            {
-              "kind": "attack",
-              "aoe": false,
-              "damage": {
-                "impact": 10
-              },
-              "procChance": 0
+              "id": "direct",
+              "label": "直接命中",
+              "segments": [
+                {
+                  "kind": "impact",
+                  "aoe": false,
+                  "damage": {
+                    "impact": 10
+                  },
+                  "procChance": 0.1
+                },
+                {
+                  "kind": "attack",
+                  "aoe": false,
+                  "damage": {
+                    "impact": 10
+                  },
+                  "procChance": 0
+                }
+              ]
             }
           ]
         }
@@ -108,16 +120,22 @@
           "trigger": "auto",
           "bullets": 1,
           "multishot": 1,
-          "segments": [
+          "variants": [
             {
-              "kind": "impact",
-              "aoe": false,
-              "damage": {
-                "impact": 1.5,
-                "puncture": 0.75,
-                "slash": 12.75
-              },
-              "procChance": 0.01
+              "id": "direct",
+              "label": "直接命中",
+              "segments": [
+                {
+                  "kind": "impact",
+                  "aoe": false,
+                  "damage": {
+                    "impact": 1.5,
+                    "puncture": 0.75,
+                    "slash": 12.75
+                  },
+                  "procChance": 0.01
+                }
+              ]
             }
           ]
         }
@@ -141,14 +159,20 @@
           "trigger": "unknown",
           "bullets": 1,
           "multishot": 1,
-          "segments": [
+          "variants": [
             {
-              "kind": "impact",
-              "aoe": false,
-              "damage": {
-                "cold": 5
-              },
-              "procChance": 0.35
+              "id": "direct",
+              "label": "直接命中",
+              "segments": [
+                {
+                  "kind": "impact",
+                  "aoe": false,
+                  "damage": {
+                    "cold": 5
+                  },
+                  "procChance": 0.35
+                }
+              ]
             }
           ]
         }
@@ -176,22 +200,20 @@
             "count": 3,
             "delay": 0.4
           },
-          "segments": [
+          "variants": [
             {
-              "kind": "attack",
-              "aoe": false,
-              "damage": {
-                "puncture": 10
-              },
-              "procChance": 0.22
-            },
-            {
-              "kind": "embedDeathAttack",
-              "aoe": true,
-              "damage": {
-                "blast": 100
-              },
-              "procChance": 0.22
+              "id": "direct",
+              "label": "直接命中",
+              "segments": [
+                {
+                  "kind": "attack",
+                  "aoe": false,
+                  "damage": {
+                    "puncture": 10
+                  },
+                  "procChance": 0.22
+                }
+              ]
             }
           ]
         }
@@ -215,16 +237,22 @@
           "trigger": "auto",
           "bullets": 1,
           "multishot": 1,
-          "segments": [
+          "variants": [
             {
-              "kind": "attack",
-              "aoe": false,
-              "damage": {
-                "impact": 4.5,
-                "puncture": 36,
-                "slash": 4.5
-              },
-              "procChance": 0.075
+              "id": "direct",
+              "label": "直接命中",
+              "segments": [
+                {
+                  "kind": "attack",
+                  "aoe": false,
+                  "damage": {
+                    "impact": 4.5,
+                    "puncture": 36,
+                    "slash": 4.5
+                  },
+                  "procChance": 0.075
+                }
+              ]
             }
           ]
         }
@@ -252,26 +280,32 @@
             "count": 5,
             "delay": 0.2
           },
-          "segments": [
+          "variants": [
             {
-              "kind": "impact",
-              "aoe": false,
-              "damage": {
-                "impact": 2.5,
-                "puncture": 21.25,
-                "slash": 1.25
-              },
-              "procChance": 0.1
-            },
-            {
-              "kind": "attack",
-              "aoe": false,
-              "damage": {
-                "impact": 2.5,
-                "puncture": 21.25,
-                "slash": 1.25
-              },
-              "procChance": 0.15
+              "id": "direct",
+              "label": "直接命中",
+              "segments": [
+                {
+                  "kind": "impact",
+                  "aoe": false,
+                  "damage": {
+                    "impact": 2.5,
+                    "puncture": 21.25,
+                    "slash": 1.25
+                  },
+                  "procChance": 0.1
+                },
+                {
+                  "kind": "attack",
+                  "aoe": false,
+                  "damage": {
+                    "impact": 2.5,
+                    "puncture": 21.25,
+                    "slash": 1.25
+                  },
+                  "procChance": 0.15
+                }
+              ]
             }
           ]
         }
@@ -295,16 +329,22 @@
           "trigger": "auto",
           "bullets": 1,
           "multishot": 1,
-          "segments": [
+          "variants": [
             {
-              "kind": "impact",
-              "aoe": false,
-              "damage": {
-                "impact": 2,
-                "puncture": 1,
-                "slash": 17
-              },
-              "procChance": 0.04
+              "id": "direct",
+              "label": "直接命中",
+              "segments": [
+                {
+                  "kind": "impact",
+                  "aoe": false,
+                  "damage": {
+                    "impact": 2,
+                    "puncture": 1,
+                    "slash": 17
+                  },
+                  "procChance": 0.04
+                }
+              ]
             }
           ]
         }
@@ -328,16 +368,22 @@
           "trigger": "auto",
           "bullets": 1,
           "multishot": 1,
-          "segments": [
+          "variants": [
             {
-              "kind": "attack",
-              "aoe": false,
-              "damage": {
-                "impact": 5.5,
-                "puncture": 38.5,
-                "slash": 11
-              },
-              "procChance": 0
+              "id": "direct",
+              "label": "直接命中",
+              "segments": [
+                {
+                  "kind": "attack",
+                  "aoe": false,
+                  "damage": {
+                    "impact": 5.5,
+                    "puncture": 38.5,
+                    "slash": 11
+                  },
+                  "procChance": 0
+                }
+              ]
             }
           ]
         }
@@ -361,16 +407,22 @@
           "trigger": "auto",
           "bullets": 6,
           "multishot": 6,
-          "segments": [
+          "variants": [
             {
-              "kind": "impact",
-              "aoe": false,
-              "damage": {
-                "impact": 38.25,
-                "puncture": 2.25,
-                "slash": 4.5
-              },
-              "procChance": 0.3
+              "id": "direct",
+              "label": "直接命中",
+              "segments": [
+                {
+                  "kind": "impact",
+                  "aoe": false,
+                  "damage": {
+                    "impact": 38.25,
+                    "puncture": 2.25,
+                    "slash": 4.5
+                  },
+                  "procChance": 0.3
+                }
+              ]
             }
           ]
         }
@@ -398,26 +450,32 @@
             "count": 4,
             "delay": 0.3
           },
-          "segments": [
+          "variants": [
             {
-              "kind": "impact",
-              "aoe": false,
-              "damage": {
-                "impact": 2.2,
-                "puncture": 18.7,
-                "slash": 1.1
-              },
-              "procChance": 0.15
-            },
-            {
-              "kind": "attack",
-              "aoe": false,
-              "damage": {
-                "impact": 2.2,
-                "puncture": 18.7,
-                "slash": 1.1
-              },
-              "procChance": 0.1
+              "id": "direct",
+              "label": "直接命中",
+              "segments": [
+                {
+                  "kind": "impact",
+                  "aoe": false,
+                  "damage": {
+                    "impact": 2.2,
+                    "puncture": 18.7,
+                    "slash": 1.1
+                  },
+                  "procChance": 0.15
+                },
+                {
+                  "kind": "attack",
+                  "aoe": false,
+                  "damage": {
+                    "impact": 2.2,
+                    "puncture": 18.7,
+                    "slash": 1.1
+                  },
+                  "procChance": 0.1
+                }
+              ]
             }
           ]
         }
@@ -441,24 +499,20 @@
           "trigger": "semi",
           "bullets": 1,
           "multishot": 1,
-          "segments": [
+          "variants": [
             {
-              "kind": "impact",
-              "aoe": false,
-              "damage": {
-                "impact": 4,
-                "puncture": 4,
-                "slash": 4
-              },
-              "procChance": 0.2
-            },
-            {
-              "kind": "attack",
-              "aoe": false,
-              "damage": {
-                "toxin": 15
-              },
-              "procChance": 0.2
+              "id": "direct",
+              "label": "直接命中",
+              "segments": [
+                {
+                  "kind": "attack",
+                  "aoe": false,
+                  "damage": {
+                    "toxin": 15
+                  },
+                  "procChance": 0.2
+                }
+              ]
             }
           ]
         }
@@ -482,22 +536,28 @@
           "trigger": "auto",
           "bullets": 1,
           "multishot": 1,
-          "segments": [
+          "variants": [
             {
-              "kind": "impact",
-              "aoe": false,
-              "damage": {
-                "impact": 10
-              },
-              "procChance": 0.1
-            },
-            {
-              "kind": "attack",
-              "aoe": false,
-              "damage": {
-                "electric": 175
-              },
-              "procChance": 0.25
+              "id": "direct",
+              "label": "直接命中",
+              "segments": [
+                {
+                  "kind": "impact",
+                  "aoe": false,
+                  "damage": {
+                    "impact": 10
+                  },
+                  "procChance": 0.1
+                },
+                {
+                  "kind": "attack",
+                  "aoe": false,
+                  "damage": {
+                    "electric": 175
+                  },
+                  "procChance": 0.25
+                }
+              ]
             }
           ]
         }
@@ -521,16 +581,22 @@
           "trigger": "auto",
           "bullets": 6,
           "multishot": 6,
-          "segments": [
+          "variants": [
             {
-              "kind": "impact",
-              "aoe": false,
-              "damage": {
-                "impact": 29.75,
-                "puncture": 1.75,
-                "slash": 3.5
-              },
-              "procChance": 0.27
+              "id": "direct",
+              "label": "直接命中",
+              "segments": [
+                {
+                  "kind": "impact",
+                  "aoe": false,
+                  "damage": {
+                    "impact": 29.75,
+                    "puncture": 1.75,
+                    "slash": 3.5
+                  },
+                  "procChance": 0.27
+                }
+              ]
             }
           ]
         }
@@ -555,14 +621,20 @@
           "trigger": "unknown",
           "bullets": 1,
           "multishot": 1,
-          "segments": [
+          "variants": [
             {
-              "kind": "impact",
-              "aoe": false,
-              "damage": {
-                "cold": 32
-              },
-              "procChance": 0.36
+              "id": "direct",
+              "label": "直接命中",
+              "segments": [
+                {
+                  "kind": "impact",
+                  "aoe": false,
+                  "damage": {
+                    "cold": 32
+                  },
+                  "procChance": 0.36
+                }
+              ]
             }
           ]
         }
@@ -586,14 +658,20 @@
           "trigger": "unknown",
           "bullets": 1,
           "multishot": 1,
-          "segments": [
+          "variants": [
             {
-              "kind": "impact",
-              "aoe": false,
-              "damage": {
-                "cold": 26
-              },
-              "procChance": 0.34
+              "id": "direct",
+              "label": "直接命中",
+              "segments": [
+                {
+                  "kind": "impact",
+                  "aoe": false,
+                  "damage": {
+                    "cold": 26
+                  },
+                  "procChance": 0.34
+                }
+              ]
             }
           ]
         }
@@ -620,34 +698,46 @@
             "count": 4,
             "delay": 0.1
           },
-          "segments": [
+          "variants": [
             {
-              "kind": "impact",
-              "aoe": false,
-              "damage": {
-                "impact": 1,
-                "puncture": 1,
-                "slash": 1
-              },
-              "procChance": 0.2
+              "id": "direct",
+              "label": "直接命中",
+              "segments": [
+                {
+                  "kind": "impact",
+                  "aoe": false,
+                  "damage": {
+                    "impact": 1,
+                    "puncture": 1,
+                    "slash": 1
+                  },
+                  "procChance": 0.2
+                },
+                {
+                  "kind": "attack",
+                  "aoe": false,
+                  "damage": {
+                    "impact": 5.5,
+                    "puncture": 4.5
+                  },
+                  "procChance": 0.3
+                }
+              ]
             },
             {
-              "kind": "attack",
-              "aoe": false,
-              "damage": {
-                "impact": 5.5,
-                "puncture": 4.5
-              },
-              "procChance": 0.3
-            },
-            {
-              "kind": "explosiveAttack",
-              "aoe": true,
-              "damage": {
-                "heat": 24,
-                "impact": 6
-              },
-              "procChance": 0.3
+              "id": "blast",
+              "label": "爆炸",
+              "segments": [
+                {
+                  "kind": "explosiveAttack",
+                  "aoe": true,
+                  "damage": {
+                    "heat": 24,
+                    "impact": 6
+                  },
+                  "procChance": 0.3
+                }
+              ]
             }
           ]
         }
@@ -671,14 +761,20 @@
           "trigger": "unknown",
           "bullets": 1,
           "multishot": 1,
-          "segments": [
+          "variants": [
             {
-              "kind": "impact",
-              "aoe": false,
-              "damage": {
-                "electric": 5
-              },
-              "procChance": 0.25
+              "id": "direct",
+              "label": "直接命中",
+              "segments": [
+                {
+                  "kind": "impact",
+                  "aoe": false,
+                  "damage": {
+                    "electric": 5
+                  },
+                  "procChance": 0.25
+                }
+              ]
             }
           ]
         }
@@ -702,14 +798,20 @@
           "trigger": "charge",
           "bullets": 1,
           "multishot": 1,
-          "segments": [
+          "variants": [
             {
-              "kind": "impact",
-              "aoe": false,
-              "damage": {
-                "heat": 500
-              },
-              "procChance": 0.1
+              "id": "direct",
+              "label": "直接命中",
+              "segments": [
+                {
+                  "kind": "impact",
+                  "aoe": false,
+                  "damage": {
+                    "heat": 500
+                  },
+                  "procChance": 0.1
+                }
+              ]
             }
           ]
         }

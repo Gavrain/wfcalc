@@ -1,4 +1,4 @@
-# 数据更新报告 2026-11-05T07-32-35-630Z
+# 数据更新报告 2026-11-06T09-06-11-267Z
 
 ## 抓取统计
 ```
@@ -10,8 +10,8 @@
 清洗后保留：637
 丢弃占位 behaviour：40（占 4.4%）
 保留 behaviour：861
-多攻击模式武器：203
-含 AoE 段武器：126
+多攻击模式武器：182
+含 AoE 段武器：115
 含未知伤害类型：0
 ```
 
@@ -22,22 +22,54 @@
 与上一版完全一致，无需确认。
 ```
 
-## 警告（205 条）
+## 警告（237 条）
 ```
 /Lotus/Weapons/Thanotech/EntSphereHammer/EntSphereHammer: 清洗后没有任何有效攻击模式，已跳过
 /Lotus/Weapons/Thanotech/EntFistIncarnon/EntFistIncarnon: 清洗后没有任何有效攻击模式，已跳过
-/Lotus/Weapons/Tenno/Pistols/PrimeBallistica/PrimeBallistica#1: 识别为灵化模式，暴击/触发需人工层补充（见 data-todo）
-/Lotus/Weapons/Tenno/Pistols/AutomaticHandCrossbow/AutoCrossBow#2: 识别为灵化模式，暴击/触发需人工层补充（见 data-todo）
+/Lotus/Weapons/Tenno/ThrowingWeapons/Kunai: 识别为灵化武器（Kunai Incarnon Genesis），最后一个 behaviour 标为灵化模式
+/Lotus/Weapons/Tenno/ThrowingWeapons/Kunai#1: 识别为灵化模式，面板数值待人工层补充
+/Lotus/Weapons/Tenno/Rifle/LatronPrime: 识别为灵化武器（Latron Incarnon Genesis），最后一个 behaviour 标为灵化模式
+/Lotus/Weapons/Tenno/Rifle/LatronPrime#1: 识别为灵化模式，面板数值待人工层补充
+/Lotus/Weapons/Tenno/Rifle/BratonPrime: 识别为灵化武器（Braton Incarnon Genesis），最后一个 behaviour 标为灵化模式
+/Lotus/Weapons/Tenno/Rifle/BratonPrime#1: 识别为灵化模式，面板数值待人工层补充
+/Lotus/Weapons/Tenno/Pistols/PrimeLex/PrimeLex: 识别为灵化武器（Lex Incarnon Genesis），最后一个 behaviour 标为灵化模式
+/Lotus/Weapons/Tenno/Pistols/PrimeLex/PrimeLex#1: 识别为灵化模式，面板数值待人工层补充
+/Lotus/Weapons/Tenno/Pistols/PrimeBallistica/PrimeBallistica: 识别为灵化武器（Ballistica Incarnon Genesis），最后一个 behaviour 标为灵化模式
+/Lotus/Weapons/Tenno/Pistols/PrimeBallistica/PrimeBallistica#1: 识别为灵化模式，面板数值待人工层补充
+/Lotus/Weapons/Tenno/Pistols/AutomaticHandCrossbow/AutoCrossBow#2: 识别为灵化模式，面板数值待人工层补充
+/Lotus/Weapons/Tenno/Pistol/LatoVandal: 识别为灵化武器（Lato Incarnon Genesis），最后一个 behaviour 标为灵化模式
+/Lotus/Weapons/Tenno/Pistol/LatoVandal#1: 识别为灵化模式，面板数值待人工层补充
+/Lotus/Weapons/Tenno/Pistol/LatoPrime: 识别为灵化武器（Lato Incarnon Genesis），最后一个 behaviour 标为灵化模式
+/Lotus/Weapons/Tenno/Pistol/LatoPrime#1: 识别为灵化模式，面板数值待人工层补充
+/Lotus/Weapons/Tenno/Pistol/BroncoPrime: 识别为灵化武器（Bronco Incarnon Genesis），最后一个 behaviour 标为灵化模式
+/Lotus/Weapons/Tenno/Pistol/BroncoPrime#1: 识别为灵化模式，面板数值待人工层补充
 /Lotus/Weapons/Tenno/Melee/Swords/DarkSword/DarkSwordDaggerHybridWeapon: 清洗后没有任何有效攻击模式，已跳过
 /Lotus/Weapons/Tenno/Melee/Nunchaku/TnoNunchaku/TnoNunchaku: 清洗后没有任何有效攻击模式，已跳过
-/Lotus/Weapons/Tenno/Bows/StalkerBow#1: 识别为灵化模式，暴击/触发需人工层补充（见 data-todo）
-/Lotus/Weapons/Tenno/Bows/PrimeHuntingBow#1: 识别为灵化模式，暴击/触发需人工层补充（见 data-todo）
-/Lotus/Weapons/Tenno/Bows/HuntingBow#1: 识别为灵化模式，暴击/触发需人工层补充（见 data-todo）
+/Lotus/Weapons/Tenno/LongGuns/WraithLatron/WraithLatron: 识别为灵化武器（Latron Incarnon Genesis），最后一个 behaviour 标为灵化模式
+/Lotus/Weapons/Tenno/LongGuns/WraithLatron/WraithLatron#1: 识别为灵化模式，面板数值待人工层补充
+/Lotus/Weapons/Tenno/LongGuns/PrimeBurston/PrimeBurston: 识别为灵化武器（Burston Incarnon Genesis），最后一个 behaviour 标为灵化模式
+/Lotus/Weapons/Tenno/LongGuns/PrimeBurston/PrimeBurston#1: 识别为灵化模式，面板数值待人工层补充
+/Lotus/Weapons/Tenno/LongGuns/PrimeBoltor/PrimeBoltor: 识别为灵化武器（Boltor Incarnon Genesis），最后一个 behaviour 标为灵化模式
+/Lotus/Weapons/Tenno/LongGuns/PrimeBoltor/PrimeBoltor#1: 识别为灵化模式，面板数值待人工层补充
+/Lotus/Weapons/Tenno/Bows/StalkerBow#1: 识别为灵化模式，面板数值待人工层补充
+/Lotus/Weapons/Tenno/Bows/PrimeHuntingBow#1: 识别为灵化模式，面板数值待人工层补充
+/Lotus/Weapons/Tenno/Bows/HuntingBow#1: 识别为灵化模式，面板数值待人工层补充
 /Lotus/Weapons/Tenno/Archwing/Primary/NokkoArchGun/NokkoArchGun: 清洗后没有任何有效攻击模式，已跳过
-/Lotus/Weapons/Syndicates/RedVeil/Pistols/RVBallistica#2: 识别为灵化模式，暴击/触发需人工层补充（见 data-todo）
+/Lotus/Weapons/Syndicates/RedVeil/Pistols/RVBallistica#2: 识别为灵化模式，面板数值待人工层补充
 /Lotus/Weapons/Syndicates/CephalonSuda/LongGuns/CSSimulor: 清洗后没有任何有效攻击模式，已跳过
-/Lotus/Weapons/MK1Series/MK1Paris#1: 识别为灵化模式，暴击/触发需人工层补充（见 data-todo）
+/Lotus/Weapons/MK1Series/MK1Paris: 识别为灵化武器（Paris Incarnon Genesis），最后一个 behaviour 标为灵化模式
+/Lotus/Weapons/MK1Series/MK1Paris#1: 识别为灵化模式，面板数值待人工层补充
+/Lotus/Weapons/MK1Series/MK1Kunai: 识别为灵化武器（Kunai Incarnon Genesis），最后一个 behaviour 标为灵化模式
+/Lotus/Weapons/MK1Series/MK1Kunai#1: 识别为灵化模式，面板数值待人工层补充
+/Lotus/Weapons/MK1Series/MK1Furis: 识别为灵化武器（Furis Incarnon Genesis），最后一个 behaviour 标为灵化模式
+/Lotus/Weapons/MK1Series/MK1Furis#1: 识别为灵化模式，面板数值待人工层补充
+/Lotus/Weapons/Grineer/LongGuns/WraithGorgon/WraithGorgon: 识别为灵化武器（Gorgon Incarnon Genesis），最后一个 behaviour 标为灵化模式
+/Lotus/Weapons/Grineer/LongGuns/WraithGorgon/WraithGorgon#1: 识别为灵化模式，面板数值待人工层补充
 /Lotus/Weapons/Grineer/GrineerPistol/GrnScopedPistolPlayer: 清洗后没有任何有效攻击模式，已跳过
+/Lotus/Weapons/Corpus/Pistols/CrpHandRL/PrismaAngstrum: 识别为灵化武器（Angstrum Incarnon Genesis），最后一个 behaviour 标为灵化模式
+/Lotus/Weapons/Corpus/Pistols/CrpHandRL/PrismaAngstrum#1: 识别为灵化模式，面板数值待人工层补充
+/Lotus/Weapons/ClanTech/Energy/DeraVandal: 识别为灵化武器（Dera Incarnon Genesis），最后一个 behaviour 标为灵化模式
+/Lotus/Weapons/ClanTech/Energy/DeraVandal#1: 识别为灵化模式，面板数值待人工层补充
 /Lotus/Weapons/Cephalon/Primary/CephPrimary/CephPrimary: 清洗后没有任何有效攻击模式，已跳过
 /Lotus/Types/Sentinels/SentinelWeapons/SentGlaiveWeapon: 清洗后没有任何有效攻击模式，已跳过
 /Lotus/Types/Sentinels/SentinelWeapons/DeconstructorPrime/PrimeHeliosGlaiveWeapon: 清洗后没有任何有效攻击模式，已跳过
@@ -192,37 +224,5 @@
 /Lotus/Weapons/Sentients/OperatorAmplifiers/Set1/Barrel/SentAmpSet1BarrelPartA: 清洗后没有任何有效攻击模式，已跳过
 /Lotus/Weapons/Sentients/OperatorAmplifiers/Set1/Barrel/SentAmpSet1BarrelPartB: 清洗后没有任何有效攻击模式，已跳过
 /Lotus/Weapons/Sentients/OperatorAmplifiers/Set1/Barrel/SentAmpSet1BarrelPartC: 清洗后没有任何有效攻击模式，已跳过
-/Lotus/Weapons/Sentients/OperatorAmplifiers/Set1/Chassis/SentAmpSet1ChassisPartA: 清洗后没有任何有效攻击模式，已跳过
-/Lotus/Weapons/Sentients/OperatorAmplifiers/Set1/Chassis/SentAmpSet1ChassisPartB: 清洗后没有任何有效攻击模式，已跳过
-/Lotus/Weapons/Sentients/OperatorAmplifiers/Set1/Chassis/SentAmpSet1ChassisPartC: 清洗后没有任何有效攻击模式，已跳过
-/Lotus/Weapons/Sentients/OperatorAmplifiers/Set1/Grip/SentAmpSet1GripPartA: 清洗后没有任何有效攻击模式，已跳过
-/Lotus/Weapons/Sentients/OperatorAmplifiers/Set1/Grip/SentAmpSet1GripPartB: 清洗后没有任何有效攻击模式，已跳过
-/Lotus/Weapons/Sentients/OperatorAmplifiers/Set1/Grip/SentAmpSet1GripPartC: 清洗后没有任何有效攻击模式，已跳过
-/Lotus/Weapons/Sentients/OperatorAmplifiers/Set2/Barrel/SentAmpSet2BarrelPartA: 清洗后没有任何有效攻击模式，已跳过
-/Lotus/Weapons/Sentients/OperatorAmplifiers/Set2/Chassis/SentAmpSet2ChassisPartA: 清洗后没有任何有效攻击模式，已跳过
-/Lotus/Weapons/Sentients/OperatorAmplifiers/Set2/Grip/SentAmpSet2GripPartA: 清洗后没有任何有效攻击模式，已跳过
-/Lotus/Weapons/SolarisUnited/Primary/SUModularPrimarySet1/Handles/SUModularPrimaryHandleAPart: 清洗后没有任何有效攻击模式，已跳过
-/Lotus/Weapons/SolarisUnited/Primary/SUModularPrimarySet1/Handles/SUModularPrimaryHandleBPart: 清洗后没有任何有效攻击模式，已跳过
-/Lotus/Weapons/SolarisUnited/Primary/SUModularPrimarySet1/Handles/SUModularPrimaryHandleCPart: 清洗后没有任何有效攻击模式，已跳过
-/Lotus/Weapons/SolarisUnited/Primary/SUModularPrimarySet1/Handles/SUModularPrimaryHandleDPart: 清洗后没有任何有效攻击模式，已跳过
-/Lotus/Weapons/SolarisUnited/Secondary/SUModularSecondarySet1/Barrel/SUModularSecondaryBarrelAPart: 清洗后没有任何有效攻击模式，已跳过
-/Lotus/Weapons/SolarisUnited/Secondary/SUModularSecondarySet1/Barrel/SUModularSecondaryBarrelBPart: 清洗后没有任何有效攻击模式，已跳过
-/Lotus/Weapons/SolarisUnited/Secondary/SUModularSecondarySet1/Barrel/SUModularSecondaryBarrelCPart: 清洗后没有任何有效攻击模式，已跳过
-/Lotus/Weapons/SolarisUnited/Secondary/SUModularSecondarySet1/Barrel/SUModularSecondaryBarrelDPart: 清洗后没有任何有效攻击模式，已跳过
-/Lotus/Weapons/SolarisUnited/Secondary/SUModularSecondarySet1/Clip/SUModularCapIClipPart: 清洗后没有任何有效攻击模式，已跳过
-/Lotus/Weapons/SolarisUnited/Secondary/SUModularSecondarySet1/Clip/SUModularCapIIClipPart: 清洗后没有任何有效攻击模式，已跳过
-/Lotus/Weapons/SolarisUnited/Secondary/SUModularSecondarySet1/Clip/SUModularCritICapIClipPart: 清洗后没有任何有效攻击模式，已跳过
-/Lotus/Weapons/SolarisUnited/Secondary/SUModularSecondarySet1/Clip/SUModularCritICapIIClipPart: 清洗后没有任何有效攻击模式，已跳过
-/Lotus/Weapons/SolarisUnited/Secondary/SUModularSecondarySet1/Clip/SUModularCritIICapIClipPart: 清洗后没有任何有效攻击模式，已跳过
-/Lotus/Weapons/SolarisUnited/Secondary/SUModularSecondarySet1/Clip/SUModularCritIIReloadIClipPart: 清洗后没有任何有效攻击模式，已跳过
-/Lotus/Weapons/SolarisUnited/Secondary/SUModularSecondarySet1/Clip/SUModularCritIReloadIClipPart: 清洗后没有任何有效攻击模式，已跳过
-/Lotus/Weapons/SolarisUnited/Secondary/SUModularSecondarySet1/Clip/SUModularCritIReloadIIClipPart: 清洗后没有任何有效攻击模式，已跳过
-/Lotus/Weapons/SolarisUnited/Secondary/SUModularSecondarySet1/Clip/SUModularReloadIClipPart: 清洗后没有任何有效攻击模式，已跳过
-/Lotus/Weapons/SolarisUnited/Secondary/SUModularSecondarySet1/Clip/SUModularReloadIIClipPart: 清洗后没有任何有效攻击模式，已跳过
-/Lotus/Weapons/SolarisUnited/Secondary/SUModularSecondarySet1/Clip/SUModularStatICapIClipPart: 清洗后没有任何有效攻击模式，已跳过
-/Lotus/Weapons/SolarisUnited/Secondary/SUModularSecondarySet1/Clip/SUModularStatICapIIClipPart: 清洗后没有任何有效攻击模式，已跳过
-/Lotus/Weapons/SolarisUnited/Secondary/SUModularSecondarySet1/Clip/SUModularStatIICapIClipPart: 清洗后没有任何有效攻击模式，已跳过
-/Lotus/Weapons/SolarisUnited/Secondary/SUModularSecondarySet1/Clip/SUModularStatIIReloadIClipPart: 清洗后没有任何有效攻击模式，已跳过
-/Lotus/Weapons/SolarisUnited/Secondary/SUModularSecondarySet1/Clip/SUModularStatIReloadIClipPart: 清洗后没有任何有效攻击模式，已跳过
 ```
-（共 205 条，仅显示前 200 条）
+（共 237 条，仅显示前 200 条）

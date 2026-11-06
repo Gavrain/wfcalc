@@ -1,4 +1,4 @@
-/**
+﻿/**
  * D-060：DoT 加权每层秒伤 —— 按触发占比加权。
  *
  * 触发是互斥的（一次触发只落在一个类型上），所以合计不能直接相加。
@@ -20,7 +20,7 @@ const weapon: any = {
   fireRate: 10, magazineSize: 30, reloadTime: 2,
   modes: [{
     id: 'primary', role: 'normal', trigger: 'auto', multishot: 1,
-    segments: [{ kind: 'physical', procChance: 0.5, damage: { slash: 100 } }],
+    variants: [{ id: 'direct', label: '直接命中', segments: [{ kind: 'physical', procChance: 0.5, damage: { slash: 100 } }] }],
   }],
 };
 
@@ -53,7 +53,7 @@ describe('DoT 加权每层秒伤（D-060 / D-061）', () => {
     // 冲击无 DoT，分母只算火 90 → 火焰占比 = 100%
     const w2: any = { ...weapon, modes: [{
       id: 'primary', role: 'normal', trigger: 'auto', multishot: 1,
-      segments: [{ kind: 'impact', procChance: 0.5, damage: { impact: 100 } }],
+      variants: [{ id: 'direct', label: '直接命中', segments: [{ kind: 'impact', procChance: 0.5, damage: { impact: 100 } }] }],
     }] };
     const res = compute(w2, w2.modes[0], [
       { stat: 'elemental:heat', form: 'pct', amount: 90, source: 'h' },

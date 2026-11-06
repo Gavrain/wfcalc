@@ -7,7 +7,7 @@
  * 本模块只负责"把 HTML 里的数组抠出来并做结构规整"，不含任何业务判断。
  */
 
-/** ZKMODS 单条原始结构（字段含义见 docs/mod 数据模型.md） */
+/** ZKMODS 单条原始结构（字段含义见 research/03-Mod数据抓取.md） */
 export interface ZkMod {
   /** 稳定 id，如 `serration` */
   i: string;

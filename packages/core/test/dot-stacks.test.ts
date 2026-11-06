@@ -1,4 +1,4 @@
-/**
+﻿/**
  * D-036：异常状态层数必须以「层/秒」为单位（单发层数 × 射速）。
  *
  * 回归背景：之前 `stacksPerType` 存的是**单发**层数，界面按「层/秒」显示，
@@ -27,7 +27,7 @@ const mode: any = {
   role: 'primary',
   trigger: 'auto',
   multishot: 1,
-  segments: [{ kind: 'physical', procChance: 0.31, damage: { heat: 100 } }],
+  variants: [{ id: 'direct', label: '直接命中', segments: [{ kind: 'physical', procChance: 0.31, damage: { heat: 100 } }] }],
 };
 
 const contribs: any[] = [

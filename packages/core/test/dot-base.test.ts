@@ -1,4 +1,4 @@
-/**
+﻿/**
  * §6.2 DoT 基础值口径（回归）。
  *
  * 文档原文：① 基础命中伤 = 命中伤害中【剔除元素/物理 Mod 加量】后的值，
@@ -30,7 +30,7 @@ const mode: any = {
   role: 'primary',
   trigger: 'auto',
   multishot: 1,
-  segments: [{ kind: 'physical', procChance: 0.5, damage: { impact: 100 } }],
+  variants: [{ id: 'direct', label: '直接命中', segments: [{ kind: 'physical', procChance: 0.5, damage: { impact: 100 } }] }],
 };
 
 const near = (a: number, b: number, eps = 1e-6) => assert.ok(Math.abs(a - b) < eps, `${a} != ${b}`);

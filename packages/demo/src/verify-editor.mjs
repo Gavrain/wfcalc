@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 武器编辑器接口测试（D-044）。
  *   node packages/demo/src/verify-editor.mjs
  *
@@ -95,7 +95,7 @@ try {
   });
   check('增删伤害类型可保存', addRes.ok);
   const w2 = JSON.parse(await readFile(OVERRIDES, 'utf8'));
-  const dmg = w2.KuvaKarak.modes[0].segments[0].damage;
+  const dmg = core.firstSegment(w2.KuvaKarak.modes[0]).damage;
   check('新增的 heat 已写入', dmg.heat === 3.5);
   check('删除的 puncture/slash 已消失', dmg.puncture === undefined && dmg.slash === undefined);
 

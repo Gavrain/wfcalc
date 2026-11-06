@@ -46,8 +46,10 @@ class Node {
   fire(t, ev = {}) {
     const e = { target: this, preventDefault() {}, dataTransfer: { setData() {} }, ...ev };
     (this._listeners[t] ?? []).forEach((fn) => fn(e));
-    // 真实 DOM 里 `el.onclick = fn` 等价于一个 click 监听器
+    // 真实 DOM 里 `el.onclick/onchange = fn` 等价于一个对应事件的监听器
     if (t === 'click' && typeof this.onclick === 'function') this.onclick(e);
+    if (t === 'change' && typeof this.onchange === 'function') this.onchange(e);
+    if (t === 'input' && typeof this.oninput === 'function') this.oninput(e);
   }
   querySelector() { return null; }
   get firstChild() { return this.children[0] ?? null; }
@@ -109,19 +111,29 @@ globalThis.window = globalThis;
 const { transpile } = await import(new URL('./transpile.mjs', import.meta.url).href);
 const core = await stripTemp(ROOT, 'packages/core/src/index.ts', transpile);
 const adapter = await stripTemp(ROOT, 'packages/data/src/adapter.ts', transpile);
+// D-093：武器切换模块（纯 JS，无需剥类型）
+const picker = await import(new URL('../public/weapon-picker.js', import.meta.url).href);
 
 const CORE_NAMES = ['compute', 'critAverage', 'critTiers', 'DOT_TYPES', 'METRIC_OPTIONS', 'totalProcChance', 'isKuvaFamily'];
-const ADAPTER_NAMES = ['arcaneToContributions', 'isConditionOverloadMod', 'isModCompatibleWithWeapon', 'modKindsFor', 'modToContributions'];
+const ADAPTER_NAMES = ['arcaneToContributions', 'isConditionOverloadMod', 'isModCompatibleWithWeapon', 'isSemiAutoOnlyWeapon', 'isSemiCannonade', 'modKindsFor', 'modToContributions'];
+const PICKER_NAMES = ['WEAPON_GROUPS', 'groupWeapons', 'searchWeapons', 'FIRE_STYLE_OPTIONS', 'filterByStyle', 'weaponLabel', 'ISSUE_MARK'];
+// D-101：武器数据问题清单
+const issuesMod = await import(new URL('../../data/manual/weapon-issues.ts', import.meta.url).href);
+const ISSUE_NAMES = ['issuesOf'];
 
 let src = await readFile(join(ROOT, 'packages/demo/public/app.js'), 'utf8');
 src = src.replace(/^import\s*\{[\s\S]*?\}\s*from\s*'\.\.\/\.\.\/core\/src\/index\.ts';/m, '');
 src = src.replace(/^import\s*\{[\s\S]*?\}\s*from\s*'\.\.\/\.\.\/data\/src\/adapter\.ts';/m, '');
+src = src.replace(/^import\s*\{[\s\S]*?\}\s*from\s*'\.\/weapon-picker\.js';/m, '');
+src = src.replace(/^import\s*\{[\s\S]*?\}\s*from\s*'\.\.\/\.\.\/data\/manual\/weapon-issues\.ts';/m, '');
 src =
   CORE_NAMES.map((n) => `const ${n} = __core.${n};`).join('\n') + '\n' +
-  ADAPTER_NAMES.map((n) => `const ${n} = __adapter.${n};`).join('\n') + '\n' + src;
+  ADAPTER_NAMES.map((n) => `const ${n} = __adapter.${n};`).join('\n') + '\n' +
+  PICKER_NAMES.map((n) => `const ${n} = __picker.${n};`).join('\n') + '\n' +
+  ISSUE_NAMES.map((n) => `const ${n} = __issues.${n};`).join('\n') + '\n' + src;
 
-const fn = new Function('__core', '__adapter', 'document', 'window', 'fetch', 'setTimeout', 'clearTimeout', 'console', src);
-await fn(core, adapter, document, globalThis, globalThis.fetch, setTimeout, clearTimeout, console);
+const fn = new Function('__core', '__adapter', '__picker', '__issues', 'document', 'window', 'fetch', 'setTimeout', 'clearTimeout', 'console', src);
+await fn(core, adapter, picker, issuesMod, document, globalThis, globalThis.fetch, setTimeout, clearTimeout, console);
 await new Promise((r) => setTimeout(r, 300));
 
 // ── helpers ──
@@ -727,6 +739,8 @@ check('备选区已渲染', registry['#candidate-list'].children.length > 50);
 
 // ── 39. 当前面板 / 伤害分布 的变化高亮（D-041 / D-045 回归）──
 {
+  // ⚠ 上一节（38）刚执行过"全部卸下"，槽位是空的 → 必须先装满才有"变化"可比
+  recoverFullSlots();
   // 预设有 Mod，所以"当前"列必然与"基础"列不同 → 应有 changed 高亮
   function hasChanged(items) {
     return items.some((row) => row.children.some((c) => (c.className || '').includes('changed')));
@@ -792,6 +806,111 @@ check('备选区已渲染', registry['#candidate-list'].children.length > 50);
   const html = await readFile(join(ROOT, 'packages/demo/public/index.html'), 'utf8');
   check('模式切换栏在武器面板标题右侧', html.indexOf('id="mode-switch"') > 0
     && html.indexOf('id="mode-switch"') < html.indexOf('id="panel-table"'));
+}
+
+// ── 44. 武器切换选单：选中值必须等于当前武器（D-097）──
+{
+  const gsel = registry['#weapon-group'];
+  const tsel = registry['#weapon-type'];
+  const wsel = registry['#weapon-select'];
+  check('有武器大类选单', Boolean(gsel));
+  check('有武器类型选单', Boolean(tsel));
+  check('有武器名选单', Boolean(wsel));
+  check('大类里次要/近战/空战是禁用的',
+    Array.from(gsel.children).filter((o) => o.disabled).length === 3);
+
+  // 记录初始选中值，切到"霰弹枪"再切回"步枪"
+  const beforeType = tsel.value;
+  const beforeWeapon = wsel.value;
+
+  // 切到另一个类型
+  const other = Array.from(tsel.children).find((o) => o.value !== beforeType);
+  check('类型选单里不止一个类型', Boolean(other));
+  if (other) {
+    tsel.value = other.value;
+    tsel.fire('change');
+    await new Promise((r) => setTimeout(r, 200));
+    check('切换类型后武器选单已更新', wsel.children.length > 0);
+  }
+
+  // 切回原类型
+  tsel.value = beforeType;
+  tsel.fire('change');
+  await new Promise((r) => setTimeout(r, 200));
+  // 切类型会自动选中该类型第一把枪（等同用户选择），此时选单值要与实际武器一致。
+  // 关键断言：选单值不为空、且确实指向列表里存在的一项。
+  const typeOpts = Array.from(wsel.children).map((o) => o.value);
+  check('切回类型后选单有选中项', Boolean(wsel.value));
+  check('切回类型后选中项存在于列表', typeOpts.includes(wsel.value));
+
+  // 重复选中"当前武器"不应崩溃、也不应改变状态
+  const steady = wsel.value;
+  wsel.fire('change');
+  await new Promise((r) => setTimeout(r, 200));
+  check('重复选中当前武器不出错', wsel.value === steady);
+
+  // 搜索：搜一个**确定不含当前武器**的词 → 应补一项"（当前）"并保持选中
+  const search = registry['#weapon-search'];
+  check('有搜索框', Boolean(search));
+  if (search) {
+    // ⚠ 切换类型会自动选中该类型的第一把枪（等同用户主动选择），所以这里以
+    //   **搜索前一刻的选中值**为基准——它此时与 DATA.weapon 一致（前面的断言已验证）
+    const curId = wsel.value;
+    // 先把搜索框清空再搜，保证从已知状态出发
+    search.value = '血肢';
+    search.fire('input');
+    await new Promise((r) => setTimeout(r, 200));
+    const opts = Array.from(wsel.children).map((o) => o.value);
+    check('搜索结果里含血肢', opts.some((v) => /Hema/i.test(v)));
+    // 血肢搜索结果只有 2 项，当前武器（步枪）必然不在其中
+    check('搜索时补了"当前武器"项', opts.includes(curId));
+    check('搜索时选中值仍是当前武器', wsel.value === curId);
+
+    // 清空搜索 → 回到分类浏览，选中值仍要等于当前武器
+    search.value = '';
+    search.fire('input');
+    await new Promise((r) => setTimeout(r, 200));
+    check('清空搜索后选中值仍是当前武器', wsel.value === curId);
+  }
+}
+
+// ── 45. 弹道筛选（D-099 A）──
+{
+  const ssel = registry['#weapon-style'];
+  check('有弹道下拉栏', Boolean(ssel));
+  if (ssel) {
+    check('弹道选项 = 6 项', ssel.children.length === 6);
+    const labels = Array.from(ssel.children).map((o) => o.textContent);
+    check('含全自动/半自动/点射/蓄力', ['全自动', '半自动', '点射', '蓄力'].every((x) => labels.includes(x)));
+
+    const wsel = registry['#weapon-select'];
+    const allCount = wsel.children.length;
+    ssel.value = 'semi';
+    ssel.fire('change');
+    await new Promise((r) => setTimeout(r, 200));
+    check('筛半自动后选项变少', wsel.children.length > 0 && wsel.children.length <= allCount);
+
+    ssel.value = 'all';
+    ssel.fire('change');
+    await new Promise((r) => setTimeout(r, 200));
+    check('切回全部弹道后选项恢复', wsel.children.length === allCount);
+  }
+}
+
+// ── 46. 数据问题标记（D-101）──
+{
+  const wsel = registry['#weapon-select'];
+  const withMark = Array.from(wsel.children).filter((o) => o.textContent.includes('\u26a0'));
+  check('武器选单里有带标记的项', withMark.length > 0);
+  if (withMark.length) {
+    check('带标记的项有 title 说明', Boolean(withMark[0].title));
+    // 找一个已知有问题的武器（伊格尼斯 = trigger 未识别）
+    const ignis = Array.from(wsel.children).find((o) => /FlameThrower(?!Wraith)/.test(o.value));
+    if (ignis) check('伊格尼斯带标记', ignis.textContent.includes('\u26a0'));
+  }
+  // 检查模块级函数
+  check('issuesOf 对已知问题武器返回非空', issuesMod.issuesOf('FlameThrower').length > 0);
+  check('issuesOf 对正常武器返回空', issuesMod.issuesOf('KuvaKarak').length === 0);
 }
 
 let ok = true;

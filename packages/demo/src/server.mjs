@@ -138,16 +138,27 @@ function validateEdit(payload) {
         }
       }
 
-      if (!Array.isArray(m.segments)) { errors.push('segments 必须是数组'); continue; }
-      for (const seg of m.segments) {
-        for (const [k] of Object.entries(seg)) {
-          if (k === 'kind' || k === 'aoe' || k === 'damage' || k === 'procChance') continue;
-          errors.push(`分段字段「${k}」不可编辑`);
+      // D-080：段只属于变体，模式上没有 segments
+      if (!Array.isArray(m.variants) || m.variants.length === 0) {
+        errors.push('variants 必须是至少含 1 项的数组');
+        continue;
+      }
+      for (const v of m.variants) {
+        if (typeof v.id !== 'string' || typeof v.label !== 'string') {
+          errors.push('变体必须含字符串 id 与 label');
+          continue;
         }
-        if (!seg.damage || typeof seg.damage !== 'object') { errors.push('分段缺少 damage'); continue; }
-        for (const [t, v] of Object.entries(seg.damage)) {
-          if (typeof v !== 'number' || !Number.isFinite(v) || v < 0) {
-            errors.push(`伤害类型「${t}」的值必须是非负数字`);
+        if (!Array.isArray(v.segments)) { errors.push(`变体「${v.id}」的 segments 必须是数组`); continue; }
+        for (const seg of v.segments) {
+          for (const [k] of Object.entries(seg)) {
+            if (k === 'kind' || k === 'aoe' || k === 'damage' || k === 'procChance') continue;
+            errors.push(`分段字段「${k}」不可编辑`);
+          }
+          if (!seg.damage || typeof seg.damage !== 'object') { errors.push('分段缺少 damage'); continue; }
+          for (const [t, val] of Object.entries(seg.damage)) {
+            if (typeof val !== 'number' || !Number.isFinite(val) || val < 0) {
+              errors.push(`伤害类型「${t}」的值必须是非负数字`);
+            }
           }
         }
       }

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-05T08:28:41.935Z",
+  "generatedAt": "2026-11-06T06:43:04.356Z",
   "source": "ExportArcanes.json（官方结构化逐级数值）+ dict.zh/en 渲染描述",
   "note": "levels[].values 为各级的数值槽（路径 → 数值）；bucket 对应 docs/乘区归属表.md",
   "scope": "仅收录武器可用赋能（主要·/次要·/近战·/神威·/和平·/残差·/弓箭·/霰弹·/双枪·/瀑流·/联结·/分形·）",

@@ -1,7 +1,7 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { chargeTimeToFireRate, applyOverrides } from '../src/overrides.ts';
-import type { WeaponPanel } from '../../core/src/weapon.ts';
+import type { Weapon } from '../../core/src/weapon.ts';
 
 describe('蓄力时间反推射速', () => {
   it('蓄力 0.5s → 射速 2（需求方给出的规则）', () => {
@@ -22,9 +22,9 @@ describe('蓄力时间反推射速', () => {
   });
 });
 
-const fake = (id: string, fireRate: number): WeaponPanel => ({
+const fake = (id: string, fireRate: number): Weapon => ({
   id,
-  name: { en: id },
+  name: id,
   category: 'primary',
   critChance: 0.2,
   critMultiplier: 2,

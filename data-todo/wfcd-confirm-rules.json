@@ -1,0 +1,26 @@
+{
+  "source": "data-todo/wfcd-confirm.csv（需求方 2026-11-06 填写）",
+  "encoding": "GBK（Excel 另存导致）；生成器写 UTF-8 且 Excel 打开后保存会变 GBK，回填脚本两种都要能读",
+  "panelConflict": [
+    {
+      "weapon": "CrpSentExperimentRifle",
+      "mode": "mode2",
+      "verdict": "WFCD 正确：第一条是次要开火的直接命中，第二条是次要开火的范围伤害"
+    },
+    {
+      "weapon": "SpiderWhipWeapon",
+      "mode": "primary",
+      "verdict": "WFCD 正确：近战分普通攻击 / 震地攻击 / 震地重击，同一伤害在不同攻击里面板不同"
+    }
+  ],
+  "aoeRadius": [
+    {
+      "weapon": "AstillaPrimeWeapon",
+      "rule": "radius = falloff.end（2.4m），minMultiplier = 1 - reduction"
+    },
+    {
+      "weapon": "CarminePenta",
+      "rule": "同上；embedDeathAttack 与 explosiveAttack 是同一发爆炸"
+    }
+  ]
+}

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * D-055：配装里**没有**的元素不会触发，层数与秒伤必须为 0。
  *
  * bug 背景：`dotTick` 的 ① 基础值取的是**全类型之和**（§6.2 要求），
@@ -28,7 +28,7 @@ const near = (a: number, b: number, eps = 1e-9) => assert.ok(Math.abs(a - b) < e
 /** 只有切割的武器 */
 const slashOnly: any = {
   id: 'primary', role: 'normal', trigger: 'auto', multishot: 1,
-  segments: [{ kind: 'slash', procChance: 0.5, damage: { slash: 100 } }],
+  variants: [{ id: 'direct', label: '直接命中', segments: [{ kind: 'slash', procChance: 0.5, damage: { slash: 100 } }] }],
 };
 
 describe('没有的元素不触发（D-055）', () => {

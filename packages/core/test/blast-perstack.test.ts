@@ -1,4 +1,4 @@
-/**
+﻿/**
  * D-056：爆炸每层伤害的两个 bug（回归）。
  *
  * bug 1：`blastBase` 取 `dotBase.blast`，但爆炸几乎全靠 Mod 合成
@@ -20,7 +20,7 @@ const weapon: any = {
   fireRate: 10, magazineSize: 30, reloadTime: 2,
   modes: [{
     id: 'primary', role: 'normal', trigger: 'auto', multishot: 1,
-    segments: [{ kind: 'impact', procChance: 0.5, damage: { impact: 100 } }],
+    variants: [{ id: 'direct', label: '直接命中', segments: [{ kind: 'impact', procChance: 0.5, damage: { impact: 100 } }] }],
   }],
 };
 
