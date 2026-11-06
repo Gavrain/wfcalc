@@ -219,6 +219,16 @@ export function isTrueBow(w: ExportWeapon): boolean {
   return w.holsterCategory === 'BOW';
 }
 
+/**
+ * 是不是**双持手枪**（双手枪类，能吃「双枪·」赋能）。
+ *
+ * 依据官方导出的 `compatibilityTags`：双手枪带 `DUAL_PISTOL`（双子葛拉卡达这类带霰弹模式的也算）。
+ * 需求方 2026-07-11：副手即使是霰弹模式也只算副手，所以副手侧只区分"双持 / 非双持"。
+ */
+export function isDualPistolWeapon(w: ExportWeapon): boolean {
+  return (w.compatibilityTags ?? []).some((t) => /DUAL/i.test(t));
+}
+
 /** holsterCategory → 宽类槽位（第 2 级兜底） */
 const HOLSTER_KINDS: Record<string, ModSlotKind> = {
   RIFLE: 'rifle',

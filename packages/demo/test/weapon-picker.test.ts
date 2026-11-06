@@ -73,9 +73,10 @@ describe('武器分组（大类 → 类型）', () => {
       );
     }
     // 真正的弓不能被误判成弩
-    const crossbows = Object.entries(slotFile.weapons).filter(([, e]) => e.subclass === 'crossbow');
+    const slotWeapons = slotFile.weapons as Record<string, { subclass?: string; trueBow?: boolean }>;
+    const crossbows = Object.entries(slotWeapons).filter(([, e]) => e.subclass === 'crossbow');
     for (const [id] of crossbows) {
-      assert.ok(!slotFile.weapons[id].trueBow, `${id} 既是弩又是弓，判定冲突`);
+      assert.ok(!slotWeapons[id]?.trueBow, `${id} 既是弩又是弓，判定冲突`);
     }
   });
 

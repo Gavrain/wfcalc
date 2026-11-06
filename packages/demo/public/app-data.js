@@ -125,48 +125,76 @@ export function clearLoadout() {
  * | 主要（步枪 / 狙击 / 发射器…） | primary（主要· + 分形·） |
  * | **弓**（`weapon-slots.json` 的 `trueBow`） | bow（弓箭·）+ primary |
  * | 弩（诸葛连弩 / 阿提卡，`subclass = crossbow`） | 只有 primary —— **弩不能装弓箭·赋能** |
- * | 主手霰弹枪（`subclass = shotgun`） | shotgun（霰弹·）+ primary |
- * | 副手霰弹 / 双持霰弹 / 手枪 | secondary（次要· + 瀑流· + 联结·） |
- * | 双持（`subclass = dual_pistols` / `dual_shotguns`） | 额外加 dual（双枪·） |
+ * | 主手霰弹枪（`slots.broad = shotgun`） | shotgun（霰弹·）+ primary |
+ * | 副手（含某些模式是霰弹的副手） | secondary（次要· + 瀑流· + 联结·）—— **只算副手** |
+ * | 双持双手枪（`isDualPistols`） | 额外加 dual（双枪·） |
  * | 近战 / Zaw | melee（近战· + 神威·） |
  * | 组合枪（Kitgun） | kitgun（和平· + 残差·） |
  * | 空战武器 | 无（数据缺口） |
  *
  * 需求方原话：「主手霰弹能装主手赋能和霰弹专属赋能，副手霰弹只算副手，
  * 跟霰弹赋能无关」「（弓）弓箭· + 主要· + 分形·」。
- * 需求方 2026-07-11 补充：「弩不能装弓箭类mod和赋能」。
+ * 需求方 2026-07-11 补充：「弩不能装弓箭类mod和赋能」；
+ * 「霰弹枪仅限主手，副手就算是霰弹模式也算副手，因为他们的可安装 mod 和赋能没区别」。
  *
  * @param weapon `generated/weapons/*.json` 里的武器记录
- * @param slotEntry `weapon-slots.json` 里该武器的记录（取 `trueBow` / `subclass`）
+ * @param slotEntry `weapon-slots.json` 里该武器的记录（取 `trueBow` / `subclass` / `slots.broad`）
  * @returns 可装大类 id 数组（对应 `arcanes.json` 的 `category`；`dual` 为虚拟大类）
  */
 export function arcaneCategoriesFor(weapon, slotEntry) {
   const trueBow = Boolean(slotEntry && slotEntry.trueBow);
-  const subclass = (slotEntry && slotEntry.subclass) || null;
+  const slot = (slotEntry && slotEntry.slots) || {};
+  const broad = slot.broad || null;
+  // 需求方 2026-07-11：霰弹枪**仅限主手**；副手即使有霰弹模式也只算副手。
+  // 可装 Mod 与赋能都由 broad 决定（霰弹枪 = slots.broad 'shotgun'），不看副手的霰弹模式。
+  const isShotgun = broad === 'shotgun';
   const cat = weapon && weapon.category;
   if (cat === 'primary') {
     if (trueBow) return ['bow', 'primary'];
-    if (subclass === 'shotgun') return ['shotgun', 'primary'];
+    if (isShotgun) return ['shotgun', 'primary'];
     return ['primary'];
   }
   if (cat === 'secondary') {
-    return subclass === 'dual_pistols' || subclass === 'dual_shotguns'
-      ? ['secondary', 'dual']
-      : ['secondary'];
+    // 副手：即便某个模式是霰弹，也只算副手 —— 副手没有霰弹枪的 Mod 池，也不吃霰弹· 赋能。
+    // 双持（双手枪）额外拿 双枪·；双持武器里带霰弹的（双子葛拉卡达之类）同样只算副手。
+    const isDualPistols = Boolean(slotEntry && slotEntry.isDualPistols);
+    return isDualPistols ? ['secondary', 'dual'] : ['secondary'];
   }
   if (cat === 'melee') return ['melee']; // Zaw 刀头与近战共用 近战·/神威· 两前缀，都按 melee
   return [];
 }
 
 /**
- * 一条赋能能不能装在这个武器上（`arcanes.json` 的 `category` 只有大类，
- * 「双枪·」靠名称前缀区分：它是 `secondary` 里唯一属于**双持**的那条）。
+ * 一条赋能能不能装在这个武器上。
+ *
+ * 赋能的**大类归属看前缀**（`prefix`），不看导出里的 `category`：
+ *   · 导出把霰弹·仇杀归成 `secondary`，但它是**霰弹·**赋能，只限主手霰弹枪；
+ *   · 「双枪·」是 `secondary` 里唯一属于**双持**的那条，要单独判断。
+ *
+ * 需求方 2026-07-11：「霰弹枪仅限主手，副手就算是霰弹模式也算副手，因为他们的可安装 mod 和赋能没区别。」
  */
+const PREFIX_TO_CATEGORY = {
+  '主要·': 'primary',
+  '次要·': 'secondary',
+  '近战·': 'melee',
+  '神威·': 'melee', // 与近战· 共用近战大类
+  '弓箭·': 'bow',
+  '霰弹·': 'shotgun',
+  '双枪·': 'dual',
+  '瀑流·': 'secondary',
+  '联结·': 'secondary',
+  '和平·': 'kitgun',
+  '残差·': 'kitgun',
+  '分形·': null, // 分形· 跟随主武器大类（下面单独处理）
+};
+
 export function isArcaneUsableOn(arcane, weapon, slotEntry) {
   const cats = arcaneCategoriesFor(weapon, slotEntry);
-  const prefix = String((arcane.name && arcane.name.zh) || '');
-  if (prefix.startsWith('双枪·')) return cats.includes('dual');
-  return cats.includes(arcane.category);
+  const prefix = String((arcane.name && arcane.name.zh) || '').split('·')[0] + '·';
+  if (prefix === '双枪·') return cats.includes('dual');
+  if (prefix === '分形·') return cats.includes('primary');
+  const cat = PREFIX_TO_CATEGORY[prefix] ?? arcane.category;
+  return cat !== null && cats.includes(cat);
 }
 
 /**
