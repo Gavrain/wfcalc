@@ -98,7 +98,7 @@ export function buildWeaponData(weaponId, options = {}) {
   return {
     baseWeapon: weapon,
     weapon: weapon,
-    /** `weapon-slots.json` 里本武器的记录（D-138：赋能可用性要看 `zkClass` 细类） */
+    /** `weapon-slots.json` 里本武器的记录（D-138：赋能可用性要看 `trueBow` / `subclass` 细类） */
     slotEntry: entry,
     isKuva: isKuvaFamily(weapon.id, weapon.variantType, weapon.name),
     availableMods: availableMods,
@@ -123,31 +123,34 @@ export function clearLoadout() {
  * | 武器 | 可装大类 |
  * |---|---|
  * | 主要（步枪 / 狙击 / 发射器…） | primary（主要· + 分形·） |
- * | 弓（zkClass = bow） | bow（弓箭·）+ primary |
- * | 主手霰弹枪（zkClass = shotgun） | shotgun（霰弹·）+ primary |
+ * | **弓**（`weapon-slots.json` 的 `trueBow`） | bow（弓箭·）+ primary |
+ * | 弩（诸葛连弩 / 阿提卡，`subclass = crossbow`） | 只有 primary —— **弩不能装弓箭·赋能** |
+ * | 主手霰弹枪（`subclass = shotgun`） | shotgun（霰弹·）+ primary |
  * | 副手霰弹 / 双持霰弹 / 手枪 | secondary（次要· + 瀑流· + 联结·） |
- * | 双持（dual_pistols / dual_shotguns） | 额外加 dual（双枪·） |
+ * | 双持（`subclass = dual_pistols` / `dual_shotguns`） | 额外加 dual（双枪·） |
  * | 近战 / Zaw | melee（近战· + 神威·） |
  * | 组合枪（Kitgun） | kitgun（和平· + 残差·） |
  * | 空战武器 | 无（数据缺口） |
  *
  * 需求方原话：「主手霰弹能装主手赋能和霰弹专属赋能，副手霰弹只算副手，
  * 跟霰弹赋能无关」「（弓）弓箭· + 主要· + 分形·」。
+ * 需求方 2026-07-11 补充：「弩不能装弓箭类mod和赋能」。
  *
  * @param weapon `generated/weapons/*.json` 里的武器记录
- * @param slotEntry `weapon-slots.json` 里该武器的记录（取 `zkClass` 细类）
+ * @param slotEntry `weapon-slots.json` 里该武器的记录（取 `trueBow` / `subclass`）
  * @returns 可装大类 id 数组（对应 `arcanes.json` 的 `category`；`dual` 为虚拟大类）
  */
 export function arcaneCategoriesFor(weapon, slotEntry) {
-  const zk = slotEntry && slotEntry.slots && slotEntry.slots.basis && slotEntry.slots.basis.zkClass;
+  const trueBow = Boolean(slotEntry && slotEntry.trueBow);
+  const subclass = (slotEntry && slotEntry.subclass) || null;
   const cat = weapon && weapon.category;
   if (cat === 'primary') {
-    if (zk === 'bow') return ['bow', 'primary'];
-    if (zk === 'shotgun') return ['shotgun', 'primary'];
+    if (trueBow) return ['bow', 'primary'];
+    if (subclass === 'shotgun') return ['shotgun', 'primary'];
     return ['primary'];
   }
   if (cat === 'secondary') {
-    return zk === 'dual_pistols' || zk === 'dual_shotguns'
+    return subclass === 'dual_pistols' || subclass === 'dual_shotguns'
       ? ['secondary', 'dual']
       : ['secondary'];
   }

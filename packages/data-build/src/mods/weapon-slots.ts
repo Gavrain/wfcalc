@@ -152,25 +152,71 @@ const SUBCLASS_BY_TYPE: Record<string, 'launcher' | 'crossbow'> = {
   Crossbow: 'crossbow',
 };
 /** 英文名 / 内部 id 里的发射器信号（以爆炸弹药为主的主武器） */
-const LAUNCHER_NAME = /launcher|grenade|rocket/i;
-/** 英文名 / 内部 id 里的弩信号 */
-const CROSSBOW_NAME = /crossbow/i;
+const LAUNCHER_NAME = /launcher|grenade|rocket|torid/i;
+/** 弩的**型号名**（阿提卡 / 诸葛连弩 / 噬蛇弩 / 弩炮），按字母词边界匹配（"Zhuge Prime" 也算） */
+const CROSSBOW_MODEL = /(?<![a-z])(attica|zhuge|nagantaka|ballistica)(?![a-z])/i;
 /** 名字里不带信号、但以爆炸弹药为主的主武器（沙皇 / 赤毒·沙皇 / 赤毒·布拉玛） */
 const EXPLOSIVE_NAME = /zarr|bramma/i;
 /** 没写英文名时，用内部 id 兜底识别这几把 */
-const EXPLOSIVE_ID = /GrnCannonWeapon|KuvaZarr|GrnBowWeapon/i;
+const EXPLOSIVE_ID = /GrnCannonWeapon|KuvaZarr|GrnBowWeapon|BioWeapon/i;
+
+/**
+ * 是否带**弩**信号（只看显示名、资源末段、标签）。
+ *
+ * 官方数据里弩的写法各不相同，逐条判：
+ *   · 资源末段是 `*Crossbow` / `*Xbow`（诸葛连弩 RepeatingCrossbow、阿提卡 TnoPrmryXbowWeapon）
+ *   · 显示名命中弩的型号词（阿提卡 Attica / 诸葛连弩 Prime / 噬蛇弩 Nagantaka / 弩炮 Ballistica），
+ *     因为显示名是英文短语（"Zhuge Prime"），所以按词边界判，不能用整词相等
+ *   · 带 `CROSSBOW` 标签
+ * ⚠ 不要写成 `/crossbow|(?<![a-z])(attica|...)/i` 这种一条式：`|` 让 `crossbow` 分支不受边界保护，
+ * 而资源目录名 `.../Pistol/CrossBow` 正是**螺钉手枪 Bolto**。所以**只看末段**，不看全路径。
+ */
+function crossbowSignalOf(name: string, idTail: string, tags: string[]): boolean {
+  if (tags.includes('CROSSBOW')) return true;
+  // 资源末段以 Crossbow / Xbow 结尾（诸葛连弩 RepeatingCrossbow、阿提卡 TnoPrmryXbowWeapon）
+  const tail = idTail.toLowerCase();
+  if (tail.endsWith('crossbow') || tail.endsWith('xbow')) return true;
+  return CROSSBOW_MODEL.test(name);
+}
 
 /** 判定展示用细类（launcher / crossbow）；不是这两类返回 null */
 export function exportSubclass(w: ExportWeapon): 'launcher' | 'crossbow' | null {
   const byType = w.type !== undefined ? SUBCLASS_BY_TYPE[w.type] : undefined;
   if (byType) return byType;
-  const key = `${w.name ?? ''} ${w.uniqueName ?? ''}`;
-  if (w.holsterCategory === 'BOW' && CROSSBOW_NAME.test(key)) return 'crossbow';
-  if (LAUNCHER_NAME.test(key)) return 'launcher';
-  if (w.holsterCategory === 'RIFLE' && (EXPLOSIVE_NAME.test(key) || EXPLOSIVE_ID.test(w.uniqueName ?? ''))) {
-    return 'launcher';
-  }
+
+  // ⚠ 只看**显示名 / 内部 id 末段 / 携带方式 / 标签**，不要拼 `uniqueName` 全路径：
+  //   全路径里带资源目录名（`.../Pistol/CrossBow` 其实是 螺钉手枪 Bolto），会把武器认错。
+  const idTail = (w.uniqueName ?? '').split('/').pop() ?? '';
+  const name = w.name ?? '';
+  const key = `${name} ${idTail}`;
+  const tags = w.compatibilityTags ?? [];
+
+  // 弩：显示名 / 资源末段里有弩信号（诸葛连弩、阿提卡、噬蛇弩、弩炮，或 `Xbow` 缩写），
+  // 或带 `CROSSBOW` 标签。
+  // ⚠ 排除"真正的弓"：名字里的 Bow 必须是**独立词**（`Xxx Bow` / 末段 `...Bow`）。
+  //   不能用 `/bow$/` —— `CrossBow` 自己就以 `bow` 结尾，会把所有弩都排除掉。
+  // ⚠ 槽位约束：箭速弩只有主手（`productCategory` 为 LongGuns 或空）。副手位没有"弩"这一类，
+  //   而螺钉手枪 Bolto / 弩炮 Ballistica 的资源末段恰好也叫 `CrossBow`，只靠命名分不开。
+  const isBowNamed = /(?<![a-z])bow$/i.test(name.trim()) || /(?<![a-z])bow$/i.test(idTail);
+  const primarySlot = w.productCategory === undefined || w.productCategory === 'LongGuns';
+  if (primarySlot && !isBowNamed && crossbowSignalOf(name, idTail, tags)) return 'crossbow';
+
+  if (LAUNCHER_NAME.test(`${name} ${idTail}`)) return 'launcher';
+  // 托里德（BioWeapon）、沙皇、赤毒·布拉玛：名字不带信号，但以爆炸弹药为主。
+  // 判据：名字里的 Zarr / Bramma，或资源末段的已知 id（不看携带方式，赤毒·布拉玛是 Bow 但归发射器）。
+  if (EXPLOSIVE_NAME.test(name) || EXPLOSIVE_ID.test(idTail)) return 'launcher';
   return null;
+}
+
+/**
+ * 是不是**真正的弓**（能吃弓箭类 Mod、装弓箭·赋能）。
+ *
+ * 依据只有 `holsterCategory === 'BOW'`。为什么不信 `CROSSBOW` 标签：实测弩（诸葛连弩 / 阿提卡）
+ * 的标签里有 `CROSSBOW`，而真正的弓（如恐惧）标签里是 `BOW`。需求方 2026-07-11 确认：
+ * **弩不能装弓箭类 Mod，也不能装弓箭·赋能**，所以两者必须分开。
+ */
+export function isTrueBow(w: ExportWeapon): boolean {
+  return w.holsterCategory === 'BOW';
 }
 
 /** holsterCategory → 宽类槽位（第 2 级兜底） */
@@ -400,8 +446,17 @@ export function resolveFromExport(w: ExportWeapon): SlotResolution {
  *   · 手枪模组（`pistol`）只装手枪（含霰弹手枪）
  *   · `primary` 类模组（如私法热诚）装所有枪械主武器
  *   · 近战：**宽类 `melee` 模组装所有近战；细类模组只装对应细类**（D-001）
+ *
+ * @param slots 槽位判定结果
+ * @param trueBow 是否**真正的弓**（`isTrueBow`）。默认 false：
+ *        弩（诸葛连弩 / 阿提卡）在数据里与弓同处于 `BOW` 携带方式，但**弩不能装弓箭类 Mod**
+ *        （需求方 2026-07-11 确认），所以只有确认为弓时才把 `bow` 放进可装集合。
  */
-export function compatibleModKinds(slots: SlotResolution): ModSlotKind[] {
+export function compatibleModKinds(slots: SlotResolution, trueBow = false): ModSlotKind[] {
+  if (slots.broad === 'bow' && !trueBow) {
+    // 弩：按步枪算（步枪类 + 主武器类），**不含**弓箭类
+    return ['rifle', 'primary'];
+  }
   const out = new Set<ModSlotKind>([slots.broad]);
   switch (slots.broad) {
     case 'bow':
@@ -430,7 +485,7 @@ export function compatibleModKinds(slots: SlotResolution): ModSlotKind[] {
  *   · 宽类 `melee` 模组 → 任何近战合法
  *   · 细类 `nikana` 模组 → 只有细类含 `nikana` 的近战合法
  */
-export function canEquipMod(slots: SlotResolution, modSlotKind: string): boolean {
-  const kinds = compatibleModKinds(slots);
+export function canEquipMod(slots: SlotResolution, modSlotKind: string, trueBow = false): boolean {
+  const kinds = compatibleModKinds(slots, trueBow);
   return kinds.includes(modSlotKind as ModSlotKind);
 }

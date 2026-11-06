@@ -27,6 +27,7 @@ import { lookupStat, registeredKeys } from './mods/stat-map.ts';
 import {
   normalizeKey,
   exportSubclass,
+  isTrueBow,
   resolveFromExport,
   compatibleModKinds,
   type SlotResolution,
@@ -334,7 +335,15 @@ async function main(): Promise<number> {
 
   const weaponSlots: Record<
     string,
-    { name: string; nameZh?: string; slots: SlotResolution; subclass?: 'launcher' | 'crossbow'; modKinds: string[]; todo?: 'melee_specific' }
+    {
+      name: string;
+      nameZh?: string;
+      slots: SlotResolution;
+      subclass?: 'launcher' | 'crossbow';
+      trueBow?: boolean;
+      modKinds: string[];
+      todo?: 'melee_specific';
+    }
   > = {};
   const unresolvedWeapons: string[] = [];
 
@@ -355,13 +364,16 @@ async function main(): Promise<number> {
     if (slots.unresolved) unresolvedWeapons.push(`${id} (${enName || w.name || '?'})`);
     const zhName = w.name ? zhDict[w.name] : undefined;
     const subclass = exportSubclass({ ...w, uniqueName: key });
+    // 真正的弓才吃弓箭类 Mod / 弓箭·赋能；弩按步枪算（需求方 2026-07-11 确认）
+    const trueBow = isTrueBow(w);
     weaponSlots[id] = {
       name: enName || id,
       ...(zhName ? { nameZh: zhName } : {}),
       slots,
       // 展示用细类（发射器 / 弩）：它们吃步枪类 Mod，broad 仍是 rifle，只影响界面分组
       ...(subclass ? { subclass } : {}),
-      modKinds: compatibleModKinds(slots),
+      ...(trueBow ? { trueBow } : {}),
+      modKinds: compatibleModKinds(slots, trueBow),
       // 近战缺细类：显式标记，让消费方知道"这把武器只能装通用近战 Mod"
       ...(slots.broad === 'melee' && slots.specific.length === 0 && !slots.unresolved
         ? { todo: 'melee_specific' as const }

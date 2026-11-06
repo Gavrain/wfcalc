@@ -5,6 +5,8 @@ import {
   resolveFromZkClass,
   compatibleModKinds,
   canEquipMod,
+  exportSubclass,
+  isTrueBow,
   normalizeKey,
 } from '../src/mods/weapon-slots.ts';
 import { lookupExaltedSlots } from '../../data/src/manual/exalted-slots.ts';
@@ -24,9 +26,9 @@ describe('ZK 武器库 → Mod 槽位', () => {
     assert.deepEqual(compatibleModKinds(r!), ['shotgun', 'primary']);
   });
 
-  it('弓类同时可装步枪系通用模组', () => {
+  it('弓类同时可装步枪系通用模组（真弓）', () => {
     const r = resolveFromZkClass({ i: 'dread', n: 'Dread', s: 'p', c: 'bow' });
-    assert.deepEqual(compatibleModKinds(r!).sort(), ['bow', 'primary', 'rifle']);
+    assert.deepEqual(compatibleModKinds(r!, true).sort(), ['bow', 'primary', 'rifle']);
   });
 
   it('狙击枪可装步枪系模组', () => {
@@ -142,6 +144,46 @@ describe('哨兵 / 猎犬武器不参与配装', () => {
     const r = resolveFromZkClass({ i: 'batoten', n: 'Batoten', s: 'm', c: 'melee' }, ['HOUND_WEAPON']);
     assert.equal(r.unresolved, true);
     assert.equal(r.broad, 'melee');
+  });
+});
+
+describe('弓 vs 弩（需求方 2026-07-11：弩不能装弓箭类 Mod / 弓箭·赋能）', () => {
+  const bowSlots = { broad: 'bow' as const, specific: [], source: 'holster' as const, basis: { tags: [] }, unresolved: false };
+
+  it('真正的弓可以装弓箭类', () => {
+    assert.deepEqual(compatibleModKinds(bowSlots, true).sort(), ['bow', 'primary', 'rifle']);
+    assert.equal(canEquipMod(bowSlots, 'bow', true), true);
+  });
+
+  it('弩只吃步枪类 + 主武器类，不吃弓箭类', () => {
+    assert.deepEqual(compatibleModKinds(bowSlots, false).sort(), ['primary', 'rifle']);
+    assert.equal(canEquipMod(bowSlots, 'bow', false), false);
+    assert.equal(canEquipMod(bowSlots, 'rifle', false), true);
+  });
+
+  it('携带方式 BOW 的才是真弓；弩的英文名/标签对得上但携带方式是 LongGuns', () => {
+    assert.equal(isTrueBow({ name: 'Dread', holsterCategory: 'BOW', productCategory: 'LongGuns' }), true);
+    assert.equal(isTrueBow({ name: 'Zhuge', holsterCategory: 'WIDE_RIFLE', productCategory: 'LongGuns' }), false);
+  });
+
+  it('细类判定：托里德算发射器；诸葛连弩/阿提卡/噬蛇弩算弩；螺钉手枪不能因为资源路径含 CrossBow 就算弩', () => {
+    assert.equal(exportSubclass({ name: 'Torid', uniqueName: '/Lotus/Weapons/.../BioWeapon', holsterCategory: 'RIFLE' }), 'launcher');
+    assert.equal(exportSubclass({ name: 'Zhuge', uniqueName: '/Lotus/.../RepeatingCrossbow', holsterCategory: 'WIDE_RIFLE' }), 'crossbow');
+    assert.equal(
+      exportSubclass({ name: 'Attica', uniqueName: '/Lotus/.../TnoPrmryXbowWeapon', holsterCategory: 'WIDE_RIFLE', compatibilityTags: ['PROJECTILE', 'CROSSBOW'] }),
+      'crossbow',
+    );
+    assert.equal(
+      exportSubclass({ name: 'Nagantaka', uniqueName: '/Lotus/.../GarudaCrossbow', holsterCategory: 'WIDE_RIFLE', compatibilityTags: ['CROSSBOW'] }),
+      'crossbow',
+    );
+    assert.equal(exportSubclass({ name: 'Bolto', uniqueName: '/Lotus/Weapons/Tenno/Pistol/CrossBow', productCategory: 'Pistols' }), null);
+    assert.equal(exportSubclass({ name: 'Dread', holsterCategory: 'BOW', productCategory: 'LongGuns', compatibilityTags: ['BOW'] }), null);
+    // 赤毒·布拉玛：携带方式 BOW 的真弓，名字里的 Bramma 要算发射器
+    assert.equal(
+      exportSubclass({ name: 'Kuva Bramma', uniqueName: '/Lotus/.../GrnBowWeapon', holsterCategory: 'BOW', productCategory: 'LongGuns', compatibilityTags: ['BOW'] }),
+      'launcher',
+    );
   });
 });
 

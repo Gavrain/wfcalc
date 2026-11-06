@@ -54,21 +54,29 @@ describe('武器分组（大类 → 类型）', () => {
     const launcher = primary.types.get('launcher');
     assert.ok(launcher, '应有发射器类型');
     // 已核对过的发射器（官方导出没有 launcher 类型名，由 weapon-slots.json 的 subclass 标出）
-    for (const name of ['食人女魔', '潘塔', '征服榴炮', '信条·典客']) {
+    // 需求方 2026-07-11 明确：托里德也算发射器。
+    for (const name of ['食人女魔', '潘塔', '征服榴炮', '信条·典客', '托里德', '沙皇', '赤毒·布拉玛']) {
       assert.ok(
         launcher.weapons.some((w) => String(w.nameZh || w.name) === name),
         `${name} 应在发射器里`,
       );
     }
-    // 托里德不属于发射器（它是带 AoE 的步枪）
-    assert.ok(
-      !launcher.weapons.some((w) => String(w.nameZh || w.name) === '托里德'),
-      '托里德不该在发射器里（它不是发射器）',
-    );
     // D-099 C：弩并入弓弩，弩不再是独立类型
     const bow = primary.types.get('bow');
     assert.ok(bow, '应有弓弩类型');
     assert.equal(primary.types.get('crossbow'), undefined, '弩不应再是独立类型');
+    // 弩要留在弓弩桶里（需求方 2026-07-11：弩不能装弓箭类 Mod / 弓箭·赋能，但仍是主手弓弩）
+    for (const name of ['诸葛连弩', '阿提卡', '噬蛇弩']) {
+      assert.ok(
+        bow.weapons.some((w) => String(w.nameZh || w.name) === name),
+        `${name} 应在弓弩里`,
+      );
+    }
+    // 真正的弓不能被误判成弩
+    const crossbows = Object.entries(slotFile.weapons).filter(([, e]) => e.subclass === 'crossbow');
+    for (const [id] of crossbows) {
+      assert.ok(!slotFile.weapons[id].trueBow, `${id} 既是弩又是弓，判定冲突`);
+    }
   });
 
   it('发射器不再出现在步枪里', async () => {
