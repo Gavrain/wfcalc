@@ -64,7 +64,7 @@ npm install
 npm run typecheck
 npm test         # 内核单测 + 数据流水线测试
 npm run build:data  # 重新抓取并生成武器数据（需网络）
-npm run build:mods  # 重新生成 Mod 数据（需紫卡模拟器 HTML 快照）
+npm run build:mods  # 重新生成 Mod 数据（数值来自入库的 mods/baseline.json）
 ```
 
 > 若在受限环境里 `npm` 报 `EPERM ... npm-cache`，改用

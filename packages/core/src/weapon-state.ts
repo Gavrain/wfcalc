@@ -1,7 +1,8 @@
 /**
  * `WeaponState`：把计算链抽成**输入层 / computed 层**，下游读 computed，不重算。
  *
- * 设计意图（`docs/变量依赖图.md`，D-075）：
+ * 设计意图（`docs/变量依赖图.md`，D-075）；
+ * 元素合成部分调 `elements.ts`（D-102 拆出，去掉与 `main.ts` 的双向依赖）：
  *
  * ```
  * w.面板.*              输入的原子值
@@ -33,6 +34,7 @@ import { spreadTotal } from './damage-types.ts';
 import type { BucketDetail, BucketableStat } from './buckets.ts';
 import { bucket, bucketDetail } from './buckets.ts';
 import type { Faction } from './contributions.ts';
+import { applyElements } from './elements.ts';
 
 /** 一张 Mod 的贡献（保留来源，便于逐乘区拆解） */
 export interface ContribEntry {
@@ -90,10 +92,10 @@ export interface WeaponStateComputed {
   /** **面板多重 × (1+Σ%) + Σ绝对值** */
   readonly 当前多重: number;
   readonly 当前弹匣: number;
+  /** 等效弹匣（**加成的**弹匣 × 弹药效率倍数），两位小数（D-129：基础列取 `panelStats` 的弹匣，即倍数 1） */
+  readonly 等效弹匣: number;
   /** 弹药效率倍数（1 = 无加成）；≈ D-084 的 `a/(1-x)` 除以面板弹匣 */
   readonly 弹药效率倍数: number;
-  /** 等效弹匣（面板弹匣 × 弹药效率倍数），两位小数 */
-  readonly 等效弹匣: number;
   readonly 当前装填时间: number;
   /** 面板 + 玄骸加成（**数组形态**） */
   readonly 新面板: DamageSpread;
@@ -276,9 +278,11 @@ function panelValueOf(stat: BucketableStat, ps: ReturnType<typeof panelStats>): 
 /**
  * 构建 `WeaponState`。
  *
- * ⚠ 这里只做「把输入算成 computed」，**不**做元素合成（合成依赖 `main.ts` 的
- * `applyElements` / `mergePairwise`）。所以 `元素槽位` 与 `命中分布` 由调用方
- * 在这一步之后填入——见 `compute()`。
+ * ⚠ 这里做「把输入算成 computed」，包括 `元素槽位` / `命中分布` ——
+ * 元素合成调的是 `elements.ts` 的 `applyElements()`（与结算链共用同一个实现）。
+ *
+ * > D-102：之前这一段由调用方（`main.ts` 的 `buildState()`）在返回后补填，
+ * > 造成 `main ↔ weapon-state` 双向依赖；现在依赖方向是 `weapon-state → elements`，单向。
  */
 export function buildWeaponState(
   weapon: Weapon,
@@ -292,11 +296,7 @@ export function buildWeaponState(
     kuva?: { type: DamageType; ratio: number } | undefined;
     segment: DamageSegment;
   },
-): {
-  state: Omit<WeaponState, 'computed'> & {
-    computed: Omit<WeaponStateComputed, '元素槽位' | '命中分布' | '命中分布总伤'>;
-  };
-} {
+): { state: WeaponState } {
   const ps = panelStats(weapon, mode);
 
   // ── 输入层 ──
@@ -387,6 +387,9 @@ export function buildWeaponState(
   const 当前弹匣 = byStat('magazine');
   const 等效弹匣 = displayMagazine(当前弹匣 * ammoMul);
 
+  // 元素合成（合成前各占一槽 → 两两配对），与 `resolveSegment()` 共用同一实现
+  const el = applyElements(基伤面板, contribs, 'hit');
+
   return {
     state: {
       weapon,
@@ -415,6 +418,9 @@ export function buildWeaponState(
         新面板总伤,
         基伤面板,
         基伤面板总伤: spreadTotal(基伤面板),
+        元素槽位: el.slots,
+        命中分布: el.v,
+        命中分布总伤: spreadTotal(el.v),
       },
     },
   };

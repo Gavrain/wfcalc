@@ -24,8 +24,11 @@ export type SourceName = keyof typeof SOURCES;
 /**
  * Mod 数值的二级来源（官方导出里没有数值，见 research/03-Mod数据抓取.md）。
  *
- *   zkHtml  需求方维护的紫卡模拟器单文件 HTML。内置 `ZKMODS`（满级值 + 等级上限）与
- *           `WEAPON_DB`（武器类细分）。**仓库内的副本是快照**，更新时把新 HTML 放回原处再跑。
+ * Mod 的数值 / 等级上限 / 互斥 / 条件效果全部来自仓库内入库的
+ * `packages/data/src/mods/**` 下的 JSON（见 `mods/baseline.ts`），**不读任何仓库外的文件**。
+ * 早先有一个"读本地大 HTML 抠出数值"的入口，已删除：项目不能依赖一份不在版本管理里的外部文件，
+ * 否则换设备、或者文件不在时，流水线就产不出正确数值。
+ *
  *   wfcd    WFCD/warframe-items 的 Mods.json（MIT 许可），只用来交叉校验、
  *           补词缀套装/集团等元信息——它的数值是"每级的展示文本"，不是结构化数值。
  *
@@ -33,7 +36,6 @@ export type SourceName = keyof typeof SOURCES;
  * 抓 WFCD 需要先设置 `WFCD_INSECURE_TLS=1` 让脚本跳过证书校验，或者直接用缓存。
  */
 export const MOD_SOURCES = {
-  zkHtml: { kind: 'local', path: '20261031紫卡模拟器V10.html' },
   wfcdMods: {
     kind: 'remote',
     url: 'https://raw.githubusercontent.com/WFCD/warframe-items/master/data/json/Mods.json',
@@ -41,8 +43,7 @@ export const MOD_SOURCES = {
   },
 } as const;
 
-/** 本地快照目录：抓回来的上游原始文件放这里，清单提交进仓库 */
-export const SNAPSHOT_DIR = 'packages/data/src/snapshot';
-
+/** Mod 人工基线目录（入库，是 Mod 数值的唯一来源） */
+export const MOD_BASELINE_DIR = 'packages/data/src/mods';
 /** 抓取产物目录：本地缓存，不进仓库 */
 export const CACHE_DIR = '.cache/export';

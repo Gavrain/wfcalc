@@ -80,6 +80,7 @@ describe('赋能排除清单（不是武器伤害词条）', () => {
     'SecondaryOnRollCritChanceOnHeadshot', // 仅弱点命中的暴率
     'SecondaryOnStatusProcBonusDamage', // 固定附加伤害
     'StatusTriggerRadialDamage', // 神威·气力：需求方 2026-11-06「设置成无效果」
+    'SecondaryColdOnPuncture', // D-138：NUM_PROCS 是"施加 3 层冰冻异常"的层数，不是触发几率
     'BurningCystOnKill',
     'IceMistOnKill',
     'LightningStrikeOnKill',
@@ -104,5 +105,49 @@ describe('类镀层：次要·冷颤只认冰冻层数（D-086）', () => {
     const c = byStat('SecondaryExtraDamagePerFreezeStack');
     assert.equal(c.coFreeze, 45);
     assert.equal(c.statusChance, undefined);
+  });
+});
+
+describe('D-138：次要赋能加成逐条核对', () => {
+  it('次要·爆发：暴率 +20 和暴伤 +20 两条都有（以前只有暴伤）', () => {
+    const c = byStat('MultishotForCombo');
+    assert.equal(c.critChance, 20);
+    assert.equal(c.critMultiplier, 20);
+    assert.equal(Object.keys(c).length, 2);
+  });
+
+  it('次要·死首：基伤 +360% 且弱点伤害 +30%（与主要·死首同口径，30% 不随层数叠）', () => {
+    const s = byStat('SecondaryDamageOnNoMelee');
+    assert.equal(s.baseDamage, 360); // 120 × 3 层
+    assert.equal(s.weakpointDamage, 30);
+    const p = byStat('PrimaryDamageOnNoMelee');
+    assert.deepEqual(s, p);
+  });
+
+  it('瀑流·耀炎：满层 480%（12% × 40 层）记在基伤', () => {
+    const c = byStat('SecondaryDamageOnHeatProc');
+    assert.equal(c.baseDamage, 480);
+    assert.equal(c.statusChance, undefined);
+  });
+});
+
+describe('D-138：赋能安装位大类', () => {
+  function cat(id: string): string {
+    return arcane(id).category;
+  }
+
+  it('弓箭·利矢归 bow，霰弹·仇杀归 shotgun（以前都落在 secondary）', () => {
+    assert.equal(cat('LongbowDamageOnHeadshot'), 'bow');
+    assert.equal(cat('ShotgunMultishotAndReloadSpeedOnCloseKill'), 'shotgun');
+  });
+
+  it('分形·重置归 primary（它本来就是主要武器赋能）', () => {
+    assert.equal(cat('PrimaryOnAbilityReloadSpeed'), 'primary');
+  });
+
+  it('次要·/ 瀑流· / 联结· 仍是 secondary', () => {
+    assert.equal(cat('SecondaryDamageOnKill'), 'secondary');
+    assert.equal(cat('SecondaryDamageOnHeatProc'), 'secondary');
+    assert.equal(cat('SecondaryReloadSpeedAndMultishotOnElectricProc'), 'secondary');
   });
 });

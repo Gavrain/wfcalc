@@ -88,7 +88,8 @@ Mod  side : mods.json → slotKind
 
 代码里用 `canEquipMod(slots, modSlotKind)` 判断，不要自己拼逻辑。
 
-数值口径：`levelValues[r] = 满级值 × r / 等级上限`，满级值取 ZKMODS 的 `p[][1]`。
+数值口径：`levelValues[r] = 满级值 × r / 等级上限`，满级值取 `mods/baseline.json` 的 `p[][1]`。
+（幽灵膛线是唯一已知的固定步长个例，每级 30，见 `data-build/src/mods/stat-map.ts` 的 `MOD_VALUE_OVERRIDES`。）
 
 ## 武器赋能
 

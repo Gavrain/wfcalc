@@ -2,7 +2,7 @@ import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { levelValues, round4, cleanMod, isStanceMod, effectiveMaxRank } from '../src/mods/clean-mods.ts';
 import { lookupStat, ALL_ELEMENT_KEYS, ALL_PHYSICAL_KEYS } from '../src/mods/stat-map.ts';
-import type { ZkMod } from '../src/mods/zk-source.ts';
+import type { ModRecord } from '../src/mods/mod-record.ts';
 
 describe('Mod 等级数值换算', () => {
   it('满级值按等级上限线性递增（Serration：满级 165%，f=10 → 每级 16.5）', () => {
@@ -102,7 +102,7 @@ describe('属性键 → 乘区映射（对照乘区归属表）', () => {
 });
 
 /** 构造一个最小的 ZK 模组 */
-function zk(partial: Partial<ZkMod> & { i: string; n: string; p: Array<[string, number, number?]> }): ZkMod {
+function zk(partial: Partial<ModRecord> & { i: string; n: string; p: Array<[string, number, number?]> }): ModRecord {
   return {
     t: 'rifle',
     s: 'g',
@@ -113,7 +113,7 @@ function zk(partial: Partial<ZkMod> & { i: string; n: string; p: Array<[string, 
     de: '',
     z: '',
     ...partial,
-  } as ZkMod;
+  } as ModRecord;
 }
 
 describe('Mod 清洗', () => {

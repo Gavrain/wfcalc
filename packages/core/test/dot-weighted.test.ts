@@ -30,19 +30,39 @@ const slashPlusHeat: any[] = [
 ];
 
 describe('DoT 加权每层秒伤（D-060 / D-061）', () => {
-  /** 只累加「有 DoT 的类型」作为分母（D-061） */
-  const dotTotalOf = (spread: any) => core.DOT_TYPES.reduce((a: number, t: string) => a + (spread[t] ?? 0), 0);
+  /**
+   * D-107：某类型的"触发份额"。
+   * 合成元素（毒气/爆炸…）在命中分布里没有自己的份，用**来源元素之和**代替。
+   */
+  const SOURCES: Record<string, string[]> = {
+    gas: ['heat', 'toxin'], blast: ['heat', 'cold'], radiation: ['heat', 'electric'],
+    viral: ['cold', 'toxin'], magnetic: ['cold', 'electric'], corrosive: ['toxin', 'electric'],
+  };
+  const shareOf = (spread: any, type: string) => {
+    const direct = spread[type] ?? 0;
+    if (direct > 0) return direct;
+    return (SOURCES[type] ?? []).reduce((a: number, s: string) => a + (spread[s] ?? 0), 0);
+  };
+  /**
+   * 分母 = **命中分布里真的存在**的 DoT 类型之和（D-061 / D-107 / D-109）。
+   * 合成元素（毒气…）没有自己的一份，它的份已经算在来源元素（火焰/毒素）头上了，
+   * 再单独加一次会让分母翻倍。
+   */
+  const dotTotalOf = (spread: any) =>
+    core.DOT_TYPES.filter((t: string) => t !== 'blast' && (spread[t] ?? 0) > 0)
+      .reduce((a: number, t: string) => a + (spread[t] ?? 0), 0);
 
   it('加权合计 = Σ(每层秒伤 × 占比)，分母只算有 DoT 的类型', () => {
     const res = compute(weapon, weapon.modes[0], slashPlusHeat, {}, false);
     const seg: any = res.segments[0];
-    const present = new Set(Object.keys(seg.finalHit));
+    // D-107：触发池看命中分布；"有 DoT 的类型"是 DOT_TYPES，不是 Object.keys
     const denom = dotTotalOf(seg.finalHit);
 
     let expected = 0;
     for (const t of seg.dotTicks) {
-      if (!present.has(t.type)) continue;
+      if (t.type === 'blast') continue; // 爆炸不计入每层秒伤（D-057）
       const share = (seg.finalHit[t.type] ?? 0) / denom;
+      if (share <= 0) continue;
       expected += t.tick * share;
     }
     near(res.output.dotPerSecond, expected);
@@ -67,14 +87,22 @@ describe('DoT 加权每层秒伤（D-060 / D-061）', () => {
   it('各占 50% 时，合计是未加权的一半', () => {
     const res = compute(weapon, weapon.modes[0], slashPlusHeat, {}, false);
     const seg: any = res.segments[0];
-    const present = new Set(Object.keys(seg.finalHit));
     let unweighted = 0;
     for (const t of seg.dotTicks) {
-      if (!present.has(t.type)) continue;
+      if (t.type === 'blast') continue;
       unweighted += t.tick;
     }
-    // 命中分布只有 slash 与 heat，各 100，各占 50%
-    near(res.output.dotPerSecond, unweighted * 0.5);
+    // D-107：分母 = slash 100 + 火 100 + 毒气(火+毒 = 100) —— 毒气与火共用同一份火
+    //   所以合计 = 35×0.2 + 50×0.2 + 50×0.6 = 45（不是简单的一半）
+    const denom = dotTotalOf(seg.finalHit);
+    let expected = 0;
+    for (const t of seg.dotTicks) {
+      if (t.type === 'blast') continue;
+      const share = (seg.finalHit[t.type] ?? 0) / denom;
+      if (share <= 0) continue;
+      expected += t.tick * share;
+    }
+    near(res.output.dotPerSecond, expected);
     assert.ok(res.output.dotPerSecond < unweighted, '加权后应小于未加权');
   });
 

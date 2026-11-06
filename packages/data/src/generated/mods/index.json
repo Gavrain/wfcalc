@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-11-06T06:43:04.358Z",
+  "generatedAt": "2026-11-06T16:49:08.538Z",
   "sources": [
     {
-      "name": "ZKMODS（紫卡模拟器快照）",
+      "name": "mods/baseline.json",
       "usage": "Mod 数值、等级上限、互斥关系、条件效果"
     },
     {
@@ -36,11 +36,10 @@
     "weapons": 842
   },
   "coverage": {
-    "officialMatched": 440,
-    "withStats": 440,
-    "zkWeaponsMatched": 646,
-    "unresolvedWeapons": 24,
-    "meleeMissingSpecific": 44,
+    "officialMatched": 441,
+    "withStats": 441,
+    "unresolvedWeapons": 26,
+    "meleeMissingSpecific": 31,
     "zhMissing": 0
   },
   "todo": {
@@ -69,11 +68,21 @@
       "SwarmerWeapon (Helstrum)",
       "HextraWeapon (Multron)",
       "CryoxionWeapon (Cryotra)",
+      "GarudaPrimeClaws (Garuda Prime Talons)",
+      "GarudaClaws (Garuda Talons)",
       "ZanukaPetMeleeWeaponIP (Batoten)",
       "ZanukaPetMeleeWeaponIS (Lacerten)",
       "ZanukaPetMeleeWeaponPS (Akaten)"
     ],
     "meleeMissingSpecific": [
+      "TnoGunblade (Redeemer)",
+      "RedeemerPrimeWep (Redeemer Prime)",
+      "TnoGunbladeAutomatic (Sarpa)",
+      "GrnGunblade (Vastilok)",
+      "GrnGhoulSawPlayer (Ghoulsaw)",
+      "KuvaGhoulSaw (Kuva Ghoulsaw)",
+      "CrpGunbladeWeapon (Stropha)",
+      "DuviriDualSwordsWeapon (Sun & Moon)",
       "ReaperMeleeWeapon (Shadow Claws)",
       "SevagothShadowPrimeClawsWeapon (Shadow Claws Prime)",
       "PacifistFist (Desert Wind)",
@@ -86,8 +95,6 @@
       "KhoraWhipclawWeapon (Whipclaw)",
       "GaraShankWeapon (Shattered Lash)",
       "GaraShankWeaponPrime (Shattered Lash Prime)",
-      "GarudaPrimeClaws (Garuda Prime Talons)",
-      "GarudaClaws (Garuda Talons)",
       "PrimeFlightSword (Diwata Prime)",
       "FlightSword (Diwata)",
       "DoomSwordUmbra (Exalted Umbra Blade)",
@@ -98,39 +105,7 @@
       "BerserkerMeleePrime (Valkyr Prime Talons)",
       "BerserkerMelee (Valkyr Talons)",
       "NechroTechSwordWeapon (Ironbride)",
-      "PvPVariantTipFive (Dehtat)",
-      "PvPVariantTipFour (Cyath)",
-      "PvPVariantTipOne (Balla)",
-      "PvPVariantTipSix (Kronsh)",
-      "PvPVariantTipThree (Mewan)",
-      "PvPVariantTipTwo (Ooltha)",
-      "TipFive (Dehtat)",
-      "TipFour (Cyath)",
-      "TipOne (Balla)",
-      "TipSix (Kronsh)",
-      "TipThree (Mewan)",
-      "TipTwo (Ooltha)",
-      "TipEleven (Dokrahm)",
-      "TipNine (Sepfahn)",
-      "TipTen (Rabvee)",
-      "InfestedTipOne (Plague Kripath)",
-      "InfestedTipTwo (Plague Keewar)",
-      "PvPVariantInfestedTipOne (Plague Kripath)",
-      "PvPVariantInfestedTipTwo (Plague Keewar)",
       "TnBayonetMeleeWeapon (Vinquibus (Melee))"
-    ],
-    "zkNotInExport": [
-      "corufell_prime (Corufell Prime)",
-      "nunchasa (Nunchasa)",
-      "gaze_primary (Gaze)",
-      "rattleguts_primary (Rattleguts)",
-      "tombfinger_primary (Tombfinger)",
-      "sporelacer_primary (Sporelacer)",
-      "catchmoon_primary (Catchmoon)",
-      "vermisplicer_primary (Vermisplicer)",
-      "aksondol (Aksondol)",
-      "steflos_prime (Steflos Prime)",
-      "vinquibus_primary (Vinquibus (Primary))"
     ],
     "wfcdMismatch": [],
     "rankFixes": [

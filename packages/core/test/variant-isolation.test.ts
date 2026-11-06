@@ -64,15 +64,21 @@ describe('多变体武器：无 Mod 时「当前」必须等于「基础」', ()
     assert.equal(cur.slash, undefined, '爆炸变体不该混入切割');
   });
 
-  it('巴兹火枪（Buzlok）爆炸变体不含命中段', async () => {
+  it('巴兹火枪（Buzlok）没有爆炸变体（官方 explosiveAttack 40 已剔除，D-121）', async () => {
     const all = await loadAllWeapons();
     const w = all.find((x) => x.id === 'GrnGorgSniperRifle');
     assert.ok(w, '找不到巴兹火枪');
     const m = w.modes[0]!;
+    // 需求方 2026-11-06：「巴兹火枪……没有爆炸也没有范围伤害……这个爆炸还是要删掉的」
+    assert.equal(m.variants.findIndex((v) => v.id === 'blast'), -1, '巴兹火枪不该再有爆炸变体');
+    for (const v of m.variants) {
+      assert.equal(baseOf(v).blast, undefined, `变体 ${v.id} 不该含爆炸`);
+    }
+    // 直接命中两个面板都保留（本体 60/11.25/3.75 + 投射段 30/24/6）
     const res = compute(w, { ...m, segments: m.variants[0]!.segments } as unknown as AttackMode, [], {}, false);
-    const blastIdx = m.variants.findIndex((v) => v.id === 'blast');
-    assert.ok(blastIdx >= 0);
-    assert.equal(sumSpread(res.spreadByVariant[blastIdx]!), sumSpread(baseOf(m.variants[blastIdx]!)));
+    const cur = res.spreadByVariant[0]!;
+    assert.equal(cur.blast, undefined, '当前面板不该出现爆炸');
+    assert.equal(sumSpread(cur), 135, '直接命中合计应为 90+35.25+9.75 = 135');
   });
 
   it('全库扫描：所有多变体武器、所有变体都满足（无 Mod 时）', async () => {

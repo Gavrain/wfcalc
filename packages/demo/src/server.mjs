@@ -118,7 +118,7 @@ function validateEdit(payload) {
     for (const m of modes) {
       if (!m || typeof m.id !== 'string') { errors.push('模式缺少 id'); continue; }
       for (const [k] of Object.entries(m)) {
-        if (k === 'id' || k === 'segments') continue;
+        if (k === 'id' || k === 'variants') continue;
         if (!EDITABLE_SEGMENT_FIELDS.has(k)) errors.push(`模式字段「${k}」不可编辑`);
       }
       // D-050：模式级面板 override 校验（只允许六项面板字段，值必须有限且非负）
@@ -139,6 +139,10 @@ function validateEdit(payload) {
       }
 
       // D-080：段只属于变体，模式上没有 segments
+      //
+      // D-103 修复：`variants` 是 D-083 之后的**唯一**段容器，原来这里漏了它，
+      // 导致编辑器保存（以及 verify-editor / override-e2e 等测试）全被
+      // 「模式字段「variants」不可编辑」拒掉。它必须与 `id` 一样放行。
       if (!Array.isArray(m.variants) || m.variants.length === 0) {
         errors.push('variants 必须是至少含 1 项的数组');
         continue;

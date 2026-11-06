@@ -94,7 +94,7 @@ describe('DOM：选单重建后选中值必须等于当前武器', () => {
     assert.ok(syncCount >= 4, `syncWeaponSelect 调用次数应 ≥4，实际 ${syncCount}`);
     // 同武器分支不能再直接 return
     assert.ok(
-      /if \(DATA && DATA\.weapon && DATA\.weapon\.id === weaponId\) \{\s*\n\s*syncWeaponSelect\(\);/.test(src),
+      /if \(store\.data && store\.data\.weapon && store\.data\.weapon\.id === weaponId\) \{\s*\n\s*syncWeaponSelect\(\);/.test(src),
       '同武器时应同步选单而不是直接 return',
     );
   });

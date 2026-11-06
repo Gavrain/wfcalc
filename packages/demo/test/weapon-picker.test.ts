@@ -26,9 +26,9 @@ async function loadAll() {
 }
 
 describe('武器大类（主要 / 次要 / 近战 / 空战）', () => {
-  it('四个大类齐全，目前只有「主要」可选', () => {
+  it('四个大类齐全，且全部可选（D-119）', () => {
     assert.deepEqual(WEAPON_GROUPS.map((g) => g.id), ['primary', 'secondary', 'melee', 'archwing']);
-    assert.deepEqual(WEAPON_GROUPS.filter((g) => g.enabled).map((g) => g.id), ['primary']);
+    assert.deepEqual(WEAPON_GROUPS.filter((g) => g.enabled).map((g) => g.id), ['primary', 'secondary', 'melee', 'archwing']);
   });
 });
 
@@ -46,37 +46,40 @@ describe('武器分组（大类 → 类型）', () => {
     assert.equal(total, 192);
   });
 
-  it('发射器与弩来自官方 zkClass（D-098）', async () => {
+  it('发射器来自数据层 subclass（D-098）', async () => {
     const { weapons, slotFile } = await loadAll();
     const groups = groupWeapons(weapons, slotFile);
     const primary = groups.get('primary');
     assert.ok(primary);
     const launcher = primary.types.get('launcher');
     assert.ok(launcher, '应有发射器类型');
-    assert.equal(launcher.weapons.length, 12);
-    // 已知的发射器
-    for (const name of ['托里德', '沙皇', '征服榴炮']) {
+    // 已核对过的发射器（官方导出没有 launcher 类型名，由 weapon-slots.json 的 subclass 标出）
+    for (const name of ['食人女魔', '潘塔', '征服榴炮', '信条·典客']) {
       assert.ok(
         launcher.weapons.some((w) => String(w.nameZh || w.name) === name),
         `${name} 应在发射器里`,
       );
     }
-    // D-099 C：弩并入弓弩 = 弓 17 + 弩 5
+    // 托里德不属于发射器（它是带 AoE 的步枪）
+    assert.ok(
+      !launcher.weapons.some((w) => String(w.nameZh || w.name) === '托里德'),
+      '托里德不该在发射器里（它不是发射器）',
+    );
+    // D-099 C：弩并入弓弩，弩不再是独立类型
     const bow = primary.types.get('bow');
     assert.ok(bow, '应有弓弩类型');
-    assert.equal(bow.weapons.length, 22);
     assert.equal(primary.types.get('crossbow'), undefined, '弩不应再是独立类型');
   });
 
-  it('发射器和弩不再出现在步枪里', async () => {
+  it('发射器不再出现在步枪里', async () => {
     const { weapons, slotFile } = await loadAll();
     const groups = groupWeapons(weapons, slotFile);
     const primary = groups.get('primary');
     assert.ok(primary);
     const rifle = primary.types.get('rifle');
     assert.ok(rifle);
-    assert.equal(rifle.weapons.length, 106);
-    for (const id of ['BioWeapon', 'CannonWeapon']) {
+    // 已被标成 subclass=launcher 的武器一个都不能留在步枪桶里
+    for (const id of ['GrenadeLauncher', 'RocketLauncher', 'GrnCannonWeapon']) {
       assert.ok(!rifle.weapons.some((w) => w.id === id), `${id} 不该在步枪里`);
     }
   });

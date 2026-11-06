@@ -1,25 +1,24 @@
 /**
  * 武器 → 可装备的 Mod 槽位种类（mod slot kind）。
  *
- * 为什么需要：ZKMODS 用 `t` 字段标注模组属于哪一类武器（`rifle` / `shotgun` / `bow` /
+ * 为什么需要：Mod 基线用 `t` 字段标注模组属于哪一类武器（`rifle` / `shotgun` / `bow` /
  * `nikana` / `glaive` …），而武器面板给的是 `holsterCategory` / `compatibilityTags`。
  * 两边要能对上，UI 才能"选一把武器 → 只列出它能装的 Mod"。
  *
- * 判定优先级（每一级都比上一级更权威，逐级回退，并记录依据便于排查）：
- *   1. **ZK 武器库（主）**：需求方模拟器的 `WEAPON_DB` 自带 `c`（武器类）与 `s`（主/副/近战/空战）。
- *      实测 642 把里 637 把能和官方导出对上（默认按英文名匹配），分类与游戏一致。
- *   2. **官方导出的 holsterCategory**：ZK 库里没有的新武器用它兜底
- *      （RIFLE / BOW / SHOTGUN / SNIPER / SMG / WIDE_RIFLE / PISTOL）。
- *   3. **近战 `*_STANCE` 标签**：ZK 的近战类有时只给宽类 `melee`，用标签补出细类。
- *   4. **产品大类**：Pistols → pistol，LongGuns → rifle，最后兜底。
+ * 判定只用**官方导出**，逐级回退，并记录依据便于排查：
+ *   1. **产品大类**：SpaceGuns → archgun，SpaceMelee → archmelee，Melee / DrifterMelee → melee
+ *   2. **holsterCategory**：RIFLE / WIDE_RIFLE / SMG / SHOTGUN / SNIPER / BOW / PISTOL …
+ *      （官方导出的手枪大多没有 `holsterCategory`，靠下一级兜底）
+ *   3. **近战 `*_STANCE` 标签**：补出近战细类（剑 / 锤 / 匕首 …）
+ *   4. 都拿不到 → `unresolved`，列入待人工确认（显赫武器走 `manual/exalted-slots.ts`）
  *
- * 注意：官方导出的手枪绝大多数没有 `holsterCategory`，霰弹类手枪（Bronco/Pyrana）
- * 更是只有 ZK 库能分辨——这也是把 ZK 库放第一位的原因。
+ * 官方导出给不出 launcher / crossbow 这种展示细类（它们本来就吃步枪类 Mod），
+ * 由 `exportSubclass` 单独判定，只影响界面分组，不影响可装 Mod。
  */
 import type { ExportWeapon } from '../types.ts';
 
 /**
- * Mod 槽位种类，与 ZKMODS 的 `t` 一一对应。
+ * Mod 槽位种类，与 Mod 基线的 `t` 一一对应。
  */
 export const MOD_SLOT_KINDS = [
   // 枪械宽类
@@ -115,7 +114,7 @@ for (const k of MELEE_SUBCLASSES) {
   if (!MOD_SLOT_KINDS.includes(k)) throw new Error(`MELEE_SUBCLASSES 里的 ${k} 不在 MOD_SLOT_KINDS 中`);
 }
 
-/** ZK 武器库里出现的 `c` 值（含几个不在 Mod 槽位种类里的枪械类） */
+/** 武器类 `c` 值（含几个不在 Mod 槽位种类里的枪械类） */
 const ZK_CLASS_TO_KIND: Record<string, ModSlotKind | null> = {
   rifle: 'rifle',
   bow: 'bow',
@@ -137,8 +136,42 @@ const ZK_CLASS_TO_KIND: Record<string, ModSlotKind | null> = {
 };
 
 
-/** ZK 武器库的 `s`（武器槽位）→ 大类 */
+/** 武器槽位 `s`（主 / 副 / 近战 / 空战 / 显赫） */
 type ZkSlot = 'p' | 's' | 'm' | 'a' | 'e';
+
+/**
+ * holsterCategory / 官方 `type` 的**细类**（只用于展示分组，不影响 Mod 槽位）。
+ *
+ * 游戏里发射器（火箭/榴弹/炮）和弩都吃步枪类 Mod，所以 Mod 槽位一律按 `rifle` 算；
+ * 但界面上的"主要武器"要按类型分开（需求方 2026-11-06：下拉栏类别内再按类型分类）。
+ * 官方导出里没有 launcher / crossbow 这种类型名，按**命名**、携带方式与武器特性判定。
+ */
+const SUBCLASS_BY_TYPE: Record<string, 'launcher' | 'crossbow'> = {
+  RocketLauncher: 'launcher',
+  GrenadeLauncher: 'launcher',
+  Crossbow: 'crossbow',
+};
+/** 英文名 / 内部 id 里的发射器信号（以爆炸弹药为主的主武器） */
+const LAUNCHER_NAME = /launcher|grenade|rocket/i;
+/** 英文名 / 内部 id 里的弩信号 */
+const CROSSBOW_NAME = /crossbow/i;
+/** 名字里不带信号、但以爆炸弹药为主的主武器（沙皇 / 赤毒·沙皇 / 赤毒·布拉玛） */
+const EXPLOSIVE_NAME = /zarr|bramma/i;
+/** 没写英文名时，用内部 id 兜底识别这几把 */
+const EXPLOSIVE_ID = /GrnCannonWeapon|KuvaZarr|GrnBowWeapon/i;
+
+/** 判定展示用细类（launcher / crossbow）；不是这两类返回 null */
+export function exportSubclass(w: ExportWeapon): 'launcher' | 'crossbow' | null {
+  const byType = w.type !== undefined ? SUBCLASS_BY_TYPE[w.type] : undefined;
+  if (byType) return byType;
+  const key = `${w.name ?? ''} ${w.uniqueName ?? ''}`;
+  if (w.holsterCategory === 'BOW' && CROSSBOW_NAME.test(key)) return 'crossbow';
+  if (LAUNCHER_NAME.test(key)) return 'launcher';
+  if (w.holsterCategory === 'RIFLE' && (EXPLOSIVE_NAME.test(key) || EXPLOSIVE_ID.test(w.uniqueName ?? ''))) {
+    return 'launcher';
+  }
+  return null;
+}
 
 /** holsterCategory → 宽类槽位（第 2 级兜底） */
 const HOLSTER_KINDS: Record<string, ModSlotKind> = {
@@ -169,7 +202,7 @@ const MELEE_HOLSTERS = new Set([
 /**
  * 近战 `*_STANCE` 标签 → 近战细类。
  *
- * 用途：ZK 武器库对某些近战只给了宽类 `melee`，这时用官方导出的架势标签补出细类。
+ * 用途：近战只判出宽类 `melee` 时，用官方导出的架势标签补出细类。
  * D-001 恢复近战区分后重新启用。
  */
 const STANCE_TAG_TO_KIND: Record<string, ModSlotKind> = {
@@ -221,9 +254,9 @@ function isMeleeStanceTag(tag: string): boolean {
   return Object.hasOwn(STANCE_TAG_TO_KIND, t) || /_STANCE(_STANCE)?$/.test(t);
 }
 
-/** ZK 武器库条目（只声明用到的字段） */
+/** 武器类条目（只声明用到的字段） */
 export interface ZkWeaponClass {
-  /** ZK 内部 id */
+  /** 武器 id */
   i: string;
   /** 英文名 */
   n: string;
@@ -260,7 +293,7 @@ export interface SlotResolution {
 export function resolveFromZkClass(zk: ZkWeaponClass, tags: string[] = []): SlotResolution {
   const basis: SlotResolution['basis'] = { zkClass: zk.c, zkSlot: zk.s, tags };
 
-  // 哨兵 / 猎犬武器在 ZK 库里有自己的 p/a 条目，但它们属于伙伴武器，不在本项目的配装范围
+  // 哨兵 / 猎犬武器属于伙伴武器，不在本项目的配装范围
   if (tags.includes('SENTINEL_WEAPON') || tags.includes('HOUND_WEAPON')) {
     const meleeLike = zk.s === 'm';
     return { broad: meleeLike ? 'melee' : 'rifle', specific: [], source: 'unresolved', basis, unresolved: true };
@@ -282,7 +315,7 @@ export function resolveFromZkClass(zk: ZkWeaponClass, tags: string[] = []): Slot
     const specific: ModSlotKind[] = [];
     if (isMeleeSubclass(zk.c)) specific.push(zk.c as ModSlotKind);
     else {
-      // ZK 只给了宽类时，用官方 `*_STANCE` 标签补细类
+      // 只判出宽类时，用官方 `*_STANCE` 标签补细类
       for (const t of tags) {
         const k = STANCE_TAG_TO_KIND[t.toUpperCase()];
         if (k && !specific.includes(k)) specific.push(k);
@@ -307,7 +340,7 @@ function isMeleeSubclass(c: string | undefined): boolean {
 }
 
 /**
- * 无 ZK 条目时，用官方导出兜底。
+ * 只用官方导出判定武器槽位（不依赖任何仓库外文件）。
  */
 export function resolveFromExport(w: ExportWeapon): SlotResolution {
   const tags = w.compatibilityTags ?? [];

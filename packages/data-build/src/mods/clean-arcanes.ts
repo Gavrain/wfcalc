@@ -17,9 +17,20 @@
  */
 import type { BucketId } from '../../../core/src/buckets.ts';
 
+/**
+ * 赋能安装位大类（D-138）。
+ *
+ * 以前 `弓箭·` / `霰弹·` / `双枪·` 全被归进 `secondary`，于是
+ * 霰弹枪的赋能列表是空的、「弓箭·利矢」出现在次要武器列表里。
+ * 现在按 wiki「安装」一节的 18 类安装位拆开：
+ *   主要·/ 分形· → 主要武器；弓箭· → 弓；霰弹· → 霰弹枪；
+ *   次要·/ 瀑流·/ 联结·/ 双枪· → 次要武器。
+ */
 export type ArcaneCategory =
-  | 'primary' // 主要·
-  | 'secondary' // 次要·/ 瀑流·/ 联结·/ 双枪·/ 弓箭·/ 霰弹·/ 分形·
+  | 'primary' // 主要·/ 分形·
+  | 'secondary' // 次要·/ 瀑流·/ 联结·/ 双枪·
+  | 'bow' // 弓箭·
+  | 'shotgun' // 霰弹·
   | 'melee' // 近战·/ 神威·
   | 'kitgun'; // 和平·/ 残差·
 
@@ -77,11 +88,13 @@ export const WEAPON_PREFIXES = [
   '分形·',
 ] as const;
 
-/** 前缀 → 大类 */
+/** 前缀 → 大类（D-138：弓箭·/ 霰弹·/ 双枪· 各归各的安装位，不再一律 secondary） */
 export function categoryOf(prefix: string): ArcaneCategory {
-  if (prefix === '主要·') return 'primary';
+  if (prefix === '主要·' || prefix === '分形·') return 'primary';
   if (prefix === '近战·' || prefix === '神威·') return 'melee';
   if (prefix === '和平·' || prefix === '残差·') return 'kitgun';
+  if (prefix === '弓箭·') return 'bow';
+  if (prefix === '霰弹·') return 'shotgun';
   return 'secondary';
 }
 
@@ -191,6 +204,12 @@ export function classifyArcane(
   if (/多重/.test(d)) return { kind: 'multishot', bucket: 'multishot', reason: '多重射击' };
   if (/暴击伤害|暴击倍率/.test(d)) return { kind: 'crit', bucket: 'critMultiplier', reason: '暴击伤害' };
   if (/暴击几率|暴击率/.test(d)) return { kind: 'crit', bucket: 'critChance', reason: '暴击几率' };
+  // D-138：瀑流·耀炎 =「+12% 伤害」叠 40 层，描述里没有「暴击」，必须排在"暴击"之后、
+  //   不能被下面的「异常状态」兜住（它原先落到 statusChance，靠 adapter 的覆盖表才没算错）。
+  //   ⚠ 规则要窄：瀑流·强化「造成 750 伤害」不是百分比词条，不能一起进来。
+  if (/触发.*异常状态时.*[+\d]\s*%[^。]*伤害/.test(d) && !/武器伤害|额外/.test(d)) {
+    return { kind: 'damageBuff', bucket: 'baseDamage', reason: '伤害加成（描述里没有暴击词条）' };
+  }
   if (/(获得|附加|施加).*(腐蚀|冰冻|火焰|毒素|电击)伤害/.test(d)) {
     return { kind: 'elemental', bucket: 'elemental', reason: '武器附加元素伤害' };
   }

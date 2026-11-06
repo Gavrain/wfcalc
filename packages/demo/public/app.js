@@ -1,5 +1,15 @@
 /**
- * 赤毒·卡拉克（Kuva Karak）配装计算。
+ * 配装页面（D-105）：本文件只留「界面怎么画」。
+ *
+ * ```
+ * app.js            入口 + 渲染编排 + 渲染函数 + 拖拽 + 武器切换
+ * app-store.js      共享状态（store.ui / modSlots / data …）+ 中文表 + 数字格式
+ * app-data.js       数据层：读 generated/ JSON、挑可装 Mod、劣化槽判定
+ * app-compute.js    计算层薄壳：组装 runCompute() 参数、跑计算、算相对提升
+ * ui-editor.js      开发态武器编辑器
+ * weapon-picker.js  武器选单
+ * weapon-override.js override 合并规则
+ * ```
  *
  * 每个数值都能对应到 `docs/伤害公式.md` 的某个函数；面板区随 Mod 实时更新；
  * 备选 Mod 区给出装上之后的伤害增幅（增幅基准可选）。
@@ -7,76 +17,52 @@
  * ⚠ 写法约束：`packages/demo/src/server.mjs` 用"剥类型"的方式在浏览器里直接跑 `.ts` 源码，
  * 所以这里只用**命名导入**，不要写 `const { a } = ns` 这种解构。
  */
-import {
-  compute,
-  critAverage,
-  critTiers,
-  DOT_TYPES,
-  isKuvaFamily,
-  METRIC_OPTIONS,
-  totalProcChance,
-} from '../../core/src/index.ts';
-import { WEAPON_GROUPS, groupWeapons, searchWeapons, FIRE_STYLE_OPTIONS, filterByStyle, weaponLabel, ISSUE_MARK } from './weapon-picker.js';
+import { critAverage, critTiers, DOT_TYPES, isKuvaFamily, METRIC_OPTIONS, totalProcChance } from '../../core/src/index.ts';
+import { WEAPON_GROUPS, groupWeapons, searchWeapons, FIRE_STYLE_OPTIONS, filterByStyle, weaponLabel, weaponGroupId, ISSUE_MARK } from './weapon-picker.js';
+import { OVERRIDE_WEAPON_FIELDS as OVERRIDE_FIELDS, mergeWeaponOverride as applyWeaponOverride } from './weapon-override.js';
 import { issuesOf } from '../../data/manual/weapon-issues.ts';
+import { arcaneDisplayStats, arcaneToContributions, isConditionOverloadMod, modStackFactor } from '../../data/src/adapter.ts';
 import {
-  arcaneToContributions,
-  isConditionOverloadMod,
-  isModCompatibleWithWeapon,
-  isSemiAutoOnlyWeapon,
-  isSemiCannonade,
-  modKindsFor,
-  modToContributions,
-} from '../../data/src/adapter.ts';
+  ELEMENT_COLOR, ELEMENT_LABEL, EXILUS_INDEX, FACTION_OPTIONS, KUVA_ELEMENTS, MAX_SLOTS, SLOT_COUNT,
+  bucketLabel, fmt, fmtPct, setData, setDataAll, spreadTotalOf, store,
+} from './app-store.js';
+import { buildWeaponData, isArcaneUsableOn, isExilusMod, isModAllowedOnWeapon, loadAllWeapons, modName } from './app-data.js';
+import {
+  coDefaults, coInfo, coModGain, currentContributions, effectiveModeFor, freezeInfo, gainOf, metricValueOf, runCompute,
+} from './app-compute.js';
+import * as editor from './ui-editor.js';
 
 // ─────────────────────────────────────────────────────────────
 // 常量
 // ─────────────────────────────────────────────────────────────
 
-const WEAPON_ID = 'KuvaKarak';
+/** 默认打开的模式（武器的第一个攻击模式在 boot 时按实际武器取，见 `firstDisplayMode`） */
 const MODE_ID = 'primary';
-const SLOT_COUNT = 8; // 两行四列
-const EXILUS_INDEX = 8; // 劣化槽
-const MAX_SLOTS = 9;
-
-/** 派系：只显示英文名，默认「无」 */
-const FACTION_OPTIONS = [
-  ['none', '无'],
-  ['grineer', 'Grineer'],
-  ['corpus', 'Corpus'],
-  ['infested', 'Infested'],
-  ['orokin', 'Orokin'],
-  ['murmur', 'Murmur'],
-];
-
-/** 玄骸加成可选元素：冰、火、毒、电、磁力、辐射、冲击 */
-const KUVA_ELEMENTS = ['cold', 'heat', 'toxin', 'electric', 'magnetic', 'radiation', 'impact'];
-
-const ELEMENT_LABEL = {
-  impact: '冲击', puncture: '穿刺', slash: '切割',
-  heat: '火焰', cold: '冰冻', electric: '电击', toxin: '毒素',
-  blast: '爆炸', gas: '毒气', magnetic: '磁力', radiation: '辐射',
-  corrosive: '腐蚀', viral: '病毒', void: '虚空', tau: 'Tau',
-};
-
-const ELEMENT_COLOR = {
-  impact: '#8fa3b8', puncture: '#b8a78f', slash: '#b85f6a',
-  heat: '#e8703a', cold: '#5fb8d8', electric: '#c9a83a', toxin: '#6ab04c',
-  blast: '#d98f5a', gas: '#7fbf5a', magnetic: '#8f7fd8', radiation: '#c8d85a',
-  corrosive: '#8fbf7a', viral: '#b06fc0',
-};
-
-const BUCKET_LABEL = {
-  baseDamage: '基伤', multishot: '多重', elemental: '元素', physical: '物理',
-  critChance: '暴击几率', critMultiplier: '暴击伤害', statusChance: '触发几率',
-  faction: '派系', fireRate: '射速', utility: '通用',
-};
 
 /**
- * 词条 / 属性名的中文表（界面用语统一走这里，不再直接显示英文 key）。
- * 与 `bucketLabel()` 分工：
- *   · 这里管**词条名**（穿透、装填速度……，用于 Mod 卡的数值行）；
- *   · `bucketLabel()` 管**乘区名**（基伤、多重……）。
+ * 启动时的第一把显示模式：取该武器 `modes` 里的第一个。
+ *
+ * 之前用写死的 `MODE_ID = 'primary'`，对没有 `primary` 模式的武器会落到 `modes[0]`；
+ * 现在统一以"第一个模式"为准，换默认武器时不用再跟着改模式 id。
  */
+function firstDisplayMode(weapon) {
+  if (!weapon || !weapon.modes || !weapon.modes.length) return MODE_ID;
+  const own = weapon.modes.find(function (m) { return m.role !== 'incarnon'; }) || weapon.modes[0];
+  return own.id || MODE_ID;
+}
+
+/**
+ * 默认打开的武器（需求方 2026-11-06：「刚打开的时候默认武器是卡拉克，请改成步枪的第一个」）。
+ *
+ * 真正的选择在数据加载之后由 `defaultWeaponId()` 按选单顺序取；
+ * 这里的 id 只是**兜底**（数据里连步枪分类都没有时才会用到）。
+ */
+const WEAPON_ID = 'KuvaKarak';
+
+// ─────────────────────────────────────────────────────────────
+// 常量
+// ─────────────────────────────────────────────────────────────
+
 const STAT_LABEL = {
   accuracy: '精准度',
   ammoEfficiency: '弹药效率',
@@ -115,271 +101,25 @@ function statLabel(stat) {
 }
 
 // ─────────────────────────────────────────────────────────────
-// 状态
+// 状态（D-105：真实状态在 app-store.js 的 store 里，这里只取常用别名）
 // ─────────────────────────────────────────────────────────────
 
-const modSlots = new Array(SLOT_COUNT).fill(null); // 索引 0..7 是 Mod 槽
-let exilusModId = null; // 劣化槽
-let arcaneKey = null; // 赋能
-
-/** 冰冻满层数（与 core 的 FROZEN_FULL_STACKS 保持一致） */
-const FROZEN_FULL_STACKS = 10;
-
-const state = {
-  metric: 'perShot',
-  faction: 'none',
-  headshot: false,
-  headshotMult: 3,
-  kuvaType: 'heat',
-  kuvaRatio: 0.6,
-  /** 镀层：敌人身上的**异况种类数**（需求方 2026-11-06：默认 0，加成随之不生效） */
-  coStatusTypes: 0,
-  coStacks: 0,
-  /** 敌人当前冰冻层数（D-086：次要·冷颤按冰冻层数生效） */
-  coFreezeStacks: 0,
-  filter: 'all',
-  search: '',
-  modeIndex: 0, // 当前选中的攻击模式（D-042：多面板武器可切换）
-  variantIndex: 0, // 当前模式内的面板变体（D-080：直接命中 / 爆炸）
-};
-
-/** `renderAll` 算好的一份贡献上下文（每张卡查提升时复用，避免重复计算） */
-let GAIN_CTX = null;
-
-let DATA = null;
-let dragPayload = null;
-
-/** 当前选中的攻击模式（D-042：多面板武器由右上角的模式按钮切换） */
-function currentMode() {
-  if (!DATA || !DATA.weapon) return null;
-  const modes = DATA.weapon.modes;
-  return modes[Math.min(state.modeIndex, modes.length - 1)] ?? modes[0];
-}
-
-/**
- * 一个模式内**全部变体的全部段**（D-080：模式上不再有 `segments`）。
- *
- * 只给编辑器这类"整段遍历"的场景用；结算与展示请用 `effectiveMode()`（按变体）。
- */
-function modeSegments(m) {
-  if (!m) return [];
-  const out = [];
-  for (const v of m.variants || []) for (const s of v.segments || []) out.push(s);
-  return out;
-}
-
-/**
- * 当前模式内的**面板变体**（D-080）。
- *
- * 命中与爆炸不再挤在同一个面板里：它们是同一模式下的两个独立面板，
- * 各自有自己的触发/暴击与配装。单段模式只有 1 个变体，界面不显示切换。
- */
-function currentVariant() {
-  const m = currentMode();
-  if (!m) return null;
-  const vs = m.variants ?? [];
-  if (vs.length === 0) return null;
-  return vs[Math.min(state.variantIndex, vs.length - 1)] ?? vs[0];
-}
-
-/**
- * 当前变体的**生效模式**：把变体的段与 override 合并成一个扁平模式，
- * 交给 core 计算（core 的 `panelStats` 也支持变体，这里保持单入口）。
- */
-function effectiveMode() {
-  const m = currentMode();
-  if (!m) return null;
-  const v = currentVariant();
-  if (!v) return m;
-  return {
-    ...m,
-    segments: v.segments,
-    ...(v.override ? { override: { ...(m.override ?? {}), ...v.override } } : {}),
-  };
-}
+/** 界面选项状态（派系 / 爆头 / 玄骸 / 镀层 / 筛选 / 当前模式与变体） */
+const state = store.ui;
+/** 8 个 Mod 槽（索引 0..7） */
+const modSlots = store.modSlots;
 
 // ─────────────────────────────────────────────────────────────
 // 工具
 // ─────────────────────────────────────────────────────────────
 
-const $ = function (s) { return document.querySelector(s); };
+const $ = (s) => document.querySelector(s);
 
 function el(tag, cls, text) {
   const n = document.createElement(tag);
   if (cls) n.className = cls;
   if (text !== undefined) n.textContent = text;
   return n;
-}
-
-function fmt(v, d) {
-  d = d === undefined ? 2 : d;
-  return Number.isFinite(v) ? v.toLocaleString('zh-CN', { minimumFractionDigits: d, maximumFractionDigits: d }) : '—';
-}
-
-function fmtPct(v, d) {
-  d = d === undefined ? 2 : d;
-  if (v === null || !Number.isFinite(v)) return '—';
-  return (v >= 0 ? '+' : '') + (v * 100).toFixed(d) + '%';
-}
-
-function bucketLabel(stat) {
-  if (stat.startsWith('elemental:')) return ELEMENT_LABEL[stat.split(':')[1]] || '元素';
-  if (stat.startsWith('physical:')) return ELEMENT_LABEL[stat.split(':')[1]] || '物理';
-  if (stat.startsWith('faction:')) return '派系';
-  if (stat === 'co') return '基伤';
-  return BUCKET_LABEL[stat] || stat;
-}
-
-function spreadTotalOf(s) {
-  let t = 0;
-  const keys = Object.keys(s);
-  for (let i = 0; i < keys.length; i++) t += s[keys[i]] || 0;
-  return t;
-}
-
-function modName(mod) {
-  return mod.name.zh || mod.name.en;
-}
-
-// ─────────────────────────────────────────────────────────────
-// 计算
-// ─────────────────────────────────────────────────────────────
-
-function currentContributions() {
-  const out = [];
-  for (let i = 0; i < SLOT_COUNT; i++) {
-    const id = modSlots[i];
-    if (!id) continue;
-    const mod = DATA.modById.get(id);
-    if (!mod) continue;
-    const list = modToContributions(mod, mod.maxRank, i);
-    for (let j = 0; j < list.length; j++) out.push(list[j]);
-  }
-  if (exilusModId) {
-    const mod = DATA.modById.get(exilusModId);
-    if (mod) {
-      const list = modToContributions(mod, mod.maxRank, EXILUS_INDEX);
-      for (let j = 0; j < list.length; j++) out.push(list[j]);
-    }
-  }
-  if (arcaneKey) {
-    const arc = DATA.arcaneByKey.get(arcaneKey);
-    if (arc) {
-      const list = arcaneToContributions(arc);
-      for (let j = 0; j < list.length; j++) out.push(list[j]);
-    }
-  }
-  return out;
-}
-
-/**
- * 镀层类的可用性：装上带 `co` 词条的 Mod 时显示 a / y 两个下拉框。
- * 叠层上限 y 取该 Mod 数据里的 maxStacks；异况超量常驻生效、恒 1 层。
- */
-function coMaxStacksOf(mod) {
-  const cond = (mod.conditions || []).find(function (c) { return c.group === 'condition_overload'; });
-  if (cond && cond.maxStacks) return cond.maxStacks;
-  return 1;
-}
-
-function coInfo() {
-  let maxStacks = 0;
-  let perStack = 0;
-  const sources = [];
-  for (let i = 0; i < MAX_SLOTS; i++) {
-    const id = i === EXILUS_INDEX ? exilusModId : modSlots[i];
-    if (!id) continue;
-    const mod = DATA.modById.get(id);
-    if (!mod) continue;
-    const co = mod.stats.filter(function (s) { return s.key === 'co'; });
-    if (!co.length) continue;
-    for (let j = 0; j < co.length; j++) {
-      perStack += co[j].levelValues[co[j].levelValues.length - 1];
-    }
-    maxStacks = Math.max(maxStacks, coMaxStacksOf(mod));
-    sources.push(modName(mod));
-  }
-  return { active: sources.length > 0, maxStacks: Math.max(1, maxStacks), perStack: perStack, sources: sources };
-}
-
-
-/**
- * 类镀层（只认单一异常状态层数的加成，D-086）：次要·冷颤 `coFreeze`。
- * 与 `coInfo` 分开：它按**冰冻层数**算，不按异况种类数。
- */
-function freezeInfo() {
-  let perStack = 0;
-  const sources = [];
-  for (let i = 0; i < MAX_SLOTS; i++) {
-    const id = i === EXILUS_INDEX ? exilusModId : modSlots[i];
-    if (!id) continue;
-    const mod = DATA.modById.get(id);
-    if (!mod) continue;
-    const st = mod.stats.filter(function (s) { return s.key === 'coFreeze'; });
-    if (!st.length) continue;
-    for (let j = 0; j < st.length; j++) perStack += st[j].levelValues[st[j].levelValues.length - 1];
-    sources.push(modName(mod));
-  }
-  return { active: sources.length > 0, perStack: perStack, sources: sources };
-}
-
-function computeOptions() {
-  const co = coInfo();
-  const fc = freezeInfo();
-  const opts = {
-    // ⚠ 非玄骸武器必须**真的不传**元素加成：界面隐藏控件只是显示层，
-    //   计算层仍会按 kuva 加一份伤害，导致"加成条没了但伤害分布里还有"。
-    kuva: DATA && DATA.isKuva ? { type: state.kuvaType, ratio: state.kuvaRatio } : null,
-    faction: state.faction,
-    headshot: { enabled: state.headshot, multiplier: state.headshotMult },
-  };
-  if (co.active) {
-    // 敌人身上的**异常状态数量**（需求方 2026-11-06：配置里加一个框，默认 0）
-    // 只服务镀层系列；冷颤固定 10 层，不读这里
-    opts.coStatusTypes = state.coStatusTypes;
-  }
-  if (co.active) {
-    opts.coStacks = state.coStacks > 0 ? state.coStacks : co.maxStacks;
-  }
-  return opts;
-}
-
-function runCompute(contribs) {
-  return compute(DATA.weapon, effectiveMode(), contribs, computeOptions(), false);
-}
-
-function metricValueOf(res) {
-  const lines = res.output.lines;
-  for (let i = 0; i < lines.length; i++) if (lines[i].id === state.metric) return lines[i].value;
-  return 0;
-}
-
-/**
- * 某件已装装备（Mod / 赋能）对**当前指标**的贡献幅度。
- *
- * 定义（需求方 2026-11-06）：「已安装的 mod 也展示自身提供的贡献百分比，
- * 即为相对于不上这张 mod 的提升数值」。
- *
- * ```
- * 提升 = (当前指标 - 拿掉该装备后的指标) / 拿掉该装备后的指标
- * ```
- *
- * 实现：把该装备从贡献列表里剔除后重算一次，与当前值相比。
- * ⚠ 这是**边际贡献**，不是可加和的份额：两张同乘区的卡各算各的，加起来不等于总值，
- *    这正是需求方要的"相对于不上这张"的口径。
- *
- * @param contribs 当前全部贡献
- * @param current  当前指标值（已算好，避免重复调用）
- * @param sourceId 要剔除的装备来源 id（`Contribution.source`）
- * @returns 提升比例（0.25 = +25%）；无法计算时返回 null
- */
-function marginalGainOf(contribs, current, sourceId) {
-  const rest = [];
-  for (let i = 0; i < contribs.length; i++) if (contribs[i].source !== sourceId) rest.push(contribs[i]);
-  if (rest.length === contribs.length) return null; // 该装备没有产出任何贡献
-  const without = metricValueOf(runCompute(rest));
-  if (!(without > 0)) return null; // 拿掉后为 0（或负数）→ 比例无意义
-  return current / without - 1;
 }
 
 /** 百分比格式：带符号、一位小数 */
@@ -402,49 +142,43 @@ function gainBadge(gain) {
   return wrap;
 }
 
-/**
- * 劣化槽只接受"不影响伤害"的功能类 Mod。
- *
- * ⚠ 数据里 `reloadSpeed`（装填速度）与 `magazine`（弹匣容量）被标成 `functional/utility`，
- *   但两者都**直接影响「持续伤害」口径**：
- *   ```
- *   持续伤害 = 单次射击 × 弹匣 ÷ (弹匣 ÷ 射速 + 装填时间)
- *   装填时间 = 面板装填 ÷ (1 + Σ装填速度%)
- *   ```
- *   所以它们属于**影响伤害**的词条，不能当纯功能卡塞进劣化槽（D-037）。
- *   同理 `fireRate` / `multishot` / `statusChance` 等一律按"影响伤害"处理。
- */
-const DAMAGE_AFFECTING_STATS = new Set([
-  'baseDamage', 'multishot', 'fireRate', 'statusChance', 'statusDamage', 'statusDuration',
-  'critChance', 'critMultiplier', 'weakpointCritChance', 'weakpointDamage',
-  'reloadSpeed', 'magazine', 'slashOnCrit', 'impactToSlash',
-]);
-
-function isExilusMod(mod) {
-  const stats = mod.stats;
-  if (!stats.length) return false;
-  for (let i = 0; i < stats.length; i++) {
-    const s = stats[i];
-    // ① 有进伤害乘区的词条
-    if (s.bucket && s.bucket !== 'utility') return false;
-    // ② 虽然是 utility，但影响伤害（装填 / 弹匣等，D-037）
-    if (DAMAGE_AFFECTING_STATS.has(s.stat)) return false;
-    if (s.stat.indexOf('elemental:') === 0 || s.stat.indexOf('physical:') === 0) return false;
-    if (s.key === 'co') return false;
-  }
-  return true;
+/** 当前选中攻击模式（D-042：多面板武器由右上角的模式按钮切换） */
+function currentMode() {
+  const d = store.data;
+  if (!d || !d.weapon) return null;
+  const modes = d.weapon.modes;
+  return modes[Math.min(state.modeIndex, modes.length - 1)] ?? modes[0];
 }
 
 /**
- * 这件 Mod 能不能装到当前武器上（D-091）。
+ * 一个模式内**全部变体的全部段**（D-080：模式上不再有 segments）。
  *
- * 半自动炮轰系列（Semi-*-Cannonade）要求「只有一个射击模式，且该模式为半自动」，
- * 并且**只看武器本身的射击模式**——灵化模式是后加上去的，不参与判定。
+ * ⚠ app.js 不是模块（没有 import/export 之外的模块语法以外的包装），
+ *   ui-editor.js 里有一份同义实现，改这里要同步改那边。
  */
-function isModAllowedOnWeapon(mod) {
-  if (!DATA || !DATA.weapon) return true;
-  if (isSemiCannonade(mod)) return isSemiAutoOnlyWeapon(DATA.weapon.modes);
-  return true;
+function modeSegments(m) {
+  if (!m) return [];
+  const out = [];
+  for (const v of m.variants || []) for (const s of v.segments || []) out.push(s);
+  return out;
+}
+
+/** 当前模式内的**面板变体**（D-080）。 *
+ * 命中与爆炸不再挤在同一个面板里：它们是同一模式下的两个独立面板，
+ * 各自有自己的触发/暴击与配装。单段模式只有 1 个变体，界面不显示切换。
+ */
+function currentVariant() {
+  const m = currentMode();
+  if (!m) return null;
+  const vs = m.variants ?? [];
+  if (vs.length === 0) return null;
+  return vs[Math.min(state.variantIndex, vs.length - 1)] ?? vs[0];
+}
+
+/** 当前变体的**生效模式**：把变体的段与 override 合并后交给 core（实现在 app-compute.js） */
+function effectiveMode() {
+  const d = store.data;
+  return d ? effectiveModeFor(d.weapon, state) : null;
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -452,7 +186,7 @@ function isModAllowedOnWeapon(mod) {
 // ─────────────────────────────────────────────────────────────
 
 function renderHeader() {
-  const w = DATA.weapon;
+  const w = store.data.weapon;
   // D-101：数据有问题时标题后面挂一个标记，鼠标悬停看原因
   const issues = issuesOf(w.id);
   const titleEl = $('#weapon-title');
@@ -484,7 +218,7 @@ function renderModeSwitch() {
   const box = $('#mode-switch');
   if (!box) return;
   box.innerHTML = '';
-  const modes = DATA.weapon.modes;
+  const modes = store.data.weapon.modes;
 
   // 第一排：模式（单模式武器不显示）
   if (modes.length > 1) {
@@ -493,7 +227,7 @@ function renderModeSwitch() {
       const m = modes[i];
       const btn = el('button', 'mode-btn' + (i === state.modeIndex ? ' active' : ''), MODE_LABEL[m.id] || m.id);
       btn.type = 'button';
-      btn.title = m.id + ' · ' + m.trigger;
+      btn.title = m.id + ' · ' + m.trigger + (m._note ? '\n' + m._note : '');
       (function (idx) {
         btn.addEventListener('click', function () {
           state.modeIndex = idx;
@@ -541,14 +275,19 @@ const MODE_LABEL = {
  * **非玄骸武器完全隐藏**（连标题一起）。
  */
 function renderKuvaVisibility() {
-  const isKuva = Boolean(DATA.isKuva);
+  const isKuva = Boolean(store.data.isKuva);
   const controls = $('#kuva-controls');
   if (controls) {
     controls.style.display = isKuva ? '' : 'none';
-    // 标题紧跟在它前面
+    // 标题紧跟在它前面（`index.html` 的结构不会变，用兄弟节点找不到就退回按 id 设置）
     const title = controls.previousElementSibling;
     if (title && title.classList && title.classList.contains('section-title')) {
       title.style.display = isKuva ? '' : 'none';
+    } else {
+      for (const id of ['kuva-title', 'kuva-section-title']) {
+        const t = $('#' + id);
+        if (t) t.style.display = isKuva ? '' : 'none';
+      }
     }
   }
 }
@@ -559,7 +298,7 @@ function renderKuvaVisibility() {
 
 function renderPanel(res) {
   const p = res.panelPairs;
-  const w = DATA.weapon;
+  const w = store.data.weapon;
 
   // ⚠ 两列必须用**同一套格式**：「当前」列的差异高亮是拿显示串比较的（`isChanged`），
   //   基础列写 1.00、当前列写 1.000，就会把"没变化"判成"变了"。
@@ -576,16 +315,45 @@ function renderPanel(res) {
     ['装填时间', p.reloadTime.base.toFixed(3) + ' 秒', p.reloadTime.after.toFixed(3) + ' 秒'],
   ];
 
+  // D-125：弹药效率（主要·准星 / 次要·妨害 / 头颅射击…）体现在「等效弹匣」上。
+  // 以前这只在内核 `state.computed.等效弹匣` 里算，**面板没有这一行**，
+  // 上了准星左边面板看不出任何变化。有弹药效率时补一行「等效弹匣」。
+  {
+    const c = res.state && res.state.computed;
+    const mul = c && c.弹药效率倍数;
+    if (typeof mul === 'number' && Math.abs(mul - 1) > 1e-9) {
+      const now = c.等效弹匣;
+      const base = p.magazineSize.base;
+      rows.push([
+        '等效弹匣',
+        base.toFixed(2),
+        now.toFixed(2) + '（×' + mul.toFixed(3) + '）',
+      ]);
+    }
+  }
+
   fillRows('#panel-table', ['属性', '基础面板', '当前面板'], rows);
 
+  // 伤害分布三列（Q5 定案，需求方 2026-11-06）：
+  //   「基础面板 = 加了玄骸的，当前面板含其他加成。因为玄骸加成这部分表现的就是基础面板加成。」
+  //
   // ⚠ 基础列必须取**该变体所有段**的伤害合计，不能只取 segments[0]：
   //   血肢（Hema）的自带病毒在 attack 段、impact 段只有物理三元素，
   //   只读第一段会把自带病毒漏掉（需求方 2026-11-06 反馈）。
+  // 基础列 = 每段面板 ⊕ 玄骸加成（`res` 里每段的 `panelWithKuva`）。
   const orig = {};
-  const curVariant = currentVariant();
-  for (const s of (curVariant ? curVariant.segments : effectiveMode().segments)) {
-    for (const [t, v] of Object.entries(s.damage)) {
+  for (const s of res.segments || []) {
+    for (const [t, v] of Object.entries(s.panelWithKuva || s.panel || {})) {
       if (typeof v === 'number' && v !== 0) orig[t] = (orig[t] || 0) + v;
+    }
+  }
+  // 兜底：内核没给出分段结果时退回原始面板（非玄骸武器两者相同）
+  if (!res.segments || res.segments.length === 0) {
+    const curVariant = currentVariant();
+    for (const s of (curVariant ? curVariant.segments : effectiveMode().segments)) {
+      for (const [t, v] of Object.entries(s.damage)) {
+        if (typeof v === 'number' && v !== 0) orig[t] = (orig[t] || 0) + v;
+      }
     }
   }
   // ⚠ 当前列必须用**当前变体**的分布，不能用 res.totalSpread：
@@ -820,7 +588,7 @@ function renderSlots() {
 /** 让任意卡片既能作为拖出源，也能作为放置目标（不接受时显示禁止符号） */
 function makeDropTarget(card, accepts, onDrop) {
   card.addEventListener('dragover', function (e) {
-    const ok = Boolean(dragPayload) && accepts(dragPayload);
+    const ok = Boolean(store.dragPayload) && accepts(store.dragPayload);
     // 不接受时**不** preventDefault → 浏览器显示禁止符号，drop 也不会触发（回位）
     if (!ok) {
       card.classList.remove('drop-target');
@@ -832,27 +600,27 @@ function makeDropTarget(card, accepts, onDrop) {
   });
   card.addEventListener('dragleave', function () { card.classList.remove('drop-target'); });
   card.addEventListener('drop', function (e) {
-    if (!dragPayload || !accepts(dragPayload)) return;
+    if (!store.dragPayload || !accepts(store.dragPayload)) return;
     e.preventDefault();
     card.classList.remove('drop-target');
     dropHappened = true; // 成功放进配置区，dragend 时不再卸下
-    onDrop(dragPayload);
-    dragPayload = null;
+    onDrop(store.dragPayload);
+    store.dragPayload = null;
   });
 }
 
 function makeDraggable(card, payload) {
   card.draggable = true;
   card.addEventListener('dragstart', function (e) {
-    dragPayload = payload;
+    store.dragPayload = payload;
     dropHappened = false;
     card.classList.add('dragging');
     if (e.dataTransfer) e.dataTransfer.setData('text/plain', payload.id || payload.key || '');
   });
   card.addEventListener('dragend', function () {
     card.classList.remove('dragging');
-    const p = dragPayload;
-    dragPayload = null;
+    const p = store.dragPayload;
+    store.dragPayload = null;
     // D-040：没能放进配置区 → 视为卸下（拖出配置区 / 拖到备选区 都算）
     if (p && !dropHappened && p.from !== 'list' && p.from !== 'slot-picker') {
       removeByPayload(p);
@@ -864,19 +632,22 @@ function makeDraggable(card, payload) {
 /** 按拖动载荷卸下对应内容 */
 function removeByPayload(p) {
   if (p.kind === 'mod') {
-    if (p.from === 'exilus') { exilusModId = null; renderAll(); return; }
+    // 劣化槽里的卡载荷带 `exilus: true`，但 `makeDraggable` 里写的是 `from: 'exilus'`（两种写法都认）
+    if (p.from === 'exilus' || p.exilus) { store.exilusModId = null; renderAll(); return; }
     if (typeof p.index === 'number' && modSlots[p.index]) { modSlots[p.index] = null; renderAll(); }
     return;
   }
-  if (p.kind === 'arcane') { arcaneKey = null; renderAll(); }
+  if (p.kind === 'arcane') { store.arcaneKey = null; renderAll(); }
 }
 
 function statChips(mod) {
+  // D-116：无限叠层类（弹能过继等）的值按「每层 × 满层」显示，与内核取的值一致
+  const stacks = modStackFactor(mod.id);
   const wrap = el('div', 'slot-stats');
   for (let i = 0; i < mod.stats.length; i++) {
     const s = mod.stats[i];
     if (!s.bucket || s.bucket === 'utility') continue;
-    const max = s.levelValues[s.levelValues.length - 1];
+    const max = s.levelValues[s.levelValues.length - 1] * stacks;
     wrap.append(el('span', 'slot-stat', statLabel(s.stat) + ' ' + (max > 0 ? '+' : '') + max));
   }
   return wrap;
@@ -888,7 +659,7 @@ function statChips(mod) {
  */
 function unequipAllMods() {
   for (let i = 0; i < SLOT_COUNT; i++) modSlots[i] = null;
-  exilusModId = null;
+  store.exilusModId = null;
   renderAll();
 }
 
@@ -904,7 +675,24 @@ function unequipAllMods() {
  */
 let dropHappened = false;
 
-/** 普通 Mod 槽：放 Mod，或作为已有 Mod 的换位/插入目标 */
+/**
+ * 已装卡上的贡献徽标（D-117）。
+ *
+ * 普通卡：`gainOf`（拿掉它重算）。镀层类卡：拿掉后「异况数 × 层数」也没了，
+ * 边距贡献的定义依然成立，但 `gainOf` 在"拿掉后指标为 0"时返回 null（界面不显示），
+ * 而镀层卡恰恰是唯一能带来"全部基伤"的卡之一——改用 `coModGain` 的口径（装上 vs 当前）。
+ */
+function coSlotGain(mod) {
+  if (mod && isConditionOverloadMod(mod)) {
+    const g = coModGain(mod);
+    if (g !== null) return g;
+  }
+  return gainOf(mod ? mod.id : null);
+}
+
+/**
+ * 普通 Mod 槽：放 Mod，或作为已有 Mod 的换位/插入目标
+ */
 function modSlotCard(index) {
   const card = el('div', 'slot');
   card.append(el('div', 'slot-title', '槽位 ' + (index + 1)));
@@ -912,11 +700,13 @@ function modSlotCard(index) {
   const id = modSlots[index];
 
   if (id) {
-    const mod = DATA.modById.get(id);
+    const mod = store.data.modById.get(id);
     body.append(el('div', 'slot-name', modName(mod)));
     body.append(statChips(mod));
     // 需求方 2026-11-06：显示这张卡相对「不上它」时当前指标的提升
-    const g = gainBadge(gainOf(id));
+    // D-117：镀层类卡单独处理——拿掉它连「异况数 × 层数」一起没了，
+    //   而 `gainOf` 在"拿掉后指标为 0"时返回 null（界面上就不显示增长了），所以改用同一套推演
+    const g = gainBadge(coSlotGain(mod));
     if (g) body.append(g);
     // D-040：去掉「卸下」按钮，改为把卡片拖出 Mod 配置区即卸下
     makeDraggable(card, { kind: 'mod', id: id, from: 'slot', index: index });
@@ -929,93 +719,165 @@ function modSlotCard(index) {
   return card;
 }
 
-/** 劣化槽：只接受功能类 Mod */
+/** 劣化槽：只接受功能类 Mod（D-127：与普通 Mod 槽同尺寸，槽名写在卡片右上角） */
 function exilusSlotCard() {
   const card = el('div', 'slot exilus');
-  card.append(el('div', 'slot-title', '劣化槽'));
+  card.append(el('span', 'slot-chip', '劣化槽'));
   const body = el('div', 'slot-body');
 
-  if (exilusModId) {
-    const mod = DATA.modById.get(exilusModId);
+  if (store.exilusModId) {
+    const mod = store.data.modById.get(store.exilusModId);
     body.append(el('div', 'slot-name', modName(mod)));
-    const g = gainBadge(gainOf(exilusModId));
+    const g = gainBadge(gainOf(store.exilusModId));
     if (g) body.append(g);
     // D-040：去掉「卸下」按钮，改为拖出配置区即卸下
-    makeDraggable(card, { kind: 'mod', id: exilusModId, exilus: true, from: 'exilus' });
+    makeDraggable(card, { kind: 'mod', id: store.exilusModId, exilus: true, from: 'exilus' });
   } else {
     body.append(el('div', 'slot-empty', '拖入功能 Mod'));
   }
   card.append(body);
 
+  /**
+   * 劣化槽的**劣化槽内**位置：功能 Mod 从备选区拖进来。
+   *   · 劣化槽为空 → 放进去；
+   *   · 劣化槽已有卡 → 互换（D-115）：原来那张回备选区，新卡占位。
+   * 功能类 Mod 只能出现在劣化槽，所以不会有"槽位之间互换"这一路。
+   */
   makeDropTarget(
     card,
     function (p) { return p.kind === 'mod' && p.exilus; },
-    function (p) { placeMod(p.id, EXILUS_INDEX); },
+    function (p) { dropOnExilus(p); },
   );
   return card;
 }
 
-/** 赋能槽 */
+/**
+ * 放到劣化槽。D-115：劣化槽已有卡时**互换**（那张回备选区），不再静默顶掉。
+ */
+function dropOnExilus(payload) {
+  const mod = store.data.modById.get(payload.id);
+  if (!mod) return;
+  if (!isModAllowedOnWeapon(mod)) {
+    flash('半自动炮轰系列只能装在只有半自动射击模式的武器上');
+    return;
+  }
+  store.exilusModId = payload.id;
+  renderAll();
+}
+
+/** 赋能槽（D-127：与普通 Mod 槽同尺寸，槽名写在卡片右上角） */
 function arcaneSlotCard() {
   const card = el('div', 'slot arcane');
-  card.append(el('div', 'slot-title', '赋能'));
+  card.append(el('span', 'slot-chip', '赋能'));
   const body = el('div', 'slot-body');
 
-  if (arcaneKey) {
-    const arc = DATA.arcaneByKey.get(arcaneKey);
+  if (store.arcaneKey) {
+    const arc = store.data.arcaneByKey.get(store.arcaneKey);
     body.append(el('div', 'slot-name', arc.name.zh || arc.name.en));
+    // D-116：装备区同样要显示词条（D-127：与普通 Mod 槽一样用 slot-stats 包一层）
+    const arcChips = arcaneStatChips(arc);
+    if (arcChips.length) {
+      const wrap = el('div', 'slot-stats');
+      for (const st of arcChips) wrap.append(st);
+      body.append(wrap);
+    }
     // 赋能同样显示边际贡献（source 用 arcane.key）
-    const g = gainBadge(gainOf(arcane.key));
+    // ⚠ 原来这里误用了不存在的变量 `arcane.key`，有赋能在槽里时每次重渲染都 ReferenceError（D-115 发现）
+    const g = gainBadge(gainOf(store.arcaneKey));
     if (g) body.append(g);
     // D-040：赋能同样拖出配置区即卸下
-    makeDraggable(card, { kind: 'arcane', key: arcaneKey, from: 'arcane' });
+    makeDraggable(card, { kind: 'arcane', key: store.arcaneKey, from: 'arcane' });
   } else {
     body.append(el('div', 'slot-empty', '拖入赋能'));
   }
   card.append(body);
 
+  // ── 赋能槽（D-115 / D-134）：与 Mod 槽 / 劣化槽同一套处理 ——
+  //   · 拖「正在算的这把武器所属大类」的赋能进来：空槽就放、已有赋能就**互换**（旧的回列表）；
+  //   · 拖别的大类的赋能进来（例如近战赋能拖到主要武器上）：**不接受**（禁止符号），
+  //     以前这里只看 `p.kind === 'arcane'`，会静默把槽里那张顶掉并换上不属于本大类的赋能。
+  const targetKey = store.arcaneKey;
+  const targetArc = targetKey ? store.data.arcaneByKey.get(targetKey) : null;
+  const targetPayload = targetKey
+    ? { kind: 'arcane', key: targetKey, category: targetArc ? targetArc.category : undefined }
+    : null;
   makeDropTarget(
     card,
-    function (p) { return p.kind === 'arcane'; },
-    function (p) { arcaneKey = p.key; renderAll(); },
+    function (p) { return arcaneSlotAccepts(p, targetPayload); },
+    function (p) { dropOnArcane(p); },
   );
   return card;
 }
 
-/** 8 个 Mod 槽里还有空位吗（D-034：全满时拒绝从备选区拖入） */
-function hasEmptyModSlot() {
-  for (let i = 0; i < SLOT_COUNT; i++) if (!modSlots[i]) return true;
-  return false;
-}
-
-/** 槽位是否接受这次拖拽（决定"允许放置"还是"禁止符号"） */
-function slotAcceptsMod(payload, targetIndex) {
-  // 赋能不能进 Mod 槽
-  if (payload.kind !== 'mod') return false;
-  // 功能类只能进劣化槽
-  if (payload.exilus) return false;
-  // 目标槽若已有 Mod → 拒绝，避免"不小心把已装 Mod 顶掉"（D-038）
-  if (targetIndex !== undefined && modSlots[targetIndex]) return false;
-  // 从槽位间移动不受空位限制
-  if (payload.from === 'slot') return true;
-  // 从备选区拖入：必须还有空位
-  return hasEmptyModSlot();
+/**
+ * 赋能槽是否接受这次拖拽（D-134）——规则与 Mod 槽一致：
+ * 空槽接受、已占用就互换；**但只接受本武器大类可用的赋能**。
+ */
+function arcaneSlotAccepts(payload, targetPayload) {
+  if (!payload || payload.kind !== 'arcane') return false;
+  const arc = store.data && store.data.arcaneByKey.get(payload.key);
+  // D-138：判定统一走 `isArcaneUsableOn`（主手霰弹 / 弓额外可装专属赋能，副手霰弹只走次要）
+  if (arc && !isArcaneUsableOn(arc, store.data.weapon, store.data.slotEntry)) return false;
+  // 从别的槽位拖来（目前没有"赋能槽之间"的移动）——占位判断统一交给 `dropOnArcane`
+  void targetPayload;
+  return true;
 }
 
 /**
- * 把 Mod 放到目标槽（D-034 的"紧凑前移"语义）。
+ * 放到赋能槽（D-134）：空槽直接放；已有赋能则**互换**（旧赋能回列表，与劣化槽一致）。
+ */
+function dropOnArcane(payload) {
+  const arc = store.data.arcaneByKey.get(payload.key);
+  if (!arc) return;
+  // 本武器能装的赋能（D-138，与 `.slot-wrap` 的禁止符号判定同一套规则）
+  if (!isArcaneUsableOn(arc, store.data.weapon, store.data.slotEntry)) {
+    flash('这个赋能不能装在本武器上');
+    return;
+  }
+  store.arcaneKey = payload.key;
+  renderAll();
+}
+
+/** 赋能大类 → 中文（报错文案用） */
+const ARCANE_CATEGORY_LABEL = {
+  primary: '主要',
+  secondary: '次要',
+  bow: '弓箭',
+  shotgun: '霰弹',
+  melee: '近战',
+  kitgun: '组合枪',
+};
+
+/**
+ * 槽位是否接受这次拖拽（决定"允许放置"还是"禁止符号"）。D-115：占用不再一律拒绝。
+ *
+ * | 拖拽       | 目标空槽 | 目标已占用                          |
+ * |------------|----------|-------------------------------------|
+ * | 备选区 Mod | 接受     | **互换**（被替换的那张回备选区）     |
+ * | 槽位 Mod   | 接受     | **两个槽位互换**                     |
+ *
+ * 功能类（劣化）Mod 永远只能进劣化槽，普通槽对它一律不接受。
+ */
+function slotAcceptsMod(payload, targetIndex) {
+  // 赋能不能进 Mod 槽
+  if (payload.kind !== 'mod') return false;
+  // 功能类只能进劣化槽（D-034）
+  if (payload.exilus) return false;
+  return true;
+}
+
+/**
+ * 把 Mod 放到目标槽。D-115：**落到哪张卡上就和那张卡互换**。
  *
  * ```
- * 拖到位置 k：把"从新 Mod 到 k"这一段里已有的 Mod 按紧凑规则重排，
- *            空洞被填上，新 Mod 占在 k。
- *   例：槽位 3 空、拖到槽位 6
- *       → 槽位 4/5/6 依次前移，填上 3；
- *       → 新 Mod 落在槽位 6。
+ * · 从其它槽拖来   → 两个槽位直接互换（源槽拿走目标槽原来的那张）；
+ * · 从备选区拖来   → 目标槽原来那张退回备选区，新 Mod 占位；
+ * · 目标槽是空的   → 直接放进去，其他槽一律不动（D-035，不做自动紧凑）；
+ * · 拖的就是目标槽 → 什么都不做（不卸载、不动）。
  * ```
- * 前后移动同理，所以永远不会把已有 Mod 剔除。
  */
 function dropOnSlot(payload, targetIndex) {
-  const mod = DATA.modById.get(payload.id);
+  const mod = store.data.modById.get(payload.id);
   if (!mod) return;
   // D-091：武器不满足装备条件
   if (!isModAllowedOnWeapon(mod)) {
@@ -1028,23 +890,19 @@ function dropOnSlot(payload, targetIndex) {
   }
 
   if (payload.from === 'slot' && typeof payload.index === 'number') {
-    // D-038：目标槽已占用则拒绝（拖到已占用的槽显示禁止符号，不会顶掉别人的 Mod）
-    if (modSlots[targetIndex]) return;
-    modSlots[targetIndex] = modSlots[payload.index];
-    modSlots[payload.index] = null;
+    if (payload.index === targetIndex) return; // 拖回原位：不动
+    swapSlots(payload.index, targetIndex);
   } else {
-    // 目标槽已占用则拒绝
-    if (modSlots[targetIndex]) return;
-    insertCompact(payload.id, targetIndex);
+    insertAt(payload.id, targetIndex);
   }
   renderAll();
 }
 
 /**
- * 槽位内移动（D-035）：**直接交换两个位置**，不做整体平移、不做自动紧凑。
- * 放在哪个位置就是哪个位置，空槽就保持空着。
+ * 两个槽位直接交换（D-035 槽位间移动 / D-115 拖到已占用槽 = 互换，共用这一份）。
+ * 不做整体平移、不做自动紧凑；任一侧为空就保持空着。
  */
-function moveWithinSlots(from, to) {
+function swapSlots(from, to) {
   if (from === to) return;
   const a = modSlots[from];
   const b = modSlots[to];
@@ -1053,48 +911,68 @@ function moveWithinSlots(from, to) {
 }
 
 /**
- * 从备选区拖入（D-035）：**放在哪个位置就是哪个位置**，不做自动紧凑。
+ * 「拖到备选区的**某张卡**上」= 与该卡互换（D-115）。
+ *
+ * 整块备选区才是「拖回来卸下」（D-040）；落在某张卡上时卡片会拦下 drop，这里处理：
+ *
+ * | 从哪拖来                 | 目标卡    | 结果                                             |
+ * |--------------------------|-----------|--------------------------------------------------|
+ * | 槽位里的 Mod             | 备选 Mod  | 两张互换：目标卡进源槽，槽里那张回备选区         |
+ * | 其它槽位里的 Mod         | 备选 Mod  | 同上（源槽腾空）                                 |
+ * | 赋能槽里的赋能           | 备选赋能  | 两个赋能互换                                     |
+ * | 从备选区拖来 / 类型不符  | 备选卡    | 不接受 → 交给 `#candidate-list` 的 drop = 卸下   |
+ *
+ * 目标卡是什么类型只看**卡自己**（`p.kind`），不看它在备选区的哪一栏，避免选单筛选后错配。
+ */
+function candidateCardAccepts(targetPayload) {
+  const p = store.dragPayload;
+  if (!p || !targetPayload) return false;
+  if (p.kind !== targetPayload.kind) return false;
+  if (p.from === 'list') return false;
+  if (p.kind === 'mod') {
+    // 劣化槽 ↔ 备选**功能类** Mod：直接互换（顺手修掉"旧卡被静默顶掉"）
+    if (p.from === 'exilus') return Boolean(targetPayload.exilus);
+    // 普通槽 ↔ 普通备选 Mod：互换（功能 Mod 不能进普通槽）
+    if (p.from === 'slot') return !targetPayload.exilus;
+    return false;
+  }
+  if (p.kind === 'arcane') {
+    // D-134：只允许换到**同一大类**的赋能卡上（近战赋能不能换到主要赋能槽里）
+    return p.from === 'arcane' && (!p.category || !targetPayload.category || p.category === targetPayload.category);
+  }
+  return false;
+}
+
+function swapWithCandidateCard(targetPayload) {
+  const p = store.dragPayload;
+  if (p.kind === 'mod' && p.from === 'exilus') {
+    // 劣化槽现有卡 ↔ 备选区功能 Mod
+    store.exilusModId = targetPayload.id || null;
+  } else if (p.kind === 'mod') {
+    // 普通槽 ↔ 备选区 Mod：槽里那张回备选区（= 清空源槽），目标卡占源槽
+    insertAt(targetPayload.id, p.index);
+  } else if (p.kind === 'arcane') {
+    store.arcaneKey = targetPayload.key || null;
+  }
+  renderAll();
+}
+
+/**
+ * 从备选区拖入（D-035 / D-115）：**放在哪个位置就是哪个位置**，不做自动紧凑。
  *
  * ```
  * · 目标槽为空     → 直接放进去，其他槽一律不动；
- * · 目标槽已有 Mod → 原来那张退回备选区，新 Mod 占位，其他槽不动。
+ * · 目标槽已有 Mod → 原来那张退回备选区（换位），新 Mod 占位，其他槽不动。
  * ```
  * 空出来的槽保持空着，后面的 Mod **不会**自动前移填洞（这是 D-035 对 D-034 的修订）。
  */
-function insertCompact(modId, index) {
+function insertAt(modId, index) {
   const out = modSlots.slice();
   const existing = out.indexOf(modId);
   if (existing >= 0) out[existing] = null;
   // 目标位原内容退回备选区（不挪到其它槽）
   out[index] = modId;
   for (let i = 0; i < SLOT_COUNT; i++) modSlots[i] = out[i];
-}
-
-function placeMod(modId, index) {
-  const mod = DATA.modById.get(modId);
-  if (!mod) return;
-  // D-091：武器不满足装备条件（半自动炮轰系列要求纯半自动武器）
-  if (!isModAllowedOnWeapon(mod)) {
-    flash('半自动炮轰系列只能装在只有半自动射击模式的武器上');
-    return;
-  }
-  if (index === EXILUS_INDEX) {
-    if (!isExilusMod(mod)) {
-      flash('劣化槽只能放入功能类 Mod');
-      return;
-    }
-    exilusModId = modId;
-  } else {
-    if (isExilusMod(mod)) {
-      flash('功能类 Mod 只能放入劣化槽');
-      return;
-    }
-    const existing = modSlots.indexOf(modId);
-    if (existing >= 0) modSlots[existing] = null;
-    modSlots[index] = modId;
-  }
-  dragPayload = null;
-  renderAll();
 }
 
 let toastTimer = null;
@@ -1187,11 +1065,11 @@ function matchesFilter(mod, filter) {
  */
 function simulateEquip(mod, exilus) {
   if (exilus) {
-    if (exilusModId) return null; // 劣化槽已占用
-    const saved = exilusModId;
-    exilusModId = mod.id;
+    if (store.exilusModId) return null; // 劣化槽已占用
+    const saved = store.exilusModId;
+    store.exilusModId = mod.id;
     const c = currentContributions();
-    exilusModId = saved;
+    store.exilusModId = saved;
     return c;
   }
 
@@ -1215,11 +1093,11 @@ function renderCandidates(res) {
   list.innerHTML = '';
 
   const rows = [];
-  const mods = DATA.availableMods;
+  const mods = store.data.availableMods;
   // 已装备的 Mod 不在备选区重复显示（D-034）
   const installed = new Set();
   for (let i = 0; i < SLOT_COUNT; i++) if (modSlots[i]) installed.add(modSlots[i]);
-  if (exilusModId) installed.add(exilusModId);
+  if (store.exilusModId) installed.add(store.exilusModId);
 
   for (let i = 0; i < mods.length; i++) {
     const mod = mods[i];
@@ -1231,10 +1109,12 @@ function renderCandidates(res) {
     if (state.search && name.toLowerCase().indexOf(state.search.toLowerCase()) < 0) continue;
 
     const exilus = isExilusMod(mod);
-    // 模拟"装备这张 Mod"：找第一个空位放进去，
-    // **不能**直接替换已装备的 Mod —— 那样会把原有收益一起算掉，出现大把负数。
-    const nextContribs = simulateEquip(mod, exilus);
-    let gain = null;
+    // 模拟"装备这张 Mod"：优先空位、没有空位就**替换收益最差的那张**（D-115 之后满槽也能换）。
+    // 不能直接替换已装备的 Mod —— 那样会把原有收益一起算掉，出现大把负数。
+    // D-117：镀层类卡的收益要吃「异况数 × 层数」，走 `coModGain`（配置区不再显示推演小字）
+    const coGain = coModGain(mod);
+    const nextContribs = coGain === null ? simulateEquip(mod, exilus) : null;
+    let gain = coGain;
     if (nextContribs && baseValue !== 0) {
       gain = metricValueOf(runCompute(nextContribs)) / baseValue - 1;
     }
@@ -1248,13 +1128,18 @@ function renderCandidates(res) {
   });
 
   for (let i = 0; i < rows.length; i++) list.append(candidateCard(rows[i]));
-  $('#candidate-count').textContent = rows.length + ' / ' + DATA.availableMods.length;
+  $('#candidate-count').textContent = rows.length + ' / ' + store.data.availableMods.length;
 }
 
 function candidateCard(row) {
   const mod = row.mod;
   const card = el('div', 'cand');
-  makeDraggable(card, { kind: 'mod', id: mod.id, exilus: row.exilus, from: 'list' });
+  const payload = { kind: 'mod', id: mod.id, exilus: row.exilus, from: 'list' };
+  makeDraggable(card, payload);
+  // D-115：把已装备的卡拖到**这张备选卡**上 = 互换（槽里那张回到备选区）。
+  makeDropTarget(card, function () { return candidateCardAccepts(payload); }, function () { swapWithCandidateCard(payload); });
+  // 卡片自己拦下 drop，否则会冒泡到 #candidate-list 被当成"拖回备选区 = 卸下"
+  card.addEventListener('drop', function (e) { e.stopPropagation(); });
 
   const top = el('div', 'cand-top');
   top.append(el('span', 'cand-name', modName(mod)));
@@ -1265,7 +1150,7 @@ function candidateCard(row) {
   for (let i = 0; i < mod.stats.length; i++) {
     const s = mod.stats[i];
     if (!s.bucket) continue;
-    const max = s.levelValues[s.levelValues.length - 1];
+    const max = s.levelValues[s.levelValues.length - 1] * modStackFactor(mod.id);
     statText.push(statLabel(s.stat) + ' ' + (max > 0 ? '+' : '') + max);
   }
   card.append(el('div', 'cand-stats', statText.join(' · ') || '无伤害加成'));
@@ -1276,7 +1161,7 @@ function candidateCard(row) {
   gainEl.append(el('span', 'gain-val ' + cls, fmtPct(row.gain)));
   card.append(gainEl);
 
-  card.addEventListener('click', function () { showDetail(row); });
+  card.addEventListener('click', function () { selectDetail({ kind: 'mod', id: mod.id, exilus: row.exilus }); });
   return card;
 }
 
@@ -1284,29 +1169,114 @@ function candidateCard(row) {
 // 拆解
 // ─────────────────────────────────────────────────────────────
 
-function showDetail(row) {
-  const box = $('#detail');
-  box.innerHTML = '';
-  const mod = row.mod;
-  box.append(el('h3', '', modName(mod)));
+/**
+ * 拆解（D-038 / D-125）：展示当前选中的那只**装备**（Mod 或赋能）装上后的影响。
+ *
+ * 需求方 2026-11-06：「拆解也对赋能生效」——以前只有备选 Mod 有拆解，
+ * 赋能点不动。现在两者共用这一份：
+ *   · Mod：沿用「装到空位 / 换掉收益最差那张」的模拟（`simulateEquip`）；
+ *   · 赋能：在贡献列表上追加它的贡献（与 `arcanePreviewGain` 同一口径），
+ *     并且**不比整体指标** —— 逐口径列出，看得见"这个赋能到底改了哪些数"。
+ * 结束时恢复 overrides 文件。
+ */
+const DETAIL_PLACEHOLDER = '点击备选 Mod 或赋能查看拆解';
 
+/**
+ * 当前拆解的对象（D-128）。
+ *
+ * ⚠ 以前拆解是"点一下算一次、算完就固定在 DOM 里"：之后任何**输出变化**
+ * （调敌人异况层数 / 叠层 / 玄骸元素 / 暴击基准 / 装别的卡 / 换枪）都不会让它重算，
+ * 右边停着的是旧配置下的数。
+ *
+ * 现在只记住"拆解的是谁"（稳定的定位信息，不是行对象——那一行下次渲染就没了），
+ * 拆解本身挂在 `renderAll()` 的最后重算一次，所以它总是跟着当前配装走。
+ * 这就是"收益变动监听"的位置：绑在**渲染末尾**（所有状态变化的唯一汇合点），
+ * 而不是绑在某个控件上。
+ */
+let detailTarget = null;
+
+/** 记下要点开拆解的对象 */
+function selectDetail(target) {
+  detailTarget = target;
+  renderDetail();
+}
+
+/** 按当前配装重算拆解；没有选中对象就显示提示 */
+function renderDetail() {
+  const box = $('#detail');
+  if (!box) return;
+  box.innerHTML = '';
+  if (!detailTarget) {
+    box.append(el('div', 'muted', DETAIL_PLACEHOLDER));
+    return;
+  }
+  const row = resolveDetailTarget(detailTarget);
+  if (!row) {
+    detailTarget = null;
+    box.append(el('div', 'muted', DETAIL_PLACEHOLDER));
+    return;
+  }
+  paintDetail(box, row);
+}
+
+/**
+ * 把"拆解对象"还原成当前配装下的那一行。
+ *   · Mod：按 id 从当前武器的可装列表里重新取（换枪后取不到 → 自动清空拆解）；
+ *   · 赋能：按 key 从当前武器的赋能列表里取。
+ */
+function resolveDetailTarget(target) {
+  if (target.kind === 'arcane') {
+    const arc = store.data && store.data.arcaneByKey ? store.data.arcaneByKey.get(target.key) : null;
+    return arc ? { kind: 'arcane', arc: arc, key: target.key } : null;
+  }
+  const mod = store.data && store.data.modById ? store.data.modById.get(target.id) : null;
+  if (!mod) return null;
+  return { kind: 'mod', mod: mod, id: target.id, exilus: target.exilus };
+}
+
+function paintDetail(box, row) {
+  const isArcane = row.kind === 'arcane';
+  const mod = isArcane ? null : row.mod;
+  const arc = isArcane ? row.arc : null;
+  const name = isArcane ? (arc.name.zh || arc.name.en) : modName(mod);
+  box.append(el('h3', '', name));
+
+  // ── 词条列表：只列真正参与计算的（与内核贡献同源） ──
   const ul = el('ul', 'detail-list');
-  for (let i = 0; i < mod.stats.length; i++) {
-    const s = mod.stats[i];
-    const max = s.levelValues[s.levelValues.length - 1];
-    ul.append(el('li', '', statLabel(s.stat) + '：' + (max > 0 ? '+' : '') + max));
+  if (isArcane) {
+    const stats = arcaneDisplayStats(arc);
+    for (let i = 0; i < stats.length; i++) {
+      ul.append(el('li', '', statLabel(stats[i].stat) + ' +' + (Math.round(stats[i].amount * 100) / 100) + '%'));
+    }
+    if (!stats.length) ul.append(el('li', 'muted', '无伤害词条（不参与伤害计算）'));
+  } else {
+    for (let i = 0; i < mod.stats.length; i++) {
+      const s = mod.stats[i];
+      const max = s.levelValues[s.levelValues.length - 1];
+      ul.append(el('li', '', statLabel(s.stat) + '：' + (max > 0 ? '+' : '') + max));
+    }
   }
   box.append(ul);
 
-  const cur = runCompute(currentContributions());
-
-  // 用与备选区一致的模拟方式（装到空位，不顶掉已有 Mod）
-  const nextContribs = simulateEquip(mod, row.exilus);
-  if (!nextContribs) {
-    box.append(el('div', 'muted', '当前配置已满，无法装备这张 Mod'));
-    return;
+  // ── 当前 / 装备后 ──
+  const curContribs = currentContributions();
+  const cur = runCompute(curContribs);
+  let next = null;
+  let nextContribs = null;
+  if (isArcane) {
+    const extra = arcaneToContributions(arc);
+    // 与卡上收益同一口径：没装镀层卡时，镀层类贡献要连带层次数一起模拟
+    nextContribs = curContribs.concat(extra);
+    next = runCompute(nextContribs);
+  } else {
+    // 用与备选区一致的模拟方式（装到空位，不顶掉已有 Mod）
+    nextContribs = simulateEquip(mod, row.exilus);
+    if (!nextContribs) {
+      box.append(el('div', 'muted', '当前配置已满，无法装备这张 Mod'));
+      return;
+    }
+    next = runCompute(nextContribs);
   }
-  const next = runCompute(nextContribs);
 
   const out = el('table', 'detail-table');
   const oh = el('tr');
@@ -1326,55 +1296,71 @@ function showDetail(row) {
   }
   box.append(out);
 
-  // 暴击变动（D-038）：暴击几率 / 暴击伤害 / 平均倍率 前后对照
-  const curSeg = cur.segments[0];
-  const seg = next.segments[0];
-  const critBox = el('div', 'merge-box');
-  critBox.append(el('div', 'section-title', '暴击变动'));
-  const ctab = el('table', 'detail-table');
-  const ch = el('tr');
-  ['', '当前', '装备后', '变化'].forEach(function (h) { ch.append(el('th', '', h)); });
-  ctab.append(ch);
-
-  const critRows = [
-    ['暴击几率', curSeg.critChance, seg.critChance, 'pct'],
-    ['暴击伤害', curSeg.critDamage, seg.critDamage, 'x'],
-    ['平均暴击倍率', critAverage(1, curSeg.critChance, curSeg.critDamage), critAverage(1, seg.critChance, seg.critDamage), 'x'],
-  ];
-  let critChanged = false;
-  for (let i = 0; i < critRows.length; i++) {
-    const name = critRows[i][0];
-    const a = critRows[i][1];
-    const b = critRows[i][2];
-    const kind = critRows[i][3];
-    const diff = b - a;
-    if (Math.abs(diff) > 1e-9) critChanged = true;
-    const tr = el('tr');
-    tr.append(el('td', '', name));
-    tr.append(el('td', '', kind === 'pct' ? (a * 100).toFixed(2) + '%' : '×' + a.toFixed(3)));
-    tr.append(el('td', '', kind === 'pct' ? (b * 100).toFixed(2) + '%' : '×' + b.toFixed(3)));
-    if (Math.abs(diff) < 1e-9) {
-      tr.append(el('td', '', '—'));
-    } else {
-      // 变化量统一用 % 表示（不用 pp）
-      const txt = kind === 'pct'
-        ? ((a !== 0 ? diff / a : 0) >= 0 ? '+' : '') + (a !== 0 ? (diff / a) * 100 : 0).toFixed(2) + '%'
-        : (diff >= 0 ? '+' : '') + diff.toFixed(3);
-      tr.append(el('td', diff > 0 ? 'pos' : 'neg', txt));
+  // ── 面板（D-130 / D-132）：一张表，行按「依赖顺序」排：
+  //   暴击几率 → 暴击伤害 → 平均暴击倍率 → 触发几率 → 多重 → 射速 → 弹匣 → 装填 → 等效弹匣。
+  //   以前暴击几率/暴击伤害既在「面板」表里、又在「暴击」表里出现一次（D-132：合到一张表）。
+  //   只列**真的会变**的行；没变化的行不出现（拆解本身就是"装上它之后"）。
+  {
+    const cn = cur.state && cur.state.computed;
+    const nn = next.state && next.state.computed;
+    const curSeg = cur.segments[0];
+    const seg = next.segments[0];
+    const pairs = [
+      ['暴击几率', curSeg.critChance, seg.critChance, 'pct'],
+      ['暴击伤害', curSeg.critDamage, seg.critDamage, 'x'],
+      ['平均暴击倍率', critAverage(1, curSeg.critChance, curSeg.critDamage), critAverage(1, seg.critChance, seg.critDamage), 'x'],
+      ['触发几率', cur.panelPairs.statusChance.after, next.panelPairs.statusChance.after, 'pct'],
+      ['多重射击', cur.panelPairs.multishot.after, next.panelPairs.multishot.after, 'num3'],
+      ['射速', cur.panelPairs.fireRate.after, next.panelPairs.fireRate.after, 'num3'],
+      ['弹匣容量', cur.panelPairs.magazineSize.after, next.panelPairs.magazineSize.after, 'num2'],
+      ['装填时间', cur.panelPairs.reloadTime.after, next.panelPairs.reloadTime.after, 'num3'],
+      // D-129：等效弹匣的「当前」取面板弹匣（未乘弹药效率），装备后取加成后的等效弹匣
+      ['等效弹匣', cur.panelPairs.magazineSize.base, nn && nn.等效弹匣, 'num2'],
+    ];
+    const show = function (v, kind) {
+      if (!Number.isFinite(v)) return '—';
+      if (kind === 'pct') return (v * 100).toFixed(2) + '%';
+      if (kind === 'x') return '×' + v.toFixed(2);
+      return v.toFixed(kind === 'num2' ? 2 : 3);
+    };
+    const rows = [];
+    for (const [label, a, b, kind] of pairs) {
+      if (!Number.isFinite(b) || Math.abs(b - a) <= 1e-9) continue;
+      rows.push([label, a, b, kind]);
     }
-    ctab.append(tr);
+    if (rows.length) {
+      const pbox = el('div', 'merge-box');
+      pbox.append(el('div', 'section-title', '面板'));
+      const pt = el('table', 'detail-table');
+      const ph = el('tr');
+      ['', '当前', '装备后', '增幅'].forEach(function (h) { ph.append(el('th', '', h)); });
+      pt.append(ph);
+      for (const [label, a, b, kind] of rows) {
+        const tr = el('tr');
+        tr.append(el('td', '', label));
+        tr.append(el('td', '', show(a, kind)));
+        tr.append(el('td', '', show(b, kind)));
+        const g = a > 0 ? b / a - 1 : null;
+        tr.append(el('td', g === null ? '' : g >= 0 ? 'pos' : 'neg', fmtPct(g)));
+        pt.append(tr);
+      }
+      pbox.append(pt);
+      box.append(pbox);
+    }
+    // 显式读一遍 `cn`，避免"当前状态"在将来被误用来算变化率（口径见 D-084）
+    void cn;
   }
-  critBox.append(ctab);
-  if (critChanged) critBox.classList.add('changed');
-  box.append(critBox);
 
-  const ct = critTiers(seg.critChance, seg.critDamage);
+  // 暴击分档（D-033 / D-038）：按**装上它之后**的暴击参数重新分档。
+  // （D-132：暴击几率/暴击伤害已并进上面的「面板」表，这里只剩分档。）
+  const nextSeg = next.segments[0];
+  const ct = critTiers(nextSeg.critChance, nextSeg.critDamage);
   const tierBox = el('div', 'merge-box');
   tierBox.append(el('div', 'section-title', '暴击分档'));
   tierBox.append(el('div', 'merge-src', ct.map(function (t) {
     return '等级 ' + t.k + '：' + (t.prob * 100).toFixed(1) + '% × ' + t.mul.toFixed(2);
   }).join('　')));
-  tierBox.append(el('div', 'merge-src', '平均 ' + critAverage(1, seg.critChance, seg.critDamage).toFixed(3) + ' 倍'));
+  tierBox.append(el('div', 'merge-src', '平均 ' + critAverage(1, nextSeg.critChance, nextSeg.critDamage).toFixed(3) + ' 倍'));
   box.append(tierBox);
 }
 
@@ -1428,13 +1414,14 @@ function renderCoControls() {
   box.innerHTML = '';
   const co = coInfo();
   const fc = freezeInfo();
-  if (!co.active && !fc.active) return;
+  // 需求方 2026-11-06：这个框**始终显示**，不随是否装了镀层类 Mod 隐藏
+  //   （没装时下面的数值全为 0，计算层也不加成；理由见 decisions.md D-114）
 
   box.append(el('div', 'section-title', '镀层加成'));
 
   const row = el('div', 'controls-row');
 
-  if (co.active || fc.active) {
+  {
     // 敌人身上的**异况层数**（需求方 2026-11-06：配置里加一个框，默认 0）
     //   · 只服务**镀层系列**（co）：读它当"敌人身上的异常状态数量"
     //   · 冷颤（coFreeze）**不读这个框**，固定满层 10 层（需求方 2026-11-06 澄清）
@@ -1449,6 +1436,7 @@ function renderCoControls() {
     nInput.addEventListener('input', function (e) {
       const v = Number(e.target.value);
       state.coStatusTypes = Number.isFinite(v) && v > 0 ? Math.floor(v) : 0;
+      state.coPreview = true;
       renderAll();
     });
     nLabel.append(nInput);
@@ -1456,6 +1444,8 @@ function renderCoControls() {
   }
 
   if (co.active) {
+    // 装了镀层类 Mod：可选 0 ~ 叠层上限。`state.coStacks = 0` 现在是**真正的 0 层**（D-117），
+    // 不再是「未指定，取上限」——默认值在 store 里是上限（见 app-store.js 的 coStacksDefault）
     const yLabel = el('label', '', '叠加层数');
     const ySel = el('select');
     for (let i = 0; i <= co.maxStacks; i++) {
@@ -1463,20 +1453,37 @@ function renderCoControls() {
       o.value = String(i);
       ySel.append(o);
     }
-    ySel.value = String(state.coStacks > 0 ? state.coStacks : co.maxStacks);
+    ySel.value = String(Math.min(state.coStacks, co.maxStacks));
     ySel.addEventListener('change', function (e) { state.coStacks = Number(e.target.value); renderAll(); });
+    yLabel.append(ySel);
+    row.append(yLabel);
+  } else {
+    // 未装备也**可编辑**（需求方 2026-11-06）：默认最大值（装上时按假设的镀层卡推演收益）
+    const yLabel = el('label', '', '叠加层数');
+    const ySel = el('select');
+    const maxY = Math.max(1, co.maxStacks);
+    for (let i = 0; i <= maxY; i++) {
+      const o = el('option', '', String(i));
+      o.value = String(i);
+      ySel.append(o);
+    }
+    ySel.value = String(Math.min(state.coStacks, maxY));
+    ySel.addEventListener('change', function (e) {
+      state.coStacks = Number(e.target.value);
+      state.coPreview = true;
+      renderAll();
+    });
     yLabel.append(ySel);
     row.append(yLabel);
   }
 
   box.append(row);
 
-  if (co.active) {
-    const x = co.perStack;
-    const y = state.coStacks > 0 ? state.coStacks : co.maxStacks;
-    const a = state.coStatusTypes;
-    box.append(el('div', 'muted', co.sources.join('、') + '：每层 ' + x + '% × ' + a + ' 异况 × ' + y + ' 层 = ' + (x * a * y) + '%'));
-  }
+  // ⚠ 这里**不再**显示推演小字（D-117，需求方 2026-11-06）：
+  //   「镀层加成那边的小字推演去掉，这应该是放到镀层 mod 本身上显示的」
+  //   → 收益改由备选/槽位上的那张镀层 Mod 卡片显示（`coModGain` 付给它，`gainBadge` 画在卡上）；
+  //     只有「装了冷颤」这种与镀层 Mod 无关的说明仍留在底部。
+  // 数值本身仍然可复算：每层 % × 异况数 × 层数，见《乘区归属表》与 D-112。
   if (fc.active) {
     const n = FROZEN_FULL_STACKS;
     box.append(el('div', 'muted', fc.sources.join('、') + '：每层 ' + fc.perStack + '% × ' + n + ' 层冰冻（固定满层）= ' + (fc.perStack * n) + '%（只吃直接非灵化伤害）'));
@@ -1497,11 +1504,11 @@ function wireControls() {
   // 筛选是可反复重建的按钮组（不放这里）
   $('#candidate-search').addEventListener('input', function (e) { state.search = e.target.value; renderAll(); });
 
-  // 拖回备选区 = 卸下
+  // 拖回备选区 = 卸下（D-040）；但落在**某张备选卡**上时由卡片自己处理成互换（D-115）
   const list = $('#candidate-list');
   list.addEventListener('dragover', function (e) {
-    if (!dragPayload) return;
-    if (dragPayload.from === 'list') return; // 从备选区内部拖，不处理
+    if (!store.dragPayload) return;
+    if (store.dragPayload.from === 'list') return; // 从备选区内部拖，不处理
     e.preventDefault();
     list.classList.add('drop-target');
   });
@@ -1509,10 +1516,27 @@ function wireControls() {
   list.addEventListener('drop', function (e) {
     e.preventDefault();
     list.classList.remove('drop-target');
-    if (!dragPayload) return;
+    if (!store.dragPayload) return;
     dropHappened = true; // 已在 drop 里处理，dragend 不要重复卸下
-    removeByPayload(dragPayload);
-    dragPayload = null;
+    removeByPayload(store.dragPayload);
+    store.dragPayload = null;
+  });
+
+  // 赋能列表同理：拖回整块赋能列表 = 卸下；落在某张赋能卡上 = 互换（D-115）
+  const arcList = $('#arcane-list');
+  arcList.addEventListener('dragover', function (e) {
+    if (!store.dragPayload || store.dragPayload.from === 'list') return;
+    e.preventDefault();
+    arcList.classList.add('drop-target');
+  });
+  arcList.addEventListener('dragleave', function () { arcList.classList.remove('drop-target'); });
+  arcList.addEventListener('drop', function (e) {
+    e.preventDefault();
+    arcList.classList.remove('drop-target');
+    if (!store.dragPayload) return;
+    dropHappened = true;
+    removeByPayload(store.dragPayload);
+    store.dragPayload = null;
   });
 
   // 一键全部卸下（D-040）
@@ -1533,7 +1557,7 @@ function renderAll() {
   const contribs = currentContributions();
   const res = runCompute(contribs);
   // 每件装备的边际贡献（需求方 2026-11-06）只算一次，供槽位卡片复用
-  GAIN_CTX = {
+  store.gainCtx = {
     contribs: contribs,
     current: metricValueOf(res),
   };
@@ -1545,491 +1569,102 @@ function renderAll() {
   renderArcaneList();
   // 不再显示"可装 N 张"（信息噪音），保留元素留空
   $('#slot-info').textContent = '';
-  if (!$('#detail').firstChild) {
-    $('#detail').append(el('div', 'muted', '点击备选 Mod 查看拆解'));
-  }
+  // D-128：拆解挂在渲染**末尾**重算——任何让输出变化的状态（异况/叠层/玄骸/基准/换卡/换枪）
+  //        走完 renderAll 后，右边拆解都跟着刷新。以前它只在"点击"时算一次，之后全是旧数。
+  renderDetail();
 }
 
 
-/** 某件装备相对「不上它」时当前指标的提升比例 */
-function gainOf(sourceId) {
-  if (!GAIN_CTX) return null;
-  return marginalGainOf(GAIN_CTX.contribs, GAIN_CTX.current, sourceId);
-}
 
-/** 赋能列表（D-032 / D-034）：只放步枪赋能，多列网格，只显示名字 */
+/**
+ * 赋能列表（D-032 / D-034 / D-123）：按**增幅**从高到低排；「无伤害词条」的排在最后。
+ *
+ * 需求方 2026-11-06：「赋能也要按收益顺序排列」。
+ * 没有增益的卡（收益为 null 或 0）统一垫底，卡上不显示「增幅 —」这种噪音。
+ */
 function renderArcaneList() {
   const box = $('#arcane-list');
   box.innerHTML = '';
-  const list = DATA.primaryArcanes;
-  let shown = 0;
+  const list = store.data.primaryArcanes;
+  const rows = [];
   for (let i = 0; i < list.length; i++) {
     // 已装备的赋能不在列表里重复显示（D-034）
-    if (arcaneKey === list[i].key) continue;
-    box.append(arcaneCard(list[i]));
-    shown++;
+    if (store.arcaneKey === list[i].key) continue;
+    rows.push({ arc: list[i], gain: arcanePreviewGain(list[i]) });
   }
-  $('#arcane-count').textContent = shown + ' 个';
+  rows.sort(function (a, b) {
+    const ga = a.gain === null ? -Infinity : a.gain;
+    const gb = b.gain === null ? -Infinity : b.gain;
+    if (ga === gb) return (a.arc.name.zh || a.arc.name.en).localeCompare(b.arc.name.zh || b.arc.name.en, 'zh-CN');
+    return gb - ga;
+  });
+  for (let i = 0; i < rows.length; i++) box.append(arcaneCard(rows[i].arc, rows[i].gain));
+  $('#arcane-count').textContent = rows.length + ' 个';
 }
 
-function arcaneCard(arc) {
+function arcaneCard(arc, gain) {
   const card = el('div', 'cand arcane-cand');
-  makeDraggable(card, { kind: 'arcane', key: arc.key, from: 'list' });
+  const payload = { kind: 'arcane', key: arc.key, from: 'list' };
+  makeDraggable(card, payload);
+  // D-115：已装备的赋能拖到**这张赋能卡**上 = 互换（旧赋能回列表）。
+  makeDropTarget(card, function () { return candidateCardAccepts(payload); }, function () { swapWithCandidateCard(payload); });
+  card.addEventListener('drop', function (e) { e.stopPropagation(); });
 
   const top = el('div', 'cand-top');
   top.append(el('span', 'cand-name', arc.name.zh || arc.name.en));
   card.append(top);
-  // 只显示名字；效果描述等数据修正后再优化（D-034）
+  // D-116：词条 + 收益（收益口径与备选 Mod 一致：模拟装上后相对当前的指标提升）
+  // D-123：没有伤害词条的卡不再写任何提示（需求方：「没有效果的赋能请删掉括号里面的提示」）
+  const stats = arcaneStatChips(arc);
+  if (stats.length) {
+    const wrap = el('div', 'slot-stats');
+    for (const chip of stats) wrap.append(chip);
+    card.append(wrap);
+    if (gain === undefined) gain = arcanePreviewGain(arc);
+    const gainEl = el('div', 'cand-gain');
+    const cls = gain === null ? '' : gain >= 0.00005 ? 'pos' : gain <= -0.00005 ? 'neg' : '';
+    gainEl.append(el('span', 'gain-label', '增幅'));
+    gainEl.append(el('span', 'gain-val ' + cls, fmtPct(gain)));
+    card.append(gainEl);
+  }
+  // D-125：赋能也能点开拆解（与备选 Mod 一样）
+  card.addEventListener('click', function () { selectDetail({ kind: 'arcane', key: arc.key }); });
   return card;
 }
 
-// ─────────────────────────────────────────────────────────────
-// 武器编辑器（D-044，仅开发态）
-//
-// 可编辑：面板数值 / 伤害分布 / trigger / 每段 procChance。
-// 不可编辑：面板总伤（恒等于 Σ damage，只读显示）。
-// 保存：POST /__save-weapon → packages/data/src/manual/weapon-overrides.json
-// ─────────────────────────────────────────────────────────────
-
-const EDITABLE_WEAPON_FIELDS = [
-  ['critChance', '暴击几率', 'ratio'],
-  ['critMultiplier', '暴击伤害', 'x'],
-  // 触发几率只在这里编辑；模式里不再重复出现（D-048）
-  ['statusChance', '触发几率', 'ratio'],
-  ['fireRate', '射速', 'num'],
-  ['magazineSize', '弹匣容量', 'num'],
-  ['reloadTime', '装填时间', 'num'],
-];
-
-const TRIGGER_OPTIONS = [
-  'auto', 'burst', 'semi', 'charged', 'active', 'held', 'duplex', 'none', 'unknown',
-];
+/**
+ * 赋能 → 卡片上的词条小标签（D-116）。**只列真正参与伤害计算的词条**，
+ * 与内核拿到的贡献同一份来源（`arcaneDisplayStats`），所以"显示的"就是"算的"。
+ */
+function arcaneStatChips(arc) {
+  const out = [];
+  const stats = arcaneDisplayStats(arc);
+  for (let i = 0; i < stats.length; i++) {
+    const st = stats[i];
+    out.push(el('span', 'slot-stat', statLabel(st.stat) + ' +' + (Math.round(st.amount * 100) / 100) + '%'));
+  }
+  return out;
+}
 
 /**
- * 发射器类型的展示名与特点说明（D-048）。
- * 下拉显示「中文名（特点）」，同时保留英文原值，方便人工核对数据。
+ * 赋能装上后的增幅（D-116）：与已装卡的 `gainOf` 同口径，
+ * 只是在当前贡献列表上**追加**这个赋能的贡献再比较，而不是从配置里拿掉。
+ *
+ * ⚠ D-126（需求方 2026-11-06 纠正）：**只算当前选中的口径**，不敏感就是 +0.00%。
+ *   上一轮（D-124）曾在增幅为 0 时改用"最敏感口径"的数显示，那是错的——
+ *   那个数不属于当前口径（默认「单次射击」下准星的弹药效率本来就不该有收益），
+ *   卡上显示它等于凭空多报收益。要看弹药效率的效果：把基准切到「持续伤害」，
+ *   或点开拆解（那里逐口径列出）。
  */
-const TRIGGER_LABELS = {
-  auto: ['全自动', '按住持续射击'],
-  semi: ['半自动', '每点一次打一发'],
-  burst: ['点射', '一次扣扳机打出多连发'],
-  charged: ['蓄力', '按住蓄力后释放，伤害通常更高'],
-  active: ['主动', '需手动触发，如次要开火'],
-  held: ['持续引导', '按住持续输出，如光束类'],
-  duplex: ['双发', '扣扳机与松开各打一发'],
-  none: ['无', '武器本身不直接射击'],
-  unknown: ['未标注', '数据未给出，待人工确认'],
-};
-
-function triggerLabel(t) {
-  const e = TRIGGER_LABELS[t];
-  return e ? e[0] + '（' + e[1] + '）' : t;
-}
-
-/** 编辑器工作副本（打开时从 DATA.weapon 深拷贝） */
-let editorDraft = null;
-
-async function detectDevMode() {
-  try {
-    const r = await fetch('/__dev');
-    if (!r.ok) return false;
-    const j = await r.json();
-    return Boolean(j && j.canEdit);
-  } catch {
-    return false; // 静态部署：没有后端 → 不显示编辑入口
-  }
-}
-
-function openEditor() {
-  editorDraft = JSON.parse(JSON.stringify({
-    weaponId: DATA.weapon.id,
-    name: DATA.weapon.name,
-    nameZh: DATA.weapon.nameZh,
-    critChance: DATA.weapon.critChance,
-    critMultiplier: DATA.weapon.critMultiplier,
-    statusChance: DATA.weapon.statusChance,
-    fireRate: DATA.weapon.fireRate,
-    magazineSize: DATA.weapon.magazineSize,
-    reloadTime: DATA.weapon.reloadTime,
-    modes: DATA.weapon.modes.map(function (m) {
-      // D-080：段只属于变体；编辑器按变体编辑
-      const firstSeg = m.variants[0] && m.variants[0].segments[0];
-      return {
-        id: m.id,
-        role: m.role,
-        trigger: m.trigger,
-        procChance: firstSeg ? firstSeg.procChance : 0,
-        // D-050：模式级面板覆盖（没写就是空，编辑时会按需填）
-        override: m.override ? { ...m.override } : undefined,
-        variants: m.variants.map(function (v) {
-          return {
-            id: v.id,
-            label: v.label,
-            ...(v.override ? { override: { ...v.override } } : {}),
-            segments: v.segments.map(function (s) {
-              return { kind: s.kind, aoe: s.aoe, damage: { ...s.damage }, procChance: s.procChance };
-            }),
-          };
-        }),
-      };
-    }),
-  }));
-  $('#editor-overlay').style.display = 'flex';
-  renderEditor();
-}
-
-function closeEditor() {
-  $('#editor-overlay').style.display = 'none';
-}
-
-function renderEditor() {
-  const body = $('#editor-body');
-  body.innerHTML = '';
-  if (!editorDraft) return;
-
-  $('#editor-title').textContent = '编辑：' + (editorDraft.nameZh || editorDraft.name) + '（' + editorDraft.name + '）';
-
-  // ── 每个模式一组：面板数值 + 发射器类型 + 伤害分布（D-050）──
-  // 不同模式的面板可能不同（灵化模式、三模式武器），所以面板数值挂在模式上，模式在最上面。
-  for (let mi = 0; mi < editorDraft.modes.length; mi++) {
-    const mode = editorDraft.modes[mi];
-    body.append(el('h3', 'editor-section', '模式：' + mode.id));
-
-    // 面板数值（该模式自己的；未填则回退武器级）
-    const grid = el('div', 'editor-grid');
-    for (let i = 0; i < EDITABLE_WEAPON_FIELDS.length; i++) {
-      const key = EDITABLE_WEAPON_FIELDS[i][0];
-      const label = EDITABLE_WEAPON_FIELDS[i][1];
-      const kind = EDITABLE_WEAPON_FIELDS[i][2];
-      const row = el('label', 'editor-field');
-      row.append(el('span', 'editor-label', label));
-      const input = el('input', 'editor-input');
-      input.type = 'number';
-      input.step = '0.01';
-      // 当前生效值 = 模式 override ?? 武器级
-      const effective = mode.override && mode.override[key] !== undefined
-        ? mode.override[key] : editorDraft[key];
-      if (kind === 'ratio') {
-        input.value = String(+(effective * 100).toFixed(4));
-        input.dataset.percent = '1';
-      } else {
-        input.value = String(effective);
-      }
-      input.addEventListener('input', function (e) {
-        const raw = Number(e.target.value);
-        const v = input.dataset.percent ? raw / 100 : raw;
-        if (!Number.isFinite(v)) return;
-        // 写进该模式的 override
-        mode.override = mode.override || {};
-        mode.override[key] = v;
-        // 触发几率同时同步到分段（内核读的是段上的 procChance）
-        if (key === 'statusChance') {
-          mode.procChance = v;
-          for (const s of modeSegments(mode)) s.procChance = v;
-        }
-      });
-      row.append(input);
-      grid.append(row);
-    }
-    body.append(grid);
-
-    // 发射器类型：中文名 + 括号特点说明（D-048）。
-    // 触发几率**不**在这里重复出现——它属于武器级字段，只在「面板数值」里编辑。
-    const metaRow = el('div', 'editor-meta-row');
-
-    const tField = el('label', 'editor-field');
-    tField.append(el('span', 'editor-label', '发射器类型'));
-    const tSel = el('select');
-    for (let i = 0; i < TRIGGER_OPTIONS.length; i++) {
-      const key = TRIGGER_OPTIONS[i];
-      const o = el('option', '', triggerLabel(key));
-      o.value = key;
-      tSel.append(o);
-    }
-    tSel.value = TRIGGER_OPTIONS.indexOf(mode.trigger) >= 0 ? mode.trigger : 'unknown';
-    tSel.addEventListener('change', function (e) { mode.trigger = e.target.value; });
-    tField.append(tSel);
-    metaRow.append(tField);
-
-    body.append(metaRow);
-
-    // 伤害分布（可增删类型）
-    body.append(el('div', 'editor-sub', '伤害分布'));
-    const dmgWrap = el('div', 'editor-dmg-list');
-    renderEditorDamage(mode, dmgWrap, mi);
-    body.append(dmgWrap);
-
-    // 「添加伤害类型」放在面板总伤**上面**：
-    // 下拉选类型（D-049，不再自动取第一个可用项）+ 添加按钮
-    const addRow = el('div', 'editor-add-row');
-
-    const _ms0 = modeSegments(mode)[0];
-    const used = new Set(Object.keys(_ms0 ? _ms0.damage : {}));
-    const avail = Object.keys(ELEMENT_LABEL).filter(function (t) { return !used.has(t); });
-
-    const addSel = el('select', 'editor-add-select');
-    for (let i = 0; i < avail.length; i++) {
-      const o = el('option', '', ELEMENT_LABEL[avail[i]]);
-      o.value = avail[i];
-      addSel.append(o);
-    }
-    addRow.append(addSel);
-
-    const addBtn = el('button', 'btn-ghost', '+ 添加伤害类型');
-    addBtn.type = 'button';
-    if (!avail.length) {
-      addBtn.disabled = true;
-      addSel.disabled = true;
-      addSel.append(el('option', '', '（已无可用类型）'));
-    }
-    (function (m, sel) {
-      addBtn.addEventListener('click', function () {
-        const t = sel.value;
-        if (!t) return;
-        const seg = modeSegments(m)[0];
-        if (!seg) return;
-        seg.damage[t] = 0;
-        renderEditor();
-      });
-    })(mode, addSel);
-    addRow.append(addBtn);
-
-    body.append(addRow);
-
-    // 面板总伤（只读，由分布求和）
-    const total = el('div', 'editor-total');
-    fillEditorTotal(total, mode);
-    total.dataset.totalFor = String(mi);
-    body.append(total);
-  }
-}
-
-function renderEditorDamage(mode, wrap, mi) {
-  wrap.innerHTML = '';
-  const seg = modeSegments(mode)[0];
-  if (!seg) return;
-  const types = Object.keys(seg.damage);
-  for (let i = 0; i < types.length; i++) {
-    const t = types[i];
-    const row = el('div', 'editor-dmg-row');
-    row.append(el('span', 'editor-dmg-name', ELEMENT_LABEL[t] || t));
-    const input = el('input', 'editor-input');
-    input.type = 'number';
-    input.step = '0.01';
-    input.min = '0';
-    input.value = String(seg.damage[t]);
-    input.addEventListener('input', function (e) {
-      const v = Number(e.target.value);
-      seg.damage[t] = Number.isFinite(v) && v >= 0 ? v : 0;
-      input.value = String(seg.damage[t]);
-      // 总伤只读，实时跟着分布变
-      const totalBox = $('.editor-total[data-total-for="' + mi + '"]');
-      if (totalBox) fillEditorTotal(totalBox, mode);
-    });
-    row.append(input);
-    const del = el('button', 'btn-ghost btn-tiny', '删除');
-    del.type = 'button';
-    del.addEventListener('click', function () {
-      delete seg.damage[t];
-      renderEditor();
-    });
-    row.append(del);
-    wrap.append(row);
-  }
-  if (!types.length) wrap.append(el('div', 'muted', '无伤害类型，请添加'));
-}
-
-/** 面板总伤只读显示：恒等于 Σ damage */
-function fillEditorTotal(box, mode) {
-  const seg = modeSegments(mode)[0];
-  let sum = 0;
-  if (seg) {
-    for (const v of Object.values(seg.damage)) sum += Number(v) || 0;
-  }
-  box.innerHTML = '';
-  box.append(el('span', 'editor-label', '面板总伤'));
-  box.append(el('span', 'editor-total-val', sum.toFixed(2)));
-}
-
-async function saveEditor() {
-  const msg = $('#editor-msg');
-  msg.textContent = '保存中…';
-  msg.className = 'editor-msg';
-  // D-050：触发几率现在挂在每个模式的 override 上；保存前仍要同步到分段的 procChance，
-  // 否则内核读段上的旧值。
-  if (editorDraft) {
-    for (const m of editorDraft.modes || []) {
-      const sc = m.override && m.override.statusChance;
-      if (Number.isFinite(sc)) {
-        m.procChance = sc;
-        for (const s of modeSegments(m)) s.procChance = sc;
-      }
-    }
-  }
-  try {
-    const r = await fetch('/__save-weapon', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(editorDraft),
-    });
-    const j = await r.json();
-    if (!j.ok) {
-      msg.textContent = '保存失败：' + (j.errors || []).join('；');
-      msg.className = 'editor-msg neg';
-      return;
-    }
-    msg.textContent = '已保存到 ' + j.path;
-    msg.className = 'editor-msg pos';
-    // D-046：保存后立即重新合并并重渲染，不需要刷新页面
-    await reloadWeaponOverrides(true);
-    flash('已保存并生效');
-  } catch (err) {
-    msg.textContent = '保存失败：' + String(err);
-    msg.className = 'editor-msg neg';
-  }
-}
-
-/** 读取 overrides，刷新「已修改」标记 */
-// ─────────────────────────────────────────────────────────────
-// overrides 合并（D-046）
-//
-// 优先级：generated < manual/weapon-overrides.json
-// 规则：
-//   · 武器级 6 个数值字段 → 标量覆盖
-//   · 模式按 **id** 匹配（不按下标），匹配不到则忽略并警告
-//   · 分段按下标覆盖 damage / procChance
-//   · damage **整体替换**（因为编辑器允许删除某个伤害类型）
-//   · 未出现在 override 里的字段保留 generated 原值
-// ─────────────────────────────────────────────────────────────
-
-const OVERRIDE_WEAPON_FIELDS = [
-  'critChance', 'critMultiplier', 'statusChance', 'fireRate', 'magazineSize', 'reloadTime',
-];
-
-/**
- * 把一条 override 合并进武器对象（原地修改并返回）。
- * ⚠ 调用方必须传入**深拷贝**，否则会把 override 写回 generated 的原对象，
- *   下次再合并就会叠加（比如射速被乘两次）。
- * @param weapon 武器对象的深拷贝
- * @param ov 该武器对应的 override（可为空）
- */
-function mergeWeaponOverride(weapon, ov) {
-  if (!ov) return weapon;
-
-  // ① 武器级数值：标量覆盖
-  for (let i = 0; i < OVERRIDE_WEAPON_FIELDS.length; i++) {
-    const k = OVERRIDE_WEAPON_FIELDS[i];
-    if (ov[k] !== undefined && Number.isFinite(ov[k])) weapon[k] = ov[k];
-  }
-
-  // ② 模式：按 id 匹配
-  if (Array.isArray(ov.modes)) {
-    for (let i = 0; i < ov.modes.length; i++) {
-      const om = ov.modes[i];
-      if (!om || typeof om.id !== 'string') continue;
-      const target = weapon.modes.find(function (m) { return m.id === om.id; });
-      if (!target) {
-        console.warn('override 里的模式「' + om.id + '」在武器数据中不存在，已忽略');
-        continue;
-      }
-      // trigger / role
-      if (typeof om.trigger === 'string') target.trigger = om.trigger;
-      if (typeof om.role === 'string') target.role = om.role;
-
-      // D-050：模式级面板覆盖（只接受有限数值，非法值忽略）
-      if (om.override && typeof om.override === 'object') {
-        const ov = {};
-        for (const [k, v] of Object.entries(om.override)) {
-          if (!OVERRIDE_WEAPON_FIELDS.includes(k)) continue;
-          if (typeof v === 'number' && Number.isFinite(v)) ov[k] = v;
-        }
-        target.override = Object.keys(ov).length ? ov : undefined;
-      }
-
-      // ③ 分段：按下标覆盖（D-080：段在变体内，用 modeSegments 摊平后按下标对齐）
-      if (Array.isArray(om.segments) && modeSegments(target).length) {
-        const tSegs = modeSegments(target);
-        if (om.segments.length !== tSegs.length) {
-          console.warn('模式「' + om.id + '」的分段数量不一致（override ' + om.segments.length +
-            ' / 原 ' + tSegs.length + '），按 override 为准');
-        }
-        for (let s = 0; s < om.segments.length && s < tSegs.length; s++) {
-          const os = om.segments[s];
-          const ts = tSegs[s];
-          if (!os || !ts) continue;
-          if (Number.isFinite(os.procChance)) ts.procChance = os.procChance;
-          // damage 整体替换（支持"删除某伤害类型"）
-          if (os.damage && typeof os.damage === 'object') {
-            const clean = {};
-            for (const [t, v] of Object.entries(os.damage)) {
-              clean[t] = Number.isFinite(v) && v >= 0 ? v : 0;
-            }
-            ts.damage = clean;
-          }
-        }
-      }
-      // 若 override 只给了模式的 procChance（编辑器这么存），把它同步到所有分段
-      if (Number.isFinite(om.procChance)) {
-        const ts2 = modeSegments(target);
-        for (let s = 0; s < ts2.length; s++) {
-          ts2[s].procChance = om.procChance;
-        }
-      }
-    }
-  }
-  return weapon;
-}
-
-/** 读取 overrides 并应用到当前武器，然后重渲染 */
-async function reloadWeaponOverrides(applyToWeapon) {
-  try {
-    const r = await fetch('/__weapon-overrides');
-    if (!r.ok) return;
-    const all = await r.json();
-    DATA.overrides = all || {};
-    if (applyToWeapon) {
-      // 每次都从「generated 的深拷贝」出发再合并，保证不会叠加
-      const fresh = JSON.parse(JSON.stringify(DATA.baseWeapon));
-      DATA.weapon = mergeWeaponOverride(fresh, DATA.overrides[DATA.baseWeapon.id]);
-      // 玄骸系判定也可能随 name/variant 变化，重新算一次
-      DATA.isKuva = isKuvaFamily(DATA.weapon.id, DATA.weapon.variantType, DATA.weapon.name);
-      renderAll();
-    }
-    renderModifiedBadge();
-  } catch {
-    /* 静态部署下没有这个接口，忽略 */
-  }
-}
-
-function renderModifiedBadge() {
-  const badge = $('#modified-badge');
-  if (!badge) return;
-  const has = Boolean(DATA.overrides && DATA.overrides[DATA.weapon.id]);
-  badge.style.display = has ? '' : 'none';
-}
-
-function wireEditor() {
-  const openBtn = $('#open-editor');
-  if (openBtn) openBtn.addEventListener('click', openEditor);
-  const closeBtn = $('#editor-close');
-  if (closeBtn) closeBtn.addEventListener('click', closeEditor);
-  const saveBtn = $('#editor-save');
-  if (saveBtn) saveBtn.addEventListener('click', saveEditor);
-  const resetBtn = $('#editor-reset');
-  if (resetBtn) {
-    resetBtn.addEventListener('click', function () {
-      editorDraft = null;
-      closeEditor();
-      flash('已放弃本次编辑');
-    });
-  }
-  // 点遮罩关闭
-  const overlay = $('#editor-overlay');
-  if (overlay) {
-    overlay.addEventListener('click', function (e) {
-      if (e.target === overlay) closeEditor();
-    });
-  }
+function arcanePreviewGain(arc) {
+  const ctx = store.gainCtx;
+  if (!ctx) return null;
+  const extra = arcaneToContributions(arc);
+  if (!extra.length) return null;
+  if (!(ctx.current > 0)) return null;
+  const after = metricValueOf(runCompute(ctx.contribs.concat(extra)));
+  if (!(after > 0)) return null;
+  return after / ctx.current - 1;
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -2037,39 +1672,15 @@ function wireEditor() {
 // ─────────────────────────────────────────────────────────────
 
 async function boot() {
-  const results = await Promise.all([
-    fetch('/packages/data/src/generated/weapons/primary.json').then(function (r) { return r.json(); }),
-    fetch('/packages/data/src/generated/weapons/secondary.json').then(function (r) { return r.json(); }),
-    fetch('/packages/data/src/generated/weapons/melee.json').then(function (r) { return r.json(); }),
-    fetch('/packages/data/src/generated/weapons/archgun.json').then(function (r) { return r.json(); }),
-    fetch('/packages/data/src/generated/weapons/archmelee.json').then(function (r) { return r.json(); }),
-    fetch('/packages/data/src/generated/mods/weapon-slots.json').then(function (r) { return r.json(); }),
-    fetch('/packages/data/src/generated/mods/mods.json').then(function (r) { return r.json(); }),
-    fetch('/packages/data/src/generated/mods/arcanes.json').then(function (r) { return r.json(); }),
-  ]);
-
   // D-093：所有类别的武器都加载进来，供切换用（当前只有"主要"可选）
-  const allWeapons = [];
-  for (let i = 0; i < 5; i++) {
-    const f = results[i];
-    for (let j = 0; j < f.weapons.length; j++) allWeapons.push(f.weapons[j]);
-  }
-  const slotFile = results[5];
-  const modFile = results[6];
-  const arcaneFile = results[7];
-
-  DATA_ALL = {
-    weapons: allWeapons,
-    weaponById: new Map(),
-    slotFile: slotFile,
-    modFile: modFile,
-    arcaneFile: arcaneFile,
-    groups: groupWeapons(allWeapons, slotFile),
-  };
-  for (let i = 0; i < allWeapons.length; i++) DATA_ALL.weaponById.set(allWeapons[i].id, allWeapons[i]);
+  // 取数细节在 app-data.js 的 loadAllWeapons()
+  setDataAll(await loadAllWeapons(groupWeapons));
 
   renderWeaponPicker();
-  await loadWeapon(WEAPON_ID);
+  // 默认武器 = 主要 → 步枪的第一把；模式取其第一个攻击模式（需求方 2026-11-06）
+  const firstId = defaultWeaponId();
+  const firstW = store.dataAll && store.dataAll.weaponById.get(firstId);
+  await loadWeapon(firstId, firstDisplayMode(firstW));
 
   // 下拉：派系 / 玄骸元素 / 筛选
   const fsel = $('#faction-select');
@@ -2090,15 +1701,18 @@ async function boot() {
   $('#headshot-mult').value = String(state.headshotMult);
 
   wireControls();
-  wireEditor();
+  editor.setEditorDeps({ flash, renderAll });
+  editor.wireEditor();
   renderAll();
 
   // 开发态才显示「编辑」按钮（D-044）；静态部署没有后端，不渲染
-  const dev = await detectDevMode();
+  const dev = await editor.detectDevMode();
   const openBtn = $('#open-editor');
   if (openBtn) openBtn.style.display = dev ? '' : 'none';
   // D-046：开发态首屏就把 overrides 合进武器数据
-  if (dev) await reloadWeaponOverrides(true);
+  if (dev) await editor.reloadWeaponOverrides(true);
+  // D-122：启动/重启后也要按当前武器刷新「已修改」标记
+  editor.renderModifiedBadge();
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -2106,7 +1720,6 @@ async function boot() {
 // ─────────────────────────────────────────────────────────────
 
 /** 全部武器的索引（boot 时填充） */
-let DATA_ALL = null;
 
 /**
  * 渲染三个下拉栏 + 搜索框。
@@ -2129,7 +1742,6 @@ function renderWeaponPicker() {
   // 默认停在"主要"
   gsel.value = 'primary';
   gsel.addEventListener('change', function () { renderTypeOptions(gsel.value); });
-
   // 弹道筛选（D-099 A）：第二层筛选器，不改变类型树
   const ssel = $('#weapon-style');
   ssel.innerHTML = '';
@@ -2152,7 +1764,7 @@ function renderWeaponPicker() {
 function renderTypeOptions(groupId) {
   const tsel = $('#weapon-type');
   tsel.innerHTML = '';
-  const group = DATA_ALL.groups.get(groupId);
+  const group = store.dataAll.groups.get(groupId);
   if (!group) return;
   const types = Array.from(group.types.entries());
   types.sort(function (a, b) { return a[1].label.localeCompare(b[1].label, 'zh-CN'); });
@@ -2172,7 +1784,7 @@ function renderTypeOptions(groupId) {
   if (!types.length) { $('#weapon-select').innerHTML = ''; return; }
   // 默认类型：当前武器所属的那个类型（找不到就用第一个）
   // 这样切回大类时，界面上仍停在"我刚选的那把枪"所在的分类，而不是跳回第一类（D-097）
-  const curId = DATA && DATA.weapon ? DATA.weapon.id : null;
+  const curId = store.data && store.data.weapon ? store.data.weapon.id : null;
   let pick = types[0][0];
   if (curId) {
     for (const [key, bucket] of types) {
@@ -2187,7 +1799,7 @@ function renderTypeOptions(groupId) {
 function renderWeaponOptions(groupId, typeKey) {
   const wsel = $('#weapon-select');
   wsel.innerHTML = '';
-  const group = DATA_ALL.groups.get(groupId);
+  const group = store.dataAll.groups.get(groupId);
   const bucket = group && group.types.get(typeKey);
   if (!bucket) return;
   // 弹道筛选（D-099 A）
@@ -2201,7 +1813,7 @@ function renderWeaponOptions(groupId, typeKey) {
     wsel.append(o);
   }
   wsel.onchange = function () { switchWeapon(wsel.value); };
-  // 选中值必须等于 DATA.weapon（D-097）：在列表里就选它，不在就补一项"（当前）"。
+  // 选中值必须等于 store.data.weapon（D-097）：在列表里就选它，不在就补一项"（当前）"。
   // 绝不在这里"默认选第一项"——那会造成"选单显示 A、实际在算 B"。
   syncWeaponSelect();
 }
@@ -2210,7 +1822,7 @@ function renderWeaponOptions(groupId, typeKey) {
 function renderSearchResults(keyword) {
   const tsel = $('#weapon-type');
   const wsel = $('#weapon-select');
-  const hits = searchWeapons(DATA_ALL.weapons, keyword);
+  const hits = searchWeapons(store.dataAll.weapons, keyword);
   if (!String(keyword || '').trim()) {
     // 清空搜索 → 回到分类浏览
     renderTypeOptions($('#weapon-group').value);
@@ -2249,35 +1861,47 @@ function renderSearchResults(keyword) {
  *    并按 D-052 的约定**清空已装 Mod**，避免把步枪 Mod 留在霰弹枪上。
  */
 async function switchWeapon(weaponId) {
-  if (!DATA_ALL || !weaponId || weaponId === '__search__') return;
-  const weapon = DATA_ALL.weaponById.get(weaponId);
+  if (!store.dataAll || !weaponId || weaponId === '__search__') return;
+  const weapon = store.dataAll.weaponById.get(weaponId);
   if (!weapon) return;
   // 与当前武器相同 → 不重算，但要把选单同步回当前值
   // （否则切换类型/搜索后选单停在"第一项"，与实际武器不一致）
-  if (DATA && DATA.weapon && DATA.weapon.id === weaponId) {
+  if (store.data && store.data.weapon && store.data.weapon.id === weaponId) {
     syncWeaponSelect();
     return;
   }
 
   // 清空配置：换枪后原来的 Mod 可能已不适用
   for (let i = 0; i < SLOT_COUNT; i++) modSlots[i] = null;
-  exilusModId = null;
-  arcaneKey = null;
+  store.exilusModId = null;
+  store.arcaneKey = null;
 
   await loadWeapon(weaponId);
+  // D-119：四个大类都开放了，换枪后让"大类"下拉停在**当前武器所在的大类**
+  // （例如从选单直接切到一把近战，大类不应还停在"主要"）
+  const groupSel = $('#weapon-group');
+  const groupOf = weaponGroupId(weapon);
+  if (groupSel && groupOf) groupSel.value = groupOf;
   renderWeaponOptions($('#weapon-group').value, $('#weapon-type').value);
   renderAll();
+  // D-122：编辑器里属于上一把枪的草稿与"已保存到 …"提示都要清掉，
+  //        「已修改」标记必须按**新武器**重新判断（以前只有 reloadWeaponOverrides 会刷新它）
+  editor.resetEditorForWeaponSwitch();
+  editor.renderModifiedBadge();
+  // D-119：非玄骸武器隐藏玄骸加成区块（D-042）。这里不走 renderAll（重）而要单独刷一次，
+  //   否则从选单/搜索结果换枪时，玄骸控件会停在上一把武器的可见状态。
+  renderKuvaVisibility();
 }
 
 /**
  * 把「武器」下拉栏的选中值同步成**当前实际武器**。
  *
- * 选单只是选择器，真正的状态是 `DATA.weapon`。任何重新渲染选单之后
+ * 选单只是选择器，真正的状态是 `store.data.weapon`。任何重新渲染选单之后
  * 都要调用这里，避免出现"选单显示 A、实际在算 B"的不一致（D-097）。
  */
 function syncWeaponSelect() {
   const wsel = $('#weapon-select');
-  const cur = DATA && DATA.weapon ? DATA.weapon.id : null;
+  const cur = store.data && store.data.weapon ? store.data.weapon.id : null;
   if (!wsel || !cur) return;
   for (const o of wsel.children) {
     if (o.value === cur) { wsel.value = cur; return; }
@@ -2285,7 +1909,7 @@ function syncWeaponSelect() {
   // 当前武器不在本选单里（例如切到了别的类型）：把它补到列表**末尾**并选中，
   // 让用户看得见"我现在在哪把枪上"，且随时能切回来。
   // （用 append 而不是 insertBefore：顺序其实无所谓，但 append 兼容性更好）
-  const w = DATA_ALL && DATA_ALL.weaponById.get(cur);
+  const w = store.dataAll && store.dataAll.weaponById.get(cur);
   if (!w) return;
   const opt = el('option', '', weaponLabel(w, issuesOf(cur)) + '（当前）');
   opt.value = cur;
@@ -2293,48 +1917,34 @@ function syncWeaponSelect() {
   wsel.value = cur;
 }
 
-/** 加载一把武器：建 DATA、重置模式索引、重算可装 Mod */
-async function loadWeapon(weaponId) {
-  const weapon = DATA_ALL.weaponById.get(weaponId);
-  if (!weapon) throw new Error('找不到武器 ' + weaponId);
+/**
+ * 加载一把武器：建 store.data、重置模式索引、重算可装 Mod（取数细节在 app-data.js）
+ *
+ * D-117：「叠加层数」的默认值（叠层上限）在这里跟着武器重填——每把武器能装的镀层卡
+ * 叠层上限可能不同，而且 0 现在是合法的"0 层"，不能再靠"0 = 未指定"来取默认值。
+ */
+async function loadWeapon(weaponId, modeId) {
+  setData(buildWeaponData(weaponId, { modeId: modeId || MODE_ID }));
+  state.coStacks = coDefaults().stacks;
+}
 
-  const primaryIdx = weapon.modes.findIndex(function (m) { return m.id === MODE_ID; });
-  state.modeIndex = primaryIdx >= 0 ? primaryIdx : 0;
-  state.variantIndex = 0;
-
-  const entry = DATA_ALL.slotFile.weapons[weaponId] || { slots: {}, modKinds: [] };
-  const kinds = modKindsFor(entry, entry.slots);
-  const availableMods = DATA_ALL.modFile.mods
-    .filter(function (m) { return kinds.indexOf(m.slotKind) >= 0; })
-    .filter(function (m) { return isModCompatibleWithWeapon(m, weapon); })
-    .sort(function (a, b) { return String(modName(a)).localeCompare(String(modName(b)), 'zh-CN'); });
-
-  const byId = new Map();
-  availableMods.forEach(function (m) { byId.set(m.id, m); });
-  const arcaneByKey = new Map();
-
-  const isKuva = isKuvaFamily(weapon.id, weapon.variantType, weapon.name);
-
-  DATA = {
-    // baseWeapon 保持 generated 的原样，合并 override 时每次从它出发，避免叠加
-    baseWeapon: weapon,
-    weapon: weapon,
-    isKuva: isKuva,
-    availableMods: availableMods,
-    modById: byId,
-    arcaneByKey: arcaneByKey,
-    primaryArcanes: [],
-    slotKinds: kinds,
-    overrides: {},
-  };
-
-  DATA_ALL.arcaneFile.arcanes.forEach(function (a) {
-    arcaneByKey.set(a.key, a);
-    // 赋能按武器类别的 slotKind 分组：步枪武器只显示 primary 赋能
-    if (a.category === 'primary' && kinds.indexOf('rifle') >= 0) DATA.primaryArcanes.push(a);
-    if (a.category === 'secondary' && kinds.indexOf('pistol') >= 0) DATA.primaryArcanes.push(a);
-    if (a.category === 'melee' && kinds.indexOf('melee') >= 0) DATA.primaryArcanes.push(a);
-  });
+/**
+ * 启动时默认打开的武器：**主要 → 步枪**分类下的第一把（需求方 2026-11-06）。
+ *
+ * 说明：
+ *   · 顺序与「类型 / 武器」下拉栏完全一致（类型内按中文名 `localeCompare` 排序，
+ *     见 `groupWeapons`），所以用户看到的第一把就是打开时的那把；
+ *   · 兜底：没有步枪分类时取主要的第一个类型；再不行才用写死的 `WEAPON_ID`。
+ */
+function defaultWeaponId() {
+  const group = store.dataAll && store.dataAll.groups.get('primary');
+  if (!group) return WEAPON_ID;
+  const rifle = group.types.get('rifle');
+  if (rifle && rifle.weapons.length) return rifle.weapons[0].id;
+  for (const bucket of group.types.values()) {
+    if (bucket.weapons.length) return bucket.weapons[0].id;
+  }
+  return WEAPON_ID;
 }
 
 boot().catch(function (err) {

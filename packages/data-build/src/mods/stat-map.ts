@@ -1,7 +1,7 @@
 /**
- * ZKMODS 属性键 → 本项目的「属性 / 乘区」映射。
+ * Mod 基线属性键 → 本项目的「属性 / 乘区」映射。
  *
- * 背景：ZKMODS 的属性键（`dmg` / `ms` / `cc` / `heat` …）是紫卡模拟器的内部命名，
+ * 背景：基线的属性键（`dmg` / `ms` / `cc` / `heat` …）沿用了社区通用的简写命名，
  * 而 `docs/乘区归属表.md` 定义的是本项目的乘区口径。两边必须显式对一次，
  * 不能靠名字猜——名字相近但口径不同的最容易被错配，例如：
  *   · `sd`   = 异常状态伤害 +X%（不是状态持续时间）
@@ -214,20 +214,20 @@ const TABLE: Record<string, StatMapping> = {
 };
 
 /**
- * 镀层 / 异况类模组的**满级基伤加成**（每张卡、每种异常状态）。
+ * 需求方 2026-11-06 的数值订正口径（已并入入库基线 `mods/baseline.json`，不再在流水线里重写）：
+ *   幽灵膛线 maxValue = 330、**每级 30** → 0,30,60,…,330。
  *
- * 需求方 2026-11-06：「镀层步枪才能应该 80% 伤害/异常状态…其他的镀层基伤 mod 也要修改下」
- *
- * 旧的 ZKMODS 值（20 / 30 / 80）口径各不相同，无法当成"每张卡的真实数值"，
- * 因此在这里统一登记；流水线产出时按这个值重写 `levelValues`（第 r 级 = 80 × r / 等级上限）。
+ * ⚠️ 与其它 Mod 的逐级口径**不同**：其它 Mod 一律按"满级值 × r / 等级上限"线性展开
+ * （膛线 0,16.5,33,…,165）。幽灵膛线是全游戏唯一已知带固定步长的个例，
+ * 这里保留常量只是为了留痕——改数值请改 `baseline.json`（带 `dz` 理由）。
  */
-/**
- * 需求方指定的**数值订正**（ZKMODS id → 满级值 + 理由）。
- * 逐级仍按线性重算（第 r 级 = 满级 × r / 等级上限）。
- */
-export const MOD_VALUE_OVERRIDES: Readonly<Record<string, { maxValue: number; reason: string }>> = {
+export const MOD_VALUE_OVERRIDES: Readonly<Record<string, { maxValue: number; perRank: number; reason: string }>> = {
   // 需求方 2026-11-06：「幽灵膛线满级是 330 对的，每级 30%」→ 0,30,60,…,330
-  spectral_serration: { maxValue: 330, reason: 'ZKMODS 的 p 只给了 0~10（把每级值当成了满级值），满级应为 +330%' },
+  spectral_serration: {
+    maxValue: 330,
+    perRank: 30,
+    reason: '原表 p 只给了 0~10（把每级值当成了满级值），满级 +330%、每级 30%',
+  },
 };
 
 /**
@@ -255,7 +255,7 @@ export const CO_OVERLOAD_PER_STACK: Readonly<Record<string, number>> = {
   galvanized_shot: 40,
 };
 
-/** 镀层 / 异况类：每层值（未登记的卡返回 null，退回 ZKMODS 原值） */
+/** 镀层 / 异况类：每层值（未登记的卡返回 null，退回基线原值） */
 export function coOverloadPerStack(modId: string): number | null {
   return CO_OVERLOAD_PER_STACK[modId] ?? null;
 }

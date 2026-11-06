@@ -22,15 +22,26 @@ const OUT = join(ROOT, '.demo-check');
  *
  * ⚠ 新增 core 的源文件时**必须同步这里**，否则浏览器加载链会缺文件 404。
  * 清单按 core/src/index.ts 的 `export * from` 顺序维护（index 依赖谁，这里就列谁）。
+ * D-102：`main.ts` 已拆成按结算链阶段的多个文件，这里按「被依赖的在前」排列。
  */
 const TS_FILES = [
   'packages/core/src/damage-types.ts',
   'packages/core/src/weapon.ts',
   'packages/core/src/contributions.ts',
   'packages/core/src/buckets.ts',
+  'packages/core/src/elements.ts',
   'packages/core/src/weapon-state.ts',
   'packages/core/src/status-effects.ts',
   'packages/core/src/kuva.ts',
+  'packages/core/src/ctx.ts',
+  'packages/core/src/crit.ts',
+  'packages/core/src/dot.ts',
+  'packages/core/src/blast.ts',
+  'packages/core/src/timeline.ts',
+  'packages/core/src/six-second.ts',
+  'packages/core/src/segment.ts',
+  'packages/core/src/output.ts',
+  'packages/core/src/compute.ts',
   'packages/core/src/main.ts',
   'packages/core/src/analysis.ts',
   'packages/core/src/index.ts',
@@ -104,14 +115,25 @@ if (ok) {
   }
 }
 
-// 3. app.js 解析
-try {
-  const code = await readFile(join(ROOT, 'packages/demo/public/app.js'), 'utf8');
-  new vm.SourceTextModule(code);
-  console.log('✔ app.js 可被解析');
-} catch (err) {
-  console.error('✖ app.js：', err.message);
-  ok = false;
+// 3. 页面侧脚本解析（D-105：app.js 之外还有 4 个模块）
+const PAGE_JS = [
+  'packages/demo/public/app.js',
+  'packages/demo/public/app-store.js',
+  'packages/demo/public/app-data.js',
+  'packages/demo/public/app-compute.js',
+  'packages/demo/public/ui-editor.js',
+  'packages/demo/public/weapon-picker.js',
+  'packages/demo/public/weapon-override.js',
+];
+for (const rel of PAGE_JS) {
+  try {
+    const code = await readFile(join(ROOT, rel), 'utf8');
+    new vm.SourceTextModule(code);
+    console.log(`✔ ${rel.replace('packages/demo/public/', '')} 可被解析`);
+  } catch (err) {
+    console.error(`✖ ${rel}：`, err.message);
+    ok = false;
+  }
 }
 
 await rm(OUT, { recursive: true, force: true });

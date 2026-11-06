@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-06T06:43:04.356Z",
+  "generatedAt": "2026-11-06T16:49:08.536Z",
   "source": "ExportArcanes.json（官方结构化逐级数值）+ dict.zh/en 渲染描述",
   "note": "levels[].values 为各级的数值槽（路径 → 数值）；bucket 对应 docs/乘区归属表.md",
   "scope": "仅收录武器可用赋能（主要·/次要·/近战·/神威·/和平·/残差·/弓箭·/霰弹·/双枪·/瀑流·/联结·/分形·）",
@@ -626,7 +626,7 @@
         "en": "Longbow Sharpshot",
         "zh": "弓箭·利矢"
       },
-      "category": "secondary",
+      "category": "bow",
       "prefix": "弓箭·",
       "maxRank": 5,
       "rarity": "LEGENDARY",
@@ -2044,8 +2044,8 @@
       "prefix": "瀑流·",
       "maxRank": 5,
       "rarity": "RARE",
-      "effectKind": "status",
-      "bucket": "statusChance",
+      "effectKind": "damageBuff",
+      "bucket": "baseDamage",
       "description": {
         "en": "On <DT_FIRE_COLOR>Heat Status Effect: +12% Damage for 10s. Stacks up to 480%.",
         "zh": "触发 <DT_FIRE_COLOR>火焰异常状态时： +12% 伤害，持续 10 秒。最多叠加到 480%。"
@@ -2490,7 +2490,7 @@
         "en": "Shotgun Vendetta",
         "zh": "霰弹·仇杀"
       },
-      "category": "secondary",
+      "category": "shotgun",
       "prefix": "霰弹·",
       "maxRank": 5,
       "rarity": "RARE",
@@ -3198,7 +3198,7 @@
         "en": "Fractalized Reset",
         "zh": "分形·重置"
       },
-      "category": "secondary",
+      "category": "primary",
       "prefix": "分形·",
       "maxRank": 5,
       "rarity": "RARE",

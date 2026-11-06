@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-06T09:06:11.265Z",
+  "generatedAt": "2026-11-06T13:18:56.223Z",
   "category": "companion",
   "count": 19,
   "note": "暴率/触发为 0~1 小数；伤害分布为绝对值；procChance 同为 0~1；kuva 表示需用户在计算器里选元素与加成（25%~60%）",

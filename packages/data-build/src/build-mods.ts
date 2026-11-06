@@ -4,7 +4,6 @@
  * 用法：
  *   node --experimental-strip-types packages/data-build/src/build-mods.ts           # dry-run，只统计与报错
  *   ... --emit                                                                      # 写入产出
- *   ... --refresh                                                                   # 把上游原始文件复制到 snapshot/ 目录
  *   ... --force                                                                     # 忽略缓存重新下载 WFCD
  *
  * 与武器流程一致的约定（需求方指定）：
@@ -12,27 +11,25 @@
  *   - dry-run 默认不写任何产出，先把统计与异常项给人看。
  *   - 只有显式 --emit 才写入 packages/data/src/generated/。
  *
- * 与武器流程的差异：Mod 的**数值**不在官方导出里，只能来自紫卡模拟器 HTML 的 ZKMODS；
+ * 与武器流程的差异：Mod 的**数值**不在官方导出里，来自入库的 `packages/data/src/mods/baseline.json`；
  * 官方 ExportUpgrades 与 WFCD 只用于**交叉校验**（耗点/稀有度/极性/中文名）。
  */
-import { mkdirSync, writeFileSync, existsSync, readFileSync, copyFileSync, statSync } from 'node:fs';
-import { createHash } from 'node:crypto';
+import { mkdirSync, writeFileSync, existsSync, readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { fetchSource } from './fetch.ts';
-import { CACHE_DIR, MOD_SOURCES, SNAPSHOT_DIR } from './sources.ts';
-import { extractZkMods, type ZkMod } from './mods/zk-source.ts';
+import { CACHE_DIR, MOD_SOURCES } from './sources.ts';
 import { MOD_VALUE_OVERRIDES } from './mods/stat-map.ts';
+import { baselinePath, loadModBaseline } from './mods/mod-record.ts';
 import { cleanMod, isWeaponMod, isStanceMod, type CleanMod } from './mods/clean-mods.ts';
 import { cleanArcane, type CleanArcane } from './mods/clean-arcanes.ts';
 import { cleanModSets, type CleanModSet } from './mods/clean-modsets.ts';
 import { lookupStat, registeredKeys } from './mods/stat-map.ts';
 import {
   normalizeKey,
+  exportSubclass,
   resolveFromExport,
-  resolveFromZkClass,
   compatibleModKinds,
   type SlotResolution,
-  type ZkWeaponClass,
 } from './mods/weapon-slots.ts';
 import type { ExportWeapons } from './types.ts';
 import type { LanguageDict } from './localize.ts';
@@ -42,28 +39,26 @@ const repoRoot = resolve(import.meta.dirname, '../../..');
 const GENERATED_DIR = join(repoRoot, 'packages/data/src/generated');
 const MODS_DIR = join(GENERATED_DIR, 'mods');
 const REPORT_DIR = join(GENERATED_DIR, 'reports');
-const SNAPSHOT_ABS = join(repoRoot, SNAPSHOT_DIR);
 
 /**
- * 需求方 2026-11-06 指定的剔除清单（ZKMODS id → 理由）。
+ * 需求方 2026-11-06 指定的剔除清单（基线 id → 理由）。
  *   · aerial_ace：**战甲 Mod**（"空中制霸"，效果是击杀后刷新二段跳），不是武器 Mod，
- *     被 ZKMODS 标成 `t:"rifle"` 混进来了。
+ *     在基线里被标成 `t:"rifle"` 混进来了。
  *
  * 数值订正（不是剔除）见 `MOD_VALUE_OVERRIDES`。
  */
 export const EXCLUDED_MODS: Readonly<Record<string, string>> = {
-  aerial_ace: '战甲 Mod（击杀刷新二段跳），不是武器 Mod；ZKMODS 误标为 rifle',
+  aerial_ace: '战甲 Mod（击杀刷新二段跳），不是武器 Mod；基线误标为 rifle',
 };
 
 
 interface Args {
   emit: boolean;
   force: boolean;
-  refresh: boolean;
 }
 
 function parseArgs(argv: string[]): Args {
-  return { emit: argv.includes('--emit'), force: argv.includes('--force'), refresh: argv.includes('--refresh') };
+  return { emit: argv.includes('--emit'), force: argv.includes('--force') };
 }
 
 /** 官方 ExportUpgrades 条目（只取用到的字段） */
@@ -104,43 +99,11 @@ interface ModSetRaw {
   levelStats?: unknown[];
 }
 
-/** 读取紫卡模拟器 HTML（优先 snapshot 快照，其次仓库根目录的原件） */
-function loadZkModsHtml(): { html: string; from: string } {
-  const candidates = [
-    join(SNAPSHOT_ABS, 'zk-simulator.html'),
-    join(repoRoot, MOD_SOURCES.zkHtml.path),
-  ];
-  for (const p of candidates) {
-    if (existsSync(p) && statSync(p).size > 0) return { html: readFileSync(p, 'utf8'), from: p };
-  }
-  throw new Error(
-    `找不到紫卡模拟器 HTML。请把 ${MOD_SOURCES.zkHtml.path} 放到仓库根目录，或用 --refresh 生成快照。`,
-  );
-}
-
-/** 解码模拟器内置的 WEAPON_DB（字典压缩：负数 = POOL 下标） */
-function decodeWeaponDb(html: string): ZkWeaponClass[] {
-  const lines = html.split(/\r?\n/);
-  const grab = (prefix: string): unknown[] => {
-    const line = lines.find((l) => l.trimStart().startsWith(prefix));
-    if (!line) throw new Error(`HTML 里找不到 ${prefix}`);
-    const start = line.indexOf('=');
-    const text = line.slice(start + 1).replace(/;\s*$/, '');
-    return JSON.parse(text.replace(/\b-?Infinity\b/g, (m) => (m[0] === '-' ? '-1e308' : '1e308'))) as unknown[];
-  };
-  const pool = grab('var WEAPON_DB_POOL') as unknown[];
-  const enc = grab('var WEAPON_DB_ENC') as unknown[];
-
-  const dec = (o: unknown): unknown => {
-    if (Array.isArray(o)) return o.map(dec);
-    if (o && typeof o === 'object') {
-      return Object.fromEntries(Object.entries(o as Record<string, unknown>).map(([k, v]) => [k, dec(v)]));
-    }
-    if (typeof o === 'number' && o < 0 && Number.isInteger(o) && -o - 1 < pool.length) return pool[-o - 1];
-    return o;
-  };
-  return dec(enc) as ZkWeaponClass[];
-}
+/**
+ * 武器槽位判定只用官方导出：`productCategory`（携行方式）、`holsterCategory`、`compatibilityTags`。
+ * 见 `weapon-slots.ts` 的 `resolveFromExport`。
+ * 官方给不出武器类的（如显赫武器）走 `manual/exalted-slots.ts` 人工层。
+ */
 
 /** 读取并缓存 WFCD Mods.json（可选，用于交叉校验） */
 async function loadWfcd(force: boolean): Promise<{ mods: unknown[] | null; note: string }> {
@@ -161,11 +124,7 @@ async function loadWfcd(force: boolean): Promise<{ mods: unknown[] | null; note:
   }
 }
 
-function sha256(text: string): string {
-  return createHash('sha256').update(text).digest('hex');
-}
-
-/** 把中文名按 ZK 名对齐到官方语言包（用于补 ZK 表缺中文的模组） */
+/** 把中文名按英文名对齐到官方语言包（用于补基线缺中文的模组） */
 function buildZhLookup(zh: LanguageDict, en: LanguageDict): Map<string, string> {
   // 英文显示名 → 中文显示名
   const map = new Map<string, string>();
@@ -192,8 +151,6 @@ function formatStats(o: {
   officialMatched: number;
   officialMissing: string[];
   zhMissing: string[];
-  zkWeapons: number;
-  zkWeaponsMatched: number;
   unresolvedWeapons: string[];
   wfcdNote: string;
   wfcdCrossChecked: number;
@@ -208,17 +165,16 @@ function formatStats(o: {
   const lines = [
     'Mod 抓取统计',
     '='.repeat(60),
-    `ZKMODS 条目：${o.total}`,
+    `基线条目：${o.total}`,
     `  武器 Mod：${o.weaponMods}（其中带属性数值 ${o.withStats}）`,
     `  武器赋能：${o.weaponArcanes}（剔除不影响武器伤害 ${o.arcaneSkipped}）`,
     `  套装：${o.modSets}（影响伤害的 ${o.damageSets}）`,
-    `  ZKMODS 里的赋能（未采用，官方数据更全）：${o.arcanes}`,
+    `  基线里的赋能（未采用，官方数据更全）：${o.arcanes}`,
     `  架势：${o.stances}（不建模，仅识别）`,
     `属性键已登记：${registeredKeys().length} 个；未登记用到 ${o.unknownKeys.length} 个`,
     `官方 ExportUpgrades 名称匹配：${o.officialMatched}/${o.weaponMods}（${pct(o.officialMatched, o.weaponMods)}）`,
     `等级上限人工修正：${o.rankFixes} 条`,
     `中文名缺失：${o.zhMissing.length}`,
-    `ZK 武器库：${o.zkWeapons} 把，与官方导出对上 ${o.zkWeaponsMatched} 把`,
     `武器槽位无法判定：${o.unresolvedWeapons.length}`,
     `WFCD 交叉校验：${o.wfcdNote}，比对 ${o.wfcdCrossChecked} 条，不一致 ${o.wfcdMismatch.length} 条`,
   ];
@@ -228,12 +184,9 @@ function formatStats(o: {
 async function main(): Promise<number> {
   const args = parseArgs(process.argv.slice(2));
 
-  console.log('[1/6] 读取紫卡模拟器快照（Mod 数值来源）...');
-  const { html, from } = loadZkModsHtml();
-  console.log(`      ${from}（${(html.length / 1024 / 1024).toFixed(1)} MB）`);
-  const zkMods = extractZkMods(html);
-  const zkWeapons = decodeWeaponDb(html);
-  console.log(`      ZKMODS ${zkMods.length} 条；WEAPON_DB ${zkWeapons.length} 把`);
+  console.log('[1/6] 读取 Mod 基线（Mod 数值来源）...');
+  const baselineMods = loadModBaseline();
+  console.log(`      ${baselinePath()}：${baselineMods.length} 条`);
 
   console.log('[2/6] 读取官方导出...');
   const upgrades = await fetchSource<OfficialUpgrades>('upgrades', { force: args.force });
@@ -250,7 +203,7 @@ async function main(): Promise<number> {
   console.log('[3/6] 建立官方 Mod 元数据索引...');
   // 英文显示名 → 官方条目。
   // 坑：官方导出里同名条目很多（Primed Pressure Point 的语言键显示名曾经就是 Pressure Point），
-  // 所以按"等级上限 + 稀有度"与 ZK 表最接近的那条选，而不是简单取最高等级的一条。
+  // 所以按"等级上限 + 稀有度"与基线最接近的那条选，而不是简单取最高等级的一条。
   const officialByName = new Map<string, OfficialUpgrade[]>();
   for (const [uniqueName, u] of Object.entries(upgrades)) {
     if (!u.name) continue;
@@ -276,13 +229,13 @@ async function main(): Promise<number> {
     rare: 'RARE',
     legendary: 'LEGENDARY',
   };
-  /** 在候选里挑与 ZK 条目最吻合的一条：稀有度相同优先，再看耗点差、等级上限差 */
-  function pickOfficial(enName: string, zkRarity: string, zkDrain: number, zkMaxRank: number): OfficialUpgrade | undefined {
+  /** 在候选里挑与基线条目最吻合的一条：稀有度相同优先，再看耗点差、等级上限差 */
+  function pickOfficial(enName: string, rarity: string, drain: number, maxRank: number): OfficialUpgrade | undefined {
     const list = officialByName.get(enName);
     if (!list || list.length === 0) return undefined;
-    const wantRarity = RARITY_TO_OFFICIAL[zkRarity];
+    const wantRarity = RARITY_TO_OFFICIAL[rarity];
     const score = (o: OfficialUpgrade): number =>
-      (wantRarity && o.rarity === wantRarity ? 0 : 100) + Math.abs(o.baseDrain - zkDrain) + Math.abs(o.fusionLimit - zkMaxRank) / 10;
+      (wantRarity && o.rarity === wantRarity ? 0 : 100) + Math.abs(o.baseDrain - drain) + Math.abs(o.fusionLimit - maxRank) / 10;
     return list.reduce((best, cur) => (score(cur) < score(best) ? cur : best));
   }
   console.log(`      官方 Mod 英文名索引 ${officialByName.size} 个名称`);
@@ -301,14 +254,14 @@ async function main(): Promise<number> {
   let stances = 0;
   const excludedMods: Array<{ id: string; name: string; reason: string }> = [];
 
-  for (const raw of zkMods) {
+  for (const raw of baselineMods) {
     // 需求方 2026-11-06 指定的剔除清单（见 EXCLUDED_MODS）
     const excl = EXCLUDED_MODS[raw.i];
     if (excl !== undefined) {
       excludedMods.push({ id: raw.i, name: `${raw.n} ${raw.z}`, reason: excl });
       continue;
     }
-    // 架势先判掉：ZKMODS 的 s 字段区分不出架势，见 isStanceMod 注释
+    // 架势先判掉：基线的 s 字段区分不出架势，见 isStanceMod 注释
     const preMatch = officialByName.get(raw.n)?.[0];
     if (isStanceMod(raw, preMatch)) {
       stances++;
@@ -335,7 +288,7 @@ async function main(): Promise<number> {
     if (official) officialMatched++;
     else officialMissing.push(`${raw.i} (${raw.n})`);
 
-    // 中文名：ZK 表优先，缺失时用官方语言包补
+    // 中文名：基线优先，缺失时用官方语言包补
     if (!mod.name.zh) {
       const alt = zhByName.get(normalizeKey(raw.n));
       if (alt) mod.name.zh = alt;
@@ -351,7 +304,7 @@ async function main(): Promise<number> {
     if (lookupStat(k) !== undefined) continue;
     console.log(`      ⚠️ 未登记属性键：${k}`);
   }
-  console.log(`      武器 Mod ${weaponMods}（带数值 ${withStats}）、ZK 里的赋能 ${arcanes}、架势 ${stances}`);
+  console.log(`      武器 Mod ${weaponMods}（带数值 ${withStats}）、基线里的赋能 ${arcanes}、架势 ${stances}`);
 
   // ---- 赋能（官方 ExportArcanes，有结构化逐级数值）----
   const cleanArcanes: CleanArcane[] = [];
@@ -377,34 +330,18 @@ async function main(): Promise<number> {
   const cleanSets = cleanModSets(modSetsRaw, zhDict, enDict, modsBySet);
   console.log(`      套装 ${cleanSets.length} 个（其中 ${cleanSets.filter((s) => s.effect.bucket).length} 个影响伤害）`);
 
-  console.log('[5/6] 解析武器 → 可装 Mod 槽位...');
-  const zkByName = new Map<string, ZkWeaponClass>();
-  const zkById = new Map<string, ZkWeaponClass>();
-  for (const z of zkWeapons) {
-    zkById.set(normalizeKey(z.i), z);
-    if (z.n) zkByName.set(normalizeKey(z.n), z);
-  }
+  console.log('[5/6] 解析武器 → 可装 Mod 槽位（只用官方导出判定）...');
 
   const weaponSlots: Record<
     string,
-    { name: string; nameZh?: string; slots: SlotResolution; modKinds: string[]; todo?: 'melee_specific' }
+    { name: string; nameZh?: string; slots: SlotResolution; subclass?: 'launcher' | 'crossbow'; modKinds: string[]; todo?: 'melee_specific' }
   > = {};
   const unresolvedWeapons: string[] = [];
-  let zkWeaponsMatched = 0;
-  const matchedZkIds = new Set<string>();
 
   for (const [key, w] of Object.entries(weapons)) {
     const id = key.split('/').pop() ?? key;
     const enName = w.name ? (enDict[w.name] ?? '') : '';
-    const zk = zkByName.get(normalizeKey(enName)) ?? zkById.get(normalizeKey(id));
-    let slots: SlotResolution;
-    if (zk) {
-      matchedZkIds.add(zk.i);
-      zkWeaponsMatched++;
-      slots = resolveFromZkClass(zk, w.compatibilityTags ?? []);
-    } else {
-      slots = resolveFromExport(w);
-    }
+    let slots: SlotResolution = resolveFromExport(w);
     // 显赫武器等导出给不出武器类的，用人工表补
     const override = lookupExaltedSlots(enName);
     if (override) {
@@ -417,10 +354,13 @@ async function main(): Promise<number> {
     }
     if (slots.unresolved) unresolvedWeapons.push(`${id} (${enName || w.name || '?'})`);
     const zhName = w.name ? zhDict[w.name] : undefined;
+    const subclass = exportSubclass({ ...w, uniqueName: key });
     weaponSlots[id] = {
       name: enName || id,
       ...(zhName ? { nameZh: zhName } : {}),
       slots,
+      // 展示用细类（发射器 / 弩）：它们吃步枪类 Mod，broad 仍是 rifle，只影响界面分组
+      ...(subclass ? { subclass } : {}),
       modKinds: compatibleModKinds(slots),
       // 近战缺细类：显式标记，让消费方知道"这把武器只能装通用近战 Mod"
       ...(slots.broad === 'melee' && slots.specific.length === 0 && !slots.unresolved
@@ -428,9 +368,7 @@ async function main(): Promise<number> {
         : {}),
     };
   }
-  const zkNotInExport = zkWeapons.filter((z) => !matchedZkIds.has(z.i)).map((z) => `${z.i} (${z.n})`);
-  console.log(`      武器 ${Object.keys(weaponSlots).length} 把，命中 ZK 武器库 ${zkWeaponsMatched} 把`);
-  console.log(`      ZK 库里有但导出里没有的武器 ${zkNotInExport.length} 把（多为武器模块/铸造部件）`);
+  console.log(`      武器 ${Object.keys(weaponSlots).length} 把`);
   console.log(`      槽位无法判定 ${unresolvedWeapons.length} 把`);
 
   // 近战细类待办（docs/decisions.md D-004：需求方确认"全部列为 todo，暂不关心"）。
@@ -471,7 +409,7 @@ async function main(): Promise<number> {
         ambiguous++;
         continue;
       }
-      wfcdMismatch.push(`${mod.id}: 等级上限 ZK=${mod.maxRank} WFCD=${ranks[0]}`);
+      wfcdMismatch.push(`${mod.id}: 等级上限 基线=${mod.maxRank} WFCD=${ranks[0]}`);
     }
     if (ambiguous > 0) {
       console.log(`      另有 ${ambiguous} 条同名多版本，等级上限不作为硬校验`);
@@ -483,7 +421,7 @@ async function main(): Promise<number> {
   }
 
   const statsText = formatStats({
-    total: zkMods.length,
+    total: baselineMods.length,
     weaponMods,
     arcanes,
     stances,
@@ -492,8 +430,6 @@ async function main(): Promise<number> {
     officialMatched,
     officialMissing,
     zhMissing,
-    zkWeapons: zkWeapons.length,
-    zkWeaponsMatched,
     unresolvedWeapons,
     wfcdNote: wfcd.note,
     wfcdCrossChecked,
@@ -518,26 +454,6 @@ async function main(): Promise<number> {
   }
   if (wfcdMismatch.length > 0) problems.push(`WFCD 交叉校验有 ${wfcdMismatch.length} 条不一致，见报告。`);
 
-  if (args.refresh) {
-    mkdirSync(SNAPSHOT_ABS, { recursive: true });
-    const snapHtml = join(SNAPSHOT_ABS, 'zk-simulator.html');
-    if (from !== snapHtml) copyFileSync(from, snapHtml);
-    const manifest = {
-      refreshedAt: new Date().toISOString(),
-      note: '上游原始文件不入库（体积大/许可未确认），本清单入库用于溯源',
-      files: [
-        {
-          name: 'zk-simulator.html',
-          kind: '内嵌 ZKMODS / WEAPON_DB',
-          bytes: html.length,
-          sha256: sha256(html),
-        },
-      ],
-    };
-    writeFileSync(join(SNAPSHOT_ABS, 'manifest.json'), JSON.stringify(manifest, null, 2) + '\n');
-    console.log(`\n快照已更新：${SNAPSHOT_DIR}/manifest.json`);
-  }
-
   if (problems.length > 0) {
     console.log('\n⚠️  发现以下问题，需要确认：');
     for (const p of problems) console.log(`   - ${p}`);
@@ -558,7 +474,7 @@ async function main(): Promise<number> {
     JSON.stringify(
       {
         generatedAt: new Date().toISOString(),
-        source: 'ZKMODS（紫卡模拟器快照） + ExportUpgrades（元数据交叉校验）',
+        source: 'mods/baseline.json（Mod 数值基线） + ExportUpgrades（元数据交叉校验）',
         note: 'levelValues 为 0 级到满级的逐级数值；bucket 对应 docs/乘区归属表.md 的乘区',
         count: cleaned.length,
         mods: cleaned,
@@ -620,7 +536,7 @@ async function main(): Promise<number> {
       {
         generatedAt: new Date().toISOString(),
         sources: [
-          { name: 'ZKMODS（紫卡模拟器快照）', usage: 'Mod 数值、等级上限、互斥关系、条件效果' },
+          { name: 'mods/baseline.json', usage: 'Mod 数值、等级上限、互斥关系、条件效果' },
           { name: 'ExportUpgrades.json', usage: '耗点 / 稀有度 / 极性 / 官方名称 交叉校验' },
           { name: 'ExportArcanes.json', usage: '武器赋能的逐级数值（官方结构化数据）' },
           { name: 'ExportModSet.json', usage: '套装加成的逐级数值' },
@@ -638,7 +554,6 @@ async function main(): Promise<number> {
         coverage: {
           officialMatched,
           withStats,
-          zkWeaponsMatched,
           unresolvedWeapons: unresolvedWeapons.length,
           meleeMissingSpecific: meleeMissingSpecific.length,
           zhMissing: zhMissing.length,
@@ -649,7 +564,6 @@ async function main(): Promise<number> {
           zhMissing: zhMissing.slice(0, 200),
           unresolvedWeapons: unresolvedWeapons.slice(0, 200),
           meleeMissingSpecific: meleeMissingSpecific.slice(0, 200),
-          zkNotInExport: zkNotInExport.slice(0, 200),
           wfcdMismatch: wfcdMismatch.slice(0, 200),
           rankFixes: rankFixes.slice(0, 200),
           arcanesNeedingManualBucket: cleanArcanes
@@ -664,7 +578,7 @@ async function main(): Promise<number> {
 
   mkdirSync(REPORT_DIR, { recursive: true });
   const stamp = new Date().toISOString().replace(/[:.]/g, '-');
-  const report = renderReport({ statsText, cleaned, unknownKeyUsage, officialMissing, zhMissing, unresolvedWeapons, zkNotInExport, wfcdMismatch, rankFixes, cleanArcanes, arcaneSkipped, cleanSets, problems });
+  const report = renderReport({ statsText, cleaned, unknownKeyUsage, officialMissing, zhMissing, unresolvedWeapons, wfcdMismatch, rankFixes, cleanArcanes, arcaneSkipped, cleanSets, problems });
   writeFileSync(join(REPORT_DIR, `mods-${stamp}.md`), report);
   writeFileSync(join(REPORT_DIR, 'mods-latest.md'), report);
 
@@ -684,7 +598,6 @@ function renderReport(o: {
   officialMissing: string[];
   zhMissing: string[];
   unresolvedWeapons: string[];
-  zkNotInExport: string[];
   wfcdMismatch: string[];
   rankFixes: string[];
   cleanArcanes: CleanArcane[];
@@ -737,7 +650,6 @@ function renderReport(o: {
     ...section('官方 ExportUpgrades 里找不到的 Mod', o.officialMissing),
     ...section('缺中文名的 Mod', o.zhMissing),
     ...section('槽位无法判定的武器', o.unresolvedWeapons),
-    ...section('ZK 武器库有、官方导出没有', o.zkNotInExport),
     ...section('WFCD 交叉校验不一致', o.wfcdMismatch),
   ].join('\n');
 }

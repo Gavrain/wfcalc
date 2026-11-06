@@ -33,12 +33,51 @@ Warframe 伤害模拟器（`wfcalc`）。核心诉求：**每个乘区都能复�
 
 ```
 packages/core/        计算内核（纯函数，无 DOM）
+  src/ctx.ts          结算上下文（武器 + 模式 + 贡献 + 选项）
+  src/elements.ts     ③④⑤ 物理% / 元素% / 两两合成
+  src/crit.ts         L3 暴击 + 爆头
+  src/dot.ts          L4 触发率与 DoT 每跳
+  src/blast.ts        爆炸异常（独立机制，D-031）
+  src/timeline.ts     开火时间线（装填空窗）
+  src/six-second.ts   六秒异常状态总伤（逐秒曲线）
+  src/segment.ts      L0 切段 → ① 玄骸 → ② 基伤 → 单段结算
+  src/output.ts       L6 输出口径
+  src/compute.ts      compute() + WeaponState 状态树
+  src/weapon-state.ts 输入层 / computed 层
+  src/main.ts         只做 re-export（旧导入路径仍可用）
 packages/data/        数据层：generated/ 是流水线产物（勿手改），manual/ 是人工层
 packages/data-build/  抓取清洗流水线
-research/             研究记录（数据源验证、抓取口径）
-docs/                 规格与决策（乘区归属表、决策确认规范、决策台账）
-data-todo/            待人工补充的数据清单
+packages/demo/        本地页面 demo（零依赖静态服务 + 配装 UI）
+  public/app.js       页面本体：渲染编排 / 拖拽 / 武器切换（1284 行）
+  public/app-store.js 共享状态 store + 中文表 + 数字格式
+  public/app-data.js  数据层：读 generated/ JSON、挑可装 Mod
+  public/app-compute.js 计算层薄壳：组装 compute() 参数、算相对提升
+  public/ui-editor.js 开发态武器编辑器
+  public/weapon-picker.js   武器选单（纯 JS 模块）
+  public/weapon-override.js override 合并规则（纯 JS 模块，页面与测试共用）
+  src/server.mjs      静态服务 + 开发态 `/__save-weapon` 校验
+  src/dom/            校对用 DOM shim + 页面装载器 + 记账本
+  src/checks/         页面级校对脚本（`demo:check` / `demo:editor-check`）
+  src/verify-*.mjs    纯内核校验（不跑页面）
+research/             研究记录（01~06 结论）；一次性探查脚本在 research/poc/archive/（留档，不保证能跑）
+docs/                 规格与决策（乘区归属表、决策确认规范）
+  decisions.md        状态表 + 最近条目（先读这个，改口径前必看）
+  decisions/          历史正文归档（grep 用）
+data-todo/            数据文件（aoe-falloff.auto.json / wfcd-confirm.*）；清单正文已并入 docs/态势与待办.md
 ```
+
+## 改需求时先看哪份（别整读）
+
+| 要改的是 | 先读 | 不用读 |
+|---|---|---|
+| 某条口径现在怎么算 | `docs/乘区归属表.md` | 全部代码 |
+| 某条口径为什么这么定 | `docs/decisions.md` 的**状态表**（先按编号 grep） | 整份台账 |
+| 公式 / 结算顺序 | `docs/伤害公式.md` + 上面对应的阶段文件 | `main.ts`（只有 re-export） |
+| 某个展示数怎么来的 | `docs/变量依赖图.md` / `docs/数值推导.md` | 数据流水线 |
+| 数据字段来自哪 | `research/0x-*.md` | 内核 |
+
+内核改动只应落在**一个阶段文件**里；一次需求要同时改 `segment.ts` 和 `output.ts` 时，
+先在 `decisions.md` 写清为什么（多半说明口径分界画错了）。
 
 ## 常用命令
 

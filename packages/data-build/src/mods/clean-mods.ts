@@ -1,7 +1,7 @@
 /**
- * Mod 清洗：把 ZKMODS 原始条目 + 官方 ExportUpgrades 元数据，合成一份可直接进计算内核的模型。
+ * Mod 清洗：把 基线原始条目 + 官方 ExportUpgrades 元数据，合成一份可直接进计算内核的模型。
  *
- * 数值口径（从紫卡模拟器实测反推，多个模组交叉验证一致）：
+ * 数值口径（对既往数据实测反推，多个模组交叉验证一致）：
  *   · `p[][1]` 是【满级值】，0 级为 0，各级线性递增：
  *         第 r 级值 = 满级值 × r / 等级上限
  *     （Serration f=10 → 每级 16.5；Point Strike f=5 → 每级 30；Hornet Strike f=10 → 每级 22）
@@ -10,12 +10,12 @@
  *   · `f` = 等级上限（0 表示无等级）
  * 这几条会在产出时逐一落成 `levelValues` 数组，计算内核不需要再推算。
  */
-import type { ZkMod, ZkBg } from './zk-source.ts';
+import type { ModRecord, ModBuff } from './mod-record.ts';
 import { MOD_VALUE_OVERRIDES, coOverloadPerStack, lookupStat, type StatMapping } from './stat-map.ts';
 
 /** 清洗后的单个属性加量 */
 export interface ModStatValue {
-  /** ZKMODS 原始属性键，便于回溯 */
+  /** 基线原始属性键，便于回溯 */
   key: string;
   stat: string;
   bucket: string | null;
@@ -26,7 +26,7 @@ export interface ModStatValue {
   note?: string;
 }
 
-/** 条件 / 触发效果（来自 ZKMODS 的 bg 字段） */
+/** 条件 / 触发效果（来自基线的 bg 字段） */
 export interface ModCondition {
   kind: string;
   trigger?: string;
@@ -68,7 +68,7 @@ export interface CleanMod {
   exclusiveGroup?: string;
   /** 与本体互斥的其它模组 */
   conflictsWith?: string[];
-  /** 只能装在这些 ZK 武器 id 上 */
+  /** 只能装在这些基线武器 id 上 */
   onlyOn?: string[];
   /** 不能装在以下特征/武器上 */
   excludedFrom?: string[];
@@ -92,8 +92,14 @@ const RARITY: Record<string, CleanMod['rarity']> = { c: 'common', r: 'uncommon',
 export function levelValues(maxValue: number, maxRank: number, perRank?: number): number[] {
   const n = Math.max(0, Math.trunc(maxRank));
   if (n === 0) return [round4(maxValue)];
-  const step = perRank !== undefined ? perRank : maxValue / n;
   const out: number[] = [];
+  if (perRank !== undefined) {
+    // 给了固定步长：第 r 级 = 步长 × r，**满级钉死为 maxValue**（消除浮点尾巴）
+    for (let r = 0; r < n; r++) out.push(round4(perRank * r));
+    out.push(round4(maxValue));
+    return out;
+  }
+  const step = maxValue / n;
   for (let r = 0; r <= n; r++) out.push(round4(step * r));
   return out;
 }
@@ -104,13 +110,13 @@ export function round4(v: number): number {
 }
 
 /** 该卡"每个异常状态"能叠几层：取 `bg` 里 `g='condition_overload'` 的 `st`；没有（异况超量）即 1 */
-function coStacks(raw: ZkMod): number {
+function coStacks(raw: ModRecord): number {
   const hits = (raw.bg ?? []).filter((b) => b.g === 'condition_overload' && typeof b.st === 'number' && b.st > 0);
   return hits.length ? Math.max(...hits.map((h) => h.st as number)) : 1;
 }
 
 /** bg → ModCondition */
-function toCondition(bg: ZkBg): ModCondition {
+function toCondition(bg: ModBuff): ModCondition {
   const c: ModCondition = { kind: bg.k };
   if (bg.tr !== undefined && bg.tr !== '') c.trigger = bg.tr;
   if (bg.cd !== undefined && bg.cd !== '') c.condition = bg.cd;
@@ -132,7 +138,7 @@ export interface CleanModResult {
 }
 
 /** 清洗单个模组 */
-export function cleanMod(raw: ZkMod, official?: CleanMod['official']): CleanModResult {
+export function cleanMod(raw: ModRecord, official?: CleanMod['official']): CleanModResult {
   const stats: ModStatValue[] = [];
   const unknownKeys: string[] = [];
   const maxRank = effectiveMaxRank(raw);
@@ -147,12 +153,19 @@ export function cleanMod(raw: ZkMod, official?: CleanMod['official']): CleanModR
     }
     // 镀层 / 异况类（`co`）：**满层值 = 每层值 × 叠层上限**，每层值按 Mod 描述确认
     // （需求方 2026-11-06：步枪才能是一层 40 最多两层所以 80，其余看描述）。
-    // ZKMODS 的 p[][1] 是各卡自己的数值（20/30/80），不能当成"每层"。
+    // 基线的 p[][1] 是各卡自己的数值（20/30/80），不能当成"每层"。
     // 产出的是**每层值**（不乘叠层上限）：内核 `overForStacks` 会乘 y，
     // 数据层再乘一次就等于把 y 算了两次（需求方 2026-11-06 指出）。
+    // 数值口径（需求方 2026-11-06 确认）：
+    //   满级加成 = 基线 `p[][1]`（条件类走每层值表）。
+    //   逐级 = 线性：第 r 级 = 满级 × r / 等级上限。
+    // 幽灵膛线"满级 330 / 每级 30"用三元素自洽写法 `[key, 每级值, 每级值 × 等级上限]` 表达个例订正，
+    // 见 `MOD_VALUE_OVERRIDES`——这是**个例**，不是通用步长口径。
     const perStack = coOverloadPerStack(raw.i);
-    const maxValue = perStack !== null ? perStack : MOD_VALUE_OVERRIDES[raw.i]?.maxValue ?? entry[1];
-    const values = levelValues(maxValue, maxRank, perStack !== null ? undefined : entry[2]);
+    const declared = MOD_VALUE_OVERRIDES[raw.i];
+    const perRank = declared?.perRank;
+    const maxValue = perStack ?? declared?.maxValue ?? entry[1];
+    const values = levelValues(maxValue, maxRank, perStack !== null ? undefined : perRank);
     const base: ModStatValue = {
       key,
       stat: map.stat,
@@ -202,10 +215,10 @@ export function isWeaponMod(m: { category: string }): boolean {
 /**
  * 判断是否架势（Stance）。
  *
- * 踩过的坑：ZKMODS 的 `s` 字段**区分不出架势**——实测 68 个架势里大多标成 `m`（近战），
+ * 踩过的坑：基线的 `s` 字段**区分不出架势**——实测 68 个架势里大多标成 `m`（近战），
  * 少数标成 `p`，而 `p` 里又混着真正的普通模组（如并合锐卡斯斩铁）。可靠信号有两个：
  *   1. 官方 ExportUpgrades 的 `type === 'STANCE'`
- *   2. ZKMODS 自身特征：**没有属性数值**（`p` 为空）+ 近战槽位 + 描述不含 `+X`
+ *   2. 基线自身特征：**没有属性数值**（`p` 为空）+ 近战槽位 + 描述不含 `+X`
  * 不能只用描述文本——有些架势的描述里完全不含 "Stance" 字样（如 Cleaving Whirlwind）。
  */
 export function isStanceMod(
@@ -221,7 +234,7 @@ export function isStanceMod(
 /**
  * 归一化等级上限。
  *
- * ZKMODS 的 `f` 等于"等级上限（rank）"，但有 12 个模组写成了 1，而它们的
+ * 基线的 `f` 等于"等级上限（rank）"，但有 12 个模组写成了 1，而它们的
  * 满级值实际是"每级加量"（与 WFCD 的等级文本逐级核对一致）：
  *   Amanata Pressure 每级 +55% → 满级 +330%
  *   Static Discharge 每级 +10% → 满级 +80%

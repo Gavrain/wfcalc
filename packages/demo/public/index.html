@@ -66,7 +66,7 @@
         <h2 class="section-title">配置</h2>
         <div class="controls-row">
           <label>目标派系 <select id="faction-select"></select></label>
-          <label><input id="headshot-toggle" type="checkbox" /> 爆头倍率
+          <label title="勾选即按弱点/爆头命中结算；目前版本弱点伤害等同于爆头"><input id="headshot-toggle" type="checkbox" /> 弱点/爆头倍率
             <select id="headshot-mult">
               <option value="1">×1</option>
               <option value="2">×2</option>
@@ -77,7 +77,7 @@
         <div id="co-controls" class="co-controls"></div>
       </section>
 
-      <!-- 中：槽位 + 备选 + 赋能 -->
+      <!-- 中：槽位 + 备选 -->
       <section class="col col-main">
         <div class="slot-area" id="slot-area">
           <div class="slot-area-head">
@@ -89,15 +89,10 @@
           </div>
           <div class="slot-wrap">
             <div id="slot-grid" class="slot-grid"></div>
+            <!-- 赋能 / 劣化槽（D-127）：与普通 Mod 槽同尺寸；槽名写在槽内，外面不再挂小标题 -->
             <div class="side-column">
-              <div class="side-group">
-                <div class="side-label">赋能</div>
-                <div id="arcane-slots" class="arcane-slots"></div>
-              </div>
-              <div class="side-group">
-                <div class="side-label">劣化</div>
-                <div id="side-slots" class="side-slots"></div>
-              </div>
+              <div id="arcane-slots" class="arcane-slots"></div>
+              <div id="side-slots" class="side-slots"></div>
             </div>
           </div>
           <div class="metric-picker metric-picker-inline">
@@ -121,12 +116,12 @@
         </div>
       </section>
 
-      <!-- 右：赋能 + 拆解 -->
+      <!-- 右：赋能 + 拆解（D-127：赋能回到拆解上方，区域加高；拆解往下挪） -->
       <aside class="col col-right">
-        <div class="arcane-area">
+        <div class="cand-area arcane-area">
           <div class="cand-head">
             <h2 class="section-title">赋能 <span id="arcane-count" class="muted"></span></h2>
-            <span class="cand-hint muted">拖到赋能槽</span>
+            <span class="cand-hint muted">拖到 Mod 槽旁，拖回此处卸下</span>
           </div>
           <div id="arcane-list" class="arcane-list"></div>
         </div>

@@ -80,7 +80,7 @@ export interface CleanModSet {
   name: { en: string; zh: string };
   /** 该套装共有几个模组 */
   modCount: number;
-  /** 属于该套装的模组 id（来自 ZKMODS 的 `st` 字段） */
+  /** 属于该套装的模组 id（来自 Mod 基线的 `st` 字段） */
   memberMods: string[];
   effect: SetEffect;
   /** 满级描述 */

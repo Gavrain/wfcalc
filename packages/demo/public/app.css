@@ -51,6 +51,7 @@ body {
 .weapon-title { font-size: 16px; font-weight: 600; }
 .weapon-meta { color: var(--muted); font-size: 12px; }
 
+
 .layout {
   display: grid;
   grid-template-columns: 320px minmax(560px, 1fr) 380px;
@@ -94,21 +95,18 @@ body {
   margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--line);
 }
 
-/* 右栏赋能在拆解上方：多列网格，只显示名字（D-034） */
-.col-right .arcane-area { margin-bottom: 12px; }
+/* 赋能待选区（D-127）：回到右栏、拆解上方；区域加高，卡按 Mod 卡尺寸显示词条与收益。
+   （D-124 曾挪到中栏，拖到左边的槽位太远，需求方纠正。） */
+.arcane-area { margin-bottom: 14px; }
 .arcane-list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
-  gap: 5px;
-  max-height: 150px;
+  grid-template-columns: repeat(auto-fill, minmax(176px, 1fr));
+  gap: 8px;
+  max-height: 38vh;
   overflow: auto;
-  padding-right: 3px;
+  padding-right: 4px;
 }
-.arcane-list .cand { min-height: 0; padding: 4px 6px; gap: 0; cursor: grab; }
-.arcane-list .cand-name {
-  font-size: 11.5px;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
+.arcane-list .cand { min-height: 96px; }
 
 /* 面板表 */
 .panel-table { display: flex; flex-direction: column; gap: 2px; }
@@ -206,14 +204,20 @@ body {
 }
 .btn-ghost:hover { background: var(--panel-3); color: var(--text); border-color: var(--muted); }
 .btn-ghost:active { background: var(--panel-2); }
-.slot-wrap { display: flex; gap: 14px; }
-.slot-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; flex: 1; }
-.side-column { display: flex; flex-direction: column; gap: 12px; width: 210px; }
-.side-group { display: flex; flex-direction: column; gap: 6px; }
-.arcane-slots, .side-slots { display: flex; flex-direction: column; gap: 6px; }
-.side-label { font-size: 11px; color: var(--muted); }
-
+/* 槽位区（D-127 / D-133）：4 列 Mod 槽 + 右侧**窄**栏（赋能 / 劣化 竖排）——
+   侧栏固定 190px，两张侧槽竖着叠，**宽高都与普通 Mod 槽一致**：
+     · 宽度：四列 Mod 槽区从原宽让出这一栏，每格仍是一行里的 1 份；
+     · 高度：Mod 槽区是 2 行，侧栏里两张槽各占一行（同样 `min-height: 84px`），
+       所以两者高度天然对齐，不会比 Mod 槽大。
+   ⚠ 不要把侧栏铺成 2 格宽：那样两张槽横着撑满 Mod 区宽度，比 Mod 槽大一圈（D-133 修的就是这个）。 */
+.slot-wrap { display: flex; gap: 8px; align-items: flex-start; }
+.slot-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; flex: 1; min-width: 0; }
+.side-column { display: flex; flex-direction: column; gap: 8px; width: 190px; flex: none; }
+/* 赋能 / 劣化槽（D-127）：槽名画在卡片右上角（`.slot-chip`），外面不再挂小标题
+   （那个标题会在装入后把槽撑高，导致布局跳动）。 */
+.arcane-slots, .side-slots { display: contents; }
 .slot {
+  position: relative;
   background: var(--panel-2);
   border: 1px dashed var(--line);
   border-radius: 5px;
@@ -224,20 +228,24 @@ body {
   gap: 4px;
   transition: border-color 0.12s, background 0.12s;
 }
+/* 槽名标签（D-127）：`.slot-chip` 画在卡片右上角，不占布局高度 */
+.slot-chip {
+  position: absolute; top: 5px; right: 6px;
+  font-size: 9.5px; line-height: 1; color: #6d7686;
+  letter-spacing: 0.03em; pointer-events: none;
+}
+/* D-133：两张侧槽与普通 Mod 槽同一尺寸，不拉伸、不定高 */
+.slot.arcane, .slot.exilus { flex: none; }
 .slot.exilus { border-color: #4a5a70; }
 .slot.arcane { border-color: #6a5a80; }
-/* 赋能槽固定高度，装入后不撑高 Mod 配置区；文字溢出用省略号（D-034） */
-.slot.arcane { min-height: 70px; max-height: 86px; overflow: hidden; }
 .slot.arcane .slot-name,
-.slot.arcane .slot-desc,
 .slot-name {
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.slot.arcane .slot-desc { display: block; }
 .slot.drop-target { border-color: var(--accent); background: #1e2b3d; border-style: solid; }
 .slot-title { font-size: 10px; color: var(--muted); text-transform: uppercase; }
-.slot-body { display: flex; flex-direction: column; gap: 3px; flex: 1; }
-.slot-name { font-weight: 600; font-size: 12.5px; }
+.slot-body { display: flex; flex-direction: column; gap: 3px; flex: 1; min-height: 0; overflow: hidden; }
+.slot-name { font-weight: 600; font-size: 12.5px; padding-right: 34px; }
 .slot-stats { display: flex; flex-wrap: wrap; gap: 3px; }
 .slot-stat { font-size: 10.5px; background: #2a3039; border-radius: 3px; padding: 1px 4px; color: #b9c3d2; }
 .slot-empty { color: #555d6b; font-size: 12px; margin: auto 0; text-align: center; }

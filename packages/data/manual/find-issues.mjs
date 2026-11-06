@@ -5,7 +5,10 @@ for (const f of ['primary', 'secondary', 'melee', 'archgun', 'archmelee']) {
 }
 
 // 灵化缺失：清单内但无 incarnon role
-const list = JSON.parse(fs.readFileSync('.cache/incarnon-map.json', 'utf8'));
+// 清单直接从 manual/incarnon.ts 解析（原来的 .cache/incarnon-map.json 已不再维护）
+const incSrc = fs.readFileSync('packages/data/manual/incarnon.ts', 'utf8');
+const list = {};
+for (const m of incSrc.matchAll(/^  "([^"]+)": \{ source:/gm)) list[m[1]] = true;
 const norm = (s) => s.toLowerCase().replace(/[\s'\-&]/g, '');
 const listN = new Set(Object.keys(list).map(norm));
 const PRE = ['mk1', 'prisma', 'prime', 'vandal', 'wraith', 'telos', 'sancti', 'rakta', 'synoid', 'dex', 'kuva', 'coda'];
@@ -21,6 +24,12 @@ const incMissing = all.filter((w) => hit(w.id) && !w.modes.some((m) => m.role ==
 const triggerUnknown = all
   .filter((w) => ['primary', 'secondary', 'archgun'].includes(w.category))
   .filter((w) => w.modes.some((m) => m.trigger === 'unknown'))
+  .map((w) => w.id)
+  .sort();
+
+// 灵化面板复用基础面板（D-110 / D-111）：模式是生成的，但面板数值是占位值
+const panelReused = all
+  .filter((w) => w.modes.some((m) => m.role === 'incarnon' && m._manual === 'panel-reused'))
   .map((w) => w.id)
   .sort();
 
@@ -42,6 +51,8 @@ const body = `/**
 export type WeaponIssueCode =
   /** 灵化武器清单里有，但导出数据没有灵化 behaviour，灵化形态缺失 */
   | 'incarnonMissing'
+  /** 灵化模式已生成，但面板数值是"复用基础面板"的占位值（D-110 / D-111） */
+  | 'incarnonPanelReused'
   /** 枪械的射击模式 trigger 无法从 stateName 识别（多为射线/持续类） */
   | 'triggerUnknown';
 
@@ -59,6 +70,12 @@ const INCARNON_MISSING: WeaponIssue = {
   _source: 'manual/incarnon.ts 清单内有此武器，但 ExportWeapons 只有 1 个 behaviour，灵化形态没有导出',
 };
 
+const INCARNON_PANEL_REUSED: WeaponIssue = {
+  code: 'incarnonPanelReused',
+  note: '灵化面板未收录（复用基础面板）',
+  _source: 'manual/incarnon-stats.ts 里还没有这把武器的灵化数值，面板暂按基础面板占位',
+};
+
 const TRIGGER_UNKNOWN: WeaponIssue = {
   code: 'triggerUnknown',
   note: '射击模式未识别',
@@ -70,6 +87,7 @@ const TRIGGER_UNKNOWN: WeaponIssue = {
  */
 export const WEAPON_ISSUES: Readonly<Record<string, WeaponIssue[]>> = {
 \${INC_IDS}
+\${PANEL_IDS}
 \${TRIGGER_IDS}
 };
 
@@ -86,14 +104,17 @@ export function hasIssues(weaponId: string | undefined): boolean {
 `;
 
 const incIds = incMissing.map((id) => `  ${JSON.stringify(id)}: [INCARNON_MISSING],`).join('\n');
+const panelIds = panelReused.map((id) => `  ${JSON.stringify(id)}: [INCARNON_PANEL_REUSED],`).join('\n');
 const trigIds = triggerUnknown.map((id) => `  ${JSON.stringify(id)}: [TRIGGER_UNKNOWN],`).join('\n');
 
 // 注释分组
 const out = body
   .replace('${INC_IDS}', `  // ── 灵化形态缺失（${incMissing.length} 把，D-100 已知限制）──\n${incIds}\n`)
+  .replace('${PANEL_IDS}', `  // ── 灵化面板复用基础面板（${panelReused.length} 把，D-111）──\n${panelIds}\n`)
   .replace('${TRIGGER_IDS}', `  // ── 射击模式未识别（${triggerUnknown.length} 把枪械，多为射线/持续类）──\n${trigIds}\n`);
 
 fs.writeFileSync('packages/data/manual/weapon-issues.ts', out, 'utf8');
 console.log('灵化缺失:', incMissing.length, '把');
+console.log('灵化面板复用:', panelReused.length, '把');
 console.log('trigger 未知:', triggerUnknown.length, '把');
-console.log('合计:', incMissing.length + triggerUnknown.length);
+console.log('合计:', incMissing.length + panelReused.length + triggerUnknown.length);

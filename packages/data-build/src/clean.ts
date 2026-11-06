@@ -18,6 +18,7 @@ import type {
 import { hasAoeSegment } from '../../core/src/weapon.ts';
 import type { ExportAttack, ExportBehaviour, ExportProjectile, ExportWeapon, ExportWeapons } from './types.ts';
 import { incarnonInfoOf } from '../../data/manual/incarnon.ts';
+import { incarnonStatsOf } from '../../data/manual/incarnon-stats.ts';
 
 /**
  * 投射物来源：普通发射还是蓄力发射。
@@ -364,7 +365,9 @@ export function toVariants(segments: DamageSegment[] | undefined): ModeVariant[]
   return variants;
 }
 
-/** 归一化比较两组投射数据是否完全相同 */
+/**
+ * 归一化比较两组投射数据是否完全相同
+ */
 export function sameProjectile(a: ExportProjectile | undefined, b: ExportProjectile | undefined): boolean {
   const sig = (p: ExportProjectile | undefined): string => {
     if (!p) return 'none';
@@ -380,6 +383,66 @@ export function sameProjectile(a: ExportProjectile | undefined, b: ExportProject
     return [norm(p.attack), norm(p.explosiveAttack)].join('|');
   };
   return sig(a) === sig(b);
+}
+
+/**
+ * **官方导出里不存在、但被导出的冗余字段**：整段丢弃（D-121）。
+ *
+ * 目前只有一条：
+ * ```
+ * 巴兹火枪 GrnGorgSniperRifle   projectile.explosiveAttack = { DT_EXPLOSION: 40 }
+ * ```
+ * 需求方 2026-11-06：
+ * > 「巴兹火枪的基础面板有问题，他没有爆炸也没有范围伤害……当然巴兹这个爆炸还是要删掉的。」
+ *
+ * 巴兹火枪是**标记类**武器（副模式给敌人打标记），游戏里没有爆炸、也没有 AoE。
+ * 它这条 `explosiveAttack` 与实际行为不符（同一 behaviour 的 `impact` 段
+ * 60/11.25/3.75 也没被 `damagePerShot` 计入面板，见 D-095 —— 官方导出本身就不干净）。
+ * 这里按武器 id 精确剔除**那一段 `explosiveAttack`**，其它段原样保留并记录理由。
+ */
+export const DROP_EXPLOSIVE_ATTACK_WEAPONS: Readonly<Record<string, string>> = {
+  GrnGorgSniperRifle: '巴兹火枪没有爆炸/范围伤害；官方导出里的 explosiveAttack 40 是冗余字段（需求方 2026-11-06 确认删除）',
+};
+
+/** 该段是否应被剔除（按武器 + 段类型） */
+export function shouldDropSegment(weaponId: string, seg: DamageSegment): string | null {
+  const reason = DROP_EXPLOSIVE_ATTACK_WEAPONS[weaponId];
+  if (reason && seg.kind === 'explosiveAttack') return reason;
+  return null;
+}
+
+/**
+ * 占比 → 具体数值（D-110）。
+ *
+ * 需求方给的灵化面板是"总伤害 + 伤害组成占比"（如 140 伤害、57% 切割），
+ * 这里换算成各类别的绝对值；**未列出的剩余部分按"其余为冲击、穿刺"平分**，
+ * 所以调用方给占比时不必把冲击/穿刺也写出来。
+ *
+ * 换算后总量**严格等于** `total`（不会因为四舍五入漂移）。
+ */
+export function spreadFromRatio(
+  total: number,
+  ratio: Readonly<Record<string, number>>,
+): Record<string, number> {
+  const out: Record<string, number> = {};
+  let used = 0;
+  let usedRatio = 0;
+  for (const [type, r] of Object.entries(ratio)) {
+    if (!(r > 0)) continue;
+    const v = total * r;
+    out[type] = v;
+    used += v;
+    usedRatio += r;
+  }
+  const rest = total - used;
+  if (rest > 1e-9 && usedRatio < 1) {
+    // 剩余部分：物理三元素里没被点名的，按"其余为冲击、穿刺"平分
+    const remaining = ['impact', 'puncture', 'slash'].filter((x) => out[x] === undefined);
+    const pool = remaining.length > 0 ? remaining : ['slash'];
+    const each = rest / pool.length;
+    for (const x of pool) out[x] = (out[x] ?? 0) + each;
+  }
+  return out;
 }
 
 /**
@@ -537,16 +600,24 @@ export function cleanWeapons(exportWeapons: ExportWeapons): CleanResult {
       impactOnly.length = 0;
     }
 
-    // ── 灵化模式（D-100）──
+    // ── 灵化模式（D-100 / D-110）──
     // 灵化武器清单来自人工层 manual/incarnon.ts（官方导出没有灵化标记）。
     // 判定：武器命中清单 且 behaviour 数 = 普通模式数 + 1 → 最后一个 behaviour 是灵化形态。
-    // 数值暂不收录（需求方 2026-11-06：先不填数值，只做识别）。
+    //
+    // D-110：扎里曼号系列（Laetum / Phenmor / Felarx / Praedos / Innodem）在导出里
+    // 两个 behaviour 都是普通投射，结构判据认不出来。这些人只要人工层
+    // `INCARNON_STATS` 给了远程模式，就把最后一个 behaviour 当作灵化形态的**挂点**，
+    // 真实面板一律取人工层数值（这只是一个待替换的槽位）。
     const englishName = key.split('/').pop() ?? '';
     const inc = incarnonInfoOf(englishName);
+    const manualStats = incarnonStatsOf(englishName);
     let incarnonIndex = -1;
     if (inc && modeBehaviours.length >= 2) {
       incarnonIndex = modeBehaviours.length - 1;
       warnings.push(`${key}: 识别为灵化武器（${inc.source}），最后一个 behaviour 标为灵化模式`);
+    } else if (manualStats && manualStats.modes.length > 0 && modeBehaviours.length >= 1) {
+      incarnonIndex = modeBehaviours.length - 1;
+      warnings.push(`${key}: 人工层有灵化形态数值，最后一个 behaviour 作为灵化挂点`);
     }
     modeBehaviours.forEach((b, index) => {
       const context = `${key}#${index}`;
@@ -568,14 +639,66 @@ export function cleanWeapons(exportWeapons: ExportWeapons): CleanResult {
       // 其暴击/触发数值与武器面板不同，需要人工层补 override（此处留空并告警）。
       // 灵化形态（D-100）：数据可能在 chargedProjectile（弓类），也可能只在 impact（伯斯顿类）。
       // 两种都取，取到哪个算哪个。数值暂不收录。
+      // D-108（需求方 2026-11-06 选 B1）：不再只靠人工清单，**按结构规则自动对应**。
+      // 规则：只有 chargedProjectile、没有 projectile，且同武器已有别的 behaviour 提供普通射击。
+      // 这样 WFCD 那 158 把带"灵化/蓄力"命名攻击的武器都能对上，不必逐把人工确认。
       if (isIncarnonSlot || isIncarnonBehaviour(b, hasSiblingNormal)) {
+        // D-110：优先用人工层录入的灵化形态数值（INCARNON_STATS）。
+        const stats = incarnonStatsOf(key.split('/').pop());
+        if (stats && stats.modes.length > 0) {
+          let incNo = 0;
+          for (const im of stats.modes) {
+            // id 去重：第一个叫 incarnon，之后 incarnon2 / incarnon3 …
+            incNo += 1;
+            const incId = incNo === 1 ? 'incarnon' : `incarnon${incNo}`;
+            const seg: DamageSegment = {
+              kind: 'incarnon',
+              aoe: Boolean(im.aoe),
+              damage: spreadFromRatio(im.damage, im.spread),
+              procChance: im.statusChance,
+            };
+            modes.push({
+              id: incId,
+              role: 'incarnon',
+              trigger: im.trigger,
+              bullets: 1,
+              multishot: im.multishot,
+              override: {
+                critChance: im.critChance,
+                critMultiplier: im.critMultiplier,
+                statusChance: im.statusChance,
+                fireRate: im.fireRate,
+              },
+              variants: toVariants([seg]),
+              _manual: 'entered',
+              ...(im.note ? { _note: im.note } : {}),
+            });
+          }
+          warnings.push(`${key}#${index}: 灵化形态数值来自人工层（${stats._source}）`);
+          return;
+        }
+
+        // 人工层还没填 → **复用基础面板**占位，并打上未核实标记（需求方 2026-11-06）。
         const segs =
           toSegments(b, warnings, context, 'chargedProjectile', w.damagePerShot, !isMelee).length > 0
             ? toSegments(b, warnings, context, 'chargedProjectile', w.damagePerShot, !isMelee)
             : toSegments(b, warnings, context, 'projectile', w.damagePerShot, !isMelee);
         if (segs.length > 0) {
-          modes.push({ id: 'incarnon', role: 'incarnon', ...base, variants: toVariants(segs) });
-          warnings.push(`${key}#${index}: 识别为灵化模式，面板数值待人工层补充`);
+          const meleeNote = stats?.meleeBuff
+            ? `近战灵化（不参与计算）：${stats.meleeBuff.activation}，持续 ${stats.meleeBuff.durationSeconds} 秒，` +
+              Object.entries(stats.meleeBuff.buffs).map(([k, v]) => `${k} ${v}`).join('，') +
+              (stats.meleeBuff.extra ? `；${stats.meleeBuff.extra}` : '')
+            : '';
+          modes.push({
+            id: 'incarnon',
+            role: 'incarnon',
+            ...base,
+            variants: toVariants(segs),
+            // 面板是复用的基础面板，不是灵化形态的真实值 → 界面必须打标记
+            _manual: 'panel-reused',
+            _note: meleeNote || '灵化形态面板未收录，暂复用基础面板',
+          });
+          warnings.push(`${key}#${index}: 灵化形态面板未收录，已复用基础面板并标记`);
         }
         return;
       }
@@ -612,12 +735,21 @@ export function cleanWeapons(exportWeapons: ExportWeapons): CleanResult {
     });
 
     // 模式 id 规范化：第一个普通模式叫 primary，其余按顺序编号
-    modes.forEach((m, i) => {
-      if (m.role === 'incarnon') m.id = 'incarnon';
-      else if (i === 0) m.id = 'primary';
-      else if (m.role === 'charged') m.id = 'charged';
-      else m.id = `mode${i + 1}`;
-    });
+    //
+    // D-110：灵化模式**可能不止一个**（奏凯的直击/范围、赘骨的连射/蓄力），
+    // 所以这里不能一律改成 `incarnon`——那样两个模式会撞 id。
+    // 规则：第一个叫 `incarnon`，之后 `incarnon2` / `incarnon3` …
+    {
+      let incNo = 0;
+      modes.forEach((m, i) => {
+        if (m.role === 'incarnon') {
+          incNo += 1;
+          m.id = incNo === 1 ? 'incarnon' : `incarnon${incNo}`;
+        } else if (i === 0) m.id = 'primary';
+        else if (m.role === 'charged') m.id = 'charged';
+        else m.id = `mode${i + 1}`;
+      });
+    }
 
     // 只有命中段的 behaviour（毒云之类）并入第一个普通模式的**爆炸变体**（D-092）：
     // 它属于同一次开火，不是第二个射击模式。
@@ -631,6 +763,25 @@ export function cleanWeapons(exportWeapons: ExportWeapons): CleanResult {
         const existing = host.variants.find((v) => v.id === 'blast');
         if (existing) existing.segments.push(...asBlast);
         else host.variants.push({ id: 'blast', label: '爆炸', segments: asBlast });
+      }
+    }
+
+    // D-121：按武器剔除官方导出里的冗余段（目前只有巴兹火枪的 explosiveAttack 40）。
+    // 必须在上面两步之后做——`impactOnly` 合并与变体分组都可能再生成 `explosiveAttack` 段。
+    {
+      const wid = toWeaponId(key);
+      for (const m of modes) {
+        for (const v of m.variants) {
+          const kept: DamageSegment[] = [];
+          for (const seg of v.segments) {
+            const why = shouldDropSegment(wid, seg);
+            if (why) { warnings.push(`${key}: 已剔除${seg.kind}段 —— ${why}`); continue; }
+            kept.push(seg);
+          }
+          v.segments = kept;
+        }
+        // 变体里的段被清空后整个变体也一并去掉（标签页不留空壳）
+        m.variants = m.variants.filter((v) => v.segments.length > 0);
       }
     }
 

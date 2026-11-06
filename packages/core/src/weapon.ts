@@ -113,6 +113,18 @@ export interface AttackMode {
    * 所以只填部分字段是允许的，老数据（完全不填）行为不变。
    */
   override?: PanelOverride;
+  /**
+   * 该模式的数值**未核实**（D-110）。
+   *
+   * 用于灵化形态这类"官方导出没有、人工层还没填"的数据：
+   * 面板先**复用基础面板**占位，同时在界面上明确打标记，
+   * 不让用户误以为这个数可信。
+   *
+   * `'panel-reused'` = 面板是占位值；`'entered'` = 人工录入的真实值。
+   */
+  _manual?: 'panel-reused' | 'entered';
+  /** 人工备注（来源、待办、补充说明），仅供展示与溯源 */
+  _note?: string;
 }
 
 /** 当前生效的面板变体（模式内） */
@@ -136,6 +148,20 @@ export function allSegments(mode: AttackMode): DamageSegment[] {
   const out: DamageSegment[] = [];
   for (const v of mode.variants ?? []) out.push(...v.segments);
   return out;
+}
+
+/**
+ * 模式内**指定变体**的段（D-120）。
+ *
+ * 单变体结算用：`compute()` 会把 `mode.variants` 缩到只剩选中那个变体再调 `allSegments`，
+ * 于是 `segments` / `spreadByVariant` 都只含**当前变体**，界面不会再拿别的变体去累加。
+ * 越界 / 没传 → 原样返回（调用方给的是已经缩好的模式）。
+ */
+export function variantSegments(mode: AttackMode, variantIndex?: number): DamageSegment[] {
+  if (variantIndex === undefined) return allSegments(mode);
+  const v = mode.variants?.[variantIndex];
+  if (!v) return allSegments(mode);
+  return [...v.segments];
 }
 
 /** 模式内全部段的数量（含所有变体） */

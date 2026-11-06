@@ -42,6 +42,13 @@ export interface EmitMode {
   /** 模式内的面板变体（恒非空，至少 1 个）；段只存在于变体内 */
   variants: EmitVariant[];
   override?: PanelOverride;
+  /**
+   * D-110：该模式的数值是否已核实。
+   * `panel-reused` = 面板是**复用基础面板**的占位值，界面会打标记。
+   */
+  _manual?: 'panel-reused' | 'entered';
+  /** D-110：人工备注（来源、待办），供溯源与界面提示 */
+  _note?: string;
 }
 
 export interface EmitWeapon {
@@ -98,6 +105,9 @@ function toEmitMode(m: AttackMode): EmitMode {
     ...(m.burst ? { burst: m.burst } : {}),
     variants,
     ...(m.override ? { override: { ...m.override } } : {}),
+    // D-110：把"数值是否核实"的标记与备注一并产出，界面据此打标
+    ...(m._manual ? { _manual: m._manual } : {}),
+    ...(m._note ? { _note: m._note } : {}),
   };
 }
 

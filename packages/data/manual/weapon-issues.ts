@@ -13,6 +13,8 @@
 export type WeaponIssueCode =
   /** 灵化武器清单里有，但导出数据没有灵化 behaviour，灵化形态缺失 */
   | 'incarnonMissing'
+  /** 灵化模式已生成，但面板数值是"复用基础面板"的占位值（D-110 / D-111） */
+  | 'incarnonPanelReused'
   /** 枪械的射击模式 trigger 无法从 stateName 识别（多为射线/持续类） */
   | 'triggerUnknown';
 
@@ -28,6 +30,12 @@ const INCARNON_MISSING: WeaponIssue = {
   code: 'incarnonMissing',
   note: '灵化形态缺失',
   _source: 'manual/incarnon.ts 清单内有此武器，但 ExportWeapons 只有 1 个 behaviour，灵化形态没有导出',
+};
+
+const INCARNON_PANEL_REUSED: WeaponIssue = {
+  code: 'incarnonPanelReused',
+  note: '灵化面板未收录（复用基础面板）',
+  _source: 'manual/incarnon-stats.ts 里还没有这把武器的灵化数值，面板暂按基础面板占位',
 };
 
 const TRIGGER_UNKNOWN: WeaponIssue = {
@@ -53,6 +61,30 @@ export const WEAPON_ISSUES: Readonly<Record<string, WeaponIssue[]>> = {
   "PrismaObex": [INCARNON_MISSING],
   "PrismaSkana": [INCARNON_MISSING],
   "SkanaPrime": [INCARNON_MISSING],
+
+  // ── 灵化面板复用基础面板（22 把，D-111）──
+  "AutoCrossBow": [INCARNON_PANEL_REUSED],
+  "BratonPrime": [INCARNON_PANEL_REUSED],
+  "BroncoPrime": [INCARNON_PANEL_REUSED],
+  "DeraVandal": [INCARNON_PANEL_REUSED],
+  "HuntingBow": [INCARNON_PANEL_REUSED],
+  "Kunai": [INCARNON_PANEL_REUSED],
+  "LatoPrime": [INCARNON_PANEL_REUSED],
+  "LatoVandal": [INCARNON_PANEL_REUSED],
+  "LatronPrime": [INCARNON_PANEL_REUSED],
+  "MK1Furis": [INCARNON_PANEL_REUSED],
+  "MK1Kunai": [INCARNON_PANEL_REUSED],
+  "MK1Paris": [INCARNON_PANEL_REUSED],
+  "PrimeBallistica": [INCARNON_PANEL_REUSED],
+  "PrimeBoltor": [INCARNON_PANEL_REUSED],
+  "PrimeBurston": [INCARNON_PANEL_REUSED],
+  "PrimeHuntingBow": [INCARNON_PANEL_REUSED],
+  "PrimeLex": [INCARNON_PANEL_REUSED],
+  "PrismaAngstrum": [INCARNON_PANEL_REUSED],
+  "RVBallistica": [INCARNON_PANEL_REUSED],
+  "StalkerBow": [INCARNON_PANEL_REUSED],
+  "WraithGorgon": [INCARNON_PANEL_REUSED],
+  "WraithLatron": [INCARNON_PANEL_REUSED],
 
   // ── 射击模式未识别（30 把枪械，多为射线/持续类）──
   "AutoPistol": [TRIGGER_UNKNOWN],

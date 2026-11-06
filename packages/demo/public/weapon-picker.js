@@ -3,11 +3,13 @@
  *
  * 需求方 2026-11-06：
  * > 「开放武器切换功能，目前暂定可以切换所有主武器。可以使用名称搜索，或者下拉栏选择，
- * > 为下拉栏加入主要次要近战空战的筛选，类别内再按类型分类。」
+ * > > 为下拉栏加入主要次要近战空战的筛选，类别内再按类型分类。」
+ *
+ * 2026-11-06 后续（D-119）：四个大类**全部开放**（主要 / 次要 / 近战 / 空战）。
  *
  * 结构：
  * ```
- * 大类（主要 / 次要 / 近战 / 空战）   ← 前三个按需求只开放"主要"，其余置灰
+ * 大类（主要 / 次要 / 近战 / 空战）
  *   └ 类型（步枪 / 霰弹枪 / 狙击枪 / 弓 / 手枪 / 剑 …）  ← 取自 weapon-slots.json 的 broad/specific
  *        └ 武器
  * ```
@@ -16,12 +18,12 @@
  *           `mods/weapon-slots.json` 的 `slots.broad` / `slots.specific`。
  */
 
-/** 大类定义：id / 中文名 / 对应的 generated 文件 / 是否可选 */
+/** 大类定义：id / 中文名 / 对应的 generated 文件 / 是否可选（D-119：四个大类全部开放） */
 export const WEAPON_GROUPS = [
   { id: 'primary', label: '主要', files: ['primary'], enabled: true },
-  { id: 'secondary', label: '次要', files: ['secondary'], enabled: false },
-  { id: 'melee', label: '近战', files: ['melee'], enabled: false },
-  { id: 'archwing', label: '空战', files: ['archgun', 'archmelee'], enabled: false },
+  { id: 'secondary', label: '次要', files: ['secondary'], enabled: true },
+  { id: 'melee', label: '近战', files: ['melee'], enabled: true },
+  { id: 'archwing', label: '空战', files: ['archgun', 'archmelee'], enabled: true },
 ];
 
 /** `broad` + `specific` → 中文类型名 */
@@ -63,22 +65,22 @@ const MELEE_TYPE_LABEL = {
 export function classifyWeapon(slotEntry) {
   const broad = (slotEntry && slotEntry.slots && slotEntry.slots.broad) || 'unknown';
   const specific = (slotEntry && slotEntry.slots && slotEntry.slots.specific) || [];
-  const zkClass = (slotEntry && slotEntry.slots && slotEntry.slots.basis && slotEntry.slots.basis.zkClass) || null;
+  const subclass = (slotEntry && slotEntry.subclass) || null;
 
   // 分类优先级（D-098）：
   //   1. 近战 → 用 `specific`（剑/锤/匕首…，官方本来就细分）
-  //   2. 其余 → 用官方 `zkClass`：它能识别出 broad 之外的真实子类，
-  //      例如 rifle 里的 launcher（发射器）/ crossbow（弩）、
-  //      pistol 里的 dual_pistols（双手枪）/ shotgun_sidearm（手炮）
+  //   2. 其余 → 用数据层给的 `subclass`：它标出 broad 之外的真实子类，
+  //      例如 rifle 里的 launcher（发射器）/ crossbow（弩）
+  //      （这两个都吃步枪类 Mod，broad 仍是 rifle，只在界面上分开展示）
   //   3. 都拿不到 → 退回 broad 本身
   let typeKey;
   if (broad === 'melee' || broad === 'archmelee') {
     // specific 缺失时**不要**退回 broad：broad 对近战就是 'melee'，
     // 但空 specific 的武器会被误显示成"手枪/步枪"这种其它大类的名字。
     typeKey = specific.length ? specific[0] : '__other_melee__';
-  } else if (zkClass && zkClass !== broad && TYPE_LABEL[zkClass]) {
+  } else if (subclass && subclass !== broad && TYPE_LABEL[subclass]) {
     // D-099 C：弩并入弓弩（同一个类型桶）
-    typeKey = zkClass === 'crossbow' ? 'bow' : zkClass;
+    typeKey = subclass === 'crossbow' ? 'bow' : subclass;
   } else {
     typeKey = broad;
   }
@@ -167,6 +169,17 @@ function groupOfCategory(category) {
     case 'archmelee': return 'archwing';
     default: return 'other';
   }
+}
+
+/**
+ * 武器大类 id（D-093 / D-119 / D-134）。
+ * `archgun` / `archmelee` 都归到 `archwing`；认不出时退回 `primary`。
+ * app.js 换枪后用它把「大类」下拉停在当前武器所在的类别。
+ */
+export function weaponGroupId(weapon) {
+  const cat = weapon && weapon.category;
+  if (cat === 'archgun' || cat === 'archmelee') return 'archwing';
+  return cat || 'primary';
 }
 
 /** 按名称搜索（中英文都匹配，大小写/空格不敏感） */

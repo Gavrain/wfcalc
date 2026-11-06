@@ -40,19 +40,20 @@ describe('爆炸每层伤害（D-056）', () => {
       `每层伤害应 > 0，实际 ${res.output.blast.perStack}`);
   });
 
-  it('每层伤害 = 全类型基础值 × 0.3（基础值里已含暴击期望）', () => {
+  it('每层伤害 = 全类型基础值 × 0.3 × 暴击期望（基础值里已含暴击期望）', () => {
     const res = compute(weapon, weapon.modes[0], blastMods, {}, false);
     const seg: any = res.segments[0];
-    // dotBase 剔除了元素加量 → 只剩冲击 100（面板）+ 基伤加成 0
-    const baseTotal = Object.values(seg.dotBase).reduce((a: number, v: any) => a + v, 0);
-    // D-063：dotBase 已含完整期望倍率，blast 不再单独乘暴击
-    near(res.output.blast.perStack, baseTotal * 0.3);
+    // ⚠ D-107：面板里的基础分布（**不含**元素 Mod 加量）= 冲击 100
+    const baseTotal = Object.values(seg.tickBase).reduce((a: number, v: any) => a + v, 0);
+    // 爆炸基础值 = 该分布 × 期望倍率(1.2)，再 × 系数 0.3
+    const expectedMul = 1 + seg.critChance * (seg.critDamage - 1);
+    near(res.output.blast.perStack, baseTotal * expectedMul * 0.3);
   });
 
   it('每层伤害量级合理（不超过基础值的 3 倍）', () => {
     const res = compute(weapon, weapon.modes[0], blastMods, {}, false);
     const seg: any = res.segments[0];
-    const baseTotal = Object.values(seg.dotBase).reduce((a: number, v: any) => a + v, 0);
+    const baseTotal = Object.values(seg.tickBase).reduce((a: number, v: any) => a + v, 0);
     // 系数 0.3 × 暴击期望(1.2) = 0.36 倍基础值，绝不该是几十倍
     assert.ok(res.output.blast.perStack < baseTotal * 3,
       `每层 ${res.output.blast.perStack} 不应超过基础值 ${baseTotal} 的 3 倍`);
@@ -62,7 +63,7 @@ describe('爆炸每层伤害（D-056）', () => {
     const noCrit: any = { ...weapon, critChance: 0 };
     const res = compute(noCrit, noCrit.modes[0], blastMods, {}, false);
     const seg: any = res.segments[0];
-    const baseTotal = Object.values(seg.dotBase).reduce((a: number, v: any) => a + v, 0);
+    const baseTotal = Object.values(seg.tickBase).reduce((a: number, v: any) => a + v, 0);
     near(res.output.blast.perStack, baseTotal * 0.3);
   });
 

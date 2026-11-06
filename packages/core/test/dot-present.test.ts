@@ -114,3 +114,72 @@ describe('没有的元素不触发（D-055）', () => {
     assert.ok(res.output.dotPerType.gas > 0, '毒气应有每层秒伤');
   });
 });
+
+describe('D-109：异常是否存在，只看「当前面板复合后」有没有这个元素', () => {
+  const kuva = (type: string) => ({
+    kuva: { type, ratio: 0.6 }, faction: 'none', headshot: { enabled: false, multiplier: 3 },
+  });
+  const mod = (stat: string, slot: number) => ({ stat, form: 'pct', amount: 90, source: stat, slot });
+  const rowsOf = (res: any) => {
+    const out: string[] = [];
+    for (const t of core.DOT_TYPES) {
+      const per = res.output.dotPerType[t] ?? 0;
+      const st = res.output.stacksPerType[t] ?? 0;
+      if (per > 0 || st > 0) out.push(t);
+    }
+    return out.sort();
+  };
+
+  it('只有火 Mod、没有毒 → 不该出现毒气行', () => {
+    const res = compute(weapon, slashOnly, [mod('elemental:heat', 0)], {}, false);
+    assert.ok(!(res.segments[0].finalHit.gas > 0), '命中分布里不该有毒气');
+    assert.ok(!rowsOf(res).includes('gas'), '界面上不该有毒气行');
+  });
+
+  it('「电+毒+火」按槽位合成为腐蚀+火时，不该出现毒气行', () => {
+    // 槽位顺序：电(0) 毒(1) → 腐蚀；火(2) 留下
+    const res = compute(weapon, slashOnly, [
+      mod('elemental:electric', 0), mod('elemental:toxin', 1), mod('elemental:heat', 2),
+    ], {}, false);
+    const seg: any = res.segments[0];
+    assert.ok(seg.finalHit.corrosive > 0, '应有腐蚀');
+    assert.ok(seg.finalHit.heat > 0, '应有火焰');
+    assert.ok(!(seg.finalHit.gas > 0), '不该有毒气');
+    assert.ok(!rowsOf(res).includes('gas'), '界面上不该有毒气行');
+  });
+
+  it('火+毒真的合成毒气时，毒气行必须出现且有层数', () => {
+    const res = compute(weapon, slashOnly, [
+      mod('elemental:heat', 0), mod('elemental:toxin', 1),
+    ], {}, false);
+    assert.ok(res.segments[0].finalHit.gas > 0, '应合成出毒气');
+    assert.ok(rowsOf(res).includes('gas'), '界面上应有毒气行');
+    assert.ok((res.output.stacksPerType.gas ?? 0) > 0, '毒气应有层数');
+  });
+
+  it('玄骸火参与合成（需求方选 B）：玄骸火 + 毒 Mod 会合成毒气', () => {
+    const res = compute(weapon, slashOnly, [mod('elemental:toxin', 0)], kuva('heat'), false);
+    assert.ok(res.segments[0].finalHit.gas > 0, '玄骸火应与毒合成毒气');
+    assert.ok(rowsOf(res).includes('gas'), '界面上应有毒气行');
+  });
+
+  it('显示与叠层一致：显示出的 DoT 行，层数都必须 > 0', () => {
+    const cases = [
+      [mod('elemental:heat', 0)],
+      [mod('elemental:toxin', 0)],
+      [mod('elemental:heat', 0), mod('elemental:toxin', 1)],
+      [mod('elemental:electric', 0), mod('elemental:toxin', 1), mod('elemental:heat', 2)],
+    ];
+    for (const contribs of cases) {
+      for (const opts of [{}, kuva('heat')]) {
+        const res = compute(weapon, slashOnly, contribs, opts, false);
+        for (const t of core.DOT_TYPES) {
+          const per = res.output.dotPerType[t] ?? 0;
+          const st = res.output.stacksPerType[t] ?? 0;
+          if (per <= 0 && st <= 0) continue;
+          assert.ok(st > 0, t + ' 显示了每层伤害 ' + per + ' 但层数为 0');
+        }
+      }
+    }
+  });
+});

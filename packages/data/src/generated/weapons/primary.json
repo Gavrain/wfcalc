@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-06T09:06:11.256Z",
+  "generatedAt": "2026-11-06T13:18:56.213Z",
   "category": "primary",
   "count": 192,
   "note": "暴率/触发为 0~1 小数；伤害分布为绝对值；procChance 同为 0~1；kuva 表示需用户在计算器里选元素与加成（25%~60%）",
@@ -454,7 +454,9 @@
                 }
               ]
             }
-          ]
+          ],
+          "_manual": "panel-reused",
+          "_note": "灵化形态面板未收录，暂复用基础面板"
         }
       ]
     },
@@ -2273,7 +2275,9 @@
                 }
               ]
             }
-          ]
+          ],
+          "_manual": "panel-reused",
+          "_note": "灵化形态面板未收录，暂复用基础面板"
         }
       ]
     },
@@ -3426,20 +3430,6 @@
                   "procChance": 0.21
                 }
               ]
-            },
-            {
-              "id": "blast",
-              "label": "爆炸",
-              "segments": [
-                {
-                  "kind": "explosiveAttack",
-                  "aoe": true,
-                  "damage": {
-                    "blast": 40
-                  },
-                  "procChance": 0
-                }
-              ]
             }
           ]
         },
@@ -4015,7 +4005,9 @@
                 }
               ]
             }
-          ]
+          ],
+          "_manual": "panel-reused",
+          "_note": "灵化形态面板未收录，暂复用基础面板"
         }
       ]
     },
@@ -5523,7 +5515,9 @@
                 }
               ]
             }
-          ]
+          ],
+          "_manual": "panel-reused",
+          "_note": "灵化形态面板未收录，暂复用基础面板"
         }
       ]
     },
@@ -5612,7 +5606,9 @@
                 }
               ]
             }
-          ]
+          ],
+          "_manual": "panel-reused",
+          "_note": "灵化形态面板未收录，暂复用基础面板"
         }
       ]
     },
@@ -6315,7 +6311,9 @@
                 }
               ]
             }
-          ]
+          ],
+          "_manual": "panel-reused",
+          "_note": "灵化形态面板未收录，暂复用基础面板"
         }
       ]
     },
@@ -6382,7 +6380,9 @@
                 }
               ]
             }
-          ]
+          ],
+          "_manual": "panel-reused",
+          "_note": "灵化形态面板未收录，暂复用基础面板"
         }
       ]
     },
@@ -6876,7 +6876,9 @@
                 }
               ]
             }
-          ]
+          ],
+          "_manual": "panel-reused",
+          "_note": "灵化形态面板未收录，暂复用基础面板"
         }
       ]
     },
@@ -9496,7 +9498,9 @@
                 }
               ]
             }
-          ]
+          ],
+          "_manual": "panel-reused",
+          "_note": "灵化形态面板未收录，暂复用基础面板"
         }
       ]
     },
@@ -11638,7 +11642,9 @@
                 }
               ]
             }
-          ]
+          ],
+          "_manual": "panel-reused",
+          "_note": "灵化形态面板未收录，暂复用基础面板"
         }
       ]
     },
@@ -11724,7 +11730,9 @@
                 }
               ]
             }
-          ]
+          ],
+          "_manual": "panel-reused",
+          "_note": "灵化形态面板未收录，暂复用基础面板"
         }
       ]
     },
@@ -11776,28 +11784,38 @@
           ]
         },
         {
-          "id": "mode2",
-          "role": "normal",
+          "id": "incarnon",
+          "role": "incarnon",
           "trigger": "semi",
           "bullets": 1,
-          "multishot": 4,
+          "multishot": 1,
           "variants": [
             {
               "id": "direct",
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "attack",
+                  "kind": "incarnon",
                   "aoe": false,
                   "damage": {
-                    "impact": 200,
-                    "radiation": 400
+                    "impact": 66,
+                    "puncture": 66,
+                    "radiation": 402,
+                    "slash": 66
                   },
                   "procChance": 0.2
                 }
               ]
             }
-          ]
+          ],
+          "override": {
+            "critChance": 0.2,
+            "critMultiplier": 3,
+            "statusChance": 0.2,
+            "fireRate": 1.5
+          },
+          "_manual": "entered",
+          "_note": "600 为单弹片伤害；67% 辐射；强制触发冲击；射程 56 米，精准度 9，投射物 100 米/秒，灵化充能 60"
         }
       ]
     },
@@ -11838,8 +11856,8 @@
           ]
         },
         {
-          "id": "mode2",
-          "role": "normal",
+          "id": "incarnon",
+          "role": "incarnon",
           "trigger": "auto",
           "bullets": 1,
           "multishot": 1,
@@ -11849,25 +11867,26 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "incarnon",
                   "aoe": false,
                   "damage": {
-                    "impact": 40
-                  },
-                  "procChance": 0.1
-                },
-                {
-                  "kind": "attack",
-                  "aoe": false,
-                  "damage": {
-                    "radiation": 60,
-                    "slash": 80
+                    "impact": 30.1,
+                    "puncture": 30.1,
+                    "slash": 79.8
                   },
                   "procChance": 0.2
                 }
               ]
             }
-          ]
+          ],
+          "override": {
+            "critChance": 0.2,
+            "critMultiplier": 2,
+            "statusChance": 0.2,
+            "fireRate": 13.3
+          },
+          "_manual": "entered",
+          "_note": "57% 切割（其余为冲击、穿刺）；穿透 3 米，精准度 14，投射物 80 米/秒，灵化充能 408"
         }
       ]
     }

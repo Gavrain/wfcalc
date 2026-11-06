@@ -1,4 +1,4 @@
-﻿/**
+/**
  * §6.2 DoT 基础值口径（回归）。
  *
  * 文档原文：① 基础命中伤 = 命中伤害中【剔除元素/物理 Mod 加量】后的值，
@@ -49,8 +49,10 @@ describe('DoT 基础值取全类型之和（§6.2）', () => {
     const gasTick = seg.dotTicks.find((t: any) => t.type === 'gas');
     assert.ok(gasTick, '应有毒气 DoT');
     assert.ok(gasTick.tick > 0, `毒气每跳应 > 0，实际 ${gasTick.tick}`);
-    // ① 基础值 = 全类型之和（不是单项）
+    // ① 基础值 = 全类型之和（**剔除元素 Mod 加量**后只剩面板的冲击 100）
     near(gasTick.baseValue, 100);
+    // D-107：毒气不吃火焰%——火/毒 Mod 的加量既不在基础值里，也不额外给毒气加成
+    near(gasTick.tick, 100 * 0.5);
   });
 
   it('① 基础值 = 剔除元素加量后的全类型合计', () => {
@@ -68,9 +70,10 @@ describe('DoT 基础值取全类型之和（§6.2）', () => {
     const heatTick = seg.dotTicks.find((t: any) => t.type === 'heat');
     near(heatTick.baseValue, 200);
     // ② × 火系数 0.5 = 100
-    near(heatTick.baseTick, 100);
-    // ③ × (1 + 火元素%) = × 1.9
-    near(heatTick.tick, 100 * 1.9);
+    near(heatTick.baseTick, 200 * 0.5);
+    // D-107：元素 % **不进基础值**——`tickBase` 剔掉了火 Mod 的 180，只剩冲击 200。
+    //   这里 elementPct 只是展示字段；每跳值只由 baseValue × 系数 组成。
+    near(heatTick.tick, heatTick.baseTick);
   });
 
   it('每种 DoT 类型的基础值相同（都是全类型之和），只有系数与元素%不同', () => {

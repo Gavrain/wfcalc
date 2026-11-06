@@ -74,6 +74,8 @@ export function modToContributions(mod: ModRecord, rank = mod.maxRank, slot?: nu
   const locksFireRate = SEMI_CANNONADE_MODS.has(mod.id);
   // 复合元素 Mod（如「生化弹药」同时给病毒与磁力）只能生效一个，取第一个，另一个标为未生效
   let compoundSeen = false;
+  // 无限叠层类（弹能过继等）：数据值是每层值，按满层极限换算
+  const stacks = modStackFactor(mod.id);
   for (const s of mod.stats) {
     const stat = toContribStat(s, mod.id);
     if (!stat) continue;
@@ -82,7 +84,7 @@ export function modToContributions(mod: ModRecord, rank = mod.maxRank, slot?: nu
     // 镀层 / 异况类（`co`）的 `levelValues` 是**每层值**（步枪才能 40），内核 `overForStacks`
     // 会乘 「异况数量 a × 叠层上限 y」，所以这里原样传，不再换算。
     const isCo = s.key === 'co';
-    const amount = value;
+    const amount = isCo ? value : value * stacks;
     const isCompoundStat = stat.startsWith('elemental:') && isCompoundElement(stat.slice('elemental:'.length));
     const suppressed = isCompoundStat && compoundSeen;
     if (isCompoundStat) compoundSeen = true;
@@ -94,7 +96,7 @@ export function modToContributions(mod: ModRecord, rank = mod.maxRank, slot?: nu
       ...(slot !== undefined ? { slot } : {}),
       ...(suppressed ? { active: false } : {}),
       ...(locksFireRate ? { locksFireRate: true } : {}),
-      label: `${mod.name.zh ?? mod.name.en} ${fmtStatValue(s, value)}${isCo ? ' / 每种异常状态' : ''}${suppressed ? '（复合元素只能生效一个，已忽略）' : ''}`,
+      label: `${mod.name.zh ?? mod.name.en} ${fmtStatValue(s, amount)}${isCo ? ' / 每种异常状态' : ''}${stacks > 1 ? `（满层：每层 ${round(value)}% × ${stacks}）` : ''}${suppressed ? '（复合元素只能生效一个，已忽略）' : ''}`,
     });
   }
   return out;
@@ -204,6 +206,8 @@ function round(v: number): number {
 /** 数据层的属性键 → 内核 `ContribStat`；返回 null 表示该属性不参与伤害计算 */
 export function toContribStat(s: ModStat, modId: string): ContribStat | null {
   const raw = s.stat;
+  // 集团特效（+X Justice / Truth …）不建模（D-116）：见 `isSyndicateEffectStat`
+  if (isSyndicateEffectStat(s)) return null;
   if (raw.startsWith('elemental:') || raw.startsWith('physical:')) {
     const typed = typedDamageStat(raw);
     if (typed) return typed;
@@ -250,6 +254,40 @@ export function toContribStat(s: ModStat, modId: string): ContribStat | null {
 export function isConditionOverloadMod(mod: ModRecord): boolean {
   return mod.stats.some((s) => s.key === 'co');
 }
+
+/**
+ * 集团特效（`syndRadial`，描述里的 `+X Justice / Truth / Purity …`）**不进伤害计算**。
+ *
+ * 需求方 2026-11-06 确认：「+1 Justice」这类集团特效的伤害（充满后释放的冲击波）不建模＝不算，
+ * 与其它「= 无效果」的集团特效保持一致。
+ *
+ * 踩过的坑：`stat-map.ts` 把 `syndRadial` 映射成 `baseDamage`，且 `bucket: null`，
+ * `toContribStat` 认不出 `stat` 时也没有拦，于是 `modToContributions` 会给**每一张带集团卡的 Mod**
+ * 凭空加 +1% 基伤（散射正义 → 收益显示 +203% 而不是 +200%）。
+ */
+export function isSyndicateEffectStat(s: ModStat): boolean {
+  return s.key === 'syndRadial';
+}
+
+/**
+ * **无限叠层**的武器专属 Mod：数据里的 `levelValues` 是**每层值**，
+ * 而描述写的是「每层 X%……无硬性层数上限」（只有弹能过继写了 Max 15 stacks）。
+ *
+ * 需求方 2026-11-06 定：「固定取满级满层极限」。这里的 `stacks` 是**满级可叠到的层数**：
+ *   · 描述里写了上限的，上限 ÷ 每层值（弹能过继 15 × 15% = 225%）；
+ *   · 没写上限但给了「Capped at N%」的，满级值就是 N%，所以 = 1（数据里的满级值本身就是极限）。
+ *
+ * 命中这些 Mod 时，按 `每层值 × stacks` 传入内核（**不是**再乘一次数据里的满级值）。
+ */
+const UNBOUNDED_STACK_MODS: Readonly<Record<string, number>> = {
+  clip_delegation: 15, // 弹能过继：每层 15%（满级） × 15 层 = +225% 触发 / +225% 多重
+};
+
+/** 一张 Mod 的叠层倍数（默认 1 = 原样使用数据值） */
+export function modStackFactor(modId: string): number {
+  return UNBOUNDED_STACK_MODS[modId] ?? 1;
+}
+
 
 // ─────────────────────────────────────────────────────────────
 // 可装判定（D-001 / weapon-slots.json）
@@ -334,14 +372,13 @@ export function isModCompatibleWithWeapon(mod: ModRecord, weapon: WeaponLike): b
 }
 
 // ─────────────────────────────────────────────────────────────
-// 赋能（arcanes.json）
+// 赋能（arcanes.json）源码结束标记：上面还没真正开始
 // ─────────────────────────────────────────────────────────────
-
 export interface ArcaneRecord {
   id: string;
   key: string;
   name: { en: string; zh?: string };
-  category: 'primary' | 'secondary' | 'melee' | 'kitgun';
+  category: 'primary' | 'secondary' | 'bow' | 'shotgun' | 'melee' | 'kitgun';
   maxRank: number;
   effectKind: string;
   bucket: string | null;
@@ -370,28 +407,69 @@ export function arcaneToContributions(arcane: ArcaneRecord, rank = arcane.maxRan
   if (!level) return [];
   const perEntries = arcanePerStackValues(arcane, level);
   if (!perEntries.length) return [];
-
   if (ARCANE_IGNORED.has(arcane.key)) return [];
-  const stacks = arcaneStackCount(arcane, level);
-  const out: Contribution[] = [];
+
   const primaryStat = arcane.bucket ? bucketToStat(arcane.bucket) : null;
   const bonusStats = ARCANE_BONUS_STATS[arcane.key];
-  for (const [i, [statKey, perStack, fullSlot]] of perEntries.entries()) {
-    // 词条 → 内核属性
-    //   · 带语义的槽名（STATUS_CHANCE / AMMO_EFF / BONUS …）直接映射；
-    //   · 无数字的 `BONUS1` / `BONUS2` 这种，按赋能 id 查下表；
-    //   · 都认不出时，第一条退回 `bucket` 推断，其余忽略。
-    // 解析优先级：覆盖表 → BONUS1/BONUS2 表 → 第一条退回 bucket
+  /** 该词条映射到的内核属性（与下面循环里同一套优先级） */
+  const statOf = (i: number, statKey: string, fullSlot: string): ContribStat | null | undefined => {
     let stat: ContribStat | null | undefined = resolveArcaneStatKey(arcane, statKey, fullSlot);
     if (stat === undefined) {
       const bonusIdx = /^BONUS(\d)$/i.exec(statKey)?.[1];
       if (bonusIdx !== undefined) stat = bonusStats?.[Number(bonusIdx) - 1] ?? null;
       else if (i === 0) stat = primaryStat;
     }
+    return stat;
+  };
+
+  // D-123：导出槽不是加成值的（堡垒 / 过载），直接给满级值，不再走"每层 × 层数"。
+  // ⚠ 死首不在这里：它的基伤照常叠 3 层（+360%），只有**弱点伤害**那一条不叠——
+  //   那条由下面的 `flatAmount`（同一张表里只登记了 `weakpointDamage`）单独处理。
+  const totalOverride = ARCANE_TOTAL_OVERRIDES[arcane.key];
+  const allFlat = totalOverride !== undefined &&
+    perEntries.every(([key, , slotName], i) => {
+      const stat = statOf(i, key, slotName);
+      return stat === null || (typeof stat === 'string' && Object.hasOwn(totalOverride, stat));
+    }) && Object.keys(totalOverride).length > 0;
+  if (allFlat) {
+    return Object.entries(totalOverride!).map(([stat, amount]) => ({
+      stat: stat as ContribStat,
+      form: 'pct' as const,
+      amount,
+      source: arcane.key,
+      ...(slot !== undefined ? { slot } : {}),
+      label: `${arcane.name.zh ?? arcane.name.en} +${amount}%`,
+    }));
+  }
+  const stacks = arcaneStackCount(arcane, level);
+  const out: Contribution[] = [];
+  // D-138：单数值槽拆多词条（次要·爆发：STAT_VALUE 同时是暴率与暴伤）
+  const multi = ARCANE_MULTI_STATS[arcane.key];
+  if (multi) {
+    for (const [, perStack] of perEntries) {
+      for (const stat of multi) {
+        out.push({
+          stat,
+          form: 'pct' as const,
+          amount: perStack * stacks,
+          source: arcane.key,
+          ...(slot !== undefined ? { slot } : {}),
+          label: `${arcane.name.zh ?? arcane.name.en} +${perStack * stacks}%`,
+        });
+      }
+    }
+    return out;
+  }
+  for (const [i, [statKey, perStack, fullSlot]] of perEntries.entries()) {
+    // 词条 → 内核属性（优先级：覆盖表 → BONUS1/BONUS2 表 → 第一条退回 bucket）
+    const stat = statOf(i, statKey, fullSlot);
     // null = 明确不参与伤害计算（覆盖表标的，或 BONUS 表里就是 null）
     if (!stat) continue;
 
-    const amount = perStack * stacks;
+    // D-118：**不随层数叠加**的词条（主要·死首的弱点伤害那条，登记在 `ARCANE_TOTAL_OVERRIDES`）
+    const flat = ARCANE_TOTAL_OVERRIDES[arcane.key];
+    const flatAmount = flat && Object.hasOwn(flat, stat) ? flat[stat] : undefined;
+    const amount = flatAmount !== undefined ? flatAmount : perStack * stacks;
     out.push({
       stat,
       form: 'pct',
@@ -399,12 +477,54 @@ export function arcaneToContributions(arcane: ArcaneRecord, rank = arcane.maxRan
       source: arcane.key,
       ...(slot !== undefined ? { slot } : {}),
       label:
-        stacks > 1
-          ? `${arcane.name.zh ?? arcane.name.en} +${amount}%（满层：每层 ${perStack}% × ${stacks}）`
-          : `${arcane.name.zh ?? arcane.name.en} +${amount}%`,
+        flatAmount !== undefined
+          ? `${arcane.name.zh ?? arcane.name.en} ${amount > 0 ? '+' : ''}${amount}%（不随层数叠加）`
+          : stacks > 1
+            ? `${arcane.name.zh ?? arcane.name.en} +${amount}%（满层：每层 ${perStack}% × ${stacks}）`
+            : `${arcane.name.zh ?? arcane.name.en} +${amount}%`,
     });
   }
   return out;
+}
+
+/**
+ * **导出的数值槽本身不是加成值**的赋能 → 真实满级值（D-123）。
+ *
+ * 导出的 `GIVE_STAT` / `GIVE_STAT_MAX` / `HAVE_STAT_MIN` 是「每点护甲 +1%、上限 500%」
+ * 「能量 ≥90% 时给最大能量的 35%、层数上限 350%」这类**规则参数**，
+ * `statForArcaneKey` 却按词条名把它们当成「每层加成」喂给了内核。
+ * 需求方 2026-11-06：「堡垒和过载的收益还是不对」—— 这里按描述给出**满级满层值**，
+ * 并且界面显示直接读它（`arcaneDisplayStats` 不再单独缩放），保证「显示的 = 算的」。
+ *
+ * | 赋能 | 导出 | 满级值 |
+ * |---|---|---|
+ | 主要·堡垒 | `GIVE_STAT:1` `GIVE_STAT_MAX:500` | 基伤 **+500%**（满护甲封顶） |
+ * | 主要·过载 | `HAVE_STAT_MIN:90` `GIVE_STAT:35` `GIVE_STAT_CAP:350` | 多重 **+350%**（35% × 10 层） |
+ * | 主要·死首 | `[1].val:30`（与基伤共用 3 层） | 弱点伤害 **+30%**（D-118：不随层数叠加） |
+ */
+const ARCANE_TOTAL_OVERRIDES: Readonly<Record<string, Readonly<Record<string, number>>>> = {
+  DamageForBonusArmour: { baseDamage: 500 },
+  MultishotForMaxEnergy: { multishot: 350 },
+  PrimaryDamageOnNoMelee: { weakpointDamage: 30 },
+  SecondaryDamageOnNoMelee: { weakpointDamage: 30 }, // D-138：与主要·死首同口径
+};
+
+/**
+ * 赋能**在界面上显示的词条**（D-116 / D-123：待选区与装备区都要有词条）。
+ *
+ * ⚠ D-123 修正：以前这里用一张显示缩放表显示**上限**（堡垒 500、过载 350），
+ *   而真正喂给内核的仍是导出里的第一个数（1、35）——「描述改对了，收益还是不对」。
+ *   现在数值合并在 `arcaneToContributions` 里完成，这里只是同一份结果的透传，
+ *   所以**卡上显示的就是算进内核的**；「明确不生效」的赋能返回空数组，卡上不写任何提示。
+ *
+ * @returns `[{ stat, amount, label }]`，`amount` 为百分比口径
+ */
+export function arcaneDisplayStats(arcane: ArcaneRecord, rank = arcane.maxRank): { stat: ContribStat; amount: number; label: string }[] {
+  return arcaneToContributions(arcane, rank).map((c) => ({
+    stat: c.stat,
+    amount: c.amount,
+    label: c.label,
+  }));
 }
 
 /**
@@ -433,6 +553,20 @@ const ARCANE_BONUS_STATS: Readonly<Record<string, readonly (ContribStat | null)[
 };
 
 /**
+ * **数值槽本身没有词条名**、但描述里其实有**多条加成**的赋能（D-138）。
+ *
+ * | 赋能 | 导出槽 | 描述 | 处理 |
+ * |---|---|---|---|
+ * | 次要·爆发 `MultishotForCombo` | `STAT_VALUE:20`（单槽） | 每层消耗的连击倍率 **+20% 暴击几率 和 暴击伤害** | 拆成暴率 +20 / 暴伤 +20 两条 |
+ *
+ * 之前只有 `bucket = critMultiplier` 兜底，暴率那一条整条丢了。
+ * 两条都从同一个导出值取（描述里两个百分比相同）。
+ */
+const ARCANE_MULTI_STATS: Readonly<Record<string, readonly ContribStat[]>> = {
+  MultishotForCombo: ['critChance', 'critMultiplier'],
+};
+
+/**
  * **词条名 → 内核属性**的显式覆盖（按赋能 id + 词条名）。
  *
  * 用于两种情况，两种情况都必须按 Mod 描述人工判定：
@@ -448,10 +582,46 @@ const ARCANE_BONUS_STATS: Readonly<Record<string, readonly (ContribStat | null)[
  * | 次要·冷颤 | 裸 `.val` = "敌人多受 45% 伤害"，是独立终伤倍率 | **不生效**（等待其乘区确认） |
  * | 瀑流·强化 | `[BONUS,AMOUNT]` = +750 固定附加伤害（不是百分比） | **不生效** |
  * | 弓箭·利矢 | `BONUS.DAMAGE`，只作用于"下一发" | 基伤（上限口径已简化） |
+ *
+ * **D-116（需求方 2026-11-06）**：官方导出的数值槽里混着「条件 / 上限 / 层数 / 概率」，
+ * 被 `statForArcaneKey` 按词条名一律当成了**每层加成**，于是算出了下面这些明显错的数：
+ *
+ * | 赋能 | 导出值 | 旧结果 | 现状 |
+ * |---|---|---|---|
+ * | 主要·堡垒 `DamageForBonusArmour` | `GIVE_STAT:1` `GIVE_STAT_MAX:500` | 基伤 +1 | **基伤 +500**（需求方：「应该是 500」） |
+ * | 主要·过载 `MultishotForMaxEnergy` | `HAVE_STAT_MIN:90` `GIVE_STAT:35` `GIVE_STAT_CAP:350` | 多重 +90 | 多重 +350（35% × 10 层，需求方：按描述满层取） |
+ * | 主要·衰弱 `SplitStatusProcsOnStackedStatusHit` | `CHANCE:100` | 触发 +1000 | **不生效**（追加异常的概率，不是触发率词条） |
+ * | 主要·滞阻 `PrimaryJamEnemyWeaponsOnMagneticProc` | `JAM_RANGE:15` | 触发 +15 | **不生效**（干扰范围，不是触发率） |
+ * | 主要·压缩 `ConvergeRadialAttackOnAim` | `RADIUS:0.2` `STAT1:100` `STAT2:5.5` | 无 | **不生效**（D-123：它会改爆炸范围、并按损失的半径加伤害/弹药效率，涉及半径数据，需求方明确「目前不实现」） |
+ * | 主要·镀金弹头 `PrimaryDamagePerAmmoOnReload` | 只有 `DURATION` | 无 | **不生效**（每发弹药的加成按弹匣长度换算，待确认） |
+ * | 主要·死首 `PrimaryDamageOnNoMelee` | `[1].val:30` `[2].val:-50` | 无 | 弱点伤害 +30（不随层数叠加，D-118；-50 后坐力仍忽略） |
  */
 const ARCANE_STAT_OVERRIDES: Readonly<Record<string, Readonly<Record<string, ContribStat | null>>>> = {
   // ── bucket 标错、词条其实是基伤 ──
   SecondaryDamageOnHeatProc: { BONUS: 'baseDamage' },
+  // ── D-116：上限 / 条件 / 概率被当成加成 ──
+  // 主要·堡垒：每点护甲 +1%，上限 +500% —— 满护甲时就是 500%（需求方 2026-11-06）
+  DamageForBonusArmour: { GIVE_STAT: 'baseDamage', GIVE_STAT_MAX: null },
+  // 主要·过载：能量 ≥90% 时「最大能量的 35%」作为多重，上限 350% —— 按满层取 350%
+  MultishotForMaxEnergy: { HAVE_STAT_MIN: null, GIVE_STAT: 'multishot', GIVE_STAT_CAP: null },
+  // 主要·衰弱：100% 是「追加基本异常」的概率，不是触发几率
+  SplitStatusProcsOnStackedStatusHit: { CHANCE: null },
+  // 主要·滞阻：15 是干扰半径（米），不是触发几率
+  PrimaryJamEnemyWeaponsOnMagneticProc: { JAM_RANGE: null },
+  // 主要·压缩（D-123 需求方：「记下他改变爆炸范围增加伤害和弹药效率这件事，
+  //   但是由于这个赋能过于复杂，涉及爆炸范围，目前不实现」）：
+  //   描述 = 瞄准时爆炸半径 ×0.2，**每损失 1 米** +100% 伤害、+5.5% 弹药效率。
+  //   要算它必须知道该武器的爆炸半径与"损失了多少米"，而半径目前不在内核里 → 整条不生效。
+  ConvergeRadialAttackOnAim: { RADIUS: null, STAT1: null, STAT2: null },
+  // 主要·镀金弹头：数值槽里没有任何加成值，只有持续时间
+  PrimaryPlatedRound: { DURATION: null },
+  // 主要·死首：裸 .val 放行后按顺序对齐 —— [1] **弱点伤害** +30%（D-118：不随层数叠加），[2] 后坐力 -50%
+  // D-138：次要·死首同样登记（以前只登记了主要版，次要版这 30% 被当"裸 val"丢掉）。
+  //   需求方 2026-11-06：「现版本游戏，弱点==爆头，请全部改为弱点描述」
+  PrimaryDamageOnNoMelee: { VAL: 'weakpointDamage', VAL2: null },
+  SecondaryDamageOnNoMelee: { VAL: 'weakpointDamage', VAL2: null },
+  // 次要·低温：NUM_PROCS 是"施加 3 层冰冻异常"的层数，不是触发几率（D-138：不生效）
+  SecondaryColdOnPuncture: { NUM_PROCS: null },
   // ── 不是伤害词条 / 没有对应通路 → 明确不生效（null 覆盖 bucket 推断，避免误算） ──
   SecondaryOnRollCritChanceOnHeadshot: { BONUS: null }, // +300% 暴率**仅对弱点命中**生效
   ExtraProcOnProc: { BONUS: null }, // +24% 是"二次触发的概率"，不是状态触发率词条
@@ -516,27 +686,30 @@ function resolveArcaneStatKey(
  * 规则：
  * - 词条名取**第一段**（`BONUS` / `STATUS_CHANCE` / `AMMO_EFF` …）；单段名非词条则退到第二段
  *   （`BONUS.DAMAGE` → `DAMAGE`）；
- * - **裸 `.val`**（`[1].val` 这种没有任何词条名的）无法判定，忽略——
- *   否则会把「主要·无情」的装填速度当成基伤再加一遍；
+ * - **裸 `.val`**（`[1].val` 这种没有任何词条名的）无法判定，默认忽略——
+ *   否则会把「主要·无情」的装填速度当成基伤再加一遍；只有在覆盖表里**显式登记**了
+ *   `VAL`（第一个）/ `VAL2`（第二个）… 的赋能才放行（D-116：主要·死首的 `[1].val` 是爆头倍率）；
  * - 层数 / 持续时间 / 范围 / 冷却这类名字不是词条，过滤掉。
  */
 export function arcanePerStackValues(
   arcane: ArcaneRecord,
   level: { values: Record<string, number> },
 ): [string, number, string][] {
-  void arcane;
   const out: [string, number, string][] = [];
   // 覆盖表里明确登记了 `VAL` 的赋能（如次要·冷颤）：裸 .val 就是唯一词条，放行
   const override = ARCANE_STAT_OVERRIDES[arcane.key];
-  const allowBareVal = override !== undefined && Object.hasOwn(override, 'VAL');
+  let bareSeen = 0;
   for (const [k, v] of Object.entries(level.values)) {
     if (typeof v !== 'number' || !Number.isFinite(v)) continue;
     const rest = /^\[\d+\]\.(.+)$/.exec(k)?.[1];
     if (rest === undefined) continue;
     const parts = rest.split('.').filter((p) => !/^val$/i.test(p));
     if (!parts.length) {
-      if (allowBareVal) out.push(['VAL', v, 'VAL']);
-      continue; // 裸 .val / [0].val（未登记时忽略，避免把装填速度当基伤）
+      // 裸 .val：按出现顺序编号 VAL / VAL2 / VAL3 …，只有覆盖表登记过的才放行
+      bareSeen += 1;
+      const name = bareSeen === 1 ? 'VAL' : `VAL${bareSeen}`;
+      if (override !== undefined && Object.hasOwn(override, name)) out.push([name, v, name]);
+      continue;
     }
     const first = parts[0]!.toUpperCase();
     if (ARCANE_NON_STAT_NAMES.has(first) || first === 'VAL') continue;
@@ -625,8 +798,7 @@ export function arcaneStackCount(arcane: ArcaneRecord, level?: { values: Record<
 }
 
 
-function bucketToStat(bucket: string): ContribStat | null {
-  switch (bucket) {
+function bucketToStat(bucket: string): ContribStat | null {  switch (bucket) {
     case 'baseDamage':
       return 'baseDamage';
     case 'multishot':

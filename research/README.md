@@ -1,6 +1,22 @@
-﻿# Mod 数据来源探查脚本（research/poc）
+# 研究记录（数据源与抓取口径）
 
-一次性验证脚本，用来确认"哪个数据源带 Mod 数值"。结论已写进 `research/03-Mod数据抓取.md`，
+> **这里只放「结论」与「口径」**。一次性探查脚本一律在 `poc/archive/`，**仅为留档、不保证能跑**
+> （D-104）。要重跑某个探查，先看本文件的脚本表，再按需修复路径——**不要**把它们当生产代码引用。
+
+## 结论文档
+
+| 文档 | 管什么 |
+|---|---|
+| `01-数据源可行性验证.md` | 武器面板数据从哪来 |
+| `02-太始弓数据获取.md` | 单个武器的取数与换算 |
+| `03-Mod数据抓取.md` | Mod 数值从哪来、等级换算口径、属性键→乘区映射 |
+| `04-@wfcd-items比对.md` | 本地来源汇总，与 `@wfcd/items` 的逐项对比 |
+| `05-WFCD补缺执行方案.md` | D-069 定案后怎么补 AoE 衰减与灵化面板 |
+| `06-衰减模型与面板展示.md` | 爆炸 / 霰弹两种衰减模型，只做面板展示（D-070） |
+
+## `poc/archive/`（历史探查脚本，留档）
+
+用来确认"哪个数据源带 Mod 数值"。结论已写进 `03-Mod数据抓取.md`，
 正式流程在 `packages/data-build/src/build-mods.ts`，**这里不是生产代码**。
 
 运行前需要这些缓存（`build-mods.ts` 跑一次 dry-run 就会生成）：
@@ -9,11 +25,11 @@
 .cache/export/weapons.json        ExportWeapons.json
 .cache/export/upgrades.json       ExportUpgrades.json
 .cache/export/wfcd-mods.json      WFCD Mods.json（需 WFCD_INSECURE_TLS=1）
-.cache/inspect/zkmods.json        本目录 extract-zkdata.mjs 生成
-.cache/inspect/weapon-db.json     本目录 decode-weapon-db.mjs 生成
+.cache/inspect/zkmods.json        由 archive/extract-zkdata.mjs 生成
+.cache/inspect/weapon-db.json     由 archive/decode-weapon-db.mjs 生成
 ```
 
-`node --experimental-strip-types <脚本>` 运行（需要从仓库根目录）。
+`node --experimental-strip-types poc/archive/<脚本>` 运行（需要从仓库根目录）。
 
 | 脚本 | 用途 |
 |---|---|
@@ -30,3 +46,4 @@
 | `verify-mod-output.mjs` | 检查 Mod 产出形状与质量（无 NaN、无缺中文名等） |
 | `verify-arcane-output.mjs` | 检查赋能/套装产出形状与质量 |
 | `verify-slots-output.mjs` | 检查武器 → Mod 槽位判定的分布与样例 |
+| `inspect.js` / `inspect/one.js` | 早期单文件探查（浏览 ZKMODS 结构） |

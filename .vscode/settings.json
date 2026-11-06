@@ -1,0 +1,8 @@
+{
+  // 本仓库所有文件和本次改动都是 UTF-8（无 BOM）。
+  // 显式写死编码，避免 VS Code 按系统默认编码（中文 Windows 上是 GBK）打开 md 时乱码。
+  "files.encoding": "utf8",
+  "files.autoGuessEncoding": false,
+  "files.eol": "\n",
+  "files.insertFinalNewline": true
+}

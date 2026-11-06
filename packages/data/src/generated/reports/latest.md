@@ -1,4 +1,4 @@
-# 数据更新报告 2026-11-06T09-06-11-267Z
+# 数据更新报告 2026-11-06T13-18-56-224Z
 
 ## 抓取统计
 ```
@@ -19,57 +19,73 @@
 ```
 变更报告
 ============================================================
-与上一版完全一致，无需确认。
+新增武器：0 把
+移除武器：0 把
+数值变动：1 把武器，共 3 处
+  ~ GrnGorgSniperRifle
+      mode[0].variant[1].blast.seg[0].blast: 40 → (无)
+      mode[0].variant[1].blast.seg[0].kind: explosiveAttack → (无)
+      mode[0].variant[1].blast.seg[0].procChance: 0 → (无)
+未变动：636 把
 ```
 
-## 警告（237 条）
+## 警告（246 条）
 ```
+/Lotus/Weapons/Thanotech/EntratiWristGun/EntratiWristGunWeapon: 人工层有灵化形态数值，最后一个 behaviour 作为灵化挂点
+/Lotus/Weapons/Thanotech/EntratiWristGun/EntratiWristGunWeapon#2: 灵化形态数值来自人工层（需求方 2026-11-06 录入（远程武器表））
 /Lotus/Weapons/Thanotech/EntSphereHammer/EntSphereHammer: 清洗后没有任何有效攻击模式，已跳过
 /Lotus/Weapons/Thanotech/EntFistIncarnon/EntFistIncarnon: 清洗后没有任何有效攻击模式，已跳过
+/Lotus/Weapons/Tenno/Zariman/Pistols/HeavyPistol/ZarimanHeavyPistol: 人工层有灵化形态数值，最后一个 behaviour 作为灵化挂点
+/Lotus/Weapons/Tenno/Zariman/Pistols/HeavyPistol/ZarimanHeavyPistol#1: 灵化形态数值来自人工层（需求方 2026-11-06 录入（远程武器表））
+/Lotus/Weapons/Tenno/Zariman/LongGuns/SemiAutoRifle/ZarimanSemiAutoRifle: 人工层有灵化形态数值，最后一个 behaviour 作为灵化挂点
+/Lotus/Weapons/Tenno/Zariman/LongGuns/SemiAutoRifle/ZarimanSemiAutoRifle#1: 灵化形态数值来自人工层（需求方 2026-11-06 录入（远程武器表））
+/Lotus/Weapons/Tenno/Zariman/LongGuns/PumpShotgun/ZarimanPumpShotgun: 人工层有灵化形态数值，最后一个 behaviour 作为灵化挂点
+/Lotus/Weapons/Tenno/Zariman/LongGuns/PumpShotgun/ZarimanPumpShotgun#1: 灵化形态数值来自人工层（需求方 2026-11-06 录入（远程武器表））
 /Lotus/Weapons/Tenno/ThrowingWeapons/Kunai: 识别为灵化武器（Kunai Incarnon Genesis），最后一个 behaviour 标为灵化模式
-/Lotus/Weapons/Tenno/ThrowingWeapons/Kunai#1: 识别为灵化模式，面板数值待人工层补充
+/Lotus/Weapons/Tenno/ThrowingWeapons/Kunai#1: 灵化形态面板未收录，已复用基础面板并标记
 /Lotus/Weapons/Tenno/Rifle/LatronPrime: 识别为灵化武器（Latron Incarnon Genesis），最后一个 behaviour 标为灵化模式
-/Lotus/Weapons/Tenno/Rifle/LatronPrime#1: 识别为灵化模式，面板数值待人工层补充
+/Lotus/Weapons/Tenno/Rifle/LatronPrime#1: 灵化形态面板未收录，已复用基础面板并标记
 /Lotus/Weapons/Tenno/Rifle/BratonPrime: 识别为灵化武器（Braton Incarnon Genesis），最后一个 behaviour 标为灵化模式
-/Lotus/Weapons/Tenno/Rifle/BratonPrime#1: 识别为灵化模式，面板数值待人工层补充
+/Lotus/Weapons/Tenno/Rifle/BratonPrime#1: 灵化形态面板未收录，已复用基础面板并标记
 /Lotus/Weapons/Tenno/Pistols/PrimeLex/PrimeLex: 识别为灵化武器（Lex Incarnon Genesis），最后一个 behaviour 标为灵化模式
-/Lotus/Weapons/Tenno/Pistols/PrimeLex/PrimeLex#1: 识别为灵化模式，面板数值待人工层补充
+/Lotus/Weapons/Tenno/Pistols/PrimeLex/PrimeLex#1: 灵化形态面板未收录，已复用基础面板并标记
 /Lotus/Weapons/Tenno/Pistols/PrimeBallistica/PrimeBallistica: 识别为灵化武器（Ballistica Incarnon Genesis），最后一个 behaviour 标为灵化模式
-/Lotus/Weapons/Tenno/Pistols/PrimeBallistica/PrimeBallistica#1: 识别为灵化模式，面板数值待人工层补充
-/Lotus/Weapons/Tenno/Pistols/AutomaticHandCrossbow/AutoCrossBow#2: 识别为灵化模式，面板数值待人工层补充
+/Lotus/Weapons/Tenno/Pistols/PrimeBallistica/PrimeBallistica#1: 灵化形态面板未收录，已复用基础面板并标记
+/Lotus/Weapons/Tenno/Pistols/AutomaticHandCrossbow/AutoCrossBow#2: 灵化形态面板未收录，已复用基础面板并标记
 /Lotus/Weapons/Tenno/Pistol/LatoVandal: 识别为灵化武器（Lato Incarnon Genesis），最后一个 behaviour 标为灵化模式
-/Lotus/Weapons/Tenno/Pistol/LatoVandal#1: 识别为灵化模式，面板数值待人工层补充
+/Lotus/Weapons/Tenno/Pistol/LatoVandal#1: 灵化形态面板未收录，已复用基础面板并标记
 /Lotus/Weapons/Tenno/Pistol/LatoPrime: 识别为灵化武器（Lato Incarnon Genesis），最后一个 behaviour 标为灵化模式
-/Lotus/Weapons/Tenno/Pistol/LatoPrime#1: 识别为灵化模式，面板数值待人工层补充
+/Lotus/Weapons/Tenno/Pistol/LatoPrime#1: 灵化形态面板未收录，已复用基础面板并标记
 /Lotus/Weapons/Tenno/Pistol/BroncoPrime: 识别为灵化武器（Bronco Incarnon Genesis），最后一个 behaviour 标为灵化模式
-/Lotus/Weapons/Tenno/Pistol/BroncoPrime#1: 识别为灵化模式，面板数值待人工层补充
+/Lotus/Weapons/Tenno/Pistol/BroncoPrime#1: 灵化形态面板未收录，已复用基础面板并标记
 /Lotus/Weapons/Tenno/Melee/Swords/DarkSword/DarkSwordDaggerHybridWeapon: 清洗后没有任何有效攻击模式，已跳过
 /Lotus/Weapons/Tenno/Melee/Nunchaku/TnoNunchaku/TnoNunchaku: 清洗后没有任何有效攻击模式，已跳过
 /Lotus/Weapons/Tenno/LongGuns/WraithLatron/WraithLatron: 识别为灵化武器（Latron Incarnon Genesis），最后一个 behaviour 标为灵化模式
-/Lotus/Weapons/Tenno/LongGuns/WraithLatron/WraithLatron#1: 识别为灵化模式，面板数值待人工层补充
+/Lotus/Weapons/Tenno/LongGuns/WraithLatron/WraithLatron#1: 灵化形态面板未收录，已复用基础面板并标记
 /Lotus/Weapons/Tenno/LongGuns/PrimeBurston/PrimeBurston: 识别为灵化武器（Burston Incarnon Genesis），最后一个 behaviour 标为灵化模式
-/Lotus/Weapons/Tenno/LongGuns/PrimeBurston/PrimeBurston#1: 识别为灵化模式，面板数值待人工层补充
+/Lotus/Weapons/Tenno/LongGuns/PrimeBurston/PrimeBurston#1: 灵化形态面板未收录，已复用基础面板并标记
 /Lotus/Weapons/Tenno/LongGuns/PrimeBoltor/PrimeBoltor: 识别为灵化武器（Boltor Incarnon Genesis），最后一个 behaviour 标为灵化模式
-/Lotus/Weapons/Tenno/LongGuns/PrimeBoltor/PrimeBoltor#1: 识别为灵化模式，面板数值待人工层补充
-/Lotus/Weapons/Tenno/Bows/StalkerBow#1: 识别为灵化模式，面板数值待人工层补充
-/Lotus/Weapons/Tenno/Bows/PrimeHuntingBow#1: 识别为灵化模式，面板数值待人工层补充
-/Lotus/Weapons/Tenno/Bows/HuntingBow#1: 识别为灵化模式，面板数值待人工层补充
+/Lotus/Weapons/Tenno/LongGuns/PrimeBoltor/PrimeBoltor#1: 灵化形态面板未收录，已复用基础面板并标记
+/Lotus/Weapons/Tenno/Bows/StalkerBow#1: 灵化形态面板未收录，已复用基础面板并标记
+/Lotus/Weapons/Tenno/Bows/PrimeHuntingBow#1: 灵化形态面板未收录，已复用基础面板并标记
+/Lotus/Weapons/Tenno/Bows/HuntingBow#1: 灵化形态面板未收录，已复用基础面板并标记
 /Lotus/Weapons/Tenno/Archwing/Primary/NokkoArchGun/NokkoArchGun: 清洗后没有任何有效攻击模式，已跳过
-/Lotus/Weapons/Syndicates/RedVeil/Pistols/RVBallistica#2: 识别为灵化模式，面板数值待人工层补充
+/Lotus/Weapons/Syndicates/RedVeil/Pistols/RVBallistica#2: 灵化形态面板未收录，已复用基础面板并标记
 /Lotus/Weapons/Syndicates/CephalonSuda/LongGuns/CSSimulor: 清洗后没有任何有效攻击模式，已跳过
 /Lotus/Weapons/MK1Series/MK1Paris: 识别为灵化武器（Paris Incarnon Genesis），最后一个 behaviour 标为灵化模式
-/Lotus/Weapons/MK1Series/MK1Paris#1: 识别为灵化模式，面板数值待人工层补充
+/Lotus/Weapons/MK1Series/MK1Paris#1: 灵化形态面板未收录，已复用基础面板并标记
 /Lotus/Weapons/MK1Series/MK1Kunai: 识别为灵化武器（Kunai Incarnon Genesis），最后一个 behaviour 标为灵化模式
-/Lotus/Weapons/MK1Series/MK1Kunai#1: 识别为灵化模式，面板数值待人工层补充
+/Lotus/Weapons/MK1Series/MK1Kunai#1: 灵化形态面板未收录，已复用基础面板并标记
 /Lotus/Weapons/MK1Series/MK1Furis: 识别为灵化武器（Furis Incarnon Genesis），最后一个 behaviour 标为灵化模式
-/Lotus/Weapons/MK1Series/MK1Furis#1: 识别为灵化模式，面板数值待人工层补充
+/Lotus/Weapons/MK1Series/MK1Furis#1: 灵化形态面板未收录，已复用基础面板并标记
 /Lotus/Weapons/Grineer/LongGuns/WraithGorgon/WraithGorgon: 识别为灵化武器（Gorgon Incarnon Genesis），最后一个 behaviour 标为灵化模式
-/Lotus/Weapons/Grineer/LongGuns/WraithGorgon/WraithGorgon#1: 识别为灵化模式，面板数值待人工层补充
+/Lotus/Weapons/Grineer/LongGuns/WraithGorgon/WraithGorgon#1: 灵化形态面板未收录，已复用基础面板并标记
+/Lotus/Weapons/Grineer/LongGuns/GrnGorgSniperRifle/GrnGorgSniperRifle: 已剔除explosiveAttack段 —— 巴兹火枪没有爆炸/范围伤害；官方导出里的 explosiveAttack 40 是冗余字段（需求方 2026-11-06 确认删除）
 /Lotus/Weapons/Grineer/GrineerPistol/GrnScopedPistolPlayer: 清洗后没有任何有效攻击模式，已跳过
 /Lotus/Weapons/Corpus/Pistols/CrpHandRL/PrismaAngstrum: 识别为灵化武器（Angstrum Incarnon Genesis），最后一个 behaviour 标为灵化模式
-/Lotus/Weapons/Corpus/Pistols/CrpHandRL/PrismaAngstrum#1: 识别为灵化模式，面板数值待人工层补充
+/Lotus/Weapons/Corpus/Pistols/CrpHandRL/PrismaAngstrum#1: 灵化形态面板未收录，已复用基础面板并标记
 /Lotus/Weapons/ClanTech/Energy/DeraVandal: 识别为灵化武器（Dera Incarnon Genesis），最后一个 behaviour 标为灵化模式
-/Lotus/Weapons/ClanTech/Energy/DeraVandal#1: 识别为灵化模式，面板数值待人工层补充
+/Lotus/Weapons/ClanTech/Energy/DeraVandal#1: 灵化形态面板未收录，已复用基础面板并标记
 /Lotus/Weapons/Cephalon/Primary/CephPrimary/CephPrimary: 清洗后没有任何有效攻击模式，已跳过
 /Lotus/Types/Sentinels/SentinelWeapons/SentGlaiveWeapon: 清洗后没有任何有效攻击模式，已跳过
 /Lotus/Types/Sentinels/SentinelWeapons/DeconstructorPrime/PrimeHeliosGlaiveWeapon: 清洗后没有任何有效攻击模式，已跳过
@@ -215,14 +231,5 @@
 /Lotus/Weapons/Ostron/Melee/ModularMeleeInfested/Handles/InfestedHandleOne: 清洗后没有任何有效攻击模式，已跳过
 /Lotus/Weapons/Ostron/Melee/ModularMeleeInfested/Handles/InfestedHandleTwo: 清洗后没有任何有效攻击模式，已跳过
 /Lotus/Weapons/Ostron/Melee/ModularMeleeInfested/Tips/InfestedTipOne: 清洗后没有任何有效攻击模式，已跳过
-/Lotus/Weapons/Ostron/Melee/ModularMeleeInfested/Tips/InfestedTipTwo: 清洗后没有任何有效攻击模式，已跳过
-/Lotus/Weapons/Ostron/Melee/ModularMeleeInfested/Tips/PvPVariantInfestedTipOne: 清洗后没有任何有效攻击模式，已跳过
-/Lotus/Weapons/Ostron/Melee/ModularMeleeInfested/Tips/PvPVariantInfestedTipTwo: 清洗后没有任何有效攻击模式，已跳过
-/Lotus/Weapons/Sentients/OperatorAmplifiers/SentTrainingAmplifier/SentAmpTrainingBarrel: 清洗后没有任何有效攻击模式，已跳过
-/Lotus/Weapons/Sentients/OperatorAmplifiers/SentTrainingAmplifier/SentAmpTrainingChassis: 清洗后没有任何有效攻击模式，已跳过
-/Lotus/Weapons/Sentients/OperatorAmplifiers/SentTrainingAmplifier/SentAmpTrainingGrip: 清洗后没有任何有效攻击模式，已跳过
-/Lotus/Weapons/Sentients/OperatorAmplifiers/Set1/Barrel/SentAmpSet1BarrelPartA: 清洗后没有任何有效攻击模式，已跳过
-/Lotus/Weapons/Sentients/OperatorAmplifiers/Set1/Barrel/SentAmpSet1BarrelPartB: 清洗后没有任何有效攻击模式，已跳过
-/Lotus/Weapons/Sentients/OperatorAmplifiers/Set1/Barrel/SentAmpSet1BarrelPartC: 清洗后没有任何有效攻击模式，已跳过
 ```
-（共 237 条，仅显示前 200 条）
+（共 246 条，仅显示前 200 条）

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-06T09:06:11.260Z",
+  "generatedAt": "2026-11-06T13:18:56.217Z",
   "category": "secondary",
   "count": 147,
   "note": "暴率/触发为 0~1 小数；伤害分布为绝对值；procChance 同为 0~1；kuva 表示需用户在计算器里选元素与加成（25%~60%）",
@@ -761,7 +761,9 @@
                 }
               ]
             }
-          ]
+          ],
+          "_manual": "panel-reused",
+          "_note": "灵化形态面板未收录，暂复用基础面板"
         }
       ]
     },
@@ -888,7 +890,9 @@
                 }
               ]
             }
-          ]
+          ],
+          "_manual": "panel-reused",
+          "_note": "灵化形态面板未收录，暂复用基础面板"
         }
       ]
     },
@@ -2569,9 +2573,9 @@
           ]
         },
         {
-          "id": "mode3",
-          "role": "normal",
-          "trigger": "unknown",
+          "id": "incarnon",
+          "role": "incarnon",
+          "trigger": "held",
           "bullets": 1,
           "multishot": 1,
           "variants": [
@@ -2580,8 +2584,39 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "incarnon",
                   "aoe": false,
+                  "damage": {
+                    "radiation": 30
+                  },
+                  "procChance": 0.18
+                }
+              ]
+            }
+          ],
+          "override": {
+            "critChance": 0.14,
+            "critMultiplier": 1.6,
+            "statusChance": 0.18,
+            "fireRate": 2
+          },
+          "_manual": "entered",
+          "_note": "连射穿透 5 米；灵化充能 350"
+        },
+        {
+          "id": "incarnon2",
+          "role": "incarnon",
+          "trigger": "charged",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
+            {
+              "id": "direct",
+              "label": "直接命中",
+              "segments": [
+                {
+                  "kind": "incarnon",
+                  "aoe": true,
                   "damage": {
                     "heat": 2200
                   },
@@ -2589,7 +2624,15 @@
                 }
               ]
             }
-          ]
+          ],
+          "override": {
+            "critChance": 0.38,
+            "critMultiplier": 3.2,
+            "statusChance": 0.26,
+            "fireRate": 0.25
+          },
+          "_manual": "entered",
+          "_note": "强制触发火焰；蓄力每次耗 50 弹药"
         }
       ]
     },
@@ -3934,7 +3977,9 @@
                 }
               ]
             }
-          ]
+          ],
+          "_manual": "panel-reused",
+          "_note": "灵化形态面板未收录，暂复用基础面板"
         }
       ]
     },
@@ -4450,7 +4495,9 @@
                 }
               ]
             }
-          ]
+          ],
+          "_manual": "panel-reused",
+          "_note": "灵化形态面板未收录，暂复用基础面板"
         }
       ]
     },
@@ -4515,7 +4562,9 @@
                 }
               ]
             }
-          ]
+          ],
+          "_manual": "panel-reused",
+          "_note": "灵化形态面板未收录，暂复用基础面板"
         }
       ]
     },
@@ -4627,7 +4676,9 @@
                 }
               ]
             }
-          ]
+          ],
+          "_manual": "panel-reused",
+          "_note": "灵化形态面板未收录，暂复用基础面板"
         }
       ]
     },
@@ -4692,7 +4743,9 @@
                 }
               ]
             }
-          ]
+          ],
+          "_manual": "panel-reused",
+          "_note": "灵化形态面板未收录，暂复用基础面板"
         }
       ]
     },
@@ -5363,7 +5416,9 @@
                 }
               ]
             }
-          ]
+          ],
+          "_manual": "panel-reused",
+          "_note": "灵化形态面板未收录，暂复用基础面板"
         }
       ]
     },
@@ -5757,7 +5812,9 @@
                 }
               ]
             }
-          ]
+          ],
+          "_manual": "panel-reused",
+          "_note": "灵化形态面板未收录，暂复用基础面板"
         }
       ]
     },
@@ -6187,7 +6244,9 @@
                 }
               ]
             }
-          ]
+          ],
+          "_manual": "panel-reused",
+          "_note": "灵化形态面板未收录，暂复用基础面板"
         }
       ]
     },
@@ -6478,7 +6537,9 @@
                 }
               ]
             }
-          ]
+          ],
+          "_manual": "panel-reused",
+          "_note": "灵化形态面板未收录，暂复用基础面板"
         }
       ]
     },
@@ -7925,8 +7986,8 @@
           ]
         },
         {
-          "id": "mode2",
-          "role": "normal",
+          "id": "incarnon",
+          "role": "incarnon",
           "trigger": "auto",
           "bullets": 1,
           "multishot": 1,
@@ -7936,7 +7997,7 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "attack",
+                  "kind": "incarnon",
                   "aoe": false,
                   "damage": {
                     "impact": 100
@@ -7944,13 +8005,30 @@
                   "procChance": 0.22
                 }
               ]
-            },
+            }
+          ],
+          "override": {
+            "critChance": 0.22,
+            "critMultiplier": 2.2,
+            "statusChance": 0.22,
+            "fireRate": 6.67
+          },
+          "_manual": "entered",
+          "_note": "灵化充能 216"
+        },
+        {
+          "id": "incarnon2",
+          "role": "incarnon",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
             {
-              "id": "blast",
-              "label": "爆炸",
+              "id": "direct",
+              "label": "直接命中",
               "segments": [
                 {
-                  "kind": "explosiveAttack",
+                  "kind": "incarnon",
                   "aoe": true,
                   "damage": {
                     "radiation": 300
@@ -7959,7 +8037,15 @@
                 }
               ]
             }
-          ]
+          ],
+          "override": {
+            "critChance": 0.22,
+            "critMultiplier": 2.2,
+            "statusChance": 0.22,
+            "fireRate": 6.67
+          },
+          "_manual": "entered",
+          "_note": "范围 2 米，2 米外 80%；投射物 40 米/秒，精准度 4"
         }
       ]
     },

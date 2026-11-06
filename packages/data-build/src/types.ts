@@ -27,6 +27,10 @@ export interface ExportBehaviour {
 export interface ExportWeapon {
   name?: string;
   parentName?: string;
+  /** 官方内部名（`/Lotus/Weapons/...` 全路径；由读入方按需填） */
+  uniqueName?: string;
+  /** 官方武器类型名，如 RocketLauncher / GrenadeLauncher / Crossbow（多数武器没有） */
+  type?: string;
   productCategory?: string;
   holsterCategory?: string;
   /** 变体类型：VT_NORMAL / VT_PRIME / VT_KUVA / VT_SYNDICATE 等 */
