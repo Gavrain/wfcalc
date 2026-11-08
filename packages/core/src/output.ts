@@ -32,7 +32,7 @@ import { ammoEfficiencyMultiplier } from './weapon-state.ts';
  * 用于"这个触发池到底存不存在 / 该分多少份"——合成出来的元素没有面板份，
  * 但它的来源元素出现在基础分布里，就说明它确实会被触发。
  */
-const DOT_ELEMENT_SOURCES: Record<string, readonly DamageType[]> = {
+const DOT_ELEMENT_SOURCES: Record<DoTType, readonly DamageType[]> = {
   blast: ['heat', 'cold'],
   gas: ['heat', 'toxin'],
   radiation: ['heat', 'electric'],
@@ -174,7 +174,7 @@ export function buildOutput(weapon: Weapon, mode: AttackMode, contribs: readonly
   const dotShareOf = (t: DoTType): number => {
     const direct: number = res.finalHit[t] ?? 0;
     if (direct > 0) return direct;
-    return DOT_ELEMENT_SOURCES[t].reduce(
+    return (DOT_ELEMENT_SOURCES[t] ?? []).reduce(
       (sum: number, src: DamageType) => sum + (res.finalHit[src] ?? 0),
       0,
     );

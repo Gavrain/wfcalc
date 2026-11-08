@@ -20,7 +20,7 @@
 import { critAverage, critTiers, DOT_TYPES, isKuvaFamily, METRIC_OPTIONS, totalProcChance } from '../../core/src/index.ts';
 import { WEAPON_GROUPS, groupWeapons, searchWeapons, FIRE_STYLE_OPTIONS, filterByStyle, weaponLabel, weaponGroupId, ISSUE_MARK } from './weapon-picker.js';
 import { OVERRIDE_WEAPON_FIELDS as OVERRIDE_FIELDS, mergeWeaponOverride as applyWeaponOverride } from './weapon-override.js';
-import { issuesOf } from '../../data/manual/weapon-issues.ts';
+import { issuesOf } from '../../data/src/manual/weapon-issues.ts';
 import { arcaneDisplayStats, arcaneToContributions, isConditionOverloadMod, modStackFactor } from '../../data/src/adapter.ts';
 import {
   ELEMENT_COLOR, ELEMENT_LABEL, EXILUS_INDEX, FACTION_OPTIONS, KUVA_ELEMENTS, MAX_SLOTS, SLOT_COUNT,

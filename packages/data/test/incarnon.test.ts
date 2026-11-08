@@ -6,7 +6,7 @@
  *
  * 官方 `ExportWeapons` **没有灵化标记**（`defaultUpgrades` 是玄骸元素/近战姿态），
  * 灵化形态的触发方式又五花八门，所以用灰机 wiki 的清单做人工层：
- * `packages/data/manual/incarnon.ts`（95 把，抓取于 2026-11-06）。
+ * `packages/data/src/manual/incarnon.ts`（95 把，抓取于 2026-11-06）。
  *
  * 数值暂不收录（需求方：先不填数值，只做识别）。
  */
@@ -15,7 +15,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { join, normalize } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { INCARNON_WEAPONS, incarnonInfoOf } from '../manual/incarnon.ts';
+import { INCARNON_WEAPONS, incarnonInfoOf } from '../src/manual/incarnon.ts';
 
 const ROOT = normalize(join(fileURLToPath(new URL('.', import.meta.url)), '../../..'));
 

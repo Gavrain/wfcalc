@@ -29,6 +29,18 @@ Warframe 伤害模拟器（`wfcalc`）。核心诉求：**每个乘区都能复�
 
 每个数值都要能回答"哪来的"。产出里的字段若来自人工推断，必须带 `_manual` 或 note 说明原因。
 
+### 4. 面向需求方的沟通预设（提问必须用人话）
+
+需求方（用户）不是开发者，看不懂「统一到 src/manual/ 还是顶层 manual/」这类 agent 视角选项。
+向需求方汇报 / 提问时，**禁止只甩专业术语和 A/B/C 编号**，必须：
+
+- **用大白话**说每个选项是什么（不出现 D-编号、乘区、流水线等内部术语，除非先解释一句）；
+- **每个选项都讲清后果**：选了它，需求方之后会看到 / 发生什么变化（用户能感知的差异）、代价是什么；
+- **明确推荐哪个 + 一句人话理由**。
+
+参考模板见 `docs/决策确认规范.md` 的「向需求方提问的预设格式」。
+需求方查阅入口见 `docs/需求方导读.md`（这是给他看的唯一简洁文档，其余 markdown 他不必读）。
+
 ## 目录
 
 ```
@@ -45,7 +57,15 @@ packages/core/        计算内核（纯函数，无 DOM）
   src/compute.ts      compute() + WeaponState 状态树
   src/weapon-state.ts 输入层 / computed 层
   src/main.ts         只做 re-export（旧导入路径仍可用）
-packages/data/        数据层：generated/ 是流水线产物（勿手改），manual/ 是人工层
+  src/weapon.ts       武器模型（与数据层输出逐字段对齐，D-011）
+  src/damage-types.ts 伤害类型（官方 DT_* 的语义化别名）
+  src/contributions.ts 贡献表：Mod/赋能/自定义加成摊平 + sumFlat/sumPct/productMul
+  src/buckets.ts      乘区骨架 BUCKET（面板 ×(1+Σpct)+Σflat ×Πmul）
+  src/kuva.ts         玄骸 / 变体标记
+  src/status-effects.ts 异常状态（proc）机制
+  src/analysis.ts     增幅分析（某 Mod 相对当前配置的提升）
+  src/index.ts        包 re-export
+packages/data/        数据层：src/generated/ 是流水线产物（勿手改），src/manual/ 是人工层（D-144 已合并）
 packages/data-build/  抓取清洗流水线
 packages/demo/        本地页面 demo（零依赖静态服务 + 配装 UI）
   public/app.js       页面本体：渲染编排 / 拖拽 / 武器切换（1284 行）
@@ -95,5 +115,7 @@ npm run build:data     # 重新抓取武器数据
 - 本机 PowerShell/curl 的 TLS 有凭据异常，抓取一律走 Node 的 `fetch`。
 - GitHub 域名在本机被 TLS 中间人拦截（`UNABLE_TO_VERIFY_LEAF_SIGNATURE`），
   抓 WFCD 需要 `WFCD_INSECURE_TLS=1` 或直接用缓存。
-- `packages/core/src/buckets.ts` 的部分注释是**历史遗留的乱码**（双重转码，无法还原），
-  不要照着改代码逻辑，以 `docs/乘区归属表.md` 为准。
+- 历史遗留的「双重转码乱码」注释（如 `buckets.ts`）**已按 `docs/乘区归属表.md` 重写干净**，
+  逻辑以那份文档为准。
+- 终端/编辑器里看到的「乱码」多半是**用 GBK 代码页读 UTF-8 文件**的显示假象，文件本身没坏；
+  `.vscode/settings.json` 已固定 `files.encoding = utf8`，不要在 GBK 下打开这些文件。

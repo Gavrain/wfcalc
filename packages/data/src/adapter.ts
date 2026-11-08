@@ -519,7 +519,7 @@ const ARCANE_TOTAL_OVERRIDES: Readonly<Record<string, Readonly<Record<string, nu
  *
  * @returns `[{ stat, amount, label }]`，`amount` 为百分比口径
  */
-export function arcaneDisplayStats(arcane: ArcaneRecord, rank = arcane.maxRank): { stat: ContribStat; amount: number; label: string }[] {
+export function arcaneDisplayStats(arcane: ArcaneRecord, rank = arcane.maxRank): { stat: ContribStat; amount: number; label: string | undefined }[] {
   return arcaneToContributions(arcane, rank).map((c) => ({
     stat: c.stat,
     amount: c.amount,

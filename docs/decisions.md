@@ -144,6 +144,8 @@
 | D-140 | Mod 数值脱离仓库外的大文件：数值基线入库（`packages/data/src/mods/baseline.json`），流水线与校验只读入库文件；同时修回幽灵膛线逐级值 | **待确认** | 2026-11-07 |
 | D-141 | 面板取值以导出顶层字段为主、导出与游戏不符处走人工订正（白板值）；impact 占位判定重写为「主模式逐类型比对 + procChance 自洽 + 模板指纹」；分离 / 分离 Prime 的导出 behaviours 判废、按面板人工补（130 / 160 冲击）；暗黑分合剑拆巨刃 / 双剑两版（面板待补）；琉璃碎击、土石坍方按技能剔除 | **已确认 / 已实施** | 2026-11-07 |
 | D-142 | D-141 的落地：impact 占位判定重写（主模式逐类型比对 + procChance 自洽 + 模板指纹）；分离 / 分离 Prime 判废改人工面板 130 / 160 冲击；全量回归 637→651 把、0 移除 | **已确认 / 已实施** | 2026-11-07 |
+| D-143 | 根目录 16MB 单文件 demo（`20261031紫卡模拟器V10.html`）由 D-104「不动」改为**归档**到 `research/poc/archive/`（可逆，取代「不动」） | **已确认 / 已实施**（本次会话指令） | 2026-11-08 |
+| D-144 | 人工层 `manual/` 目录分裂：`packages/data/manual/`（顶层，D-100/101/110 时代）与 `packages/data/src/manual/`（D-140/141 时代）两处并存，需定唯一归属并合并 | **已确认（选 A）/ 已实施**：统一到 `src/manual/` | 2026-11-08 |
 
 ---
 
@@ -2187,3 +2189,65 @@ D-137 早已记录「`spectral_serration` 仍被流水线写进 `mods.json`，�
 
 **残留（未做）**：数据源里霰弹赋能**只有一条**（霰弹·仇杀），上游 `ExportArcanes.json` 与 WFCD 均如此；
 若游戏内还有其它霰弹赋能，需要换 / 补数据源才能加进来。
+
+---
+
+### D-143 根目录 16MB 单文件 demo 由「不动」改为归档（状态：**已确认 / 已实施**，本次会话指令）
+
+- **日期**：2026-11-08
+- **类别**：范围增减（仓库根目录物理文件）——**不动代码、不动数据、不动 git**
+- **背景**：需求方本次会话要求清理「DSv4.1flash 生成的一堆东西、文件夹混乱」。
+- **历史口径**：D-104（2026-11-06）曾明确「根目录紫卡模拟器 HTML 15.4 MB → 已确认 `.gitignore` 排除、不引用、**不动**」。
+- **本次变更**：需求方本次会话选择「A+B+C 一次性推进」，其中 A 档含「删 16MB 单文件 demo」。
+  这是对 D-104「不动」的**推翻**。为避免不可逆，采用**归档**（可逆）而非硬删除：
+
+| 对象 | 之前 | 现在 |
+|---|---|---|
+| `20261031紫卡模拟器V10.html`（15.4 MB） | 根目录（.gitignore 已排除，未入库） | 移到 `research/poc/archive/20261031紫卡模拟器V10.html` |
+
+- **为什么归档而不硬删**：该文件从未进过 git（.gitignore 排除），硬删后无法从版本库恢复；
+  归档到既有「留档」目录，根目录变干净，同时保留可恢复。
+- **结论**：按需求方本次指令实施。若需求方希望**彻底删除**或**恢复「不动」**，改本条状态即可。
+
+---
+
+### D-144 人工层 `manual/` 目录分裂，需定唯一归属（状态：**待确认**）
+
+- **日期**：2026-11-08
+- **类别**：结构变化（目录归属）——**不动文件内容，只定位置**
+- **现状（实测）**：人工维护层分裂在两个目录，且新旧两代文件各据一方：
+
+| 目录 | 文件 | 来源决策 |
+|---|---|---|
+| `packages/data/manual/`（顶层） | `find-issues.mjs`、`incarnon-stats.ts`、`incarnon.ts`、`weapon-issues.ts` | D-100 / D-101 / D-110（2026-11-06 一代） |
+| `packages/data/src/manual/` | `exalted-slots.ts`、`overrides.ts`、`weapon-effects.ts`、`weapon-patches.ts` | D-140 / D-141（2026-11-07 二代） |
+
+  此外 `packages/data/src/index.ts` 顶部注释还写了第三种形状（`data/manual/aoe.ts` / `incarnon.ts` /
+  `arcanes.ts` / `mods.ts`），其中 `aoe.ts` 实际已不存在（AoE 衰减在 `data-todo/`）。三处对不上。
+
+- **为什么是问题**：同一个人工层概念有两个家，改数据时要同时知道「旧数据在顶层、新数据在 src/ 下」，
+  新人/新会话很容易改错目录；CLAUDE.md 目录图也无法写唯一路径。
+- **建议**：统一到 `packages/data/src/manual/`（代码与 `data-build` 已从这里 import，且 `generated/`
+  也在 `src/` 下，src/ 内 manual/ 与 generated/ 并列最自洽）。合并 = 把顶层 4 个文件移到
+  `src/manual/`，并同步改：`find-issues.mjs` 里的相对路径、`src/index.ts` 注释、CLAUDE.md 目录图。
+- **备选**：
+  - A. 统一到 `src/manual/`（**建议**，与 generated/ 并列、与新文件一致）；
+  - B. 统一回顶层 `packages/data/manual/`（把二代 4 个文件搬上来，迁回一代的位置）；
+  - C. 维持分裂，只在 CLAUDE.md 里写清「顶层是旧一代、src/manual 是新一代」。
+- **风险**：合并要碰 `find-issues.mjs` 的 import 路径与 `src/index.ts` 注释，需跑一遍
+  `npm run build:data`（或至少 `find-issues.mjs`）确认无断链。
+- **待确认**：选 A / B / C？确认后我按所选方向合并并回归。
+
+**结论（2026-11-08）**：需求方选 **A**（统一到 `src/manual/`）。
+
+**实施**：
+- 4 个文件（`find-issues.mjs` / `incarnon-stats.ts` / `incarnon.ts` / `weapon-issues.ts`）
+  从 `packages/data/manual/` 迁到 `packages/data/src/manual/`；
+- 同步改 4 处 import（`data/test/incarnon.test.ts` / `data-build/src/clean.ts` /
+  `demo/public/app.js` / `demo/src/dom/load-page.mjs`）、`find-issues.mjs` 内部读写路径、
+  `weapon-issues.ts` 的 `_source`、`data/src/index.ts` 目录注释、CLAUDE.md 目录图；
+- **顺带修 bug**：`find-issues.mjs` 原来把三个类别直接拼进对象，`MK1Furis` 同时命中
+  「灵化面板复用」与「trigger 未知」→ 生成重复 key（TS1117）。改为按 id 聚合；
+- **重生成 `weapon-issues.ts`**：trigger 未知 30→14 把（D-121/141/142 之后武器数据已重跑、
+  触发分类修正，但该文件一直没跟着重生成，属陈旧）。
+- **回归**：`npm run typecheck` 通过；全量 448 项测试全绿。

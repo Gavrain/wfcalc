@@ -2,11 +2,17 @@
  * 数据层入口。
  *
  * 目录约定：
- *   data/manual/aoe.ts     —— AoE 半径与伤害衰减（人工维护，todo 见 data-todo/）
- *   data/manual/incarnon.ts—— 灵化加成（人工维护）
- *   data/manual/arcanes.ts  —— 武器赋能数值（人工维护）
- *   data/manual/mods.ts     —— Mod 数值与乘区归属（人工维护）
- *   data/generated/        —— data-build 流水线生成，勿手改
+ *   src/manual/     人工维护层（勿由流水线覆盖）：
+ *     incarnon.ts        灵化武器清单（D-100）
+ *     incarnon-stats.ts  灵化形态面板数值（D-110，需求方录入）
+ *     weapon-issues.ts   武器「已知问题」清单（D-101，由 find-issues.mjs 生成）
+ *     weapon-patches.ts  武器级人工订正表（D-141）
+ *     overrides.ts       人工覆盖层（编辑器保存目标）
+ *     exalted-slots.ts   显赫武器 → Mod 槽位补充
+ *     weapon-effects.ts  武器被动效果表
+ *     find-issues.mjs    生成 weapon-issues.ts 的脚本
+ *   src/generated/  data-build 流水线生成，勿手改
+ *   src/mods/       Mod 数值基线（D-140，入库 JSON）
  */
 
 export type ManualLayerStatus = 'todo' | 'partial' | 'complete';

@@ -35,7 +35,7 @@ export async function loadModules() {
   const core = await stripTemp(ROOT, 'packages/core/src/index.ts', transpile);
   const adapter = await stripTemp(ROOT, 'packages/data/src/adapter.ts', transpile);
   const picker = await import(pathToFileURL(join(PUBLIC, 'weapon-picker.js')).href);
-  const issues = await stripTemp(ROOT, 'packages/data/manual/weapon-issues.ts', transpile);
+  const issues = await stripTemp(ROOT, 'packages/data/src/manual/weapon-issues.ts', transpile);
   const override = await import(pathToFileURL(join(PUBLIC, 'weapon-override.js')).href);
   const store = await import(pathToFileURL(join(PUBLIC, 'app-store.js')).href);
   const data = await import(pathToFileURL(join(PUBLIC, 'app-data.js')).href);

@@ -7,7 +7,7 @@
  * **原则**：只登记**已确认有问题**的武器，宁可少登记也不要误标——
  * 误标会让用户以为没问题的武器也有问题。
  *
- * 生成方式：`node packages/data/manual/find-issues.mjs`（重新产出数据后可复核）。
+ * 生成方式：`node packages/data/src/manual/find-issues.mjs`（重新产出数据后可复核）。
  * 抓取/生成日期：2026-11-06。
  */
 export type WeaponIssueCode =
@@ -29,13 +29,13 @@ export interface WeaponIssue {
 const INCARNON_MISSING: WeaponIssue = {
   code: 'incarnonMissing',
   note: '灵化形态缺失',
-  _source: 'manual/incarnon.ts 清单内有此武器，但 ExportWeapons 只有 1 个 behaviour，灵化形态没有导出',
+  _source: 'src/manual/incarnon.ts 清单内有此武器，但 ExportWeapons 只有 1 个 behaviour，灵化形态没有导出',
 };
 
 const INCARNON_PANEL_REUSED: WeaponIssue = {
   code: 'incarnonPanelReused',
   note: '灵化面板未收录（复用基础面板）',
-  _source: 'manual/incarnon-stats.ts 里还没有这把武器的灵化数值，面板暂按基础面板占位',
+  _source: 'src/manual/incarnon-stats.ts 里还没有这把武器的灵化数值，面板暂按基础面板占位',
 };
 
 const TRIGGER_UNKNOWN: WeaponIssue = {
@@ -48,76 +48,53 @@ const TRIGGER_UNKNOWN: WeaponIssue = {
  * 武器 id（generated 里的 id）→ 问题列表。
  */
 export const WEAPON_ISSUES: Readonly<Record<string, WeaponIssue[]>> = {
-  // ── 灵化形态缺失（12 把，D-100 已知限制）──
-  "CeramicDagger": [INCARNON_MISSING],
-  "DestrezaPrime": [INCARNON_MISSING],
-  "DexFuris": [INCARNON_MISSING],
-  "FuraxWraith": [INCARNON_MISSING],
-  "MK1Bo": [INCARNON_MISSING],
-  "MK1Furax": [INCARNON_MISSING],
-  "MK1Strun": [INCARNON_MISSING],
-  "PrimeBoar": [INCARNON_MISSING],
-  "PrimeOkina": [INCARNON_MISSING],
-  "PrismaObex": [INCARNON_MISSING],
-  "PrismaSkana": [INCARNON_MISSING],
-  "SkanaPrime": [INCARNON_MISSING],
-
-  // ── 灵化面板复用基础面板（22 把，D-111）──
   "AutoCrossBow": [INCARNON_PANEL_REUSED],
+  "AutoPistol": [TRIGGER_UNKNOWN],
   "BratonPrime": [INCARNON_PANEL_REUSED],
   "BroncoPrime": [INCARNON_PANEL_REUSED],
+  "CephPrimary": [TRIGGER_UNKNOWN],
+  "CeramicDagger": [INCARNON_MISSING],
+  "CrpSentExperimentRifle": [TRIGGER_UNKNOWN],
+  "CrpSplitLaser": [TRIGGER_UNKNOWN],
+  "CSDroidArray": [TRIGGER_UNKNOWN],
+  "CSSimulor": [TRIGGER_UNKNOWN],
+  "CSSynoidGammacor": [TRIGGER_UNKNOWN],
   "DeraVandal": [INCARNON_PANEL_REUSED],
+  "DestrezaPrime": [INCARNON_MISSING],
+  "DexFuris": [INCARNON_MISSING],
+  "EntratiWristGunWeapon": [TRIGGER_UNKNOWN],
+  "FuraxWraith": [INCARNON_MISSING],
   "HuntingBow": [INCARNON_PANEL_REUSED],
   "Kunai": [INCARNON_PANEL_REUSED],
   "LatoPrime": [INCARNON_PANEL_REUSED],
   "LatoVandal": [INCARNON_PANEL_REUSED],
   "LatronPrime": [INCARNON_PANEL_REUSED],
-  "MK1Furis": [INCARNON_PANEL_REUSED],
+  "MK1Bo": [INCARNON_MISSING],
+  "MK1Furax": [INCARNON_MISSING],
+  "MK1Furis": [INCARNON_PANEL_REUSED, TRIGGER_UNKNOWN],
   "MK1Kunai": [INCARNON_PANEL_REUSED],
   "MK1Paris": [INCARNON_PANEL_REUSED],
+  "MK1Strun": [INCARNON_MISSING],
+  "NokkoArchGun": [TRIGGER_UNKNOWN],
+  "PrimeAthodaiPistolWeapon": [TRIGGER_UNKNOWN],
   "PrimeBallistica": [INCARNON_PANEL_REUSED],
+  "PrimeBoar": [INCARNON_MISSING],
   "PrimeBoltor": [INCARNON_PANEL_REUSED],
   "PrimeBurston": [INCARNON_PANEL_REUSED],
   "PrimeHuntingBow": [INCARNON_PANEL_REUSED],
   "PrimeLex": [INCARNON_PANEL_REUSED],
+  "PrimeOkina": [INCARNON_MISSING],
   "PrismaAngstrum": [INCARNON_PANEL_REUSED],
+  "PrismaObex": [INCARNON_MISSING],
+  "PrismaSkana": [INCARNON_MISSING],
   "RVBallistica": [INCARNON_PANEL_REUSED],
+  "SkanaPrime": [INCARNON_MISSING],
   "StalkerBow": [INCARNON_PANEL_REUSED],
-  "WraithGorgon": [INCARNON_PANEL_REUSED],
-  "WraithLatron": [INCARNON_PANEL_REUSED],
-
-  // ── 射击模式未识别（30 把枪械，多为射线/持续类）──
-  "AutoPistol": [TRIGGER_UNKNOWN],
-  "CSDroidArray": [TRIGGER_UNKNOWN],
-  "CSSynoidGammacor": [TRIGGER_UNKNOWN],
-  "ChainLightningRifle": [TRIGGER_UNKNOWN],
-  "CodaCatabolyst": [TRIGGER_UNKNOWN],
-  "CodaSynapse": [TRIGGER_UNKNOWN],
-  "CrpBECycron": [TRIGGER_UNKNOWN],
-  "CrpBEGlaxion": [TRIGGER_UNKNOWN],
-  "CrpChargeGun": [TRIGGER_UNKNOWN],
-  "CrpFreezeRayRifle": [TRIGGER_UNKNOWN],
-  "CrpFreezeRayVandalRifle": [TRIGGER_UNKNOWN],
-  "CrpLaserPistol": [TRIGGER_UNKNOWN],
-  "CrpLaserPistolVandal": [TRIGGER_UNKNOWN],
-  "CrpLaserRifle": [TRIGGER_UNKNOWN],
-  "CrpSentExperimentPistol": [TRIGGER_UNKNOWN],
-  "CrpSentExperimentRifle": [TRIGGER_UNKNOWN],
-  "CrpSplitLaser": [TRIGGER_UNKNOWN],
-  "EntratiWristGunWeapon": [TRIGGER_UNKNOWN],
-  "FlameThrower": [TRIGGER_UNKNOWN],
-  "FlameThrowerWraith": [TRIGGER_UNKNOWN],
-  "GrnMicrowavePistol": [TRIGGER_UNKNOWN],
-  "InfBeamPistol": [TRIGGER_UNKNOWN],
-  "InfestedRifle": [TRIGGER_UNKNOWN],
-  "InfestedShotgun": [TRIGGER_UNKNOWN],
-  "KuvaNukor": [TRIGGER_UNKNOWN],
-  "MK1Furis": [TRIGGER_UNKNOWN],
-  "PrimeAthodaiPistolWeapon": [TRIGGER_UNKNOWN],
   "ThanoTechGrenadeLauncher": [TRIGGER_UNKNOWN],
   "ThanotechPistol": [TRIGGER_UNKNOWN],
   "TnJetTurbinePistolWeapon": [TRIGGER_UNKNOWN],
-
+  "WraithGorgon": [INCARNON_PANEL_REUSED],
+  "WraithLatron": [INCARNON_PANEL_REUSED],
 };
 
 /** 查某把武器的问题列表（空数组表示没问题） */

@@ -17,8 +17,8 @@ import type {
 } from '../../core/src/weapon.ts';
 import { hasAoeSegment } from '../../core/src/weapon.ts';
 import type { ExportAttack, ExportBehaviour, ExportProjectile, ExportWeapon, ExportWeapons } from './types.ts';
-import { incarnonInfoOf } from '../../data/manual/incarnon.ts';
-import { incarnonStatsOf } from '../../data/manual/incarnon-stats.ts';
+import { incarnonInfoOf } from '../../data/src/manual/incarnon.ts';
+import { incarnonStatsOf } from '../../data/src/manual/incarnon-stats.ts';
 import {
   MANUAL_VARIANTS,
   REMOVED_WEAPONS,

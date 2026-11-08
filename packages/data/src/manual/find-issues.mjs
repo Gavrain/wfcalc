@@ -6,7 +6,7 @@ for (const f of ['primary', 'secondary', 'melee', 'archgun', 'archmelee']) {
 
 // 灵化缺失：清单内但无 incarnon role
 // 清单直接从 manual/incarnon.ts 解析（原来的 .cache/incarnon-map.json 已不再维护）
-const incSrc = fs.readFileSync('packages/data/manual/incarnon.ts', 'utf8');
+const incSrc = fs.readFileSync('packages/data/src/manual/incarnon.ts', 'utf8');
 const list = {};
 for (const m of incSrc.matchAll(/^  "([^"]+)": \{ source:/gm)) list[m[1]] = true;
 const norm = (s) => s.toLowerCase().replace(/[\s'\-&]/g, '');
@@ -45,7 +45,7 @@ const body = `/**
  * **原则**：只登记**已确认有问题**的武器，宁可少登记也不要误标——
  * 误标会让用户以为没问题的武器也有问题。
  *
- * 生成方式：\`node packages/data/manual/find-issues.mjs\`（重新产出数据后可复核）。
+ * 生成方式：\`node packages/data/src/manual/find-issues.mjs\`（重新产出数据后可复核）。
  * 抓取/生成日期：2026-11-06。
  */
 export type WeaponIssueCode =
@@ -67,13 +67,13 @@ export interface WeaponIssue {
 const INCARNON_MISSING: WeaponIssue = {
   code: 'incarnonMissing',
   note: '灵化形态缺失',
-  _source: 'manual/incarnon.ts 清单内有此武器，但 ExportWeapons 只有 1 个 behaviour，灵化形态没有导出',
+  _source: 'src/manual/incarnon.ts 清单内有此武器，但 ExportWeapons 只有 1 个 behaviour，灵化形态没有导出',
 };
 
 const INCARNON_PANEL_REUSED: WeaponIssue = {
   code: 'incarnonPanelReused',
   note: '灵化面板未收录（复用基础面板）',
-  _source: 'manual/incarnon-stats.ts 里还没有这把武器的灵化数值，面板暂按基础面板占位',
+  _source: 'src/manual/incarnon-stats.ts 里还没有这把武器的灵化数值，面板暂按基础面板占位',
 };
 
 const TRIGGER_UNKNOWN: WeaponIssue = {
@@ -86,9 +86,7 @@ const TRIGGER_UNKNOWN: WeaponIssue = {
  * 武器 id（generated 里的 id）→ 问题列表。
  */
 export const WEAPON_ISSUES: Readonly<Record<string, WeaponIssue[]>> = {
-\${INC_IDS}
-\${PANEL_IDS}
-\${TRIGGER_IDS}
+\${WEAPON_ISSUES_BODY}
 };
 
 /** 查某把武器的问题列表（空数组表示没问题） */
@@ -103,18 +101,29 @@ export function hasIssues(weaponId: string | undefined): boolean {
 }
 `;
 
-const incIds = incMissing.map((id) => `  ${JSON.stringify(id)}: [INCARNON_MISSING],`).join('\n');
-const panelIds = panelReused.map((id) => `  ${JSON.stringify(id)}: [INCARNON_PANEL_REUSED],`).join('\n');
-const trigIds = triggerUnknown.map((id) => `  ${JSON.stringify(id)}: [TRIGGER_UNKNOWN],`).join('\n');
+// 同一把武器可能命中多个问题类别（如 MK1Furis 既灵化面板复用、又 trigger 未知），
+// 按 id 聚合，避免生成对象里出现重复 key（TS1117 类型检查报错）。
+const issueMap = new Map();
+for (const id of incMissing) issueMap.set(id, ['INCARNON_MISSING']);
+for (const id of panelReused) {
+  const cur = issueMap.get(id) ?? [];
+  cur.push('INCARNON_PANEL_REUSED');
+  issueMap.set(id, cur);
+}
+for (const id of triggerUnknown) {
+  const cur = issueMap.get(id) ?? [];
+  cur.push('TRIGGER_UNKNOWN');
+  issueMap.set(id, cur);
+}
+const entries = [...issueMap.entries()]
+  .sort(([a], [b]) => a.localeCompare(b))
+  .map(([id, codes]) => `  ${JSON.stringify(id)}: [${codes.join(', ')}],`)
+  .join('\n');
 
-// 注释分组
-const out = body
-  .replace('${INC_IDS}', `  // ── 灵化形态缺失（${incMissing.length} 把，D-100 已知限制）──\n${incIds}\n`)
-  .replace('${PANEL_IDS}', `  // ── 灵化面板复用基础面板（${panelReused.length} 把，D-111）──\n${panelIds}\n`)
-  .replace('${TRIGGER_IDS}', `  // ── 射击模式未识别（${triggerUnknown.length} 把枪械，多为射线/持续类）──\n${trigIds}\n`);
+const out = body.replace('${WEAPON_ISSUES_BODY}', entries);
 
-fs.writeFileSync('packages/data/manual/weapon-issues.ts', out, 'utf8');
+fs.writeFileSync('packages/data/src/manual/weapon-issues.ts', out, 'utf8');
 console.log('灵化缺失:', incMissing.length, '把');
 console.log('灵化面板复用:', panelReused.length, '把');
 console.log('trigger 未知:', triggerUnknown.length, '把');
-console.log('合计:', incMissing.length + panelReused.length + triggerUnknown.length);
+console.log('合计（去重后）:', issueMap.size, '把');
