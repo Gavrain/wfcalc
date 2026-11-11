@@ -123,9 +123,57 @@ describe('官方导出兜底（ZK 库里没有的新武器）', () => {
     assert.equal(r.unresolved, true);
   });
 
-  it('哨兵枪械不参与 Mod 配装，记为待确认', () => {
-    const r = resolveFromExport({ productCategory: 'SentinelWeapons', holsterCategory: 'SNIPER' });
-    assert.equal(r.unresolved, true);
+  // 需求方 2026-11-08：「守护武器用的跟角色武器是一样的 mod，只是他们有的分类是步枪有的是近战」
+  it('守护枪械按 holsterCategory 归步枪类，与角色武器共用 Mod', () => {
+    const sniper = resolveFromExport({ productCategory: 'SentinelWeapons', holsterCategory: 'SNIPER' });
+    assert.equal(sniper.broad, 'sniper');
+    assert.equal(sniper.unresolved, false);
+    assert.deepEqual(compatibleModKinds(sniper), ['sniper', 'rifle', 'primary']);
+
+    const rifle = resolveFromExport({ productCategory: 'SentinelWeapons', holsterCategory: 'RIFLE' });
+    assert.equal(rifle.broad, 'rifle');
+    assert.equal(rifle.unresolved, false);
+
+    const shotgun = resolveFromExport({ productCategory: 'SentinelWeapons', holsterCategory: 'SHOTGUN' });
+    assert.equal(shotgun.broad, 'shotgun');
+    assert.equal(shotgun.unresolved, false);
+  });
+
+  it('守护近战（分离 / 分离 Prime）归近战类', () => {
+    const r = resolveFromExport({ productCategory: 'SentinelWeapons', holsterCategory: 'MELEE' });
+    assert.equal(r.broad, 'melee');
+    assert.equal(r.unresolved, false);
+  });
+
+  it('猎犬近战（巴托腾 / 莱斯腾 / 阿卡腾）按需求方确认归近战', () => {
+    const r = resolveFromExport({ productCategory: 'SentinelWeapons', compatibilityTags: ['HOUND_WEAPON'] });
+    assert.equal(r.broad, 'melee');
+    assert.equal(r.unresolved, false);
+  });
+
+  // 需求方 2026-11-08：「Pistol 说明就是手枪啊」
+  it('无 holster 的激光点发系列按名字归手枪类', () => {
+    for (const id of ['BurstLaserPistol', 'PrismaBurstLaserPistol', 'PrimeBurstLaserPistol']) {
+      const r = resolveFromExport({
+        uniqueName: `/Lotus/Weapons/Sentients/SentBurstLaser/${id}`,
+        productCategory: 'SentinelWeapons',
+        compatibilityTags: ['SENTINEL_WEAPON'],
+      });
+      assert.equal(r.broad, 'pistol', id);
+      assert.equal(r.unresolved, false, id);
+    }
+  });
+
+  // 需求方 2026-11-08：「Garuda Talons 是 garuda 被动带的近战武器，算近战」
+  it('伽拉之爪按架势标签归近战爪类', () => {
+    const r = resolveFromExport({
+      productCategory: 'SpecialItems',
+      holsterCategory: 'FIST',
+      compatibilityTags: ['CLAWS_STANCE_STANCE'],
+    });
+    assert.equal(r.broad, 'melee');
+    assert.deepEqual(r.specific, ['claws']);
+    assert.equal(r.unresolved, false);
   });
 
   it('空战近战 / 空战枪械按产品大类直判', () => {

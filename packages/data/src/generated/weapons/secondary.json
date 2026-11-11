@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-11-06T17:48:09.128Z",
+  "generatedAt": "2026-11-08T09:10:51.651Z",
   "category": "secondary",
-  "count": 147,
+  "count": 148,
   "note": "暴率/触发为 0~1 小数；伤害分布为绝对值；procChance 同为 0~1；kuva 表示需用户在计算器里选元素与加成（25%~60%）",
   "weapons": [
     {
@@ -3256,6 +3256,45 @@
                     "slash": 4.7
                   },
                   "procChance": 0.99
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "GrnScopedPistolPlayer",
+      "name": "Seer",
+      "nameZh": "预言者",
+      "category": "secondary",
+      "critChance": 0.05,
+      "critMultiplier": 1.5,
+      "statusChance": 0.13,
+      "fireRate": 2,
+      "magazineSize": 8,
+      "reloadTime": 2.8,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "semi",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
+            {
+              "id": "direct",
+              "label": "直接命中",
+              "segments": [
+                {
+                  "kind": "impact",
+                  "aoe": false,
+                  "damage": {
+                    "impact": 8.3333,
+                    "puncture": 8.3333,
+                    "slash": 8.3334
+                  },
+                  "procChance": 0.1
                 }
               ]
             }

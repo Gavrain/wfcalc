@@ -1,9 +1,1798 @@
 {
-  "generatedAt": "2026-11-06T17:46:56.273Z",
+  "generatedAt": "2026-11-08T09:10:55.052Z",
   "source": "mods/baseline.json（Mod 数值基线） + ExportUpgrades（元数据交叉校验）",
   "note": "levelValues 为 0 级到满级的逐级数值；bucket 对应 docs/乘区归属表.md 的乘区",
-  "count": 441,
+  "count": 478,
   "mods": [
+    {
+      "id": "ammo_chain",
+      "name": {
+        "en": "Ammo Chain",
+        "zh": "弹链"
+      },
+      "slotKind": "archgun",
+      "category": "g",
+      "maxRank": 5,
+      "drain": 2,
+      "rarity": "common",
+      "polarity": "-",
+      "stats": [
+        {
+          "key": "ammo",
+          "stat": "ammoMax",
+          "bucket": "utility",
+          "unit": "percent",
+          "kind": "functional",
+          "levelValues": [
+            0,
+            20,
+            40,
+            60,
+            80,
+            100
+          ]
+        }
+      ],
+      "conditions": [],
+      "descriptionEn": "+X% Ammo Maximum",
+      "official": {
+        "uniqueName": "/Lotus/Upgrades/Mods/Archwing/Rifle/ArchwingRifleAmmoMaxMod",
+        "name": "/Lotus/Language/Items/ArchwingRifleAmmoMaxMod",
+        "rarity": "UNCOMMON",
+        "baseDrain": 2,
+        "fusionLimit": 5,
+        "type": "ARCH-GUN",
+        "compatName": "Archgun"
+      },
+      "exclusiveGroup": "ammo_chain",
+      "conflictsWith": [
+        "primed_ammo_chain"
+      ]
+    },
+    {
+      "id": "archgun_ace",
+      "name": {
+        "en": "Archgun Ace",
+        "zh": "曲翼枪械行家"
+      },
+      "slotKind": "archgun",
+      "category": "g",
+      "maxRank": 5,
+      "drain": 6,
+      "rarity": "uncommon",
+      "polarity": "r",
+      "stats": [
+        {
+          "key": "frate",
+          "stat": "fireRate",
+          "bucket": "fireRate",
+          "unit": "percent",
+          "kind": "normal",
+          "levelValues": [
+            0,
+            10,
+            20,
+            30,
+            40,
+            50
+          ],
+          "note": "弓类描述为 ×2，另行处理"
+        },
+        {
+          "key": "rel",
+          "stat": "reloadSpeed",
+          "bucket": "utility",
+          "unit": "percent",
+          "kind": "functional",
+          "levelValues": [
+            0,
+            20,
+            40,
+            60,
+            80,
+            100
+          ],
+          "note": "换弹速度，非换弹时间"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "buff",
+          "trigger": "headshot_kill",
+          "group": "fire_rate",
+          "maxStacks": 1,
+          "durationSeconds": 9
+        },
+        {
+          "kind": "buff",
+          "trigger": "headshot_kill",
+          "group": "reload_speed",
+          "maxStacks": 1,
+          "durationSeconds": 9
+        }
+      ],
+      "descriptionEn": "On Headshot Kill: +X% Fire/Charge Rate +X% Reload Speed for Xs",
+      "official": {
+        "uniqueName": "/Lotus/Upgrades/Mods/Archwing/Rifle/ArchwingHeadshotKillAmmoEfficiencyMod",
+        "name": "/Lotus/Language/Mods/ArchwingHeadshotKillAmmoEfficiency",
+        "rarity": "RARE",
+        "baseDrain": 6,
+        "fusionLimit": 5,
+        "type": "ARCH-GUN",
+        "compatName": "Archgun"
+      }
+    },
+    {
+      "id": "automatic_trigger",
+      "name": {
+        "en": "Automatic Trigger",
+        "zh": "自动扳机"
+      },
+      "slotKind": "archgun",
+      "category": "g",
+      "maxRank": 5,
+      "drain": 10,
+      "rarity": "uncommon",
+      "polarity": "r",
+      "stats": [
+        {
+          "key": "frate",
+          "stat": "fireRate",
+          "bucket": "fireRate",
+          "unit": "percent",
+          "kind": "normal",
+          "levelValues": [
+            0,
+            12,
+            24,
+            36,
+            48,
+            60
+          ],
+          "note": "弓类描述为 ×2，另行处理"
+        }
+      ],
+      "conditions": [],
+      "descriptionEn": "+X% Fire Rate",
+      "official": {
+        "uniqueName": "/Lotus/Upgrades/Mods/Archwing/Rifle/ArchwingRifleFireRateMod",
+        "name": "/Lotus/Language/Items/ArchwingRifleFireRateMod",
+        "rarity": "RARE",
+        "baseDrain": 10,
+        "fusionLimit": 5,
+        "type": "ARCH-GUN",
+        "compatName": "Archgun"
+      }
+    },
+    {
+      "id": "ballista_measure",
+      "name": {
+        "en": "Ballista Measure",
+        "zh": "弩炮测距"
+      },
+      "slotKind": "archgun",
+      "category": "g",
+      "maxRank": 3,
+      "drain": 6,
+      "rarity": "uncommon",
+      "polarity": "d",
+      "stats": [
+        {
+          "key": "range",
+          "stat": "meleeRange",
+          "bucket": "utility",
+          "unit": "flat",
+          "kind": "functional",
+          "levelValues": [
+            0,
+            0.0667,
+            0.1333,
+            0.2
+          ],
+          "note": "单位：米"
+        }
+      ],
+      "conditions": [],
+      "descriptionEn": "+X% Range",
+      "official": {
+        "uniqueName": "/Lotus/Upgrades/Mods/Archwing/Rifle/ArchwingRifleRangeMod",
+        "name": "/Lotus/Language/Items/ArchwingRifleRangeMod",
+        "rarity": "RARE",
+        "baseDrain": 6,
+        "fusionLimit": 3,
+        "type": "ARCH-GUN",
+        "compatName": "Archgun"
+      }
+    },
+    {
+      "id": "charged_bullets",
+      "name": {
+        "en": "Charged Bullets",
+        "zh": "带电子弹"
+      },
+      "slotKind": "archgun",
+      "category": "g",
+      "maxRank": 3,
+      "drain": 4,
+      "rarity": "uncommon",
+      "polarity": "r",
+      "stats": [
+        {
+          "key": "electric",
+          "stat": "elemental:electric",
+          "bucket": "elemental",
+          "unit": "percent",
+          "kind": "normal",
+          "levelValues": [
+            0,
+            20,
+            40,
+            60
+          ]
+        },
+        {
+          "key": "sc",
+          "stat": "statusChance",
+          "bucket": "statusChance",
+          "unit": "percent",
+          "kind": "normal",
+          "levelValues": [
+            0,
+            20,
+            40,
+            60
+          ]
+        }
+      ],
+      "conditions": [],
+      "descriptionEn": "+X% Electricity +X% Status Chance",
+      "official": {
+        "uniqueName": "/Lotus/Upgrades/Mods/Archwing/Rifle/ArchwingEventElectricStatusRifleMod",
+        "name": "/Lotus/Language/Items/ArchwingElectricEventRifleMod",
+        "rarity": "RARE",
+        "baseDrain": 4,
+        "fusionLimit": 3,
+        "type": "ARCH-GUN",
+        "compatName": "Archgun"
+      }
+    },
+    {
+      "id": "combustion_rounds",
+      "name": {
+        "en": "Combustion Rounds",
+        "zh": "燃烧弹头"
+      },
+      "slotKind": "archgun",
+      "category": "g",
+      "maxRank": 5,
+      "drain": 4,
+      "rarity": "common",
+      "polarity": "r",
+      "stats": [
+        {
+          "key": "heat",
+          "stat": "elemental:heat",
+          "bucket": "elemental",
+          "unit": "percent",
+          "kind": "normal",
+          "levelValues": [
+            0,
+            24,
+            48,
+            72,
+            96,
+            120
+          ]
+        }
+      ],
+      "conditions": [],
+      "descriptionEn": "+X% Heat",
+      "official": {
+        "uniqueName": "/Lotus/Upgrades/Mods/Archwing/Rifle/ArchwingWeaponFireDamageMod",
+        "name": "/Lotus/Language/Items/ArchwingWeaponFireDamageRifle",
+        "rarity": "UNCOMMON",
+        "baseDrain": 4,
+        "fusionLimit": 5,
+        "type": "ARCH-GUN",
+        "compatName": "Archgun"
+      },
+      "exclusiveGroup": "combustion_rounds",
+      "conflictsWith": [
+        "primed_combustion_rounds"
+      ]
+    },
+    {
+      "id": "comet_blast",
+      "name": {
+        "en": "Comet Blast",
+        "zh": "彗星爆发"
+      },
+      "slotKind": "archgun",
+      "category": "g",
+      "maxRank": 5,
+      "drain": 2,
+      "rarity": "uncommon",
+      "polarity": "-",
+      "stats": [
+        {
+          "key": "impact",
+          "stat": "physical:impact",
+          "bucket": "physical",
+          "unit": "percent",
+          "kind": "normal",
+          "levelValues": [
+            0,
+            18,
+            36,
+            54,
+            72,
+            90
+          ],
+          "note": "加量基数是该类型自身面板值"
+        }
+      ],
+      "conditions": [],
+      "descriptionEn": "+X% Impact",
+      "official": {
+        "uniqueName": "/Lotus/Upgrades/Mods/Archwing/Rifle/ArchwingDualStatImpactStatusMod",
+        "name": "/Lotus/Language/Mods/ArchwingDualStatImpactStatusRifleMod",
+        "rarity": "RARE",
+        "baseDrain": 2,
+        "fusionLimit": 5,
+        "type": "ARCH-GUN",
+        "compatName": "Archgun"
+      }
+    },
+    {
+      "id": "containment_breach",
+      "name": {
+        "en": "Containment Breach",
+        "zh": "核控突破"
+      },
+      "slotKind": "archgun",
+      "category": "g",
+      "maxRank": 3,
+      "drain": 4,
+      "rarity": "uncommon",
+      "polarity": "r",
+      "stats": [
+        {
+          "key": "radiation",
+          "stat": "elemental:radiation",
+          "bucket": "elemental",
+          "unit": "percent",
+          "kind": "normal",
+          "levelValues": [
+            0,
+            20,
+            40,
+            60
+          ]
+        },
+        {
+          "key": "ms",
+          "stat": "multishot",
+          "bucket": "multishot",
+          "unit": "percent",
+          "kind": "normal",
+          "levelValues": [
+            0,
+            10,
+            20,
+            30
+          ],
+          "note": "独立乘区，与基伤相乘（第 2.2 节）"
+        }
+      ],
+      "conditions": [],
+      "descriptionEn": "+X% Radiation +X% Multishot",
+      "official": {
+        "uniqueName": "/Lotus/Upgrades/Mods/Archwing/Rifle/ArchwingEventRadiationFireIterationRifleMod",
+        "name": "/Lotus/Language/Upgrades/ArchwingEventRadiationFireIterationRifleMod",
+        "rarity": "RARE",
+        "baseDrain": 4,
+        "fusionLimit": 3,
+        "type": "ARCH-GUN",
+        "compatName": "Archgun"
+      }
+    },
+    {
+      "id": "contamination_casing",
+      "name": {
+        "en": "Contamination Casing",
+        "zh": "毒染套管"
+      },
+      "slotKind": "archgun",
+      "category": "g",
+      "maxRank": 3,
+      "drain": 4,
+      "rarity": "uncommon",
+      "polarity": "r",
+      "stats": [
+        {
+          "key": "toxin",
+          "stat": "elemental:toxin",
+          "bucket": "elemental",
+          "unit": "percent",
+          "kind": "normal",
+          "levelValues": [
+            0,
+            20,
+            40,
+            60
+          ]
+        },
+        {
+          "key": "sc",
+          "stat": "statusChance",
+          "bucket": "statusChance",
+          "unit": "percent",
+          "kind": "normal",
+          "levelValues": [
+            0,
+            20,
+            40,
+            60
+          ]
+        }
+      ],
+      "conditions": [],
+      "descriptionEn": "+X% Toxin +X% Status Chance",
+      "official": {
+        "uniqueName": "/Lotus/Upgrades/Mods/Archwing/Rifle/ArchwingEventToxinStatusRifleMod",
+        "name": "/Lotus/Language/Items/ArchwingToxinEventRifleMod",
+        "rarity": "RARE",
+        "baseDrain": 4,
+        "fusionLimit": 3,
+        "type": "ARCH-GUN",
+        "compatName": "Archgun"
+      }
+    },
+    {
+      "id": "critical_focus",
+      "name": {
+        "en": "Critical Focus",
+        "zh": "关键焦点"
+      },
+      "slotKind": "archgun",
+      "category": "g",
+      "maxRank": 5,
+      "drain": 6,
+      "rarity": "uncommon",
+      "polarity": "r",
+      "stats": [
+        {
+          "key": "cc",
+          "stat": "critChance",
+          "bucket": "critChance",
+          "unit": "percent",
+          "kind": "normal",
+          "levelValues": [
+            0,
+            12,
+            24,
+            36,
+            48,
+            60
+          ]
+        },
+        {
+          "key": "cd",
+          "stat": "critMultiplier",
+          "bucket": "critMultiplier",
+          "unit": "percent",
+          "kind": "normal",
+          "levelValues": [
+            0,
+            12,
+            24,
+            36,
+            48,
+            60
+          ]
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "cond",
+          "condition": "aiming"
+        },
+        {
+          "kind": "cond",
+          "condition": "aiming"
+        }
+      ],
+      "descriptionEn": "+X% Critical Chance and Damage when Aiming",
+      "official": {
+        "uniqueName": "/Lotus/Upgrades/Mods/Archwing/Rifle/ArchwingRifleCritChanceDamageAimingMod",
+        "name": "/Lotus/Language/Mods/ArchwingCritChanceDamageAiming",
+        "rarity": "RARE",
+        "baseDrain": 6,
+        "fusionLimit": 5,
+        "type": "ARCH-GUN",
+        "compatName": "Archgun"
+      }
+    },
+    {
+      "id": "deadly_efficiency",
+      "name": {
+        "en": "Deadly Efficiency",
+        "zh": "致命效率"
+      },
+      "slotKind": "archgun",
+      "category": "g",
+      "maxRank": 5,
+      "drain": 4,
+      "rarity": "uncommon",
+      "polarity": "r",
+      "stats": [
+        {
+          "key": "dmg",
+          "stat": "baseDamage",
+          "bucket": "baseDamage",
+          "unit": "percent",
+          "kind": "normal",
+          "levelValues": [
+            0,
+            24,
+            48,
+            72,
+            96,
+            120
+          ],
+          "note": "基伤，不限槽位全部相加（第 2.1 节）"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "buff",
+          "trigger": "reload_complete",
+          "group": "base_damage",
+          "maxStacks": 1,
+          "durationSeconds": 9
+        }
+      ],
+      "descriptionEn": "On Reload From Empty: +X% Damage for Xs",
+      "official": {
+        "uniqueName": "/Lotus/Upgrades/Mods/Archwing/Rifle/ArchwingDamageAfterReloadMod",
+        "name": "/Lotus/Language/Mods/ArchwingDamageonReload",
+        "rarity": "RARE",
+        "baseDrain": 4,
+        "fusionLimit": 5,
+        "type": "ARCH-GUN",
+        "compatName": "Archgun"
+      },
+      "exclusiveGroup": "deadly_efficiency",
+      "conflictsWith": [
+        "primed_deadly_efficiency"
+      ]
+    },
+    {
+      "id": "dual_rounds",
+      "name": {
+        "en": "Dual Rounds",
+        "zh": "双重弹头"
+      },
+      "slotKind": "archgun",
+      "category": "g",
+      "maxRank": 5,
+      "drain": 6,
+      "rarity": "uncommon",
+      "polarity": "r",
+      "stats": [
+        {
+          "key": "ms",
+          "stat": "multishot",
+          "bucket": "multishot",
+          "unit": "percent",
+          "kind": "normal",
+          "levelValues": [
+            0,
+            12,
+            24,
+            36,
+            48,
+            60
+          ],
+          "note": "独立乘区，与基伤相乘（第 2.2 节）"
+        }
+      ],
+      "conditions": [],
+      "descriptionEn": "+X% Multishot",
+      "official": {
+        "uniqueName": "/Lotus/Upgrades/Mods/Archwing/Rifle/ArchwingRifleFireIterationsMod",
+        "name": "/Lotus/Language/Items/ArchwingRifleFireIterationsMod",
+        "rarity": "RARE",
+        "baseDrain": 6,
+        "fusionLimit": 5,
+        "type": "ARCH-GUN",
+        "compatName": "Archgun"
+      },
+      "exclusiveGroup": "dual_rounds",
+      "conflictsWith": [
+        "primed_dual_rounds"
+      ]
+    },
+    {
+      "id": "electrified_barrel",
+      "name": {
+        "en": "Electrified Barrel",
+        "zh": "带电枪管"
+      },
+      "slotKind": "archgun",
+      "category": "g",
+      "maxRank": 5,
+      "drain": 4,
+      "rarity": "common",
+      "polarity": "-",
+      "stats": [
+        {
+          "key": "electric",
+          "stat": "elemental:electric",
+          "bucket": "elemental",
+          "unit": "percent",
+          "kind": "normal",
+          "levelValues": [
+            0,
+            24,
+            48,
+            72,
+            96,
+            120
+          ]
+        }
+      ],
+      "conditions": [],
+      "descriptionEn": "+X% Electricity",
+      "official": {
+        "uniqueName": "/Lotus/Upgrades/Mods/Archwing/Rifle/ArchwingWeaponElectricityDamageMod",
+        "name": "/Lotus/Language/Items/ArchwingWeaponElectricityDamageRifle",
+        "rarity": "UNCOMMON",
+        "baseDrain": 4,
+        "fusionLimit": 5,
+        "type": "ARCH-GUN",
+        "compatName": "Archgun"
+      },
+      "exclusiveGroup": "electrified_barrel"
+    },
+    {
+      "id": "hollowed_bullets",
+      "name": {
+        "en": "Hollowed Bullets",
+        "zh": "中空子弹"
+      },
+      "slotKind": "archgun",
+      "category": "g",
+      "maxRank": 3,
+      "drain": 4,
+      "rarity": "uncommon",
+      "polarity": "r",
+      "stats": [
+        {
+          "key": "cd",
+          "stat": "critMultiplier",
+          "bucket": "critMultiplier",
+          "unit": "percent",
+          "kind": "normal",
+          "levelValues": [
+            0,
+            26.6667,
+            53.3333,
+            80
+          ]
+        }
+      ],
+      "conditions": [],
+      "descriptionEn": "+X% Critical Damage",
+      "official": {
+        "uniqueName": "/Lotus/Upgrades/Mods/Archwing/Rifle/ArchwingRifleCritDamageMod",
+        "name": "/Lotus/Language/Items/ArchwingRifleCritDamageMod",
+        "rarity": "RARE",
+        "baseDrain": 4,
+        "fusionLimit": 3,
+        "type": "ARCH-GUN",
+        "compatName": "Archgun"
+      }
+    },
+    {
+      "id": "hypothermic_shell",
+      "name": {
+        "en": "Hypothermic Shell",
+        "zh": "低温外壳"
+      },
+      "slotKind": "archgun",
+      "category": "g",
+      "maxRank": 3,
+      "drain": 4,
+      "rarity": "uncommon",
+      "polarity": "r",
+      "stats": [
+        {
+          "key": "cold",
+          "stat": "elemental:cold",
+          "bucket": "elemental",
+          "unit": "percent",
+          "kind": "normal",
+          "levelValues": [
+            0,
+            20,
+            40,
+            60
+          ]
+        },
+        {
+          "key": "sc",
+          "stat": "statusChance",
+          "bucket": "statusChance",
+          "unit": "percent",
+          "kind": "normal",
+          "levelValues": [
+            0,
+            20,
+            40,
+            60
+          ]
+        }
+      ],
+      "conditions": [],
+      "descriptionEn": "+X% Cold +X% Status Chance",
+      "official": {
+        "uniqueName": "/Lotus/Upgrades/Mods/Archwing/Rifle/ArchwingEventColdStatusRifleMod",
+        "name": "/Lotus/Language/Items/ArchwingColdEventRifleMod",
+        "rarity": "RARE",
+        "baseDrain": 4,
+        "fusionLimit": 3,
+        "type": "ARCH-GUN",
+        "compatName": "Archgun"
+      }
+    },
+    {
+      "id": "magazine_extension",
+      "name": {
+        "en": "Magazine Extension",
+        "zh": "扩充弹匣"
+      },
+      "slotKind": "archgun",
+      "category": "g",
+      "maxRank": 5,
+      "drain": 4,
+      "rarity": "rare",
+      "polarity": "-",
+      "stats": [
+        {
+          "key": "mag",
+          "stat": "magazine",
+          "bucket": "utility",
+          "unit": "percent",
+          "kind": "functional",
+          "levelValues": [
+            0,
+            12,
+            24,
+            36,
+            48,
+            60
+          ]
+        }
+      ],
+      "conditions": [],
+      "descriptionEn": "+X% Magazine Capacity",
+      "official": {
+        "uniqueName": "/Lotus/Upgrades/Mods/Archwing/Rifle/ArchwingRifleClipMaxMod",
+        "name": "/Lotus/Language/Items/ArchwingRifleClipMaxMod",
+        "rarity": "COMMON",
+        "baseDrain": 4,
+        "fusionLimit": 5,
+        "type": "ARCH-GUN",
+        "compatName": "Archgun"
+      }
+    },
+    {
+      "id": "magma_chamber",
+      "name": {
+        "en": "Magma Chamber",
+        "zh": "熔岩弹膛"
+      },
+      "slotKind": "archgun",
+      "category": "g",
+      "maxRank": 3,
+      "drain": 4,
+      "rarity": "uncommon",
+      "polarity": "r",
+      "stats": [
+        {
+          "key": "heat",
+          "stat": "elemental:heat",
+          "bucket": "elemental",
+          "unit": "percent",
+          "kind": "normal",
+          "levelValues": [
+            0,
+            20,
+            40,
+            60
+          ]
+        },
+        {
+          "key": "sc",
+          "stat": "statusChance",
+          "bucket": "statusChance",
+          "unit": "percent",
+          "kind": "normal",
+          "levelValues": [
+            0,
+            20,
+            40,
+            60
+          ]
+        }
+      ],
+      "conditions": [],
+      "descriptionEn": "+X% Heat +X% Status Chance",
+      "official": {
+        "uniqueName": "/Lotus/Upgrades/Mods/Archwing/Rifle/ArchwingEventFireStatusRifleMod",
+        "name": "/Lotus/Language/Items/ArchwingFireEventRifleMod",
+        "rarity": "RARE",
+        "baseDrain": 4,
+        "fusionLimit": 3,
+        "type": "ARCH-GUN",
+        "compatName": "Archgun"
+      }
+    },
+    {
+      "id": "magnetized_cycle",
+      "name": {
+        "en": "Magnetized Cycle",
+        "zh": "磁场循环"
+      },
+      "slotKind": "archgun",
+      "category": "g",
+      "maxRank": 3,
+      "drain": 4,
+      "rarity": "uncommon",
+      "polarity": "r",
+      "stats": [
+        {
+          "key": "magnetic",
+          "stat": "elemental:magnetic",
+          "bucket": "elemental",
+          "unit": "percent",
+          "kind": "normal",
+          "levelValues": [
+            0,
+            20,
+            40,
+            60
+          ]
+        },
+        {
+          "key": "frate",
+          "stat": "fireRate",
+          "bucket": "fireRate",
+          "unit": "percent",
+          "kind": "normal",
+          "levelValues": [
+            0,
+            10,
+            20,
+            30
+          ],
+          "note": "弓类描述为 ×2，另行处理"
+        }
+      ],
+      "conditions": [],
+      "descriptionEn": "+X% Magnetic +X% Fire Rate",
+      "official": {
+        "uniqueName": "/Lotus/Upgrades/Mods/Archwing/Rifle/ArchwingEventMagneticFireRateRifleMod",
+        "name": "/Lotus/Language/Upgrades/ArchwingEventMagneticFireRateRifleMod",
+        "rarity": "RARE",
+        "baseDrain": 4,
+        "fusionLimit": 3,
+        "type": "ARCH-GUN",
+        "compatName": "Archgun"
+      }
+    },
+    {
+      "id": "marked_target",
+      "name": {
+        "en": "Marked Target",
+        "zh": "标记目标"
+      },
+      "slotKind": "archgun",
+      "category": "g",
+      "maxRank": 5,
+      "drain": 6,
+      "rarity": "uncommon",
+      "polarity": "-",
+      "stats": [
+        {
+          "key": "sc",
+          "stat": "statusChance",
+          "bucket": "statusChance",
+          "unit": "percent",
+          "kind": "normal",
+          "levelValues": [
+            0,
+            24,
+            48,
+            72,
+            96,
+            120
+          ]
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "cond",
+          "condition": "aiming"
+        }
+      ],
+      "descriptionEn": "+X% Status Chance when Aiming",
+      "official": {
+        "uniqueName": "/Lotus/Upgrades/Mods/Archwing/Rifle/ArchwingRifleStatusChanceAimingMod",
+        "name": "/Lotus/Language/Mods/ArchwingStatusChanceAiming",
+        "rarity": "RARE",
+        "baseDrain": 6,
+        "fusionLimit": 5,
+        "type": "ARCH-GUN",
+        "compatName": "Archgun"
+      }
+    },
+    {
+      "id": "modified_munitions",
+      "name": {
+        "en": "Modified Munitions",
+        "zh": "弹药改良"
+      },
+      "slotKind": "archgun",
+      "category": "g",
+      "maxRank": 5,
+      "drain": 4,
+      "rarity": "common",
+      "polarity": "d",
+      "stats": [
+        {
+          "key": "sc",
+          "stat": "statusChance",
+          "bucket": "statusChance",
+          "unit": "percent",
+          "kind": "normal",
+          "levelValues": [
+            0,
+            12,
+            24,
+            36,
+            48,
+            60
+          ]
+        }
+      ],
+      "conditions": [],
+      "descriptionEn": "+X% Status Chance",
+      "official": {
+        "uniqueName": "/Lotus/Upgrades/Mods/Archwing/Rifle/ArchwingRifleStatusChanceMod",
+        "name": "/Lotus/Language/Items/ArchwingRifleStatusChanceMod",
+        "rarity": "UNCOMMON",
+        "baseDrain": 4,
+        "fusionLimit": 5,
+        "type": "ARCH-GUN",
+        "compatName": "Archgun"
+      }
+    },
+    {
+      "id": "parallax_scope",
+      "name": {
+        "en": "Parallax Scope",
+        "zh": "视差瞄具"
+      },
+      "slotKind": "archgun",
+      "category": "g",
+      "maxRank": 3,
+      "drain": 4,
+      "rarity": "rare",
+      "polarity": "-",
+      "stats": [
+        {
+          "key": "cc",
+          "stat": "critChance",
+          "bucket": "critChance",
+          "unit": "percent",
+          "kind": "normal",
+          "levelValues": [
+            0,
+            33.3333,
+            66.6667,
+            100
+          ]
+        }
+      ],
+      "conditions": [],
+      "descriptionEn": "+X% Critical Chance",
+      "official": {
+        "uniqueName": "/Lotus/Upgrades/Mods/Archwing/Rifle/ArchwingRifleCritChanceMod",
+        "name": "/Lotus/Language/Items/ArchwingRifleCritChanceMod",
+        "rarity": "COMMON",
+        "baseDrain": 4,
+        "fusionLimit": 3,
+        "type": "ARCH-GUN",
+        "compatName": "Archgun"
+      }
+    },
+    {
+      "id": "polar_magazine",
+      "name": {
+        "en": "Polar Magazine",
+        "zh": "极地弹仓"
+      },
+      "slotKind": "archgun",
+      "category": "g",
+      "maxRank": 5,
+      "drain": 4,
+      "rarity": "common",
+      "polarity": "d",
+      "stats": [
+        {
+          "key": "cold",
+          "stat": "elemental:cold",
+          "bucket": "elemental",
+          "unit": "percent",
+          "kind": "normal",
+          "levelValues": [
+            0,
+            24,
+            48,
+            72,
+            96,
+            120
+          ]
+        }
+      ],
+      "conditions": [],
+      "descriptionEn": "+X% Cold",
+      "official": {
+        "uniqueName": "/Lotus/Upgrades/Mods/Archwing/Rifle/ArchwingWeaponFreezeDamageMod",
+        "name": "/Lotus/Language/Items/ArchwingWeaponFreezeDamageRifle",
+        "rarity": "UNCOMMON",
+        "baseDrain": 4,
+        "fusionLimit": 5,
+        "type": "ARCH-GUN",
+        "compatName": "Archgun"
+      },
+      "exclusiveGroup": "polar_magazine",
+      "conflictsWith": [
+        "primed_polar_magazine"
+      ]
+    },
+    {
+      "id": "primed_ammo_chain",
+      "name": {
+        "en": "Primed Ammo Chain",
+        "zh": "弹链 Prime"
+      },
+      "slotKind": "archgun",
+      "category": "g",
+      "maxRank": 10,
+      "drain": 0,
+      "rarity": "legendary",
+      "polarity": "-",
+      "stats": [
+        {
+          "key": "ammo",
+          "stat": "ammoMax",
+          "bucket": "utility",
+          "unit": "percent",
+          "kind": "functional",
+          "levelValues": [
+            0,
+            16.5,
+            33,
+            49.5,
+            66,
+            82.5,
+            99,
+            115.5,
+            132,
+            148.5,
+            165
+          ]
+        }
+      ],
+      "conditions": [],
+      "descriptionEn": "+X% Ammo Maximum",
+      "official": {
+        "uniqueName": "/Lotus/Upgrades/Mods/Archwing/Rifle/Expert/ArchwingRifleAmmoMaxModExpert",
+        "name": "/Lotus/Language/Mods/ArchwingRifleAmmoMaxModExpert",
+        "rarity": "LEGENDARY",
+        "baseDrain": 0,
+        "fusionLimit": 10,
+        "type": "ARCH-GUN",
+        "compatName": "Archgun"
+      },
+      "exclusiveGroup": "ammo_chain",
+      "conflictsWith": [
+        "ammo_chain"
+      ]
+    },
+    {
+      "id": "primed_combustion_rounds",
+      "name": {
+        "en": "Primed Combustion Rounds",
+        "zh": "燃烧弹头 Prime"
+      },
+      "slotKind": "archgun",
+      "category": "g",
+      "maxRank": 10,
+      "drain": 4,
+      "rarity": "legendary",
+      "polarity": "r",
+      "stats": [
+        {
+          "key": "heat",
+          "stat": "elemental:heat",
+          "bucket": "elemental",
+          "unit": "percent",
+          "kind": "normal",
+          "levelValues": [
+            0,
+            18.7,
+            37.4,
+            56.1,
+            74.8,
+            93.5,
+            112.2,
+            130.9,
+            149.6,
+            168.3,
+            187
+          ]
+        }
+      ],
+      "conditions": [],
+      "descriptionEn": "+X% Heat",
+      "official": {
+        "uniqueName": "/Lotus/Upgrades/Mods/Archwing/Rifle/Expert/ArchwingWeaponFireDamageModExpert",
+        "name": "/Lotus/Language/Mods/ArchwingWeaponFireDamageModExpert",
+        "rarity": "LEGENDARY",
+        "baseDrain": 4,
+        "fusionLimit": 10,
+        "type": "ARCH-GUN",
+        "compatName": "Archgun"
+      },
+      "exclusiveGroup": "combustion_rounds",
+      "conflictsWith": [
+        "combustion_rounds"
+      ]
+    },
+    {
+      "id": "primed_deadly_efficiency",
+      "name": {
+        "en": "Primed Deadly Efficiency",
+        "zh": "致命效率 Prime"
+      },
+      "slotKind": "archgun",
+      "category": "g",
+      "maxRank": 10,
+      "drain": 4,
+      "rarity": "legendary",
+      "polarity": "r",
+      "stats": [
+        {
+          "key": "dmg",
+          "stat": "baseDamage",
+          "bucket": "baseDamage",
+          "unit": "percent",
+          "kind": "normal",
+          "levelValues": [
+            0,
+            22,
+            44,
+            66,
+            88,
+            110,
+            132,
+            154,
+            176,
+            198,
+            220
+          ],
+          "note": "基伤，不限槽位全部相加（第 2.1 节）"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "buff",
+          "trigger": "reload_complete",
+          "group": "base_damage",
+          "maxStacks": 1,
+          "durationSeconds": 16.5
+        }
+      ],
+      "descriptionEn": "On Reload From Empty: +X% Damage for Xs",
+      "official": {
+        "uniqueName": "/Lotus/Upgrades/Mods/Archwing/Rifle/PrimedArchwingDamageOnReloadMod",
+        "name": "/Lotus/Language/Mods/PrimedArchwingDamageOnReloadMod",
+        "rarity": "LEGENDARY",
+        "baseDrain": 4,
+        "fusionLimit": 10,
+        "type": "ARCH-GUN",
+        "compatName": "Archgun"
+      },
+      "exclusiveGroup": "deadly_efficiency",
+      "conflictsWith": [
+        "deadly_efficiency"
+      ]
+    },
+    {
+      "id": "primed_dual_rounds",
+      "name": {
+        "en": "Primed Dual Rounds",
+        "zh": "双重弹头 Prime"
+      },
+      "slotKind": "archgun",
+      "category": "g",
+      "maxRank": 10,
+      "drain": 6,
+      "rarity": "legendary",
+      "polarity": "r",
+      "stats": [
+        {
+          "key": "ms",
+          "stat": "multishot",
+          "bucket": "multishot",
+          "unit": "percent",
+          "kind": "normal",
+          "levelValues": [
+            0,
+            11,
+            22,
+            33,
+            44,
+            55,
+            66,
+            77,
+            88,
+            99,
+            110
+          ],
+          "note": "独立乘区，与基伤相乘（第 2.2 节）"
+        }
+      ],
+      "conditions": [],
+      "descriptionEn": "+X% Multishot",
+      "official": {
+        "uniqueName": "/Lotus/Upgrades/Mods/Archwing/Rifle/PrimedArchwingRifleFireIterationsMod",
+        "name": "/Lotus/Language/Mods/PrimedArchwingRifleFireIterationsMod",
+        "rarity": "LEGENDARY",
+        "baseDrain": 6,
+        "fusionLimit": 10,
+        "type": "ARCH-GUN",
+        "compatName": "Archgun"
+      },
+      "exclusiveGroup": "dual_rounds",
+      "conflictsWith": [
+        "dual_rounds"
+      ]
+    },
+    {
+      "id": "primed_polar_magazine",
+      "name": {
+        "en": "Primed Polar Magazine",
+        "zh": "极地弹仓 Prime"
+      },
+      "slotKind": "archgun",
+      "category": "g",
+      "maxRank": 10,
+      "drain": 4,
+      "rarity": "legendary",
+      "polarity": "d",
+      "stats": [
+        {
+          "key": "cold",
+          "stat": "elemental:cold",
+          "bucket": "elemental",
+          "unit": "percent",
+          "kind": "normal",
+          "levelValues": [
+            0,
+            18.7,
+            37.4,
+            56.1,
+            74.8,
+            93.5,
+            112.2,
+            130.9,
+            149.6,
+            168.3,
+            187
+          ]
+        }
+      ],
+      "conditions": [],
+      "descriptionEn": "+X% Cold",
+      "official": {
+        "uniqueName": "/Lotus/Upgrades/Mods/Archwing/Rifle/Expert/ArchwingWeaponFreezeDamageModExpert",
+        "name": "/Lotus/Language/Mods/ArchwingWeaponFreezeDamageModExpert",
+        "rarity": "LEGENDARY",
+        "baseDrain": 4,
+        "fusionLimit": 10,
+        "type": "ARCH-GUN",
+        "compatName": "Archgun"
+      },
+      "exclusiveGroup": "polar_magazine",
+      "conflictsWith": [
+        "polar_magazine"
+      ]
+    },
+    {
+      "id": "primed_rubedo_lined_barrel",
+      "name": {
+        "en": "Primed Rubedo-Lined Barrel",
+        "zh": "红晶枪管 Prime"
+      },
+      "slotKind": "archgun",
+      "category": "g",
+      "maxRank": 10,
+      "drain": 6,
+      "rarity": "legendary",
+      "polarity": "r",
+      "stats": [
+        {
+          "key": "dmg",
+          "stat": "baseDamage",
+          "bucket": "baseDamage",
+          "unit": "percent",
+          "kind": "normal",
+          "levelValues": [
+            0,
+            18.7,
+            37.4,
+            56.1,
+            74.8,
+            93.5,
+            112.2,
+            130.9,
+            149.6,
+            168.3,
+            187
+          ],
+          "note": "基伤，不限槽位全部相加（第 2.1 节）"
+        }
+      ],
+      "conditions": [],
+      "descriptionEn": "+X% Damage",
+      "official": {
+        "uniqueName": "/Lotus/Upgrades/Mods/Archwing/Rifle/Expert/ArchwingRifleDamageAmountModExpert",
+        "name": "/Lotus/Language/Mods/ArchwingRifleDamageAmountModExpert",
+        "rarity": "LEGENDARY",
+        "baseDrain": 6,
+        "fusionLimit": 10,
+        "type": "ARCH-GUN",
+        "compatName": "Archgun"
+      },
+      "exclusiveGroup": "rubedo_lined_barrel",
+      "conflictsWith": [
+        "rubedo_lined_barrel"
+      ]
+    },
+    {
+      "id": "primed_venomous_clip",
+      "name": {
+        "en": "Primed Venomous Clip",
+        "zh": "恶毒弹匣 Prime"
+      },
+      "slotKind": "archgun",
+      "category": "g",
+      "maxRank": 10,
+      "drain": 4,
+      "rarity": "legendary",
+      "polarity": "d",
+      "stats": [
+        {
+          "key": "toxin",
+          "stat": "elemental:toxin",
+          "bucket": "elemental",
+          "unit": "percent",
+          "kind": "normal",
+          "levelValues": [
+            0,
+            18.7,
+            37.4,
+            56.1,
+            74.8,
+            93.5,
+            112.2,
+            130.9,
+            149.6,
+            168.3,
+            187
+          ]
+        }
+      ],
+      "conditions": [],
+      "descriptionEn": "+X% Toxin",
+      "official": {
+        "uniqueName": "/Lotus/Upgrades/Mods/Archwing/Rifle/Expert/ArchwingWeaponToxinDamageModExpert",
+        "name": "/Lotus/Language/Mods/ArchwingWeaponToxinDamageModExpert",
+        "rarity": "LEGENDARY",
+        "baseDrain": 4,
+        "fusionLimit": 10,
+        "type": "ARCH-GUN",
+        "compatName": "Archgun"
+      },
+      "exclusiveGroup": "venomous_clip",
+      "conflictsWith": [
+        "venomous_clip"
+      ]
+    },
+    {
+      "id": "quasar_drill",
+      "name": {
+        "en": "Quasar Drill",
+        "zh": "类星钻体"
+      },
+      "slotKind": "archgun",
+      "category": "g",
+      "maxRank": 5,
+      "drain": 2,
+      "rarity": "uncommon",
+      "polarity": "-",
+      "stats": [
+        {
+          "key": "puncture",
+          "stat": "physical:puncture",
+          "bucket": "physical",
+          "unit": "percent",
+          "kind": "normal",
+          "levelValues": [
+            0,
+            18,
+            36,
+            54,
+            72,
+            90
+          ],
+          "note": "加量基数是该类型自身面板值"
+        }
+      ],
+      "conditions": [],
+      "descriptionEn": "+X% Puncture",
+      "official": {
+        "uniqueName": "/Lotus/Upgrades/Mods/Archwing/Rifle/ArchwingDualStatPunctureStatusMod",
+        "name": "/Lotus/Language/Mods/ArchwingDualStatPunctureStatusRifleMod",
+        "rarity": "RARE",
+        "baseDrain": 2,
+        "fusionLimit": 5,
+        "type": "ARCH-GUN",
+        "compatName": "Archgun"
+      }
+    },
+    {
+      "id": "quick_reload",
+      "name": {
+        "en": "Quick Reload",
+        "zh": "快速装填"
+      },
+      "slotKind": "archgun",
+      "category": "g",
+      "maxRank": 3,
+      "drain": 2,
+      "rarity": "common",
+      "polarity": "-",
+      "stats": [
+        {
+          "key": "rel",
+          "stat": "reloadSpeed",
+          "bucket": "utility",
+          "unit": "percent",
+          "kind": "functional",
+          "levelValues": [
+            0,
+            33.3333,
+            66.6667,
+            100
+          ],
+          "note": "换弹速度，非换弹时间"
+        }
+      ],
+      "conditions": [],
+      "descriptionEn": "+X% Reload Speed",
+      "official": {
+        "uniqueName": "/Lotus/Upgrades/Mods/Archwing/Rifle/ArchwingRifleReloadSpeedMod",
+        "name": "/Lotus/Language/Items/ArchwingRifleReloadSpeedMod",
+        "rarity": "UNCOMMON",
+        "baseDrain": 2,
+        "fusionLimit": 3,
+        "type": "ARCH-GUN",
+        "compatName": "Archgun"
+      }
+    },
+    {
+      "id": "resolute_focus",
+      "name": {
+        "en": "Resolute Focus",
+        "zh": "坚决专注"
+      },
+      "slotKind": "archgun",
+      "category": "g",
+      "maxRank": 5,
+      "drain": 4,
+      "rarity": "common",
+      "polarity": "-",
+      "stats": [
+        {
+          "key": "stagger",
+          "stat": "recoil",
+          "bucket": null,
+          "unit": "percent",
+          "kind": "skip",
+          "levelValues": [
+            0,
+            20,
+            40,
+            60,
+            80,
+            100
+          ]
+        },
+        {
+          "key": "acc",
+          "stat": "accuracy",
+          "bucket": "utility",
+          "unit": "percent",
+          "kind": "functional",
+          "levelValues": [
+            0,
+            10,
+            20,
+            30,
+            40,
+            50
+          ]
+        }
+      ],
+      "conditions": [],
+      "descriptionEn": "+X% Chance to Resist Staggers/Knockdowns when Aiming +X% Accuracy when Aiming",
+      "official": {
+        "uniqueName": "/Lotus/Upgrades/Mods/Archwing/Rifle/ArchwingCCImmunityIfAimingMod",
+        "name": "/Lotus/Language/Mods/ArchwingCCImmunityifAiming",
+        "rarity": "UNCOMMON",
+        "baseDrain": 4,
+        "fusionLimit": 5,
+        "type": "ARCH-GUN",
+        "compatName": "Archgun"
+      }
+    },
+    {
+      "id": "rubedo_lined_barrel",
+      "name": {
+        "en": "Rubedo-Lined Barrel",
+        "zh": "红晶枪管"
+      },
+      "slotKind": "archgun",
+      "category": "g",
+      "maxRank": 5,
+      "drain": 6,
+      "rarity": "common",
+      "polarity": "r",
+      "stats": [
+        {
+          "key": "dmg",
+          "stat": "baseDamage",
+          "bucket": "baseDamage",
+          "unit": "percent",
+          "kind": "normal",
+          "levelValues": [
+            0,
+            20,
+            40,
+            60,
+            80,
+            100
+          ],
+          "note": "基伤，不限槽位全部相加（第 2.1 节）"
+        }
+      ],
+      "conditions": [],
+      "descriptionEn": "+X% Damage",
+      "official": {
+        "uniqueName": "/Lotus/Upgrades/Mods/Archwing/Rifle/ArchwingRifleDamageAmountMod",
+        "name": "/Lotus/Language/Items/ArchwingRifleDamageAmountMod",
+        "rarity": "UNCOMMON",
+        "baseDrain": 6,
+        "fusionLimit": 5,
+        "type": "ARCH-GUN",
+        "compatName": "Archgun"
+      },
+      "exclusiveGroup": "rubedo_lined_barrel",
+      "conflictsWith": [
+        "primed_rubedo_lined_barrel"
+      ]
+    },
+    {
+      "id": "sabot_rounds",
+      "name": {
+        "en": "Sabot Rounds",
+        "zh": "覆壳弹药"
+      },
+      "slotKind": "archgun",
+      "category": "g",
+      "maxRank": 5,
+      "drain": 10,
+      "rarity": "uncommon",
+      "polarity": "-",
+      "stats": [
+        {
+          "key": "dmg",
+          "stat": "baseDamage",
+          "bucket": "baseDamage",
+          "unit": "percent",
+          "kind": "normal",
+          "levelValues": [
+            0,
+            12,
+            24,
+            36,
+            48,
+            60
+          ],
+          "note": "基伤，不限槽位全部相加（第 2.1 节）"
+        },
+        {
+          "key": "punch",
+          "stat": "punchThrough",
+          "bucket": "utility",
+          "unit": "flat",
+          "kind": "functional",
+          "levelValues": [
+            0,
+            0.6,
+            1.2,
+            1.8,
+            2.4,
+            3
+          ],
+          "note": "单位：米"
+        }
+      ],
+      "conditions": [],
+      "descriptionEn": "+X% Damage +X Punch Through",
+      "official": {
+        "uniqueName": "/Lotus/Upgrades/Mods/Archwing/Rifle/ArchwingRiflePunchthroughMod",
+        "name": "/Lotus/Language/Mods/ArchwingPunchthrough",
+        "rarity": "RARE",
+        "baseDrain": 10,
+        "fusionLimit": 5,
+        "type": "ARCH-GUN",
+        "compatName": "Archgun"
+      }
+    },
+    {
+      "id": "shell_rush",
+      "name": {
+        "en": "Shell Rush",
+        "zh": "填弹加速"
+      },
+      "slotKind": "archgun",
+      "category": "g",
+      "maxRank": 3,
+      "drain": 4,
+      "rarity": "common",
+      "polarity": "d",
+      "stats": [
+        {
+          "key": "frate",
+          "stat": "fireRate",
+          "bucket": "fireRate",
+          "unit": "percent",
+          "kind": "normal",
+          "levelValues": [
+            0,
+            16.6667,
+            33.3333,
+            50
+          ],
+          "note": "弓类描述为 ×2，另行处理"
+        }
+      ],
+      "conditions": [],
+      "descriptionEn": "+X% Charge Rate",
+      "official": {
+        "uniqueName": "/Lotus/Upgrades/Mods/Archwing/Rifle/ArchwingRifleChargeSpeedMod",
+        "name": "/Lotus/Language/Items/ArchwingRifleChargeSpeedMod",
+        "rarity": "UNCOMMON",
+        "baseDrain": 4,
+        "fusionLimit": 3,
+        "type": "ARCH-GUN",
+        "compatName": "Archgun"
+      }
+    },
+    {
+      "id": "venomous_clip",
+      "name": {
+        "en": "Venomous Clip",
+        "zh": "恶毒弹匣"
+      },
+      "slotKind": "archgun",
+      "category": "g",
+      "maxRank": 5,
+      "drain": 4,
+      "rarity": "common",
+      "polarity": "d",
+      "stats": [
+        {
+          "key": "toxin",
+          "stat": "elemental:toxin",
+          "bucket": "elemental",
+          "unit": "percent",
+          "kind": "normal",
+          "levelValues": [
+            0,
+            24,
+            48,
+            72,
+            96,
+            120
+          ]
+        }
+      ],
+      "conditions": [],
+      "descriptionEn": "+X% Toxin",
+      "official": {
+        "uniqueName": "/Lotus/Upgrades/Mods/Archwing/Rifle/ArchwingWeaponToxinDamageMod",
+        "name": "/Lotus/Language/Items/ArchwingWeaponToxicDamageRifle",
+        "rarity": "UNCOMMON",
+        "baseDrain": 4,
+        "fusionLimit": 5,
+        "type": "ARCH-GUN",
+        "compatName": "Archgun"
+      },
+      "exclusiveGroup": "venomous_clip",
+      "conflictsWith": [
+        "primed_venomous_clip"
+      ]
+    },
+    {
+      "id": "zodiac_shred",
+      "name": {
+        "en": "Zodiac Shred",
+        "zh": "黄道碎裂"
+      },
+      "slotKind": "archgun",
+      "category": "g",
+      "maxRank": 5,
+      "drain": 2,
+      "rarity": "uncommon",
+      "polarity": "-",
+      "stats": [
+        {
+          "key": "slash",
+          "stat": "physical:slash",
+          "bucket": "physical",
+          "unit": "percent",
+          "kind": "normal",
+          "levelValues": [
+            0,
+            18,
+            36,
+            54,
+            72,
+            90
+          ],
+          "note": "加量基数是该类型自身面板值"
+        }
+      ],
+      "conditions": [],
+      "descriptionEn": "+X% Slash",
+      "official": {
+        "uniqueName": "/Lotus/Upgrades/Mods/Archwing/Rifle/ArchwingDualStatSlashStatusMod",
+        "name": "/Lotus/Language/Mods/ArchwingDualStatSlashStatusRifleMod",
+        "rarity": "RARE",
+        "baseDrain": 2,
+        "fusionLimit": 5,
+        "type": "ARCH-GUN",
+        "compatName": "Archgun"
+      }
+    },
     {
       "id": "guided_ordnance",
       "name": {

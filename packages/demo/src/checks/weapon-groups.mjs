@@ -50,9 +50,9 @@ for (const g of opts.map((o) => o.value)) {
   check(`「${g}」大停下拉同步到当前武器类别`, gsel.value === g);
   check(`「${g}」面板已渲染`, registry['#panel-table'].children.length > 0);
   if (g === 'archwing') {
-    // ⚠ 数据层现状（D-119 记录）：mods.json 里**没有** archgun / archmelee 槽位的 Mod，
-    //   arcanes.json 里也没有空战赋能 → 空战武器能切、能算，但备选/赋能为空是**数据缺口**，不是 bug。
-    check('「archwing」备选 Mod 为空（数据缺口，已记录）', registry['#candidate-list'].children.length === 0,
+    // 2026-11-08：37 张曲翼枪 Mod 已入库（需求方要求），所以空战枪械现在**有**备选 Mod。
+    // 空战近战仍然没有对应 Mod 池，赋能依旧为空——这两个缺口保留记录。
+    check('「archwing」备选 Mod 有内容', registry['#candidate-list'].children.length > 0,
       String(registry['#candidate-list'].children.length));
     check('「archwing」赋能列表为空（数据缺口，已记录）', arcList().length === 0, String(arcList().length));
   } else {

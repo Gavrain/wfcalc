@@ -184,7 +184,9 @@ export function cleanMod(raw: ModRecord, official?: CleanMod['official']): Clean
     id: raw.i,
     name: { en: raw.n, zh: raw.z },
     slotKind: raw.t,
-    category: raw.s,
+    // 基线把曲翼枪 Mod 的 `s` 错标成 `'a'`（那是"赋能"的代号）。它们是货真价实的枪械 Mod，
+    // 产出必须归 `g`，否则下游按 `category === 'a'` 会把它们当赋能处理（需求方 2026-11-08）。
+    category: raw.s === 'a' && raw.t === 'archgun' ? 'g' : raw.s,
     maxRank,
     drain: raw.d,
     rarity: RARITY[raw.r] ?? 'unknown',

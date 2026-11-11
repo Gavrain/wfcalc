@@ -65,11 +65,15 @@ export interface CleanStats {
  * 分类过滤规则（需求方确认）：
  *   - OperatorAmps：指挥官武器，不计入（DrifterPistol）
  *   - DrifterMelee：漂泊者近战，均存在同名战甲版且面板缺失，排除以免重复
+ *   - CrewShipWeapons：航道星舰炮台（`ExportRailjackWeapons.json` 的 155 条），
+ *     不装武器 Mod、不装赋能，**需求方 2026-11-08 明确「以后也不收，完全用不上」**。
+ *     实测这 155 条与 `ExportWeapons.json` 的重名条目数为 0，全部是 Zekti/Lavan/Vidar 炮台，
+ *     不存在「同一把武器的空战版 + 手持版两套面板」那种情况。
  *
  * 保留：LongGuns / Pistols / Melee / SpecialItems（战甲技能武器）/
  *       SentinelWeapons（同伴）/ SpaceGuns / SpaceMelee（空战）
  */
-export const EXCLUDED_CATEGORIES: readonly string[] = ['OperatorAmps', 'DrifterMelee'];
+export const EXCLUDED_CATEGORIES: readonly string[] = ['OperatorAmps', 'DrifterMelee', 'CrewShipWeapons'];
 
 export interface CleanResult {
   weapons: Weapon[];
@@ -171,6 +175,39 @@ export function impactTypesMatchPanel(
   return compared > 0;
 }
 
+/**
+ * 投射组自身是否带伤害。
+ *
+ * `projectile.attack` 只有 `procChance`、没有任何 `DT_*` 时，说明投射组只是挂了个触发率，
+ * 真正的伤害写在 behaviour 的 `impact` 里（预言者就是这种）。
+ */
+export function projectileHasDamage(b: ExportBehaviour): boolean {
+  const hasDt = (a: unknown): boolean => Boolean(a) && Object.keys(a as object).some((k) => k.startsWith('DT_'));
+  return hasDt(b.projectile?.attack) || hasDt(b.projectile?.explosiveAttack) || hasDt(b.chargedProjectile?.attack);
+}
+
+/**
+ * impact 的**合计**是否与面板合计对得上（用于「投射组无伤害、伤害全在 impact」这一类）。
+ *
+ * 预言者：impact 8.333×3 = 25.0（单次伤害），面板 `damagePerShot` 合计 = 101 是三弹头的合计，
+ * 所以要允许「impact 合计 × 弹头数 ≈ 面板合计」这一档，容差放到 25%。
+ */
+export function impactMatchesPanelTotal(
+  impact: ExportAttack | undefined,
+  damagePerShot: readonly number[] | undefined,
+): boolean {
+  if (!impact || !damagePerShot) return false;
+  const panel = damagePerShot.reduce((s, v) => s + (v ?? 0), 0);
+  if (panel <= 0) return false;
+  const impactTotal = impactSum(impact);
+  if (impactTotal <= 0) return false;
+  // 直接对等，或按整数倍弹头对等（面板 = impact × n）
+  for (let n = 1; n <= 8; n++) {
+    if (Math.abs(impactTotal * n - panel) <= panel * 0.25) return true;
+  }
+  return false;
+}
+
 /** 等值物理三元素 + procChance 0.1 + 数额极小：模板指纹 */
 function isUniformPhysicalTiny(impact: ExportAttack): boolean {
   const imp = impact['DT_IMPACT'];
@@ -210,6 +247,15 @@ export function isPlaceholder(b: ExportBehaviour, ctx: PlaceholderContext = {}):
   // (1) 主模式：与 `damagePerShot` **逐类型一致** → impact 是真伤害
   //     （映声战锤 340 / 双节尺棍 180 / 古声 170 / 预言者 33.67×3）。
   if (ctx.primary && impactTypesMatchPanel(impact, damagePerShot)) return false;
+
+  // (1b) 需求方 2026-11-08：**能恢复的全部恢复**。
+  //      主模式、带投射组、但 `projectile.attack` 是空的（只有 procChance）时，
+  //      真伤害其实全在 `impact` 里——预言者（`projectile.attack.procChance 0.13`，
+  //      伤害在 impact 8.33×3）。这种情况只要 impact 的价格量级与面板对得上就不是模板。
+  //      ⚠ 只放行「主模式 + 有投射组 + 投射组自身无伤害」这一种，避免把真正的模板段放进来。
+  if (ctx.primary && hasProjectile && !projectileHasDamage(b) && impactMatchesPanelTotal(impact, damagePerShot)) {
+    return false;
+  }
 
   // (2) 小额模板指纹（等值物理三元素 / 单类型裸冲击）
   if (small && fingerprint) return true;
@@ -725,7 +771,12 @@ export function cleanWeapons(exportWeapons: ExportWeapons): CleanResult {
     // 只有主模式才与 `damagePerShot` 比对——那个数组只描述一个模式。
     const primaryIndex = primaryBehaviourIndex(behaviours);
     const impactIsReal = (b: ExportBehaviour, index: number): boolean =>
-      index === primaryIndex && impactTypesMatchPanel(b.impact, w.damagePerShot);
+      index === primaryIndex &&
+      (impactTypesMatchPanel(b.impact, w.damagePerShot) ||
+        // D-145（需求方 2026-11-08「能恢复的全部恢复」）：主模式 + 投射组自身无伤害
+        // → 真伤害全在 impact 里（预言者：`projectile.attack` 只有 procChance 0.13，
+        //   伤害是 impact 的 8.33×3；旧逻辑因「逐类型比对」只对齐到 8.33 而误判为模板）。
+        (!projectileHasDamage(b) && impactMatchesPanelTotal(b.impact, w.damagePerShot)));
 
     const usable: Array<{ behaviour: ExportBehaviour; index: number }> = [];
     behaviours.forEach((b, index) => {

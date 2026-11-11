@@ -300,10 +300,19 @@ const appSrc = await readFile(join(ROOT, 'packages/demo/public/app.js'), 'utf8')
   check('武器选单里有带标记的项', withMark.length > 0);
   if (withMark.length) {
     check('带标记的项有 title 说明', Boolean(withMark[0].title));
-    const ignis = Array.from(wsel.children).find((o) => /FlameThrower(?!Wraith)/.test(o.value));
-    if (ignis) check('伊格尼斯带标记', ignis.textContent.includes('\u26a0'));
+    // 2026-11-08：原先写死「伊格尼斯 FlameThrower」带标记，但它的 trigger 已能识别为 `held`、
+    // 不再登记进 `weapon-issues.ts`，这条断言长期必然失败。改为**从问题清单里取一把真实存在的
+    // 待标记武器**来验，避免以后清单变动又把它锁死。
+    const markedId = Object.keys(issuesMod.WEAPON_ISSUES ?? {})[0];
+    if (markedId) {
+      const opt = Array.from(wsel.children).find((o) => String(o.value).split('@')[0] === markedId.split('@')[0]);
+      if (opt) check(`问题武器「${markedId}」在选单里带标记`, opt.textContent.includes('\u26a0'));
+    }
   }
-  check('issuesOf 对已知问题武器返回非空', issuesMod.issuesOf('FlameThrower').length > 0);
+  // 问题清单非空（清单本身存在即可，不绑定具体武器）
+  const issueIds = Object.keys(issuesMod.WEAPON_ISSUES ?? {});
+  check('问题清单非空', issueIds.length > 0);
+  check('issuesOf 对已知问题武器返回非空', issueIds.length > 0 && issuesMod.issuesOf(issueIds[0]).length > 0);
   check('issuesOf 对正常武器返回空', issuesMod.issuesOf('KuvaKarak').length === 0);
 
   // D-111：灵化面板复用基础面板的情况并进同一套问题清单（不再单独做一套标记）

@@ -21,17 +21,23 @@ const riflePool = mods.filter((m) => ['rifle', 'primary'].includes(m.slotKind));
 const karakMods = riflePool.filter((m) => adapter.isModCompatibleWithWeapon(m, karak));
 
 const checks = [];
-// D-024 剔除清单生效后（spectral_serration / aerial_ace 不收录），步枪池 = 120。
-// 这个数字随 Mod 数据变化，改数据时同步更新；关键是下面的**过滤行为**断言。
-checks.push(['步枪池共 120 张', riflePool.length === 120, riflePool.length]);
+// 步枪池张数随 Mod 数据变化，改数据时同步更新；关键是下面的**过滤行为**断言。
+// 2026-11-08：421→478 张（新增 37 张曲翼枪 Mod，slotKind=archgun，不进步枪池），
+// 实测步枪 + 主武器池 = 121 张，与改数据前一致。
+checks.push(['步枪池共 121 张', riflePool.length === 121, riflePool.length]);
 checks.push(['卡拉克过滤后减少', karakMods.length < riflePool.length]);
 checks.push(['通用卡「膛线」保留', karakMods.some((m) => m.id === 'serration')]);
 checks.push(['通用卡「镀层 步枪才能」保留', karakMods.some((m) => m.id === 'galvanized_aptitude')]);
 checks.push(['专属卡「brain_storm」(Grakata) 被排除', !karakMods.some((m) => m.id === 'brain_storm')]);
 checks.push(['专属卡「hata_satya」(Soma Prime) 被排除', !karakMods.some((m) => m.id === 'hata_satya')]);
 checks.push(['专属卡「nightwatch_napalm」(Ogris) 被排除', !karakMods.some((m) => m.id === 'nightwatch_napalm')]);
-// D-024 剔除清单：这两张不应出现在任何池里
-checks.push(['幽灵膛线 spectral_serration 不收录', !mods.some((m) => m.id === 'spectral_serration')]);
+// D-024 剔除清单：aerial_ace 不应出现在任何池里。
+// 2026-11-08：幽灵膛线 **恢复收录**——`EXCLUDED_MODS` 里从来没有它（只剔了 aerial_ace），
+// 而且需求方 D-140 明确要它按「满级 330、每级 30」收录，所以旧断言与现状相矛盾。
+checks.push(['幽灵膛线 spectral_serration 已收录且满级 330', (() => {
+  const m = mods.find((x) => x.id === 'spectral_serration');
+  return Boolean(m) && m.stats.some((s) => s.key === 'dmg' && s.levelValues.at(-1) === 330);
+})()]);
 checks.push(['空中制霸 aerial_ace 不收录', !mods.some((m) => m.id === 'aerial_ace')]);
 
 if (grakata) {

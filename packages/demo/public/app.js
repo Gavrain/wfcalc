@@ -1929,6 +1929,10 @@ async function switchWeapon(weaponId) {
   for (let i = 0; i < SLOT_COUNT; i++) modSlots[i] = null;
   store.exilusModId = null;
   store.arcaneKey = null;
+  // 换枪后右侧拆解必须回到提示文案：`detailTarget` 记的是**上一把枪**上的那张卡，
+  // 不清掉会继续显示旧武器的「输出口径」表（本次重跑数据暴露出来的既有缺陷）。
+  // 只重置目标、不改渲染逻辑——拆解区本来就靠 `detailTarget === null` 显示占位文案。
+  detailTarget = null;
 
   await loadWeapon(weaponId);
   // D-119：四个大类都开放了，换枪后让"大类"下拉停在**当前武器所在的大类**

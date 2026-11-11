@@ -270,11 +270,16 @@ async function main(): Promise<number> {
       stances++;
       continue;
     }
-    if (raw.s === 'a') {
+    // 需求方 2026-11-08：**37 张曲翼枪（Archgun）Mod 要入库**。
+    // 基线的 `s` 字段把这些卡标成了 `'a'`（本意是"赋能"），于是以前全部被当成赋能跳过，
+    // 一张都没进产物，结果空战枪械无卡可装。
+    // 判据：`t === 'archgun'` 就是曲翼枪 Mod（不是赋能）——赋能从来不按 `t` 分类，
+    // 它们的 `t` 是 `primary` / `melee` 这类安装位，且数值来自 `ExportArcanes.json`。
+    if (raw.s === 'a' && raw.t !== 'archgun') {
       arcanes++;
       continue;
     }
-    if (!isWeaponMod({ category: raw.s })) continue;
+    if (!isWeaponMod({ category: raw.s === 'a' ? 'g' : raw.s })) continue;
     weaponMods++;
 
     const official = pickOfficial(raw.n, raw.r, raw.d, raw.f);

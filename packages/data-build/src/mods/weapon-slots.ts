@@ -448,11 +448,30 @@ export function resolveFromExport(w: ExportWeapon): SlotResolution {
     };
   }
 
-  // 哨兵/猎犬武器：伙伴武器有自己的 Mod 池，不属于战甲武器配装范围。
-  // 必须在 holsterCategory 判定之前拦掉——哨兵枪也有 RIFLE/SNIPER/SHOTGUN 的 holster 值。
+  // 守护 / 猎犬武器：**与角色武器共用同一套 Mod**（需求方 2026-11-08 确认：
+  // 「守护武器用的跟角色武器是一样的 mod，只是他们有的分类是步枪有的是近战」）。
+  // 所以这里和普通武器走同一条 holsterCategory 判定，不再标 unresolved。
   if (product === 'SentinelWeapons') {
-    const meleeLike = MELEE_HOLSTERS.has(holster ?? '');
-    return { broad: meleeLike ? 'melee' : 'rifle', specific: [], source: 'unresolved', basis, unresolved: true };
+    // 猎犬近战三把（巴托腾 / 莱斯腾 / 阿卡腾）导出只给 `HOUND_WEAPON`、不带 holster，
+    // 按需求方确认的「近战」归类。
+    if (tags.includes('HOUND_WEAPON')) {
+      return { broad: 'melee', specific: [], source: 'manual', basis, unresolved: false };
+    }
+    // 近战类 holster（分离 / 分离 Prime = MELEE）不在 HOLSTER_KINDS 里，要先拦
+    if (MELEE_HOLSTERS.has(holster ?? '')) {
+      return { broad: 'melee', specific: [], source: 'holster', basis, unresolved: false };
+    }
+    if (holster !== undefined && HOLSTER_KINDS[holster] !== undefined) {
+      return { broad: HOLSTER_KINDS[holster], specific: [], source: 'holster', basis, unresolved: false };
+    }
+    // 无 holster 的（激光点发 / 棱晶·激光点发 / 激光点发 Prime）：
+    // 需求方 2026-11-08 确认「Pistol 说明就是手枪啊」→ 手枪类。
+    // ⚠ 不能只靠 `uniqueName`：build-mods 传进来的对象不一定带它。
+    const idTailLower = (w.uniqueName ?? '').split('/').pop() ?? '';
+    if (/pistol/i.test(idTailLower) || /pistol/i.test(w.name ?? '')) {
+      return { broad: 'pistol', specific: [], source: 'manual', basis, unresolved: false };
+    }
+    return { broad: 'rifle', specific: [], source: 'unresolved', basis, unresolved: true };
   }
 
   if (holster !== undefined && HOLSTER_KINDS[holster] !== undefined) {
@@ -466,6 +485,14 @@ export function resolveFromExport(w: ExportWeapon): SlotResolution {
   if (product === 'SpecialItems' && tags.includes('POWER_WEAPON')) {
     const meleeLike = MELEE_HOLSTERS.has(holster ?? '');
     return { broad: meleeLike ? 'melee' : 'rifle', specific: [], source: 'unresolved', basis, unresolved: true };
+  }
+
+  // 伽拉之爪（Garuda Talons / Garuda Prime Talons，`GarudaClaws` / `GarudaPrimeClaws`）：
+  // 需求方 2026-11-08 确认「是 Garuda 被动带的近战武器，算近战，他不受强度加成」。
+  // 它归在 `SpecialItems` + `CLAWS_STANCE_STANCE`，既不是 POWER_WEAPON 也没有 holster 的枪械分支，
+  // 必须单独认，否则会掉进下面的兜底。
+  if (tags.some((t) => t.toUpperCase() === 'CLAWS_STANCE_STANCE')) {
+    return { broad: 'melee', specific: ['claws'], source: 'stance-tags', basis, unresolved: false };
   }
 
   // Operator 增幅器等：不参与 Mod 配装

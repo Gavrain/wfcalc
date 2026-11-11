@@ -1,14 +1,14 @@
-# 数据更新报告 2026-11-06T17-48-09-139Z
+# 数据更新报告 2026-11-08T09-10-51-664Z
 
 ## 抓取统计
 ```
 抓取统计
 ============================================================
 导出武器条目总数：842
-分类过滤排除：7（OperatorAmps / DrifterMelee）
-无有效模式丢弃：181（其中已写明原因 1，其余为无 behaviours 的组件）
+分类过滤排除：7（OperatorAmps / DrifterMelee / CrewShipWeapons）
+无有效模式丢弃：180（其中已写明原因 0，其余为无 behaviours 的组件）
 按需求方整条移除：4
-清洗后保留：649
+清洗后保留：650
 人工订正：7 把；人工构造版本：2 把
 丢弃占位 behaviour：56（占 6.2%）
 保留 behaviour：841
@@ -21,10 +21,14 @@
 ```
 变更报告
 ============================================================
-与上一版完全一致，无需确认。
+新增武器：1 把
+  + GrnScopedPistolPlayer
+移除武器：0 把
+数值变动：0 把武器，共 0 处
+未变动：651 把
 ```
 
-## 警告（63 条）
+## 警告（62 条）
 ```
 /Lotus/Weapons/Thanotech/EntratiWristGun/EntratiWristGunWeapon: 人工层有灵化形态数值，最后一个 behaviour 作为灵化挂点
 /Lotus/Weapons/Thanotech/EntratiWristGun/EntratiWristGunWeapon#2: 灵化形态数值来自人工层（需求方 2026-11-06 录入（远程武器表））
@@ -71,7 +75,6 @@
 /Lotus/Weapons/Grineer/LongGuns/WraithGorgon/WraithGorgon: 识别为灵化武器（Gorgon Incarnon Genesis），最后一个 behaviour 标为灵化模式
 /Lotus/Weapons/Grineer/LongGuns/WraithGorgon/WraithGorgon#1: 灵化形态面板未收录，已复用基础面板并标记
 /Lotus/Weapons/Grineer/LongGuns/GrnGorgSniperRifle/GrnGorgSniperRifle: 已剔除explosiveAttack段 —— 巴兹火枪没有爆炸/范围伤害；官方导出里的 explosiveAttack 40 是冗余字段（需求方 2026-11-06 确认删除）
-/Lotus/Weapons/Grineer/GrineerPistol/GrnScopedPistolPlayer: 清洗后没有任何有效攻击模式，已跳过（导出的 behaviour 均无可用伤害段，面板伤害 101）
 /Lotus/Weapons/Corpus/Pistols/CrpHandRL/PrismaAngstrum: 识别为灵化武器（Angstrum Incarnon Genesis），最后一个 behaviour 标为灵化模式
 /Lotus/Weapons/Corpus/Pistols/CrpHandRL/PrismaAngstrum#1: 灵化形态面板未收录，已复用基础面板并标记
 /Lotus/Weapons/ClanTech/Energy/DeraVandal: 识别为灵化武器（Dera Incarnon Genesis），最后一个 behaviour 标为灵化模式

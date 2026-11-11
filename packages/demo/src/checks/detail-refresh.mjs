@@ -1,4 +1,4 @@
-﻿/**
+/**
  * 拆解必须跟着"输出变化"重算（D-128）。
  *
  *   node packages/demo/src/checks/detail-refresh.mjs   （需 demo 服务在跑）
@@ -150,8 +150,9 @@ function switchMetric(labelPart) {
     await settle(200);
   }
   check('换枪成功（' + cur + ' → ' + store.data.weapon.id + '）', store.data.weapon.id !== cur);
-  check('换枪后拆解不再显示上一把枪的 Mod', !detailText().includes('输出口径') || detailText().includes('点击备选'));
-  check('换枪后拆解回到提示文案', detailText().includes('点击备选 Mod 或赋能'), detailText().slice(0, 60));
+  const dt = detailText();
+  check('换枪后拆解不再显示上一把枪的 Mod', !dt.includes('输出口径') || dt.includes('点击备选'));
+  check('换枪后拆解回到提示文案', dt.includes('点击备选 Mod 或赋能'));
 }
 
 rec.finish();

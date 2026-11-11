@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-06T17:46:56.294Z",
+  "generatedAt": "2026-11-08T09:10:55.073Z",
   "sources": [
     {
       "name": "mods/baseline.json",
@@ -28,7 +28,7 @@
     }
   ],
   "counts": {
-    "weaponMods": 441,
+    "weaponMods": 478,
     "arcanes": 56,
     "arcanesSkipped": 6,
     "modSets": 19,
@@ -36,42 +36,17 @@
     "weapons": 844
   },
   "coverage": {
-    "officialMatched": 441,
-    "withStats": 441,
-    "unresolvedWeapons": 24,
-    "meleeMissingSpecific": 33,
+    "officialMatched": 478,
+    "withStats": 478,
+    "unresolvedWeapons": 0,
+    "meleeMissingSpecific": 36,
     "zhMissing": 0
   },
   "todo": {
     "unknownStatKeys": [],
     "officialMissing": [],
     "zhMissing": [],
-    "unresolvedWeapons": [
-      "SentinelFreezeRayRifle (Verglas)",
-      "SentinelFreezeRayPrimeRifle (Verglas Prime)",
-      "SentShotgun (Sweeper)",
-      "SentElecRailgun (Vulklok)",
-      "SentBioWeapon (Stinger)",
-      "PrismaBurstLaserPistol (Prisma Burst Laser)",
-      "PrimeSentShotgun (Sweeper Prime)",
-      "PrimeLaserRifle (Prime Laser Rifle)",
-      "PrimeDethMachineRifle (Deth Machine Rifle Prime)",
-      "PrimeBurstLaserPistol (Burst Laser Prime)",
-      "LaserRifle (Laser Rifle)",
-      "Gremlin (Artax)",
-      "DethMachineRifle (Deth Machine Rifle)",
-      "BurstLaserPistol (Burst Laser)",
-      "ThermocorMoaWeapon (Vulcax)",
-      "TazronWeapon (Tazicor)",
-      "SwarmerWeapon (Helstrum)",
-      "HextraWeapon (Multron)",
-      "CryoxionWeapon (Cryotra)",
-      "GarudaPrimeClaws (Garuda Prime Talons)",
-      "GarudaClaws (Garuda Talons)",
-      "ZanukaPetMeleeWeaponIP (Batoten)",
-      "ZanukaPetMeleeWeaponIS (Lacerten)",
-      "ZanukaPetMeleeWeaponPS (Akaten)"
-    ],
+    "unresolvedWeapons": [],
     "meleeMissingSpecific": [
       "TnoGunblade (Redeemer)",
       "RedeemerPrimeWep (Redeemer Prime)",
@@ -105,6 +80,9 @@
       "BerserkerMeleePrime (Valkyr Prime Talons)",
       "BerserkerMelee (Valkyr Talons)",
       "NechroTechSwordWeapon (Ironbride)",
+      "ZanukaPetMeleeWeaponIP (Batoten)",
+      "ZanukaPetMeleeWeaponIS (Lacerten)",
+      "ZanukaPetMeleeWeaponPS (Akaten)",
       "TnBayonetMeleeWeapon (Vinquibus (Melee))"
     ],
     "wfcdMismatch": [],

@@ -2040,6 +2040,54 @@ embedDeathAttack`，**不读 `b.impact`**；纯 `impact` 武器（无 `stateName
 D-137 早已记录「`spectral_serration` 仍被流水线写进 `mods.json`，至今未修」。
 ---
 
+### D-145 数据刷新：曲翼枪 Mod 入库、守护武器归类、航道星舰排除、impact 段恢复（状态：**已确认 / 已实施**，需求方 2026-11-08）
+
+- **日期**：2026-11-08
+- **类别**：数据取舍（收录范围）+ 归类判定 + 修 bug（清洗漏读）
+- **背景**：需求方要求用 warframe-public-export-plus 仓库的导出更新武器面板 / Mod / 赋能数据，不改计算逻辑、不改 UI。
+  调查结论：本地缓存与仓库**逐字节一致**（ExportWeapons 842 条、ExportArcanes 177 条、ExportModSet 19 条 0 差异；
+  ExportUpgrades 仅 7 条随机 Mod 条目不同），所以问题不在数据源，而在清洗与收录范围。
+- **需求方逐条确认**：
+  1. **曲翼枪（Archgun）Mod 要入库**——基线里 37 张的 `s` 字段被标成 `a`（赋能代号），此前全部被当成赋能跳过，一张都没进产物。
+  2. **守护武器与角色武器共用同一套 Mod**，只是有的归步枪、有的归近战，**没有守护武器专用 Mod**。
+     - 21 把守护武器按 `holsterCategory`：RIFLE/SHOTGUN/SNIPER → 步枪系；MELEE → 近战（分离、分离 Prime）
+     - 猎犬近战 3 把（巴托腾 / 莱斯腾 / 阿卡腾）导出只给 `HOUND_WEAPON`，按确认归**近战**
+     - 无 holster 的 3 把激光点发系列（Burst Laser / Prisma / Prime），需求方原话「Pistol 说明就是手枪啊」→ **手枪类**
+     - 伽拉之爪（Garuda Talons / Prime）：需求方「是 Garuda 被动带的近战武器，算近战，他不受强度加成」→ **近战·爪**，
+       备注「不受强度加成」记在规则注释里，不进计算
+  3. **航道星舰炮台永久不收**——需求方「以后也不收他们，完全用不上」。
+     实测 `ExportRailjackWeapons.json` 155 条全是 `CrewShipWeapons`，与 ExportWeapons 重名 0 条，
+     不存在「同一把武器空战版 + 手持版两套面板」的情况。
+  4. **impact 段能恢复的全部恢复**——需求方「恢复，没数值就没数值」。
+- **落地**：
+  - `clean.ts`：`EXCLUDED_CATEGORIES` 加 `CrewShipWeapons`；新增 `projectileHasDamage` / `impactMatchesPanelTotal`，
+    `isPlaceholder` 增加 (1b) 分支——主模式 + 投射组自身无伤害 + impact 合计与面板合计对得上 → 判为真伤害。
+    预言者（GrnScopedPistolPlayer）因此恢复：`projectile.attack` 只有 procChance 0.13，真伤害是 impact 8.33×3。
+  - `weapon-slots.ts`：`resolveFromExport` 的 SentinelWeapons 分支改为按 holster 归类，不再一律 unresolved；
+    新增「无 holster 的 Pistol 名字 → 手枪」与 `CLAWS_STANCE_STANCE → 近战爪` 两条人工规则。
+  - `build-mods.ts` + `clean-mods.ts`：`s === 'a'` 且 `t === 'archgun'` 的条目按枪械 Mod 处理，`category` 归一为 `g`。
+- **结果**：武器 649 → 650（新增预言者）；Mod 441 → 478（+37 曲翼枪）；槽位无法判定 24 → 0；
+  其余武器 0 数值变动。另有既有回归修正见 D-146。
+- **风险**：曲翼枪 Mod 只有 archgun 槽位能装，不影响步枪/手枪/近战池（实测步枪 + 主武器池仍为 121 张）。
+
+---
+
+### D-146 既有缺陷修正：换枪后拆解未清空、测试断言过期（状态：**已实施**，2026-11-08）
+
+- **日期**：2026-11-08
+- **类别**：修 bug（行为不变范围内）
+- **背景**：D-145 重跑数据后跑 `demo:check`，暴露出 4 处**改动前就存在**的问题（已用 git HEAD 比对确认与本次数据无关）：
+  1. `app.js` 的 `switchWeapon` 清空了 Mod 槽却没清 `detailTarget` → 换枪后右侧拆解仍显示上一把枪的「输出口径」表。
+     修法：换枪时 `detailTarget = null`（拆解区本来就靠它为 null 显示占位文案），渲染逻辑未改。
+  2. `verify-mod-filter.mjs`：步枪池断言写死 120，实际 121；且断言「幽灵膛线不收录」与 `EXCLUDED_MODS`
+     （只剔 aerial_ace）及 D-140「幽灵膛线按满级 330 收录」**相矛盾**。改为断言「已收录且满级 330」。
+  3. `interact.mjs`：写死「伊格尼斯带标记」，但它的 trigger 已识别为 `held`、不在问题清单里。
+     改为从 `WEAPON_ISSUES` 取真实存在的武器验证标记。
+  4. `weapon-groups.mjs`：「archwing 备选 Mod 为空」随 D-145 失效，改为断言「有内容」。
+- **验证**：`demo:check` 全部分组通过（exit 0）；单测 452 项全过；typecheck 通过。
+
+---
+
 ### D-140 Mod 数值脱离仓库外的大文件（状态：**待确认**，2026-11-07 提出）
 
 **触发**：需求方 2026-11-07 要求 —— 那份外部参考文件只是参考资料，**不应该跟项目耦合**；就算把它删掉，项目也要能正常运行，且项目记录里不出现它的名字。
