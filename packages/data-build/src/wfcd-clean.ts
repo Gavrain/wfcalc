@@ -175,6 +175,30 @@ const SEPARATE_MODE: readonly RegExp[] = [
   /^Spear Throw$/i, // 已有 "Spear Throw Impact" 时会被下面的同义合并处理
 ];
 
+/**
+ * **扳机词**：攻击名本身就是「一种扳机」的攻击，各算一个独立射击模式（D-150）。
+ *
+ * 需求方 2026-11-12：
+ * > 「雌鹿射击模式不对，他是三个模式，有两个当成一个段了。一个射击模式一般只会有一个投射物命中。」
+ *
+ * 雌鹿（Hind）在 WFCD 里的三条攻击是 `Burst Mode` / `Semi-Auto Mode`（正式版）
+ * 与 `Burst` / `Semi-Auto` / `Auto`（赤毒·雌鹿、狂鲨 Prime）。这些名字既不是主攻击锚点，
+ * 也不在 `SEPARATE_MODE` 里，旧逻辑把它们全并进第一个模式、当成「同一模式的多种攻击方式」，
+ * 于是 3 个射击模式塌成 2 个（狂鲨 Prime 只是因为名字里带 `Auto` 蹭到了 `/Alt-Fire/i` 才碰巧拆开）。
+ *
+ * ⚠ 与 `PRIMARY_ANCHORS` 的分工：锚点是「射击模式本身」的名字（`Auto` / `Burst`…），
+ * 描述的是**第一个**模式；扳机词是「换了扳机」，每一段都该自成一个模式。
+ * 判据放最后、且排除锚点，所以 `Auto` / `Burst` 这类先被锚点吃掉，不会重复开组。
+ */
+const TRIGGER_NAMES: readonly RegExp[] = [
+  /^(Burst|Burst Mode|Burst Shot|Burst-Fire( While Aiming)?)$/i,
+  /^(Semi-Auto|Semi-Auto Mode|Semi|Semi-Auto Fire)$/i,
+  /^(Auto|Auto Mode|Full-Auto|Full Auto Mode|Fully Automatic)$/i,
+  /^(Alt-Fire|Secondary Fire)$/i,
+  /^(Charged Attack|Charge Attack)$/i,
+  /^(Lock-on Mode|Barrage Mode)$/i,
+];
+
 /** 同义/从属关系：带这些词的是「另一个模式的段」，不是新模式 */
 const SUBPART: readonly RegExp[] = [
   /Radial Attack/i,
@@ -204,10 +228,56 @@ const SUBPART: readonly RegExp[] = [
  *
  * 例：`Plasma Bomb Impact` → 首词 `Plasma`，且不是 SUBPART → 新模式；
  *     `Plasma Bomb Explosion` → 同首词 → 归上一个 `Plasma` 模式。
+ *     `Semi-Auto Mode` → 扳机词（`TRIGGER_NAMES`）→ 自成模式（D-150，雌鹿三模式）。
  */
 const BOMB_SWITCH = /^(Plasma Bomb|Cluster Bombs?|Cluster|Bomb|Grenade|Rocket|Missile|Charge Bombs?)/i;
 
+/**
+ * 「按主词切换的弹种」：命中的攻击**自己起一个新模式**，不是当前模式的子段。
+ *
+ * 需求方 2026-11-12：量子切割器是 **2 个模式**——模式 1 是射线（`Beam`），
+ * 模式 2 是方块弹的 3 段（`Cube (direct hit)` / `Cube Explosion` / `Cube (shot by player)`）。
+ *
+ * 与 `BOMB_SWITCH` 的区别在这里：子母弹（`Plasma Bomb`）是**同一次射击的后续子段**，
+ * 归当前模式即可；方块弹则要**独立成一个模式**（共用弹匣，件数/换弹节奏不同）。
+ *
+ * 例：`Cube (direct hit)` → 首词 `Cube` → 开新模式；`Cube Explosion` / `Cube (shot by player)` 归它。
+ */
+const SIDE_WEAPON = /^(Cube|Quill)\b/i;
+
+/**
+ * 按主词「换了一种发射方式」的分组：同一次射击的命中 / 爆炸算同一段。
+ *
+ * 需求方 2026-11-12：异化者（Catabolyst）是 **2 个模式**——
+ * 模式 1 是射线（`Primary`），模式 2 按**换弹方式**分 4 段：
+ * ```
+ * Partial Reload    Impact 冲 11 + Explosion 腐蚀 203
+ * Reload From Empty Impact 冲 11 + Explosion 腐蚀 1997   ← 空弹匣换弹的爆炸更高
+ * ```
+ * WFCD 原文本来就把这 5 条攻击拆开了，只是名字主干不同（`Partial Reload` / `Reload From Empty`），
+ * 旧代码按「命中 / 爆炸」两层分组，把它们压成了 4 个"攻击方式"（两个 impact、两个爆炸），
+ * 看不出是按换弹方式区分的。
+ */
+const THROW_SWITCH = /^(Partial Reload|Reload From Empty)\b/i;
+
 const matchesAny = (name: string, list: readonly RegExp[]): boolean => list.some((re) => re.test(name));
+
+/** 攻击名主干 → 稳定 id（`Partial Reload` → `copartialreload`） */
+const slug = (s: string): string =>
+  'co' + String(s ?? '').toLowerCase().replace(/[^a-z0-9]+/g, '').slice(0, 24);
+
+/**
+ * WFCD 没写 `shot_type`、但确定是范围伤害的攻击。
+ *
+ * 需求方 2026-11-12：「Cube (shot by player) 应该是 aoe」。
+ * WFCD 原文对 `Cube (direct hit)` 给了 `Projectile`、对 `Cube Explosion` 给了 `AoE`，
+ * 唯独玩家射击引爆这条**没有 `shot_type` 字段**；它带 `falloff{0,6}`，是 6 米范围的引爆，
+ * 所以按范围伤害处理（这一段会走爆炸机制、不吃镀层类）。
+ */
+export function forcedAoe(name: string): boolean {
+  return /^Cube\s*\(\s*shot by player\s*\)$/i.test(String(name ?? '').trim());
+}
+
 
 /**
  * 把同一模式内的攻击拆成「攻击方式」（对应内核的 `ModeVariant`）。
@@ -249,12 +319,28 @@ function groupAttackVariants(attacks: readonly WfcdAttack[]): { id: string; labe
 
   const isAoe = (a: WfcdAttack): boolean => String(a.shot_type ?? '').toLowerCase() === 'aoe';
 
+  /**
+   * 是否按「主词」定段（而不是按「命中 / 爆炸」两层）。
+   *
+   * 需求方 2026-11-12 的两把武器说明：同一发里 `xxx Impact` 与 `xxx Explosion` 是**同一段的两个子段**，
+   * 真正区分它们的是名字的主词（`Partial Reload` / `Reload From Empty` / `Cube`）。
+   * 按主词分组之后：
+   * ```
+   * 量子切割器模式 2 → Cube (direct hit) / Cube Explosion / Cube (shot by player)   三段都在「Cube」组里
+   * 异化者模式 2     → Partial Reload(impact+explosion) / Reload From Empty(impact+explosion)
+   * ```
+   * 其它武器（幻离子子母弹等）**保持旧行为**，按命中 / 爆炸两层分。
+   */
+  const byStem = attacks.some((a) => THROW_SWITCH.test(String(a.name ?? '')) || /^\s*Cube\b/i.test(String(a.name ?? '')));
+
   // 先按「命中 / 爆炸」两大层，再按主干细分
   const buckets: { key: string; aoe: boolean; attacks: WfcdAttack[] }[] = [];
   for (const a of attacks) {
     const aoe = isAoe(a);
     const stem = stemOf(a.name);
-    const hit = buckets.find((b) => b.aoe === aoe && b.key.toLowerCase() === stem.toLowerCase());
+    const hit = byStem
+      ? buckets.find((b) => b.key.toLowerCase() === stem.toLowerCase())
+      : buckets.find((b) => b.aoe === aoe && b.key.toLowerCase() === stem.toLowerCase());
     if (hit) hit.attacks.push(a);
     else buckets.push({ key: stem, aoe, attacks: [a] });
   }
@@ -265,7 +351,8 @@ function groupAttackVariants(attacks: readonly WfcdAttack[]): { id: string; labe
   }
 
   // 多种：命中组排前、爆炸组排后；id 必须**唯一**（override 与界面勾选都按 id 认）
-  buckets.sort((a, b) => Number(a.aoe) - Number(b.aoe));
+  // byStem 下**保持 WFCD 原文顺序**——需求方要看的正是「直接命中 → 自然爆炸 → 玩家引爆」这个顺序。
+  if (!byStem) buckets.sort((a, b) => Number(a.aoe) - Number(b.aoe));
   const used = new Set<string>();
   return buckets.map((g, i) => {
     // 标签（需求方 2026-11-12）：
@@ -275,28 +362,64 @@ function groupAttackVariants(attacks: readonly WfcdAttack[]): { id: string; labe
     // 同一侧有多种时再加原名区分（`等离子炸弹` / `集束炸弹` 都是命中段）。
     const ZH: Record<string, string> = {
       'normal attack': '',
+      'normal': '',
       'primary': '',
       'incarnon form': '',
       'incarnon form held': '射线',
       'incarnon form charge': '蓄力',
+      'incarnon form held damage': '射线',
+      'incarnon form charge attack': '蓄力',
       'plasma bomb': '等离子炸弹',
       'cluster bombs': '集束炸弹',
       'grenade': '榴弹',
       'poison cloud': '毒云',
-      'radial attack': '',
+      'radial attack': '范围伤害',
       'alt-fire': '次要射击',
       'secondary fire': '次要射击',
       'beam': '',
+      'beacon': '信标',
+      // ── D-150 拆出独立模式后，直出英文的次要射击名（需求方：一律中文名展示）──
+      'buckshot': '霰弹',
+      'air burst projectile': '空爆弹',
+      'auto': '全自动',
+      'charged shot': '蓄力',
+      'charged shot laser': '蓄力激光',
+      'cannon mode projectile': '炮击模式',
+      'cannon mode cluster bomb': '炮击模式·集束炸弹',
+      'cube (direct hit)': '方块直击',
+      'cube explosion': '方块爆炸',
+      'cube (shot by player)': '方块引爆',
+      'turret expiry': '炮台过期',
+      'harpoon': '鱼叉',
+      'infested harpoon': '感染鱼叉',
+      'infested orb': '感染球',
+      'spear throw': '投掷长矛',
+      'projectile': '投射物',
+      'rocket': '火箭',
+      'homing spore': '追踪孢子',
+      'uncharged': '未蓄力',
+      'uncharged projectile': '未蓄力投射物',
+      'fully charged projectile': '满蓄力投射物',
+      'fully stacked orb singularity': '满层球体奇点',
+      'corrosive dot': '腐蚀持续伤害',
     };
-    const zh = ZH[g.key.toLowerCase()] ?? g.key;
+    // 查译名用**原始攻击名**（`Normal Attack`），不是剥过子段词的主干（`Normal`）——
+    // 否则 `ZH` 里的 `'normal attack'` 永远匹配不上，标签会漏成英文原名。
+    const rawName = String(g.attacks[0]?.name ?? '').trim();
+    const zh =
+      ZH[g.key.toLowerCase()] ??
+      ZH[rawName.toLowerCase()] ??
+      // 表外名字：用**原始名**（比剥过子段词的主干可读），仍没有就退回主干
+      (rawName || g.key);
     // 标签规则（需求方 2026-11-12：用「直接命中 / 范围伤害」区分，别拼「某某·爆炸」）：
     //   · 爆炸段 → 「范围伤害」（多段时后面带原名，如「范围伤害（集束炸弹）」）
     //   · 命中段 → 「直接命中」；但如果这一段换了**发射方式**（射线 / 蓄力），就用那个名字，
     //     否则赘骨灵化里「射线」和「蓄力」都显示成「直接命中」就分不出来了
     const MODE_OF_FIRE = /^(射线|蓄力)$/;
-    const sameSide = buckets.filter((b) => b.aoe === g.aoe);
+    const isAoeName = g.aoe || g.attacks.some(isAoe);
+    const sameSide = buckets.filter((b) => (b.aoe || b.attacks.some(isAoe)) === isAoeName);
     let label: string;
-    if (g.aoe) {
+    if (isAoeName) {
       label = sameSide.length <= 1 || !zh ? '范围伤害' : `范围伤害（${zh}）`;
     } else if (MODE_OF_FIRE.test(zh)) {
       label = zh;
@@ -306,8 +429,33 @@ function groupAttackVariants(attacks: readonly WfcdAttack[]): { id: string; labe
       // 同一侧多种：用原名区分，去掉「直接命中」前缀以免太长
       label = zh;
     }
+    // 同一组里 hitscan 与 AoE 混在一起时，把「范围伤害」标出来（见 toSegment 的 forcedAoe）。
+    // 典型是量子切割器模式 2 的三个 Cube 段：名字里没有 Impact / Explosion 可剥，
+    // 只剩 `Cube` / `Cube (shot by player)`，不标就看不出哪一段是范围伤害。
+    if (byStem) {
+      const parts = g.attacks.filter((a) => toSegment(a, [], '') !== null);
+      const hasHit = parts.some((a) => !isAoe(a));
+      const hasAoe = parts.some((a) => isAoe(a) || forcedAoe(a.name));
+      if (hasHit && hasAoe) {
+        // 标签是中文，所以名字也要走 ZH（`Cube Explosion` → 「方块爆炸」而不是「Cube」）
+        const nameOf = (a: WfcdAttack): string => {
+          const raw = String(a.name ?? '').trim();
+          return ZH[raw.toLowerCase()] ?? ZH[stemOf(raw).toLowerCase()] ?? raw;
+        };
+        const aoeParts = parts.filter((a) => isAoe(a) || forcedAoe(a.name)).map(nameOf);
+        const allSameStem = new Set(aoeParts.map((s) => s.toLowerCase())).size === 1;
+        label = allSameStem
+          ? `范围伤害（${aoeParts[0]}）`
+          : `范围伤害（${[...new Set(aoeParts)].join(' / ')}）`;
+      }
+    }
     // id 首选 direct / blast / attackN；重名就加序号，保证唯一
     let id = i === 0 ? 'direct' : g.aoe ? 'blast' : `attack${i + 1}`;
+    if (byStem) {
+      // byStem 下用**可读的 id**（`copartialreload` / `coreloadfromempty` / `cocube…`），
+      // 与攻击名一一对应，排查数据时一眼能认出是哪一段。
+      id = slug(g.key);
+    }
     if (used.has(id)) {
       let n = 2;
       while (used.has(`${id}${n}`)) n++;
@@ -349,6 +497,9 @@ function groupAttacks(attacks: readonly WfcdAttack[]): { name: string; attacks: 
   // incarnon / incarnon2 两个模式，是错的。
   let incarnonGroup: { name: string; attacks: WfcdAttack[] } | null = null;
   const isIncarnonName = (n: string): boolean => /^\s*Incarnon\s/i.test(n);
+  // 当前「切换弹种 / 换弹方式」组：`SIDE_WEAPON`（Cube）与 `THROW_SWITCH`（换弹方式）命中时开的组。
+  // 同主词的后续子段（`Cube Explosion`、`Reload From Empty Explosion` …）都归它。
+  let currentSide: { name: string; attacks: WfcdAttack[] } | null = null;
 
   for (const a of attacks) {
     const name = String(a.name ?? '');
@@ -362,6 +513,7 @@ function groupAttacks(attacks: readonly WfcdAttack[]): { name: string; attacks: 
       }
       current = incarnonGroup;
       currentBomb = null;
+      currentSide = null;
       continue;
     }
     const isAnchor = matchesAny(name, SEPARATE_MODE) || matchesAny(name, PRIMARY_ANCHORS);
@@ -369,6 +521,39 @@ function groupAttacks(attacks: readonly WfcdAttack[]): { name: string; attacks: 
       current = { name, attacks: [a] };
       groups.push(current);
       currentBomb = null; // 新锚点打断弹种分组
+      currentSide = null;
+      continue;
+    }
+    // ── 扳机词切换（D-150）：`Semi-Auto Mode` / `Auto` / `Alt-Fire`… 各起一个**新模式** ──
+    //
+    // 需求方 2026-11-12：「雌鹿射击模式不对，他是三个模式，有两个当成一个段了。
+    // 一个射击模式一般只会有一个投射物命中。」雌鹿的三条攻击是
+    // `Burst Mode` / `Semi-Auto Mode` / `Auto`，每一条都是一个独立射击模式。
+    // 锚点与扳机词先判——它们定义"模式本身"，后面的子段（`Radial Attack` / `Explosion`…）
+    // 才归到当前扳机组里。
+    if (matchesAny(name, TRIGGER_NAMES)) {
+      current = { name, attacks: [a] };
+      groups.push(current);
+      currentBomb = null;
+      currentSide = null;
+      continue;
+    }
+    // ── 主词切换（需求方 2026-11-12）：方块弹 / 换弹方式 各起一个**新模式** ──
+    //
+    //   量子切割器：`Beam`(模式1) … `Cube (direct hit)`/`Cube Explosion`/`Cube (shot by player)`(模式2)
+    //   异化者：    `Primary`(模式1) … `Partial Reload Impact`+`Explosion`(模式2) … 同上（换弹方式换一种就再起一组）
+    //
+    // 判据是「名字的主词」（`Cube` / `Partial Reload` / `Reload From Empty`）：
+    // 主词相同 → 归当前组；主词不同 → 开新组。这样异化者会被拆成「部分换弹」与「空弹匣换弹」两种模式。
+    const sideWord = name.match(SIDE_WEAPON)?.[1] ?? name.match(THROW_SWITCH)?.[1] ?? null;
+    if (sideWord) {
+      const sameSide = currentSide && currentSide.name.toLowerCase().startsWith(sideWord.toLowerCase());
+      if (sameSide) {
+        currentSide!.attacks.push(a);
+      } else {
+        currentSide = { name, attacks: [a] };
+        groups.push(currentSide);
+      }
       continue;
     }
     // ── 弹种切换：`Cluster Bombs Impact` 开新组，`Cluster Bombs Explosion` 归它 ──
@@ -380,10 +565,13 @@ function groupAttacks(attacks: readonly WfcdAttack[]): { name: string; attacks: 
         currentBomb = { name: name, attacks: [a] };
         groups.push(currentBomb);
       }
+      currentSide = null;
       continue;
     }
-    // 其余子段归当前锚点（若有），否则归当前弹种组
-    if (currentBomb) {
+    // 其余子段归当前主词组，否则归当前弹种组，再否则归当前锚点
+    if (currentSide) {
+      currentSide.attacks.push(a);
+    } else if (currentBomb) {
       currentBomb.attacks.push(a);
     } else if (current) {
       current.attacks.push(a);
@@ -393,7 +581,33 @@ function groupAttacks(attacks: readonly WfcdAttack[]): { name: string; attacks: 
       groups.push(current);
     }
   }
-  return groups;
+
+  // ── D-150：兜底再摘一次扳机词 ──
+  //
+  // 上面已经让扳机词各开一组；但如果某一组**整组都没有锚点**（首条是子段、名字不像任何模式），
+  // 组里又混着扳机词攻击，这里把它们各拆成独立模式。
+  // 「同一次开火的附属段」（钩铳的命中附带、磁道炮的 `Attraction Field`、
+  // 量子切割器的 `Cube (shot by player)`）名字不在 `TRIGGER_NAMES` 里，不受影响。
+  const split: { name: string; attacks: WfcdAttack[] }[] = [];
+  for (const g of groups) {
+    // 该组是否已经有自己的锚点（主攻击 / 独立模式 / 扳机词）开场
+    const gAnchor = matchesAny(g.name, PRIMARY_ANCHORS) || matchesAny(g.name, SEPARATE_MODE) || matchesAny(g.name, TRIGGER_NAMES);
+    const stay: WfcdAttack[] = [];
+    const standalone: WfcdAttack[] = [];
+    for (const a of g.attacks) {
+      const n = String(a.name ?? '');
+      const isAnchorName = matchesAny(n, PRIMARY_ANCHORS) || matchesAny(n, SEPARATE_MODE);
+      // 组里已经有锚点打头 → 它就定义了这个模式本身，不再往外拆；
+      // 只有「整组都没有锚点」时才把扳机词拆出来（否则量子切割器的 `Cube (shot by player)`
+      // 这种附属段会被单拎成第三个模式）。
+      const splitOut = !isAnchorName && !gAnchor && matchesAny(n, TRIGGER_NAMES);
+      if (splitOut) standalone.push(a);
+      else stay.push(a);
+    }
+    if (stay.length > 0) split.push({ name: g.name, attacks: stay });
+    for (const a of standalone) split.push({ name: String(a.name ?? ''), attacks: [a] });
+  }
+  return split;
 }
 
 /**
@@ -446,13 +660,18 @@ function toSpread(damage: Record<string, number> | undefined, warnings: string[]
 export function toSegment(a: WfcdAttack, warnings: string[], context: string): DamageSegment | null {
   const damage = toSpread(a.damage, warnings, context);
   if (Object.keys(damage).length === 0) return null;
-  const aoe = String(a.shot_type ?? '').toLowerCase() === 'aoe';
+  // `forcedAoe`：WFCD 缺 `shot_type` 但确定是范围伤害的那几条（量子切割器的玩家引爆）
+  const aoe = String(a.shot_type ?? '').toLowerCase() === 'aoe' || forcedAoe(a.name);
+  const isHitScan = String(a.shot_type ?? '').toLowerCase() === 'hit-scan';
   return {
     kind: aoe ? 'explosiveAttack' : 'attack',
     aoe,
     damage,
     // WFCD 的 status_chance 是**百分比**（11.25 = 11.25%）；内核是 0~1
     procChance: typeof a.status_chance === 'number' ? a.status_chance / 100 : 0,
+    // 射线**按段判**（需求方 2026-11-12）：只有 Hit-Scan 的那一段是激光本体。
+    // 不写的段跟随模式扳机，所以这里只在"明确不是射线"时写 `false`。
+    ...(isHitScan ? {} : { beam: false }),
   };
 }
 
@@ -682,22 +901,41 @@ export function cleanWfcdWeapons(raw: readonly WfcdWeapon[]): WfcdCleanResult {
       //
       // 判据全用扳机 + `shot_type`，不看武器名：
       //   1. 该模式内有「名字含 Held 且不是 AoE」的攻击 → `held`；
-      //   2. 否则武器级是 `held`，但该模式内没有 `Hit-Scan` 攻击（全是 Projectile / AoE）→ 不是射线，落 `semi`；
-      //   3. 其余保持武器级扳机。
+      //   2. 否则武器级是 `held`，该模式内确有 `Hit-Scan` 攻击，且该模式的攻击**全部**是 Hit-Scan
+      //      → `held`（射线本体）；
+      //   3. 否则武器级是 `held`，但该模式内没有 `Hit-Scan` 攻击（全是 Projectile / AoE）
+      //      → 不是射线，落 `semi`；
+      //   4. 其余保持武器级扳机。
+      //
+      // ⚠ 第 2 条原来的写法是「只要有 Hit-Scan 就算射线」，这在**一个模式混着射线与投射物**时会判错：
+      //   量子切割器武器级 `Held`，方块弹三段（Projectile / AoE）虽不同主词但曾因顺序被并在一起。
+      //   现在方块弹与换弹方式已各自成模式（见 groupAttacks 的 SIDE_WEAPON / THROW_SWITCH），
+      //   但它们若与射线同组（同一把枪上没有 `Beam` 锚点的情况）仍要靠"全部 Hit-Scan"这条兜住。
       //
       // ⚠ 射线的攻击名多数是 `Normal Attack` / `Primary`，**不是** `Beam`
       //   （安培克斯 / 导热聚焦枪 / 噬菌者 / 火鸡 / 冷冻光束 都是 Normal Attack），
       //   所以不能只看名字，必须结合 `shot_type`。
-      const modeHasHitscan = g.attacks.some((a) => String(a.shot_type ?? '').toLowerCase() === 'hit-scan');
+      const modeHitScanCount = g.attacks.filter((a) => String(a.shot_type ?? '').toLowerCase() === 'hit-scan').length;
+      const modeHasHitscan = modeHitScanCount > 0;
+      const modeAllHitscan = modeHitScanCount === g.attacks.length;
       const modeHasHeldAttack = g.attacks.some(
         (a) => isHeldAttack(a.name) && String(a.shot_type ?? '').toLowerCase() !== 'aoe',
       );
       const modeTrigger: TriggerKind = modeHasHeldAttack
         ? 'held'
-        : trigger === 'held' && !modeHasHitscan
-          ? 'semi'
-          : trigger;
+        : trigger === 'held' && modeHasHitscan && modeAllHitscan
+          ? 'held'
+          : trigger === 'held' && !modeHasHitscan
+            ? 'semi'
+            : trigger;
       const isBeam = modeTrigger === 'held';
+
+      // ── 模式标签与 id（需求方 2026-11-12）──
+      //
+      // 拆出来的副模式**一律叫「次要射击」**，与幻离子副模式的叫法一致；
+      // 原始攻击名（`Cube` / `Partial Reload` / `Reload From Empty`）写进 `_note` 供溯源。
+      const isSideGroup = SIDE_WEAPON.test(g.name) || THROW_SWITCH.test(g.name);
+      const sideNote = isSideGroup ? `来源攻击：${g.attacks.map((a) => a.name).join(' / ')}` : undefined;
 
       const mode: AttackMode = {
         id,
@@ -707,6 +945,8 @@ export function cleanWfcdWeapons(raw: readonly WfcdWeapon[]): WfcdCleanResult {
         multishot: round4(w.multishot ?? 1),
         variants,
         ...(roleOverride ? { override: roleOverride } : {}),
+        ...(isSideGroup ? { _label: '次要射击' } : {}),
+        ...(sideNote ? { _note: sideNote } : {}),
       };
       modes.push(mode);
       if (isBeam) beamModeIds.push(id);
@@ -718,7 +958,9 @@ export function cleanWfcdWeapons(raw: readonly WfcdWeapon[]): WfcdCleanResult {
       continue;
     }
 
-    // 主模式排最前（灵化/蓄力排在后面）
+    // 主模式排最前（灵化/蓄力排在后面）。
+    // ⚠ 必须**稳定排序**：量子切割器 / 异化者的副模式与主模式同为 `normal`，
+    //   若顺序被打乱，「模式1 = 射线」就会变成「模式1 = 次要射击」。
     const order: Record<ModeRole, number> = { normal: 0, charged: 1, incarnon: 2 };
     modes.sort((a, b) => order[a.role] - order[b.role]);
 

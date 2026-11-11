@@ -85,15 +85,31 @@ function groupOfWeaponId(weaponId) {
   return w.category;
 }
 
-/** 读「伤害类型」表：类型 → { 基础, 当前 } */
-function readDamageTable() {
-  const out = {};
-  const rows = registry['#damage-table'].children;
-  for (const row of rows) {
-    const cells = row.children.map((c) => c.textContent);
-    if (!cells.length || cells[0] === '伤害类型') continue;
-    if (cells[0] === '合计') { out.__total = { base: cells[1], cur: cells[2] }; continue; }
-    out[cells[0]] = { base: cells[1], cur: cells[2] };
+/**
+ * 读伤害分布表：**每种攻击方式一张**（需求方 2026-11-12）。
+ *
+ * `#damage-table` 是容器，里面每张表是一个 `.dmg-table`，其下第一层才是 `.panel-table`。
+ *
+ * @returns `[{ title, rows: { 类型: {base, cur}, __total: {base, cur} } }]`
+ */
+function readDamageTables() {
+  const out = [];
+  for (const t of registry['#damage-table'].children) {
+    const inner = (t.children && t.children[0]) ? t.children[0] : t;
+    const rows = {};
+    let title = '';
+    for (const row of inner.children ?? []) {
+      const cells = row.children.map((c) => c.textContent);
+      if (!cells.length) continue;
+      if ((row.className || '').includes('panel-head')) {
+        // 表头第一列现在就是攻击方式名（`直接命中` / `范围伤害` / `合计`）
+        title = cells[0];
+        continue;
+      }
+      if (cells[0] === '合计') { rows.__total = { base: cells[1], cur: cells[2] }; continue; }
+      rows[cells[0]] = { base: cells[1], cur: cells[2] };
+    }
+    out.push({ title, rows });
   }
   return out;
 }
@@ -117,22 +133,35 @@ try {
   check('巴兹火枪有两种攻击方式（本体 + 信标）', variantCount === 2, String(variantCount));
 
   {
-    const t = readDamageTable();
-    check('伤害表里没有「爆炸」行', !('爆炸' in t), Object.keys(t).join('/'));
-    const same = Object.entries(t).every(([, v]) => v.base === v.cur);
-    check('基础列 = 当前列（逐类型，无 Mod 时）', same, JSON.stringify(t));
-    // D-148 换源后巴兹火枪是「冲击 30 + 穿刺 24 + 切割 6」（本体）+ 「穿刺 3」（信标）。
-    // 默认全部勾选，所以合计 = 两者之和。这个合计不写死，按数据各段相加算出来比对。
-    const segs = w.modes[0].variants.flatMap((v) => v.segments);
-    const expected = segs.reduce(
-      (sum, s) => sum + Object.values(s.damage ?? {}).reduce((a, b) => a + b, 0),
-      0,
-    );
-    check(
-      `直接命中合计 = ${expected}（按数据各段相加）`,
-      t.__total && Number(t.__total.cur) === Number(expected.toFixed(2)) && t.__total.base === t.__total.cur,
-      `${JSON.stringify(t.__total)} vs 数据 ${expected}`,
-    );
+    // ⚠ 需求方 2026-11-12：「不同段的伤害分布是不一样的，为什么没有多个伤害分布表」
+    //   「不需要合计啊，而且他们的触发是各自算的，你把他们合到一个表然后均摊触发率显然不对」
+    //   所以现在是**每种攻击方式一张表，没有合计表**。这里逐表验证。
+    const tables = readDamageTables();
+    check('巴兹火枪渲染出多张伤害分布表', tables.length >= 2, `${tables.length} 张：` +
+      tables.map((t) => t.title).join(' / '));
+    check('没有合计表（各段触发各自算，不能均摊）',
+      !tables.some((t) => t.title === '合计'), tables.map((t) => t.title).join(' / '));
+
+    const allTypes = new Set();
+    let sameAll = true;
+    for (const t of tables) {
+      for (const [k, v] of Object.entries(t.rows)) {
+        if (k.startsWith('__')) continue;
+        allTypes.add(k);
+        if (v.base !== v.cur) sameAll = false;
+      }
+    }
+    check('伤害表里没有「爆炸」行', !allTypes.has('爆炸'), [...allTypes].join('/'));
+    check('基础列 = 当前列（逐类型，无 Mod 时）', sameAll, JSON.stringify([...allTypes]));
+
+    // 每张表的合计 = 该表自己那一行的和（各表独立，不跨表相加）
+    const expects = w.modes[0].variants.map((v) =>
+      v.segments.reduce((sum, s) => sum + Object.values(s.damage ?? {}).reduce((a, b) => a + b, 0), 0));
+    const gotTotal = tables.map((t) => (t.rows.__total ? Number(t.rows.__total.cur) : NaN));
+    check('每张表的合计 = 该攻击方式自己的各段之和',
+      gotTotal.length === expects.length &&
+        gotTotal.every((g, i) => Math.abs(g - expects[i]) < 1e-6),
+      `表: ${gotTotal.join('/')} vs 数据: ${expects.join('/')}`);
   }
 
   // ── ② 全库扫描：多攻击方式武器「基础 = 当前」 ──

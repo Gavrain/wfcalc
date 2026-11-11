@@ -55,6 +55,15 @@ export interface DamageSegment {
   procChance: number;
   /** 该段是否产生范围伤害（= 数据层的 `aoe` 字段） */
   aoe: boolean;
+  /**
+   * 该段是不是射线（需求方 2026-11-12：**射线按段判**）。
+   *
+   * 不写 = 跟随所在模式的扳机（`mode.trigger === 'held'`）。
+   * 写 `false` = 明确不是射线——即使模式的扳机是 `held`。
+   * 典型是量子切割器：模式扳机 `Held`，但方块弹 / 引爆那几段是投射物，不是激光。
+   * 数据层按 `shot_type === 'Hit-Scan'` 判（见 `wfcd-clean.ts`）。
+   */
+  beam?: boolean;
 }
 
 /** 面板覆盖（变体级 / 模式级共用同一套字段） */

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-11T16:22:55.645Z",
+  "generatedAt": "2026-11-11T17:31:30.896Z",
   "source": "WFCD/warframe-items (MIT)",
   "category": "secondary",
   "count": 149,
@@ -1216,10 +1216,19 @@
                   "procChance": 0.5
                 }
               ]
-            },
+            }
+          ]
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "semi",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
             {
-              "id": "attack2",
-              "label": "Partial Reload",
+              "id": "direct",
+              "label": "直接命中",
               "segments": [
                 {
                   "kind": "attack",
@@ -1228,34 +1237,7 @@
                     "impact": 11
                   },
                   "procChance": 0.43
-                }
-              ],
-              "override": {
-                "statusChance": 0.43
-              }
-            },
-            {
-              "id": "attack3",
-              "label": "Reload From Empty",
-              "segments": [
-                {
-                  "kind": "attack",
-                  "aoe": false,
-                  "damage": {
-                    "impact": 11
-                  },
-                  "procChance": 0.59
-                }
-              ],
-              "override": {
-                "critChance": 0.31,
-                "statusChance": 0.59
-              }
-            },
-            {
-              "id": "blast",
-              "label": "范围伤害（Partial Reload）",
-              "segments": [
+                },
                 {
                   "kind": "explosiveAttack",
                   "aoe": true,
@@ -1268,11 +1250,33 @@
               "override": {
                 "statusChance": 0.43
               }
-            },
+            }
+          ],
+          "override": {
+            "statusChance": 0.43
+          },
+          "_note": "来源攻击：Partial Reload Impact / Partial Reload Explosion",
+          "_label": "次要射击"
+        },
+        {
+          "id": "mode3",
+          "role": "normal",
+          "trigger": "semi",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
             {
-              "id": "blast2",
-              "label": "范围伤害（Reload From Empty）",
+              "id": "direct",
+              "label": "直接命中",
               "segments": [
+                {
+                  "kind": "attack",
+                  "aoe": false,
+                  "damage": {
+                    "impact": 11
+                  },
+                  "procChance": 0.59
+                },
                 {
                   "kind": "explosiveAttack",
                   "aoe": true,
@@ -1287,7 +1291,13 @@
                 "statusChance": 0.59
               }
             }
-          ]
+          ],
+          "override": {
+            "critChance": 0.31,
+            "statusChance": 0.59
+          },
+          "_note": "来源攻击：Reload From Empty Impact / Reload From Empty Explosion",
+          "_label": "次要射击"
         }
       ]
     },
@@ -1396,7 +1406,7 @@
           "variants": [
             {
               "id": "direct",
-              "label": "Normal",
+              "label": "直接命中",
               "segments": [
                 {
                   "kind": "attack",
@@ -1412,7 +1422,7 @@
             },
             {
               "id": "attack2",
-              "label": "Corrosive DoT",
+              "label": "腐蚀持续伤害",
               "segments": [
                 {
                   "kind": "attack",
@@ -2099,7 +2109,7 @@
           "variants": [
             {
               "id": "direct",
-              "label": "Normal",
+              "label": "直接命中",
               "segments": [
                 {
                   "kind": "attack",
@@ -2112,10 +2122,19 @@
                   "procChance": 0.14
                 }
               ]
-            },
+            }
+          ]
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
             {
-              "id": "attack2",
-              "label": "Lock-on Mode",
+              "id": "direct",
+              "label": "直接命中",
               "segments": [
                 {
                   "kind": "attack",
@@ -2132,7 +2151,10 @@
                 "fireRate": 1
               }
             }
-          ]
+          ],
+          "override": {
+            "fireRate": 1
+          }
         }
       ]
     },
@@ -2197,7 +2219,7 @@
           "variants": [
             {
               "id": "direct",
-              "label": "Uncharged Projectile",
+              "label": "未蓄力投射物",
               "segments": [
                 {
                   "kind": "attack",
@@ -2211,7 +2233,7 @@
             },
             {
               "id": "attack2",
-              "label": "Fully Charged Projectile",
+              "label": "满蓄力投射物",
               "trigger": "charge",
               "segments": [
                 {
@@ -2226,7 +2248,7 @@
             },
             {
               "id": "blast",
-              "label": "范围伤害（Uncharged）",
+              "label": "范围伤害（未蓄力）",
               "segments": [
                 {
                   "kind": "explosiveAttack",
@@ -2244,7 +2266,7 @@
             },
             {
               "id": "blast2",
-              "label": "范围伤害（Fully Charged）",
+              "label": "范围伤害（Fully Charged Explosion）",
               "trigger": "charge",
               "segments": [
                 {
@@ -3083,7 +3105,7 @@
             },
             {
               "id": "blast",
-              "label": "范围伤害（Blob）",
+              "label": "范围伤害（Blob Explosion）",
               "segments": [
                 {
                   "kind": "explosiveAttack",
@@ -3131,7 +3153,7 @@
             },
             {
               "id": "blast",
-              "label": "范围伤害（Incarnon Form Blob）",
+              "label": "范围伤害（Incarnon Form Blob Explosion）",
               "segments": [
                 {
                   "kind": "explosiveAttack",
@@ -3150,7 +3172,7 @@
             },
             {
               "id": "blast2",
-              "label": "范围伤害（Incarnon Form Bounce）",
+              "label": "范围伤害（Incarnon Form Bounce Explosion）",
               "segments": [
                 {
                   "kind": "explosiveAttack",
@@ -3722,7 +3744,7 @@
           "variants": [
             {
               "id": "direct",
-              "label": "Rocket",
+              "label": "火箭",
               "segments": [
                 {
                   "kind": "attack",
@@ -3750,7 +3772,7 @@
             },
             {
               "id": "blast",
-              "label": "范围伤害（Rocket）",
+              "label": "范围伤害（火箭）",
               "segments": [
                 {
                   "kind": "explosiveAttack",
@@ -3764,7 +3786,7 @@
             },
             {
               "id": "blast2",
-              "label": "范围伤害（Cluster Bomb）",
+              "label": "范围伤害（Cluster Bomb Explosion）",
               "segments": [
                 {
                   "kind": "explosiveAttack",
@@ -4174,10 +4196,19 @@
                   "procChance": 0.43
                 }
               ]
-            },
+            }
+          ]
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "semi",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
             {
-              "id": "attack2",
-              "label": "Partial Reload",
+              "id": "direct",
+              "label": "直接命中",
               "segments": [
                 {
                   "kind": "attack",
@@ -4186,31 +4217,7 @@
                     "impact": 11
                   },
                   "procChance": 0.43
-                }
-              ]
-            },
-            {
-              "id": "attack3",
-              "label": "Reload From Empty",
-              "segments": [
-                {
-                  "kind": "attack",
-                  "aoe": false,
-                  "damage": {
-                    "impact": 11
-                  },
-                  "procChance": 0.59
-                }
-              ],
-              "override": {
-                "critChance": 0.31,
-                "statusChance": 0.59
-              }
-            },
-            {
-              "id": "blast",
-              "label": "范围伤害（Partial Reload）",
-              "segments": [
+                },
                 {
                   "kind": "explosiveAttack",
                   "aoe": true,
@@ -4220,11 +4227,30 @@
                   "procChance": 0.43
                 }
               ]
-            },
+            }
+          ],
+          "_note": "来源攻击：Partial Reload Impact / Partial Reload Explosion",
+          "_label": "次要射击"
+        },
+        {
+          "id": "mode3",
+          "role": "normal",
+          "trigger": "semi",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
             {
-              "id": "blast2",
-              "label": "范围伤害（Reload From Empty）",
+              "id": "direct",
+              "label": "直接命中",
               "segments": [
+                {
+                  "kind": "attack",
+                  "aoe": false,
+                  "damage": {
+                    "impact": 11
+                  },
+                  "procChance": 0.59
+                },
                 {
                   "kind": "explosiveAttack",
                   "aoe": true,
@@ -4239,7 +4265,13 @@
                 "statusChance": 0.59
               }
             }
-          ]
+          ],
+          "override": {
+            "critChance": 0.31,
+            "statusChance": 0.59
+          },
+          "_note": "来源攻击：Reload From Empty Impact / Reload From Empty Explosion",
+          "_label": "次要射击"
         }
       ]
     },
@@ -4318,7 +4350,7 @@
           "variants": [
             {
               "id": "direct",
-              "label": "Normal",
+              "label": "直接命中",
               "segments": [
                 {
                   "kind": "attack",
@@ -4333,7 +4365,7 @@
             },
             {
               "id": "attack2",
-              "label": "Homing Spore",
+              "label": "追踪孢子",
               "segments": [
                 {
                   "kind": "attack",
@@ -4348,7 +4380,7 @@
             },
             {
               "id": "blast",
-              "label": "范围伤害",
+              "label": "范围伤害（范围伤害）",
               "segments": [
                 {
                   "kind": "explosiveAttack",
@@ -4362,7 +4394,7 @@
             },
             {
               "id": "blast2",
-              "label": "范围伤害（Headshot）",
+              "label": "范围伤害（Headshot Explosion）",
               "segments": [
                 {
                   "kind": "explosiveAttack",
@@ -4379,7 +4411,7 @@
             },
             {
               "id": "blast3",
-              "label": "范围伤害（Homing Spore）",
+              "label": "范围伤害（追踪孢子）",
               "segments": [
                 {
                   "kind": "explosiveAttack",
@@ -4494,7 +4526,7 @@
           "variants": [
             {
               "id": "direct",
-              "label": "Normal",
+              "label": "直接命中",
               "segments": [
                 {
                   "kind": "attack",
@@ -4510,7 +4542,7 @@
             },
             {
               "id": "attack2",
-              "label": "Corrosive DoT",
+              "label": "腐蚀持续伤害",
               "segments": [
                 {
                   "kind": "attack",
@@ -6168,7 +6200,7 @@
           "variants": [
             {
               "id": "direct",
-              "label": "Charged Shot",
+              "label": "蓄力",
               "trigger": "charge",
               "segments": [
                 {
@@ -6189,7 +6221,7 @@
             },
             {
               "id": "attack2",
-              "label": "Uncharged",
+              "label": "未蓄力",
               "segments": [
                 {
                   "kind": "attack",
@@ -7615,7 +7647,7 @@
           "variants": [
             {
               "id": "direct",
-              "label": "Normal",
+              "label": "直接命中",
               "segments": [
                 {
                   "kind": "attack",
@@ -7631,7 +7663,7 @@
             },
             {
               "id": "attack2",
-              "label": "Turret Expiry",
+              "label": "炮台过期",
               "segments": [
                 {
                   "kind": "attack",
@@ -7785,7 +7817,7 @@
           "variants": [
             {
               "id": "direct",
-              "label": "Primary-Fire",
+              "label": "直接命中",
               "segments": [
                 {
                   "kind": "attack",
@@ -7803,8 +7835,37 @@
               }
             },
             {
-              "id": "attack2",
-              "label": "Lock-On Mode",
+              "id": "blast",
+              "label": "范围伤害",
+              "segments": [
+                {
+                  "kind": "explosiveAttack",
+                  "aoe": true,
+                  "damage": {
+                    "heat": 46
+                  },
+                  "procChance": 0.14
+                }
+              ],
+              "override": {
+                "fireRate": 1.83
+              }
+            }
+          ],
+          "override": {
+            "fireRate": 1.83
+          }
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "burst",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
+            {
+              "id": "direct",
+              "label": "直接命中",
               "segments": [
                 {
                   "kind": "attack",
@@ -7832,23 +7893,6 @@
                   "kind": "explosiveAttack",
                   "aoe": true,
                   "damage": {
-                    "heat": 46
-                  },
-                  "procChance": 0.14
-                }
-              ],
-              "override": {
-                "fireRate": 1.83
-              }
-            },
-            {
-              "id": "blast2",
-              "label": "范围伤害（Lock-On）",
-              "segments": [
-                {
-                  "kind": "explosiveAttack",
-                  "aoe": true,
-                  "damage": {
                     "heat": 480
                   },
                   "procChance": 0.26
@@ -7863,7 +7907,10 @@
             }
           ],
           "override": {
-            "fireRate": 1.83
+            "critChance": 0.38,
+            "critMultiplier": 3,
+            "statusChance": 0.26,
+            "fireRate": 1
           }
         }
       ]
@@ -8049,7 +8096,7 @@
             },
             {
               "id": "blast",
-              "label": "范围伤害（Normal）",
+              "label": "范围伤害",
               "segments": [
                 {
                   "kind": "explosiveAttack",
@@ -8068,7 +8115,7 @@
             },
             {
               "id": "blast2",
-              "label": "范围伤害（Active）",
+              "label": "范围伤害（Active Radial Attack）",
               "segments": [
                 {
                   "kind": "explosiveAttack",
@@ -8155,7 +8202,7 @@
             },
             {
               "id": "blast",
-              "label": "范围伤害（Normal）",
+              "label": "范围伤害",
               "segments": [
                 {
                   "kind": "explosiveAttack",
@@ -8169,7 +8216,7 @@
             },
             {
               "id": "blast2",
-              "label": "范围伤害（Active）",
+              "label": "范围伤害（Active Radial Attack）",
               "segments": [
                 {
                   "kind": "explosiveAttack",
@@ -8383,10 +8430,19 @@
                   "procChance": 0.18
                 }
               ]
-            },
+            }
+          ]
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 4,
+          "variants": [
             {
-              "id": "blast",
-              "label": "范围伤害",
+              "id": "direct",
+              "label": "直接命中",
               "segments": [
                 {
                   "kind": "explosiveAttack",
@@ -8403,7 +8459,12 @@
                 "fireRate": 1.6
               }
             }
-          ]
+          ],
+          "override": {
+            "critChance": 0.08,
+            "statusChance": 0.32,
+            "fireRate": 1.6
+          }
         }
       ]
     },
@@ -8467,7 +8528,7 @@
           "variants": [
             {
               "id": "direct",
-              "label": "Charged Shot",
+              "label": "蓄力",
               "trigger": "charge",
               "segments": [
                 {
@@ -8488,7 +8549,7 @@
             },
             {
               "id": "attack2",
-              "label": "Uncharged",
+              "label": "未蓄力",
               "segments": [
                 {
                   "kind": "attack",
@@ -8686,7 +8747,7 @@
           "variants": [
             {
               "id": "direct",
-              "label": "范围伤害（Mid-Flight）",
+              "label": "范围伤害（Mid-Flight Detonation）",
               "segments": [
                 {
                   "kind": "explosiveAttack",
@@ -8700,7 +8761,7 @@
             },
             {
               "id": "blast",
-              "label": "范围伤害（Embedded）",
+              "label": "范围伤害（Embedded Detonation）",
               "segments": [
                 {
                   "kind": "explosiveAttack",

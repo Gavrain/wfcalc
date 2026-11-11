@@ -46,7 +46,6 @@ body {
 .weapon-picker option:disabled { color: #666; }
 .weapon-picker input { max-width: 160px; }
 .weapon-picker input::placeholder { color: #5b6472; }
-.weapon-title.has-issue { color: #e0a860; }
 .weapon-picker option { color: var(--fg); }
 .weapon-title { font-size: 16px; font-weight: 600; }
 .weapon-meta { color: var(--muted); font-size: 12px; }
@@ -88,7 +87,6 @@ body {
 .output-name { color: var(--muted); font-size: 11.5px; }
 .output-unit { margin-left: 5px; font-size: 10.5px; color: #5d6674; }
 .output-val { font-weight: 700; color: var(--accent); }
-.dot-note { padding: 1px 7px; font-size: 11px; }
 .dot-row { padding: 1px 6px; font-size: 11.5px; }
 
 .metric-picker-inline {
@@ -153,25 +151,29 @@ body {
 .dot-name { width: 48px; }
 .dot-stacks { color: var(--muted); }
 .dot-val { margin-left: auto; font-variant-numeric: tabular-nums; }
+/* 分段标题（需求方 2026-11-12：异常状态按攻击方式分段显示） */
+.dot-seg-title {
+  font-size: 11px; font-weight: 600; color: var(--accent);
+  padding: 4px 6px 1px; margin-top: 4px;
+}
+.dot-seg-title:first-child { margin-top: 0; }
 
 /* 槽位 */
 .slot-area, .cand-area { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 12px; }
 .slot-area-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
 
-/* 武器面板标题行：左侧标题 + 右侧模式切换按钮（D-042）
-   ⚠ 需求方 2026-11-12：「太挤了吧」「字一行就行了，这咋还带换行的」。
-   左栏只有 320px，标题 + 一排按钮放不下就会折行，所以这里让**按钮行自己占一行**、
-   标题行单独一行（标题很短，多占一行不心疼，换来按钮永远不折行）。 */
-.panel-head-row {
-  display: flex; align-items: center; justify-content: space-between;
-  gap: 10px; margin-top: 12px; flex-wrap: wrap;
+/* 武器面板：模式切换按钮独立一行，**在「武器面板」标题上方**、靠左（D-042）
+   ⚠ 需求方 2026-11-12：「武器面板四个字跟切换按钮不要在同一行，切换按钮放到上面独立成行，
+   不然切换的时候有跳动」「靠左」。
+   之前是标题在左、按钮在右、放不下才折行 → 按钮一多就 0 行 / 1 行 / 2 行地变，下面的表跟着跳。
+   现在按钮行独占一行且**高度固定**（没有按钮时留 .mode-btn 的 padding 那么高），
+   单模式 / 多模式切换时整块高度不变。 */
+.mode-row-slot {
+  display: flex; align-items: center; justify-content: flex-start;
+  min-height: 21px; margin-bottom: 2px;
 }
-.panel-head-row .section-title { margin: 0 0 6px; flex: none; }
-/* 按钮行：不受标题挤压，独占剩余宽度；内部禁止折行 */
-.panel-head-row .mode-switch { flex: 1 1 100%; justify-content: flex-end; }
-/* 模式切换：**一行排开，永不换行**（需求方 2026-11-12：「字一行就行了，这咋还带换行的」）。
-   左栏只有 320px，按钮多了会挤，所以：缩小 padding / 字号、禁止内部换行，
-   容器允许横向溢出而不是折行。 */
+.mode-row-slot .section-title { margin: 0 0 6px; }
+/* 按钮行内部禁止折行；模式 + 攻击方式排成一行 */
 .mode-switch {
   display: inline-flex; flex-direction: row; align-items: center;
   gap: 4px; flex-wrap: nowrap; min-width: 0;
@@ -203,21 +205,38 @@ body {
   width: 1px; align-self: stretch; margin: 0 4px; flex: none;
   background: var(--line);
 }
-.mode-btn.variant-btn { cursor: pointer; user-select: none; gap: 3px; }
+.mode-btn.variant-btn { cursor: pointer; user-select: none; gap: 4px; }
+/* 复选框：自绘的对勾样式（原生方框太丑，需求方 2026-11-12） */
 .mode-btn.variant-btn .variant-check {
   appearance: none; -webkit-appearance: none;
-  width: 9px; height: 9px; margin: 0; flex: none;
-  border: 1px solid currentColor; border-radius: 2px;
+  width: 11px; height: 11px; margin: 0; flex: none;
+  border: 1px solid currentColor; border-radius: 3px;
   background: transparent; position: relative; cursor: pointer;
+  transition: background 0.12s, border-color 0.12s;
 }
+/* 勾选：小方框里画一个对勾（用两条斜线拼，比实心块精致） */
 .mode-btn.variant-btn .variant-check:checked::after {
-  content: ''; position: absolute; inset: 1px;
-  background: currentColor; border-radius: 1px;
+  content: ''; position: absolute;
+  left: 3px; top: 0.5px;
+  width: 3px; height: 6px;
+  border: solid currentColor; border-width: 0 1.5px 1.5px 0;
+  transform: rotate(42deg);
 }
+.mode-btn.variant-btn .variant-check:disabled { cursor: default; opacity: 0.5; }
+/* 只有一种攻击方式：整格置灰，表示"这里本可以选，但没得选" */
+.mode-btn.variant-btn.is-locked {
+  opacity: 0.45; cursor: default; font-style: italic;
+}
+.mode-btn.variant-btn.is-locked:hover { background: var(--panel-2); color: var(--muted); }
 .mode-btn.variant-btn .variant-trig {
   font-size: 9px; padding: 0 2px; border-radius: 2px; line-height: 1.3;
   background: rgba(0, 0, 0, 0.22); opacity: 0.9;
 }
+
+/* 伤害分布：每种攻击方式一张小表（需求方 2026-11-12） */
+.dmg-table { margin-bottom: 8px; }
+.dmg-table:last-child { margin-bottom: 0; }
+.dmg-table .panel-head .c-name { color: var(--accent); font-weight: 600; }
 .slot-area-actions { display: inline-flex; align-items: center; gap: 8px; }
 
 /* 「全部卸下」等次要操作按钮 */
@@ -398,7 +417,7 @@ body {
 /* ─────────────────────────────────────────────────────────────
    武器编辑器（D-044，仅开发态）
    ───────────────────────────────────────────────────────────── */
-.panel-head-actions { display: inline-flex; align-items: center; gap: 8px; }
+.panel-head-actions { display: inline-flex; align-items: center; gap: 8px; min-height: 21px; }
 .modified-badge {
   font-size: 10.5px; padding: 2px 7px; border-radius: 4px;
   background: rgba(216, 164, 74, 0.16); color: var(--warn);

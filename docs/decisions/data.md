@@ -40,7 +40,8 @@
 | D-141 | 面板取值以导出顶层字段为主、导出与游戏不符处走人工订正（白板值）；impact 占位判定重写为「主模式逐类型比对 + procChance 自洽 + 模板指纹」；分离 / 分离 Prime 的导出 behaviours 判废、按面板人工补（130 / 160 冲击）；暗黑分合剑拆巨刃 / 双剑两版（面板待补）；琉璃碎击、土石坍方按技能剔除 | **已确认 / 已实施** | 2026-11-07 |
 | D-142 | D-141 的落地：impact 占位判定重写（主模式逐类型比对 + procChance 自洽 + 模板指纹）；分离 / 分离 Prime 判废改人工面板 130 / 160 冲击；全量回归 637→651 把、0 移除 | **已确认 / 已实施** | 2026-11-07 |
 | D-144 | 人工层 `manual/` 目录分裂：`packages/data/manual/`（顶层，D-100/101/110 时代）与 `packages/data/src/manual/`（D-140/141 时代）两处并存，需定唯一归属并合并 | **已确认（选 A）/ 已实施**：统一到 `src/manual/` | 2026-11-08 |
-| D-148 | 数据层转向 WFCD：射线判据 / 模式划分 / 触发率口径（**已全面切换**：射线只看扳机 `held`，不再有 `beam` 字段） | **已确认 / 已实施** | 2026-11-11 |
+| D-148 | 数据层转向 WFCD：射线判据 / 模式划分 / 触发率口径（**已全面切换**：射线只看扳机 `held`，不再有 `beam` 字段；第六轮起射线**按段**判，段上可有 `beam: false`） | **已确认 / 已实施** | 2026-11-11 |
+| D-150 | 一个射击模式 = 一种扳机：名字是 `Burst Mode` / `Semi-Auto Mode` / `Auto` / `Alt-Fire` / `Lock-on Mode` 这类扳机词的攻击**各成一个射击模式**（修雌鹿 / 赤毒·雌鹿 / 狂鲨 Prime 被并成一段）；同一次开火的段（霰弹弹丸+爆裂、钩铳命中附带、磁道炮吸引场）仍留在一个模式里；攻击方式标签一律中文 | **已确认 / 已实施** | 2026-11-12 |
 
 ## 正文
 
@@ -1387,7 +1388,7 @@ D-137 早已记录「`spectral_serration` 仍被流水线写进 `mods.json`，�
 
 ---
 
-### D-148 数据层转向 WFCD：射线判据、模式划分与触发率口径（状态：**部分确认 · 大部分未实施**）
+### D-148 数据层转向 WFCD：射线判据、模式划分与触发率口径（状态：**已全面切换 · 已实施**）
 
 - **日期**：2026-11-11
 - **类别**：数据源切换 / 范围增减 / 口径修正
@@ -1408,12 +1409,9 @@ D-137 早已记录「`spectral_serration` 仍被流水线写进 `mods.json`，�
   8. 武器一律中文名展示；UI 要显示当前模式的**扳机与伤害判定类型**。
   9. Zaw / Kitgun 是可变面板，**本轮不做**；灵化词条与裂罅 Mod 优先级更高。
 - **⚠ 与 D-010 的关系**：D-010（人工表 `beam-weapons.ts`）**不再需要**——射线改由 WFCD 扳机自动判定。
-- **未完成（待接手）**：
-  - `packages/data-build/src/wfcd-clean.ts` 已写出并通过 typecheck，**尚未接进 `build:data`**，
-    `clean.ts` 仍走官方导出；
-  - 内核还没改：模式内各段相加、`beam` 入参移除、派生 `trigger` / `shotType` 到 UI；
-  - 哈尔武（WFCD 无伤害值）用旧数据 33/34 Tau 补 `_manual` 尚未写；
-  - 人工层 `overrides.ts` / `weapon-issues.ts` 按需求方要求**不再保留**，尚未删除。
+- **未完成（待接手）**：~~以下四项已全部做完~~——前两项由下面「第三轮：全面切换到 WFCD」完成，
+  第三项哈尔武由 `wfcd-fallback.ts` 用官方导出兜底并标 `_manual: 'export-missing'`，
+  第四项按需求方要求不再保留人工层。**本清单自 2026-11-12 起作废，只留档。**
 
 #### 2026-11-11 第二轮：修掉射线判定的两个 bug（已实施）
 
@@ -1552,6 +1550,122 @@ UI 显示扳机与伤害类型、哈尔武补 `_manual`、删除 `overrides.ts` 
 复选框做成 10px 小方块，选中时整颗胶囊高亮（与模式选中同款）。
 
 **验证**：typecheck 通过；单测 **480 项全绿**；`demo:check` 与 `demo:editor-check` 全部通过。
+
+#### 2026-11-12 第六轮：量子切割器 / 异化者拆模式 + 射线按段判定（已实施）
+
+需求方 2026-11-12 指出这两把武器的结构错了，并给出了正确划法：
+
+> 「量子切割器显然是 2 模式，模式 1 射线，模式 2 有三个段。异化者是 2 模式，模式 1 射线，模式 2 四个段。」
+> 「对于量子切割器来说，cube hit 是次要射击的直接命中部分，爆炸是自然爆炸，shot by player 是玩家射击引爆。可以拆成一个模式的三个段，其中 Cube (shot by player) 应该是 aoe，这个改一下。异化者做成四个段，可以看到是按空弹匣换弹与否区分的。」
+
+**改前的问题**（两把都被并成「一个模式若干攻击方式」）
+
+```
+量子切割器  primary(held)  direct(held) | attack2 | attack3 | blast      ← 射线身份罩住了方块弹
+异化者      primary(held)  direct(held) | attack2 | attack3 | blast | blast2
+```
+
+**改后**
+
+```
+量子切割器  模式 1  primary(held)   direct 射线 电 10
+            模式 2  mode2(semi)     Cube (direct hit)        电 100
+                                    Cube Explosion           爆 150   aoe
+                                    Cube (shot by player)    爆 600   aoe ← 强制
+异化者      模式 1  primary(held)   Primary 腐蚀 53
+            模式 2  mode2(semi)     Partial Reload         冲 11 + 腐蚀 203
+                                    Reload From Empty      冲 11 + 腐蚀 1997
+（"信条·量子切割器""量子切割器·破坏者""终幕·异化者" 同样处理）
+```
+
+**数据层改法**（`wfcd-clean.ts`）
+
+1. 新增 `SIDE_WEAPON`（`Cube` / `Quill`）与 `THROW_SWITCH`（`Partial Reload` / `Reload From Empty`）：
+   命中时**按主词自成一个模式**，同主词的后续子段归它。`groupAttacks()` 新增 `currentSide` 指针。
+2. 新增 `forcedAoe()`：WFCD 原文给 `Cube (direct hit)` 标了 `Projectile`、给 `Cube Explosion` 标了 `AoE`，
+   唯独 `Cube (shot by player)` **没有 `shot_type`**。它带 `falloff{0,6}`、是 6 米范围的玩家引爆，
+   所以 `toSegment()` 里强制 `aoe: true`（`kind = explosiveAttack`，走爆炸机制、不吃镀层类）。
+3. `groupAttackVariants()` 新增 `byStem` 模式：同组内按**名字主词**定段，不再按「命中 / 爆炸」两层分。
+   异化者的 `Partial Reload Impact` + `Explosion` 因此合成**一段里的两个子段**（旧行为会拆成两个"攻击方式"，
+   看不出是按换弹方式区分的）。`byStem` 下保持 WFCD 原文顺序，id 用可读的 `coslug`。
+4. 副模式一律 `_label: '次要射击'`，原始攻击名写进 `_note`（溯源）。
+5. 模式扳机判据加严：`held` 只在「该模式有 Hit-Scan 攻击**且全部**是 Hit-Scan」时成立，
+   避免一旦混进投射物段就被整模式染成射线。
+6. 段级射线标记（配合 D-149）：`toSegment()` 给非 Hit-Scan 的段写 `beam: false`。
+
+**全量核对**（657 把）：扳机 `held` 的模式 40 个、射线段 42 段；
+「同模式混合射线与非射线」**0 个**——需求方点名的两把已无歧义。
+
+**验证**：typecheck 通过；单测 **488 项全绿**（新增 `beam-dot-multishot.test.ts` 8 项）；
+`demo:check` 19 项、`demo:editor-check` 7 项全过。
+
+---
+
+### D-150 一个射击模式 = 一种扳机（状态：**已确认 / 已实施**，日期 2026-11-12）
+
+- **需求方**：
+  > 「雌鹿射击模式不对，他是三个模式，有两个当成一个段了。检查下其他武器有没有这个问题，
+  >  一个射击模式一般只会有一个投射物命中，只有赘骨的灵化是个例外。」
+- **类别**：归类判定（哪个 WFCD `attacks[]` 是「一个射击模式」，哪个是「同一次开火里的段」）
+- **背景**：`wfcd-clean.ts` 的模式划分完全靠**攻击名**。雌鹿（Hind）的三条攻击是
+  `Burst Mode` / `Semi-Auto Mode`（正式版）与 `Burst` / `Semi-Auto` / `Auto`（赤毒·雌鹿、狂鲨 Prime），
+  这些名字既不在 `PRIMARY_ANCHORS`（`Normal Attack` / `Auto` / `Burst`…）也不在 `SEPARATE_MODE`，
+  于是全被并进第一个模式，当成「同一模式的多种攻击方式」：
+  ```
+  雌鹿      primary(burst)  直接命中(点射) | 直接命中(半自动)      ← 实际是 2 个射击模式
+  赤毒·雌鹿 primary(burst)  点射 | 半自动 | mode2(全自动)          ← 实际是 3 个射击模式
+  狂鲨 Prime 同上                                                   ← 实际是 3 个射击模式
+  ```
+  狂鲨 Prime 只因为名字里带 `Auto` 蹭到了 `/Alt-Fire/i` 才碰巧拆开，属偶然。
+
+- **判断依据（需求方给的判据，已逐把核对）**：**一个射击模式一般只会有一个投射物命中**。
+  按 `attacks[]` 全量扫了一遍（668 条），真正「一个扳机、两段相加」的只有两种：
+  霰弹枪的弹丸 + 爆裂（碎裂者 / 齐射玻刃……），以及钩铳（Arquebex）的 10 点火属性命中附带。
+  其余所有「同一模式里两条独立命中」都是**不同扳机**，正是本条要拆的。
+  同一次开火的附属段（磁道炮 / 信标枪的 `Attraction Field`、量子切割器的 `Cube (shot by player)`）
+  名字不是扳机词，不受影响。
+
+- **改法**（`packages/data-build/src/wfcd-clean.ts`）
+  1. 新增 `TRIGGER_NAMES`：`Burst` / `Burst Mode` / `Semi-Auto` / `Semi-Auto Mode` / `Auto` /
+     `Full-Auto` / `Alt-Fire` / `Secondary Fire` / `Charged Attack` / `Charge Attack` /
+     `Lock-on Mode` / `Barrage Mode`。命中即**自成一组**（放在锚点之后判，并排除锚点名，
+     所以 `Auto` / `Burst` 这类先被锚点吃掉、不会重复开组）。
+  2. 主循环之后再加一道**兜底拆分**，但只拆「**整组都没有锚点**」的组——
+     否则量子切割器的模式 2 会被 `Cube (shot by player)` 里蹭到的 `Alt-Fire` 再拆一刀，
+     违背第六轮已经确认的「模式 2 = 三个段」。
+  3. 攻击方式标签：拆出来的次要射击会直出英文（`Buckshot` / `Air Burst Projectile` /
+     `Charged Shot` / `Cube (direct hit)`…），这批名字补进 `ZH` 中文表；表外名字退回
+     **原始攻击名**（比剥过子段词的主干可读）。主武器 / 副武器已无英文标签（近战招式名仍为英文，另有记录）。
+
+- **受影响武器（WFCD 全量对照，多模式武器 158 → 169 把）**
+
+| 武器 | 改前 | 改后 |
+|---|---|---|
+| 赤毒·雌鹿 / 狂鲨 Prime | 2 模式（点射 / 半自动 + 全自动） | **3 模式**（点射 / 半自动 / 全自动） |
+| 双簧管 / 双簧管 Prime | 1 模式（`Fully Spooled` + `Charged` 两个攻击方式） | **2 模式** |
+| 泰诺拉 / 泰诺拉 Prime | 1 模式 | **2 模式** |
+| 球结枪（Sepulcrum） | 1 模式（主射 / 锁定） | **2 模式** |
+| 信条·纵横双枪（Tenet Diplos） | 1 模式（主射 / 锁定） | **2 模式** |
+| 潜伏者（Scyotid） | 1 模式（自动 / 半自动） | **2 模式** |
+| 尖刃（Thanotech Pistol 一族） | 1 模式 | **2 模式** |
+| 计时步枪（芭乐卡，`TnBardRifle`） | 1 模式 | **2 模式** |
+| 织棘（Oraxia，`TnOraxiaFlechette`） | 1 模式（弹头 + 爆炸） | **2 模式**（爆炸另成模式） |
+| 制胜者（`CrpBriefcaseAkimboPistol`） | 1 模式 | **2 模式** |
+| 异化者（Catabolyst） | 1 模式 4 段 | 3 模式（射线 / 部分换弹 / 空弹匣换弹） |
+
+  **没有变的**：雌鹿正式版、巴兹火枪、猛毒、附肢寄生者、信标的武器——全库只有这 4 把
+  「整把武器只有一个模式、却挂了多种发射方式」，因为它们的攻击名都不在 `TRIGGER_NAMES`
+  里（`Beacon` / `3.5x Zoom Radial Attack` / `Infested Harpoon`），**仍待单独定口径**
+  （它们要么是数据源缺名，要么真的是同一扳机下的额外伤害）。量子切割器 / 异化者维持第六轮的划法
+  （除异化者按第六轮口径自然分成 3 个模式外）。
+
+- **回归数据**（`npm run build:data -- --emit`）：657 把（WFCD 621 + 官方补齐 36），
+  `modeCount` 变化的 7 把已核对在本表内，其余 650 把未动；其余产出差异只有各分文件的时间戳。
+- **测试**：新增 `packages/data-build/test/trigger-modes.test.ts` 7 项，锁住
+  「雌鹿 2 模式 / 赤毒·雌鹿与狂鲨 Prime 3 模式 / 霰弹与钩铳与磁道炮仍单开火模式 / 灵化只有一个模式」。
+  typecheck 通过；单测 **495 项全绿**；`demo:check` 全部通过、`demo:editor-check` 全部通过。
+- **未做**：`Beacon`（巴兹火枪）/ `3.5x Zoom Radial Attack`（猛毒）/ `Infested Harpoon`（附肢寄生者）
+  这三类没有名字可判的分支，需要需求方另给口径（例如「信标 / 炮台 / 毒云」这类持续物是否单独成模式）。
 
 
 ## 已取代（只留指引）

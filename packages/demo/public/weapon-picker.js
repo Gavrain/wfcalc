@@ -232,20 +232,13 @@ export function searchWeapons(weapons, keyword) {
 }
 
 /**
- * 武器名后面的「数据有问题」标记（D-101）。
+/**
+ * 把武器名渲染成下拉项文字。
  *
- * 需求方 2026-11-06：
- * > 「数据不对的先加上标记，在选择武器的时候多个错误标记，
- * > 这样我选择的时候就知道他不对去编辑面板。」
- *
- * 只加一个符号，不写解释文字（遵守「界面只放数值本身」的约定，
- * 详细原因放在 title 里，鼠标悬停能看到）。
+ * ⚠ 需求方 2026-11-12：「现在应该不需要错误标记了，所有面板转到 wfcd 已经修正了，清除掉。」
+ * 原来的 ⚠ 数据错误标记（D-101）已整个移除，这里只返回中文名。
+ * 保留成函数是因为调用点较多，且以后若要加别的标记（如「新武器」）只需改这一处。
  */
-export const ISSUE_MARK = '\u26a0';
-
-/** 把武器名和问题标记拼成下拉项文字 */
-export function weaponLabel(weapon, issues) {
-  const name = weapon.nameZh || weapon.name;
-  if (!issues || issues.length === 0) return name;
-  return name + ' ' + ISSUE_MARK;
+export function weaponLabel(weapon) {
+  return weapon.nameZh || weapon.name;
 }

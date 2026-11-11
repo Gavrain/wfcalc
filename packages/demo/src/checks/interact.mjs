@@ -13,7 +13,6 @@ import { createChecks } from '../dom/report.mjs';
 import { ROOT, loadPage, invokeBoot } from '../dom/load-page.mjs';
 
 const { registry, modules } = await loadPage({ waitMs: 400 });
-const issuesMod = modules.issues;
 const store = modules.store;
 const rec = createChecks('interact');
 const check = rec.check.bind(rec);
@@ -156,24 +155,37 @@ const appSrc = await readFile(join(ROOT, 'packages/demo/public/app.js'), 'utf8')
   const hasChanged = (items) =>
     items.some((row) => row.children.some((c) => (c.className || '').includes('changed')));
   check('武器面板有变化高亮', hasChanged(registry['#panel-table'].children));
-  check('伤害分布有变化高亮', hasChanged(registry['#damage-table'].children));
 
-  const highlightColumns = (sel) => {
+  // ⚠ 需求方 2026-11-12：「不同段的伤害分布是不一样的，为什么没有多个伤害分布表」。
+  //   所以 `#damage-table` 现在是**容器**：里面每种攻击方式一个 `.dmg-table`，
+  //   勾选多种时最后再加一张「合计」表。这里把每一张表的行摊平再检查高亮。
+  const dmgTables = registry['#damage-table'].children.filter((n) =>
+    (n.className || '').includes('dmg-table'));
+  check('伤害分布至少有一张表', dmgTables.length > 0, `${dmgTables.length} 张`);
+  const dmgRows = dmgTables.flatMap((t) => (t.children[0] ? t.children[0].children : []));
+  check('伤害分布有变化高亮', hasChanged(dmgRows));
+
+  const highlightColumns = (rows) => {
     const cols = new Set();
-    for (const row of registry[sel].children) {
+    for (const row of rows) {
       row.children.forEach((c, i) => {
         if ((c.className || '').includes('changed')) cols.add(i);
       });
     }
     return cols;
   };
-  const pc = highlightColumns('#panel-table');
+  const pc = highlightColumns(registry['#panel-table'].children);
   check('武器面板只在「当前」列高亮', pc.size === 1 && pc.has(2));
-  const dc = highlightColumns('#damage-table');
+  const dc = highlightColumns(dmgRows);
   check('伤害分布只在「当前」列高亮', dc.size === 1 && dc.has(2));
 
-  const totalRow = registry['#damage-table'].children.find((r) => r.textContent.includes('合计'));
-  check('合计行不高亮', totalRow && !totalRow.children.some((c) => (c.className || '').includes('changed')));
+  // 每张表末尾各有一行「合计」（该攻击方式自己的和）；它不该高亮。
+  // ⚠ 需求方 2026-11-12：「不需要合计啊，而且他们的触发是各自算的」——
+  //   所以不再有**跨攻击方式的合计表**，每张表自己的合计行仍然保留。
+  const perTableTotal = dmgTables.map((t) =>
+    (t.children[0] ? t.children[0].children : []).find((r) => r.textContent.includes('合计')));
+  check('合计行不高亮',
+    perTableTotal.every((row) => row && !row.children.some((c) => (c.className || '').includes('changed'))));
 }
 
 // ── 40. 不再显示"可装 N 张"；按钮有样式类（D-041）──
@@ -213,8 +225,14 @@ const appSrc = await readFile(join(ROOT, 'packages/demo/public/app.js'), 'utf8')
   // 单模式武器不显示按钮；多模式（如两形态）要有按钮 —— 随默认武器走
   check('模式按钮数 = 模式数 - 1（当前 ' + modes + ' 个模式）',
     box.children.length === Math.max(0, modes - 1));
-  check('模式切换栏在武器面板标题右侧',
-    html.indexOf('id="mode-switch"') > 0 && html.indexOf('id="mode-switch"') < html.indexOf('id="panel-table"'));
+  // 需求方 2026-11-12：按钮独立成行、在「武器面板」标题**上方**且靠左（否则切换时跳动）
+  const iSwitch = html.indexOf('id="mode-switch"');
+  const iTitle = html.indexOf('>武器面板<');
+  const cssHead = await readFile(join(ROOT, 'packages/demo/public/app.css'), 'utf8');
+  check('模式切换栏在「武器面板」标题上方（独立一行）',
+    iSwitch > 0 && iTitle > iSwitch && html.indexOf('id="panel-table"') > iTitle);
+  check('模式切换栏所在行靠左（容器 justify-content: flex-start）',
+    /\.mode-row-slot\s*\{[^}]*justify-content:\s*flex-start/.test(cssHead));
 }
 
 // ── 44. 武器切换选单：选中值必须等于当前武器（D-097）──
@@ -293,36 +311,17 @@ const appSrc = await readFile(join(ROOT, 'packages/demo/public/app.js'), 'utf8')
   }
 }
 
-// ── 46. 数据问题标记（D-101）──
+// ── 46. 数据错误标记已移除（需求方 2026-11-12）──
+//
+// 原话：「现在应该不需要错误标记了，所有面板转到 wfcd 已经修正了，清除掉。」
+// 所以这里反过来验证：选单里**不该**再出现 ⚠。
 {
   const wsel = registry['#weapon-select'];
   const withMark = Array.from(wsel.children).filter((o) => o.textContent.includes('\u26a0'));
-  check('武器选单里有带标记的项', withMark.length > 0);
-  if (withMark.length) {
-    check('带标记的项有 title 说明', Boolean(withMark[0].title));
-    // 2026-11-08：原先写死「伊格尼斯 FlameThrower」带标记，但它的 trigger 已能识别为 `held`、
-    // 不再登记进 `weapon-issues.ts`，这条断言长期必然失败。改为**从问题清单里取一把真实存在的
-    // 待标记武器**来验，避免以后清单变动又把它锁死。
-    const markedId = Object.keys(issuesMod.WEAPON_ISSUES ?? {})[0];
-    if (markedId) {
-      const opt = Array.from(wsel.children).find((o) => String(o.value).split('@')[0] === markedId.split('@')[0]);
-      if (opt) check(`问题武器「${markedId}」在选单里带标记`, opt.textContent.includes('\u26a0'));
-    }
-  }
-  // 问题清单非空（清单本身存在即可，不绑定具体武器）
-  const issueIds = Object.keys(issuesMod.WEAPON_ISSUES ?? {});
-  check('问题清单非空', issueIds.length > 0);
-  check('issuesOf 对已知问题武器返回非空', issueIds.length > 0 && issuesMod.issuesOf(issueIds[0]).length > 0);
-  check('issuesOf 对正常武器返回空', issuesMod.issuesOf('KuvaKarak').length === 0);
-
-  // D-111：灵化面板复用基础面板的情况并进同一套问题清单（不再单独做一套标记）
-  const incReused = issuesMod.issuesOf('BratonPrime');
-  check('灵化面板复用 → 走 D-101 的问题清单',
-    incReused.some((x) => x.code === 'incarnonPanelReused'));
-  check('灵化面板复用的说明写清"复用基础面板"',
-    incReused.some((x) => x.note.includes('复用基础面板')));
-  check('已录入灵化数值的武器不再标记问题',
-    issuesMod.issuesOf('ZarimanHeavyPistol').every((x) => x.code !== 'incarnonPanelReused'));
+  check('武器选单里没有 ⚠ 错误标记', withMark.length === 0,
+    withMark.slice(0, 3).map((o) => o.textContent).join(' / '));
+  const titleEl = registry['#weapon-title'];
+  check('武器标题没有 ⚠ 错误标记', !String(titleEl.textContent).includes('\u26a0'), titleEl.textContent);
 }
 
 // ── 47. 重启页面：选单 / 槽位 / 输出全部可从零重建 ──

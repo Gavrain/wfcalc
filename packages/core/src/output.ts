@@ -80,11 +80,36 @@ export interface OutputBreakdown {
   sustainedDps: number;
   dotPerSecond: number;
   dot6s: number;
-  /** 每个 DoT 类型的每秒输出（期望层数 × 每跳） */
+  /** 每个 DoT 类型的每秒输出（期望层数 × 每跳）——**各段合并**后的合计 */
   dotPerType: Partial<Record<DoTType, number>>;
-  /** 每个 DoT 类型的每秒期望叠层 */
+  /** 每个 DoT 类型的每秒期望叠层——**各段合并**后的合计 */
   stacksPerType: Partial<Record<DoTType, number>>;
+  /**
+   * 逐段的 DoT 明细（需求方 2026-11-12）。
+   *
+   * > 「由于现在有多个段了，这里也应该分段显示，他们触发的 dot 伤害会根据段的命中伤不一样」
+   *
+   * 所以每段各一份：该段自己的命中分布决定了它的触发池与每跳伤害，
+   * 与别的段无关。界面按段显示，不再只给一个合并值。
+   */
+  dotBySegment: SegmentDotDetail[];
   /** 爆炸异常明细（D-031），无爆炸元素时 stacksPerSecond = 0 */
+  blast: BlastDetail;
+}
+
+/** 单段的 DoT 明细 */
+export interface SegmentDotDetail {
+  /** 段在 `segments` 里的下标 */
+  index: number;
+  /** 该段每秒输出合计（Σ 各类型 每层秒伤 × 触发占比） */
+  dotPerSecond: number;
+  /** 该段六秒异常状态总伤 */
+  dot6s: number;
+  /** 该段每个 DoT 类型的每层秒伤 */
+  dotPerType: Partial<Record<DoTType, number>>;
+  /** 该段每个 DoT 类型的每秒期望叠层 */
+  stacksPerType: Partial<Record<DoTType, number>>;
+  /** 该段的爆炸明细 */
   blast: BlastDetail;
 }
 
@@ -139,7 +164,7 @@ function segmentDotAndBlast(
   dot6s: number;
   dotPerType: Partial<Record<DoTType, number>>;
   stacksPerType: Partial<Record<DoTType, number>>;
-  blast: { perStack: number; perStackDetonated: number; perSecond: number; splashPerSecond: number; splashActive: boolean; total6s: number; stacksPerSecond: number; reachesMaxInWindow: boolean };
+  blast: BlastDetail;
 } {
   const dotPerType: Partial<Record<DoTType, number>> = {};
   const stacksPerType: Partial<Record<DoTType, number>> = {};
@@ -227,14 +252,12 @@ function segmentDotAndBlast(
     dotPerType,
     stacksPerType,
     blast: {
-      perStack: detail.perStack,
-      perStackDetonated: detail.perStackDetonated,
-      perSecond: detail.perSecond,
-      splashPerSecond: detail.splashPerSecond,
-      splashActive: detail.splashActive,
+      ...detail,
+      // D-055：这一段没有爆炸元素时，爆炸根本不会触发 → 六秒总伤归 0
       total6s: blastStacks > 0 ? detail.total6s : 0,
+      splash6s: blastStacks > 0 ? detail.splash6s : 0,
+      // 逐段口径：这一段的每秒叠层（不是整个模式的）
       stacksPerSecond: blastStacks * fr,
-      reachesMaxInWindow: detail.reachesMaxInWindow,
     },
   };
 }
@@ -252,9 +275,17 @@ export function buildOutput(
   const ms = multishot(contribs, weapon, mode);
   const fr = fireRateFinal(weapon, contribs, mode);
   // ── 命中类口径：各段单弹头**相加**（每段已各自做完元素合成与暴击）──
+  //
+  // 需求方 2026-11-12：「射线的多重就是合成一跳」。所以射线段的 `singlePelletSpread`
+  // 在 `resolveSegment` 里**已经乘过当前多重**，这里不能再乘一次——否则射线的命中伤害 / DPS
+  // 会比 DoT 基础值多乘一次多重（两条口径对不上）。
+  // 实弹段的单弹头不含多重，仍由这里的 `× ms` 统一折算成「单次射击」。
   const res: SegmentResult = segmentResults[0]!;
   const pelletPerHit = segmentResults.reduce((sum, r) => sum + r.line.average, 0);
-  const perShot = pelletPerHit * ms;
+  const perShot = segmentResults.reduce(
+    (sum, r) => sum + (r.beam ? r.line.average : r.line.average * ms),
+    0,
+  );
   const hitDps = perShot * fr;
 
   // 弹匣与装填：吃 Mod 加成（D-037）。
@@ -341,8 +372,19 @@ export function buildOutput(
     stacksPerSecond: 0,
     reachesMaxInWindow: false,
   };
-  for (const segRes of segmentResults) {
+  const dotBySegment: SegmentDotDetail[] = [];
+  for (let segIdx = 0; segIdx < segmentResults.length; segIdx++) {
+    const segRes = segmentResults[segIdx]!;
     const segOut = segmentDotAndBlast(segRes, contribs, ms, fr, firingTimeline);
+    // 逐段各留一份（需求方 2026-11-12：异常状态要按段显示，各段触发自己的 DoT）
+    dotBySegment.push({
+      index: segIdx,
+      dotPerSecond: segOut.dotPerSecond,
+      dot6s: segOut.dot6s + segOut.blast.total6s,
+      dotPerType: segOut.dotPerType,
+      stacksPerType: segOut.stacksPerType,
+      blast: segOut.blast,
+    });
     dotPerSecond += segOut.dotPerSecond;
     dot6s += segOut.dot6s;
     for (const [t, v] of Object.entries(segOut.dotPerType)) {
@@ -401,6 +443,8 @@ export function buildOutput(
     dot6s: dot6s,
     dotPerType: dotPerType,
     stacksPerType: stacksPerType,
+    // 需求方 2026-11-12：异常状态按段显示，各段触发自己的 DoT
+    dotBySegment: dotBySegment,
     blast: blast,
   };
 }

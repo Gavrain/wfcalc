@@ -1,4 +1,4 @@
-﻿/**
+/**
  * D-062：爆头 / 爆头暴击作用在 **DoT 基础值**上。
  *
  * 需求方口径：
@@ -110,7 +110,7 @@ describe('爆头作用在 DoT 基础值上（D-062 / D-063）', () => {
     near(b.output.blast.perStack / a.output.blast.perStack, 6);
   });
 
-  it('射速与多重不影响每层秒伤（只影响叠层）', () => {
+  it('实弹：多重不影响每层秒伤（只影响叠层）', () => {
     const base = dotOf(hs(false));
     const withMs = dotOf(hs(false), [{ stat: 'multishot', form: 'pct', amount: 90, source: 'ms' }]);
     const withFr = dotOf(hs(false), [{ stat: 'fireRate', form: 'pct', amount: 60, source: 'fr' }]);

@@ -412,12 +412,17 @@ check('DoT 每层秒伤单位含 /层', registry['#output-list'].textContent.inc
   if (cryo) { cryo.fire('dragstart'); grid()[0].fire('drop'); }
   if (hell) { hell.fire('dragstart'); grid()[1].fire('drop'); }
   const after = registry['#splash-damage'];
-  const hasBlast = registry['#damage-table'].textContent.includes('爆炸');
-  if (hasBlast) {
-    check('含爆炸时显示范围伤害面板', after.children.length > 0);
-    check('范围伤害含每秒与六秒', after.textContent.includes('每秒') && after.textContent.includes('六秒'));
+  // 判定「真有爆炸」看渲染出来的面板有没有内容，而不是看伤害表文本——
+  // 巴什穆自带电击，火+冰会先和电合成辐射，最后并没有爆炸。
+  if (after.children.length > 0) {
+    check('含爆炸时显示范围伤害面板', true);
+    // 需求方 2026-11-12：「这里的六秒合计没删啊」——范围伤害只留每秒（数值 + 「/秒」），
+    // 不再有「六秒合计」那一行。
+    check('范围伤害只显示每秒，不再显示六秒合计',
+      after.textContent.includes('/秒') && !after.textContent.includes('六秒'),
+      after.textContent.slice(0, 120));
   } else {
-    check('含爆炸时显示范围伤害面板（跳过：未能配出爆炸）', true);
+    check('含爆炸时显示范围伤害面板（跳过：这把武器配不出爆炸）', true);
   }
 }
 

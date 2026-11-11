@@ -24,7 +24,7 @@ const PUBLIC = join(ROOT, 'packages/demo/public');
 export { ROOT, PUBLIC };
 
 /**
- * 加载各依赖模块并返回 `{ __core, __adapter, __picker, __issues, __override }`。
+ * 加载各依赖模块并返回 `{ __core, __adapter, __picker, __override }`。
  * `.ts` 用 `strip-to-temp.mjs` 剥类型；纯 `.js` 直接 import。
  *
  * D-105：页面拆成 app-store / app-data / app-compute / ui-editor 四个 ES 模块，
@@ -35,13 +35,12 @@ export async function loadModules() {
   const core = await stripTemp(ROOT, 'packages/core/src/index.ts', transpile);
   const adapter = await stripTemp(ROOT, 'packages/data/src/adapter.ts', transpile);
   const picker = await import(pathToFileURL(join(PUBLIC, 'weapon-picker.js')).href);
-  const issues = await stripTemp(ROOT, 'packages/data/src/manual/weapon-issues.ts', transpile);
   const override = await import(pathToFileURL(join(PUBLIC, 'weapon-override.js')).href);
   const store = await import(pathToFileURL(join(PUBLIC, 'app-store.js')).href);
   const data = await import(pathToFileURL(join(PUBLIC, 'app-data.js')).href);
   const compute = await import(pathToFileURL(join(PUBLIC, 'app-compute.js')).href);
   const editor = await import(pathToFileURL(join(PUBLIC, 'ui-editor.js')).href);
-  return { core, adapter, picker, issues, override, store, data, compute, editor, transpile };
+  return { core, adapter, picker, override, store, data, compute, editor, transpile };
 }
 
 /**
@@ -55,7 +54,6 @@ export function inlineImports(src, ns) {
     [/core\/src\/index\.ts$/, 'ns.core'],
     [/data\/src\/adapter\.ts$/, 'ns.adapter'],
     [/weapon-picker\.js$/, 'ns.picker'],
-    [/manual\/weapon-issues\.ts$/, 'ns.issues'],
     [/\/weapon-override\.js$/, 'ns.override'],
     [/\/app-store\.js$/, 'ns.store'],
     [/\/app-data\.js$/, 'ns.data'],
@@ -131,7 +129,6 @@ export async function loadPage(opts = {}) {
     core: modules.core,
     adapter: modules.adapter,
     picker: modules.picker,
-    issues: modules.issues,
     override: modules.override,
   });
   // 把私有的 `async function boot()` 暴露成返回值，供 invokeBoot() 二次启动

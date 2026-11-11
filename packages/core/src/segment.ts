@@ -34,7 +34,7 @@ import {
   headshotMultiplier,
 } from './crit.ts';
 import type { DoTType, DotTickDetail } from './dot.ts';
-import { DOT_TYPES, dotTick } from './dot.ts';
+import { DOT_TYPES, dotTick, multishot } from './dot.ts';
 
 // 多重是"触发/层数"的输入，实现在 dot.ts；这里原样转出以保持既有导入路径。
 export { multishot } from './dot.ts';
@@ -128,7 +128,13 @@ export interface SegmentResult {
   kind: DamageSegment['kind'] | string;
   /** 该段自己的触发几率（0~1），逐段算 DoT 叠层时要用 */
   procChance: number;
-  /** 该段是否射线（射线不重复乘多重），逐段算叠层时要用 */
+  /**
+   * 该段是否射线。
+   *
+   * ⚠ **按段判**（需求方 2026-11-12），不是按模式：模式扳机 `held` + 该段自己的 `beam` 标记。
+   * 以前这里是 `ctx.beam`（整个模式一个开关），量子切割器改成一模式多段后，
+   * 方块弹 / 引爆 / 换弹那几段会被一起当成射线（DoT 每跳也乘多重），是错的。
+   */
   beam: boolean;
   /** 该段所属的阵营（派系第二次乘算要用） */
   faction: Faction;
@@ -142,7 +148,7 @@ export interface SegmentResult {
   finalHit: DamageSpread;
   /** 物理/元素 = 合成前的槽位 */
   elementDetail: ApplyElementsResult;
-  /** DoT 基础值的分布（= side 'dotBase'，只剔加量） */
+  /** DoT 基础值的分布（= side 'dotBase'，只剔加量；**射线段已乘多重**） */
   dotBase: DamageSpread;
   /**
    * 每跳用的基础分布（D-107）：命中分布**剔除元素/物理 Mod 加量**、未乘暴击。
@@ -174,8 +180,31 @@ export function resolveSegment(
   seg: DamageSegment,
   upstream?: { 新面板: DamageSpread; 基伤面板: DamageSpread },
 ): SegmentResult {
-  const { weapon, contribs } = ctx;
+  const { weapon, mode, contribs } = ctx;
   const panel: DamageSpread = { ...seg.damage };
+
+  // ── 该段是不是射线（需求方 2026-11-12：**按段判**）──
+  //
+  // 模式扳机 `held` 只说明"这个模式是按住不放的武器"；段自己还可以声明 `beam`
+  // （数据层按 `shot_type` 判：只有 Hit-Scan 的段才是激光本体，方块弹 / 爆炸 / 换弹组是投射物）。
+  //   · `seg.beam === false` → 明确不是射线（即使模式是 held）；
+  //   · `seg.beam === true`  → 是射线（即使模式扳机不是 held，少见）；
+  //   · 未声明             → 跟随模式扳机（= `ctx.beam`）。
+  const isBeam: boolean = seg.beam ?? ctx.beam;
+
+  /**
+   * §2.2 / 表 0.1：**射线的多重并进单弹头伤害**（多条激光打同一目标合并成一跳），
+   * 实弹的单弹头不含多重。
+   *
+   * 需求方 2026-11-12：
+   * > 「就是合成一跳啊，而且是乘了多重mod的合成一跳。」
+   *
+   * 所以射线段：
+   *   ① DoT 基础值 × 当前多重（面板多重 × (1+Σ多重%) + Σ绝对值）
+   *   ② 命中伤害 × 当前多重（此前 `perShot` 一律再乘一次，射线会**重复乘**，这里对齐成一次）
+   * 实弹段这一项恒为 1（多重由 L6 的 `perShot = 单弹头 × 多重` 统一处理）。
+   */
+  const msMul: number = isBeam ? multishot(contribs, weapon, mode) : 1;
 
   // ① 玄骸（在基伤之前，D-017）
   // ② 基伤
@@ -214,7 +243,15 @@ export function resolveSegment(
   const factionPct = factionFor(ctx.faction, contribs);
   const factionMul = 1 + factionPct;
   const vTotal = spreadTotal(finalHit);
-  const line: DamageLine = damageLine(vTotal, cc, cd, ctx.headshot.enabled, hsMul, factionMul);
+  /**
+   * 命中伤害三行。
+   *
+   * 射线：`vTotal × 多重`——表 0.1「射线单弹头 = 基础伤害项 × (1+Σ多重%)，
+   * 与单次射击相同」。这样命中伤害与 DoT 基础值（同样乘了 `msMul`）**同源**，
+   * 不会再出现"命中没吃多重、DoT 吃了"或反过来的错配。
+   * 实弹：`msMul` 恒为 1，行为与改动前完全一致。
+   */
+  const line: DamageLine = damageLine(vTotal * msMul, cc, cd, ctx.headshot.enabled, hsMul, factionMul);
 
   // ── D-062 / D-063：DoT 基础值 = 命中基础值 × **单弹头期望倍率** ──
   // 需求方口径：
@@ -230,7 +267,7 @@ export function resolveSegment(
   // 展开后即 `1 + cc(cd−1)`（非爆头）或 `hsM·(1 + cc(2cd−1))`（爆头）。
   const dotBase: DamageSpread = scaleSpread(
     dotBaseRaw,
-    expectedHitMultiplier(cc, cd, ctx.headshot.enabled, hsMul) * factionMul,
+    expectedHitMultiplier(cc, cd, ctx.headshot.enabled, hsMul) * factionMul * msMul,
   );
 
   /**
@@ -248,11 +285,12 @@ export function resolveSegment(
    */
   const tickBaseScaled: DamageSpread = scaleSpread(
     finalHitNoAdd,
-    expectedHitMultiplier(cc, cd, ctx.headshot.enabled, hsMul) * factionMul,
+    expectedHitMultiplier(cc, cd, ctx.headshot.enabled, hsMul) * factionMul * msMul,
   );
 
-  // 单弹头分布（供"加成后面板"与触发占比展示）：元素加量已含，暴击单列
-  const singlePelletSpread: DamageSpread = finalHit;
+  // 单弹头分布（供"加成后面板"与触发占比展示）：元素加量已含，暴击单列。
+  // 射线：多重并进单弹头（表 0.1「射线单弹头 = 基础伤害项 × (1+Σ多重%)」）。
+  const singlePelletSpread: DamageSpread = isBeam ? scaleSpread(finalHit, msMul) : finalHit;
 
   const dotTicks: DotTickDetail[] = DOT_TYPES.map((t: DoTType) =>
     dotTick(tickBaseScaled, t, contribs, { factionPct, headshot: ctx.headshot, headshotMul: hsMul }),
@@ -262,7 +300,7 @@ export function resolveSegment(
     kind: seg.kind,
     // D-148 / 需求方 2026-11-12：逐段算 DoT 叠层需要每段自己的触发率 / 射线标记 / 派系
     procChance: seg.procChance,
-    beam: ctx.beam,
+    beam: isBeam,
     faction: ctx.faction,
     panel,
     panelWithKuva,

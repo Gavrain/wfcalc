@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-11T16:22:55.655Z",
+  "generatedAt": "2026-11-11T17:31:30.903Z",
   "source": "WFCD/warframe-items (MIT)",
   "category": "companion",
   "count": 24,
@@ -611,7 +611,7 @@
           "variants": [
             {
               "id": "direct",
-              "label": "Normal",
+              "label": "直接命中",
               "segments": [
                 {
                   "kind": "attack",

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-11T16:22:55.654Z",
+  "generatedAt": "2026-11-11T17:31:30.901Z",
   "source": "WFCD/warframe-items (MIT)",
   "category": "archgun",
   "count": 20,
@@ -1176,7 +1176,7 @@
           "variants": [
             {
               "id": "direct",
-              "label": "直接命中",
+              "label": "蓄力",
               "trigger": "charge",
               "segments": [
                 {
@@ -1250,7 +1250,7 @@
           "variants": [
             {
               "id": "direct",
-              "label": "Auto",
+              "label": "全自动",
               "segments": [
                 {
                   "kind": "attack",
@@ -1266,7 +1266,7 @@
             },
             {
               "id": "attack2",
-              "label": "Charged Shot Laser",
+              "label": "蓄力激光",
               "trigger": "charge",
               "segments": [
                 {
@@ -1289,7 +1289,7 @@
             },
             {
               "id": "blast",
-              "label": "范围伤害（Auto）",
+              "label": "范围伤害（全自动）",
               "segments": [
                 {
                   "kind": "explosiveAttack",
@@ -1303,7 +1303,7 @@
             },
             {
               "id": "blast2",
-              "label": "范围伤害（Charged Shot）",
+              "label": "范围伤害（蓄力）",
               "trigger": "charge",
               "segments": [
                 {

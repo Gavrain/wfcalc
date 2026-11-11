@@ -18,9 +18,8 @@
  * 所以这里只用**命名导入**，不要写 `const { a } = ns` 这种解构。
  */
 import { critAverage, critTiers, DOT_TYPES, isKuvaFamily, METRIC_OPTIONS, totalProcChance } from '../../core/src/index.ts';
-import { WEAPON_GROUPS, groupWeapons, searchWeapons, FIRE_STYLE_OPTIONS, filterByStyle, weaponLabel, weaponGroupId, ISSUE_MARK } from './weapon-picker.js';
+import { WEAPON_GROUPS, groupWeapons, searchWeapons, FIRE_STYLE_OPTIONS, filterByStyle, weaponLabel, weaponGroupId } from './weapon-picker.js';
 import { OVERRIDE_WEAPON_FIELDS as OVERRIDE_FIELDS, mergeWeaponOverride as applyWeaponOverride } from './weapon-override.js';
-import { issuesOf } from '../../data/src/manual/weapon-issues.ts';
 import { arcaneDisplayStats, arcaneToContributions, isConditionOverloadMod, modStackFactor } from '../../data/src/adapter.ts';
 import {
   ELEMENT_COLOR, ELEMENT_LABEL, EXILUS_INDEX, FACTION_OPTIONS, KUVA_ELEMENTS, MAX_SLOTS, SLOT_COUNT,
@@ -219,17 +218,11 @@ function effectiveMode() {
 
 function renderHeader() {
   const w = store.data.weapon;
-  // D-101：数据有问题时标题后面挂一个标记，鼠标悬停看原因
-  const issues = issuesOf(w.id);
+  // D-148 / 需求方 2026-11-12：换源到 WFCD 后，原先「灵化面板复用 / 扳机未识别」这类
+  // 数据缺陷都已消除，所以标题后的 ⚠ 错误标记整个去掉。
   const titleEl = $('#weapon-title');
-  titleEl.textContent = (w.nameZh || w.name) + '（' + w.name + '）' + (issues.length ? ' ' + ISSUE_MARK : '');
-  if (issues.length) {
-    titleEl.title = issues.map(function (x) { return x.note + '：' + x._source; }).join('\n');
-    titleEl.classList.add('has-issue');
-  } else {
-    titleEl.title = '';
-    titleEl.classList.remove('has-issue');
-  }
+  titleEl.textContent = (w.nameZh || w.name) + '（' + w.name + '）';
+  titleEl.title = '';
   $('#weapon-meta').textContent =
     (currentMode()._label ? currentMode()._label + ' · ' : '') +
     currentMode().id + ' · ' + currentMode().role + ' · ' + currentMode().trigger +
@@ -256,14 +249,15 @@ function renderModeSwitch() {
   // 一排搞定：模式 + 当前模式内的**攻击方式**（需求方 2026-11-12）
   //
   // > 「这ui太丑了，跟切换攻击模式一样做成扁扁的，他们可以放在同一行。」
+  // > 「（没有多段时）也显示一行提示」
   //
   // 所以两种控件做成同一种扁平胶囊，排在同一条 `.mode-row` 里：
   //   模式是单选；攻击方式是多选（复选框），全勾 = 各段相加。
-  // 只有一种攻击方式时不显示（绝大多数武器）。
+  // **只有一种攻击方式时也显示这一行**（置灰、不可点），让用户知道有这个功能。
   const variants = currentMode() ? (currentMode().variants ?? []) : [];
-  const showVariants = variants.length > 1;
+  const singleVariant = variants.length <= 1;
 
-  if (modes.length > 1 || showVariants) {
+  if (modes.length > 1 || variants.length > 0) {
     const row = el('div', 'mode-row');
     for (let i = 0; i < modes.length; i++) {
       const m = modes[i];
@@ -283,20 +277,25 @@ function renderModeSwitch() {
       row.append(btn);
     }
 
-    if (showVariants) {
+    if (variants.length > 0) {
       // 分隔符：让「模式」与「攻击方式」两段在视觉上分开，但仍在同一行
       row.append(el('span', 'mode-sep'));
       for (let i = 0; i < variants.length; i++) {
         const v = variants[i];
         const on = isVariantSelected(i);
+        // 只有一种攻击方式时：显示但**置灰不可点**，让用户知道有这个功能
+        const locked = singleVariant;
         const cb = el('input');
         cb.type = 'checkbox';
-        cb.checked = on;
+        cb.checked = true;
         cb.className = 'variant-check';
-        cb.title = v.id + ' · ' + v.segments.map(function (s) { return s.kind; }).join(' + ');
-        cb.addEventListener('change', function () { toggleVariant(i); });
+        cb.disabled = locked;
+        cb.title = locked
+          ? '这个模式只有一种攻击方式'
+          : v.id + ' · ' + v.segments.map(function (s) { return s.kind; }).join(' + ');
+        if (!locked) cb.addEventListener('change', function () { toggleVariant(i); });
         // 与模式按钮同一种扁平胶囊，选中时高亮
-        const label = el('label', 'mode-btn variant-btn' + (on ? ' active' : ''));
+        const label = el('label', 'mode-btn variant-btn' + (on && !locked ? ' active' : '') + (locked ? ' is-locked' : ''));
         label.append(cb);
         label.append(el('span', '', v.label));
         // 这一种攻击方式自己的扳机与模式不同时标出来（赘骨灵化：射线 / 蓄力）
@@ -399,79 +398,136 @@ function renderPanel(res) {
 
   fillRows('#panel-table', ['属性', '基础面板', '当前面板'], rows);
 
-  // 伤害分布三列（Q5 定案，需求方 2026-11-06）：
-  //   「基础面板 = 加了玄骸的，当前面板含其他加成。因为玄骸加成这部分表现的就是基础面板加成。」
+  // ── 伤害分布：**每种攻击方式一张表，不做合计**（需求方 2026-11-12）──
   //
-  // ⚠ 基础列必须取**该变体所有段**的伤害合计，不能只取 segments[0]：
-  //   血肢（Hema）的自带病毒在 attack 段、impact 段只有物理三元素，
-  //   只读第一段会把自带病毒漏掉（需求方 2026-11-06 反馈）。
-  // 基础列 = 每段面板 ⊕ 玄骸加成（`res` 里每段的 `panelWithKuva`）。
-  const orig = {};
-  for (const s of res.segments || []) {
-    for (const [t, v] of Object.entries(s.panelWithKuva || s.panel || {})) {
-      if (typeof v === 'number' && v !== 0) orig[t] = (orig[t] || 0) + v;
-    }
-  }
-  // 兜底：内核没给出分段结果时退回原始面板（非玄骸武器两者相同）
-  // D-148 / 2026-11-12：只取**勾选了的攻击方式**的段，不能把全部变体都算进来。
-  if (!res.segments || res.segments.length === 0) {
-    const m = effectiveMode();
-    const picked = selectedVariantIdx();
-    for (const i of picked) {
-      const v = m && m.variants ? m.variants[i] : null;
-      if (!v) continue;
-      for (const s of v.segments || []) {
-        for (const [t, val] of Object.entries(s.damage)) {
-          if (typeof val === 'number' && val !== 0) orig[t] = (orig[t] || 0) + val;
-        }
-      }
-    }
-  }
-  // ⚠ 当前列必须只含**勾选了的攻击方式**，不能用 res.totalSpread：
-  //   totalSpread 是所有变体之和，与"当前攻击方式的基础分布"并列会把命中和爆炸混成一个面板
-  //   （巴什穆 / 巴兹火枪，需求方 2026-11-06 反馈）。
-  // ⚠ D-148 / 2026-11-12：现在支持**多选**——勾选了几种就把这几种的分布相加，
-  //   内核已经按 `selectedVariants` 缩过 variants，所以 `spreadByVariant` 里只剩选中的那几个。
-  const spread = {};
-  for (const s of res.spreadByVariant || []) {
-    for (const [t, v] of Object.entries(s)) {
-      if (typeof v === 'number' && v !== 0) spread[t] = (spread[t] || 0) + v;
-    }
-  }
-  const typeSet = [];
-  const push = function (t) { if (typeSet.indexOf(t) < 0) typeSet.push(t); };
-  Object.keys(orig).forEach(push);
-  Object.keys(spread).forEach(push);
-
-  // 当前触发几率（含触发几率 Mod，射线另算）——不是面板静态值
-  // D-148：段现在在变体里（模式上不再有 segments），取第一个勾选攻击方式的第一段
-  const firstVariant = (function () {
-    const m = effectiveMode();
-    const idx = selectedVariantIdx();
-    if (!m || !m.variants) return null;
-    return m.variants[idx[0]] ?? m.variants[0] ?? null;
-  })();
-  const procNow = totalProcChance(
-    (firstVariant && firstVariant.segments && firstVariant.segments[0] ? firstVariant.segments[0].procChance : 0),
-    currentContributions(),
-    false,
-  );
-  const totalSpread = spreadTotalOf(spread);
-  const dmgRows = typeSet.map(function (t) {
-    // 某类型的单弹头触发率 = 当前触发几率 × 该类型在伤害分布里的占比
-    const s = totalSpread > 0 ? (spread[t] || 0) / totalSpread : 0;
-    return [
-      { text: ELEMENT_LABEL[t] || t, dot: ELEMENT_COLOR[t] },
-      fmt(orig[t] || 0),
-      fmt(spread[t] || 0),
-      (procNow * s * 100).toFixed(2) + '%',
-    ];
-  });
-  dmgRows.push(['合计', fmt(spreadTotalOf(orig)), fmt(totalSpread), (procNow * 100).toFixed(2) + '%']);
-  fillRows('#damage-table', ['伤害类型', '基础', '当前', '触发率'], dmgRows);
+  // > 「伤害分布下面挂多张表，伤害类型那个表头可以不要，改成命中类型，例如直接命中，范围伤害」
+  // > 「不需要合计啊，而且他们的触发是各自算的，你把他们合到一个表然后均摊触发率显然不对」
+  //
+  // 所以「基础列 / 当前列 / 触发率」三者都**逐段在 `renderDamageTables` 里算**，
+  // 这里不再预先合并成一份，避免把不同段的伤害类型与触发率混在一起。
+  renderDamageTables(res);
 
   renderCritTiers(res);
   renderOutputs(res);
+}
+
+/**
+ * 渲染伤害分布表（每种攻击方式一张）。
+ *
+ * **需求方 2026-11-12**：
+ * > 「不同段的伤害分布是不一样的，为什么没有多个伤害分布表」
+ * > 「不需要合计啊，而且他们的触发是各自算的，你把他们合到一个表然后均摊触发率显然不对」
+ *
+ * 所以：
+ *   · 每种勾选的攻击方式**各一张表**，表头第一列写攻击方式名（直接命中 / 范围伤害 / 射线…）；
+ *   · **不做合计表**——各段伤害类型不同、触发率也各自独立，合起来再均摊触发率是错的；
+ *   · 触发率**逐段各算**：用该段自己的面板触发率 + 当前 Mod，而不是整个模式共用一个数。
+ *
+ * @param res  compute 结果（`spreadByVariant` 已按勾选的攻击方式切好）
+ */
+function renderDamageTables(res) {
+  const box = $('#damage-table');
+  box.innerHTML = '';
+
+  const m = effectiveMode();
+  const picked = selectedVariantIdx();
+  const variants = m && m.variants ? picked.map(function (i) { return m.variants[i]; }).filter(Boolean) : [];
+  const perVariant = res.spreadByVariant || [];
+  const contribs = currentContributions();
+  const beam = Boolean(m && m.trigger === 'held');
+
+  // `res.segments` 是按变体顺序拼接的（与 `spreadByVariant` 同一游标），
+  // 这里算出每个变体占哪一段区间，好把「基础」列按段取到。
+  const segStarts = [];
+  {
+    let cursor = 0;
+    for (const v of variants) {
+      segStarts.push(cursor);
+      cursor += (v.segments || []).length;
+    }
+  }
+
+  for (let i = 0; i < variants.length; i++) {
+    const v = variants[i];
+    const spread = perVariant[i] || {};
+    const segCount = (v.segments || []).length;
+    const segStart = segStarts[i];
+    // 「基础」列 = 该攻击方式各段的**面板**（Q5 定案 2026-11-06：
+    //   「基础面板 = 加了玄骸的，当前面板含其他加成」）。
+    // 所以优先用内核算好的 `panelWithKuva`，取不到再退回面板原始伤害
+    // （血肢那类自带元素在别的段上的武器，按段取才不会漏）。
+    const base = {};
+    for (let k = segStart; k < segStart + segCount; k++) {
+      const r = res.segments ? res.segments[k] : null;
+      if (!r) continue;
+      for (const [t, val] of Object.entries(r.panelWithKuva || r.panel || {})) {
+        if (typeof val === 'number' && val !== 0) base[t] = (base[t] || 0) + val;
+      }
+    }
+    if (Object.keys(base).length === 0) {
+      for (const s of v.segments || []) {
+        for (const [t, val] of Object.entries(s.damage || {})) {
+          if (typeof val === 'number' && val !== 0) base[t] = (base[t] || 0) + val;
+        }
+      }
+    }
+    // 触发率**逐段各算**：取该攻击方式第一段的面板触发率，加上当前 Mod
+    const seg0 = (v.segments && v.segments[0]) || null;
+    const proc = totalProcChance(seg0 ? seg0.procChance : 0, contribs, beam);
+    box.append(buildDamageTable(v.label || '伤害', base, spread, proc));
+  }
+}
+
+/** 造一张伤害分布小表；`title` 用作第一列表头（攻击方式名） */
+function buildDamageTable(title, base, spread, procNow) {
+  const wrap = el('div', 'dmg-table');
+  const table = el('div', 'panel-table');
+  const typeSet = [];
+  const push = function (t) { if (typeSet.indexOf(t) < 0) typeSet.push(t); };
+  Object.keys(base || {}).forEach(push);
+  Object.keys(spread || {}).forEach(push);
+  const total = spreadTotalOf(spread || {});
+  const rows = typeSet.map(function (t) {
+    const share = total > 0 ? ((spread || {})[t] || 0) / total : 0;
+    return [
+      { text: ELEMENT_LABEL[t] || t, dot: ELEMENT_COLOR[t] },
+      fmt((base || {})[t] || 0),
+      fmt((spread || {})[t] || 0),
+      (procNow * share * 100).toFixed(2) + '%',
+    ];
+  });
+  rows.push(['合计', fmt(spreadTotalOf(base || {})), fmt(total), (procNow * 100).toFixed(2) + '%']);
+
+  const head = el('div', 'panel-row panel-head');
+  head.style.gridTemplateColumns = colTemplate(4);
+  head.append(el('span', 'c-name', title));
+  for (const h of ['基础', '当前', '触发率']) head.append(el('span', 'c-val', h));
+  table.append(head);
+  for (const r of rows) {
+    const row = el('div', 'panel-row' + (r[0] === '合计' ? ' panel-total' : ''));
+    row.style.gridTemplateColumns = colTemplate(4);
+    // D-041 / D-045：只在「当前」列高亮变化（与 `fillRows` 同一判定）
+    const changed = isChanged(r);
+    for (let i = 0; i < r.length; i++) {
+      const cell = r[i];
+      if (i === 0 && cell && typeof cell === 'object' && cell.dot) {
+        // 与 `fillRows` 同一套写法（DOM shim 不支持 prepend）
+        const span = el('span', 'c-name');
+        const dot = el('span', 'dt-dot');
+        dot.style.background = cell.dot;
+        span.append(dot, document.createTextNode(cell.text));
+        row.append(span);
+      } else if (i === 2 && changed) {
+        row.append(el('span', 'c-val c-after changed', typeof cell === 'string' ? cell : cell.text));
+      } else {
+        const text = typeof cell === 'string' ? cell : cell.text;
+        row.append(el('span', i === 0 ? 'c-name' : 'c-val', text));
+      }
+    }
+    table.append(row);
+  }
+  wrap.append(table);
+  return wrap;
 }
 
 function fillRows(sel, head, rows) {
@@ -553,46 +609,81 @@ function renderOutputs(res) {
   }
 
   // 异常状态明细（含爆炸）
-  const dotBox = $('#dot-detail');
-  dotBox.innerHTML = '';
-  let any = false;
-  for (let i = 0; i < DOT_TYPES.length; i++) {
-    const t = DOT_TYPES[i];
-    const per = res.output.dotPerType[t] || 0;
-    const stacks = res.output.stacksPerType[t] || 0;
-    if (per <= 0 && stacks <= 0) continue;
-    any = true;
-    const r = el('div', 'dot-row');
-    const dot = el('span', 'dt-dot');
-    dot.style.background = ELEMENT_COLOR[t] || '#888';
-    r.append(dot, el('span', 'dot-name', ELEMENT_LABEL[t]),
-      el('span', 'dot-stacks', stacks.toFixed(2) + ' 层/秒'),
-      el('span', 'dot-val', fmt(per) + ' /层/秒'));
-    dotBox.append(r);
-  }
-  // 爆炸单独一行（D-031）
-  const b = res.output.blast;
-  const hasBlast = b.stacksPerSecond > 0;
-  if (hasBlast) {
-    any = true;
-    const r = el('div', 'dot-row');
-    const dot = el('span', 'dt-dot');
-    dot.style.background = ELEMENT_COLOR.blast || '#d98f5a';
-    r.append(dot, el('span', 'dot-name', '爆炸'));
-    // 爆炸是独立机制（D-031）：perStack 是「每层结算伤害」，不是每秒；
-    // 它与其它 DoT 的「每层秒伤」不同语义，所以单独标单位避免混淆。
-    r.append(el('span', 'dot-stacks', b.stacksPerSecond.toFixed(2) + ' 层/秒'));
-    r.append(el('span', 'dot-val', fmt(b.perStack) + ' /层'));
-    dotBox.append(r);
-    const note = el('div', 'muted dot-note');
-    note.textContent = b.reachesMaxInWindow
-      ? '每层 ' + fmt(b.perStack) + (b.splashActive ? '（满层后系数 0.3 → 3）' : '') + '，' + b.timeToMaxSeconds.toFixed(2) + ' 秒叠满'
-      : '1.5 秒内未叠满 ' + b.maxStacks + ' 层，按实际层数均摊';
-    dotBox.append(note);
-  }
-  if (!any) dotBox.append(el('div', 'muted', '无持续伤害'));
+  //
+  // **需求方 2026-11-12**：
+  // > 「把异常状态 爆炸那边的灰色小字注释去掉」
+  // > 「由于现在有多个段了，这里也应该分段显示，他们触发的 dot 伤害会根据段的命中伤不一样」
+  //
+  // 所以：不再给爆炸挂一行灰色说明；每种攻击方式各一块，各段显示自己的异常状态
+  // （每段用自己的命中分布算触发池与每跳，见内核的 `output.dotBySegment`）。
+  renderDotDetail(res);
 
   renderSplashDamage(res);
+}
+
+/**
+ * 异常状态明细：**按攻击方式分段显示**（需求方 2026-11-12）。
+ *
+ * 每段有自己的命中分布 → 触发池与每跳伤害都不同，所以不能合并成一个数。
+ */
+function renderDotDetail(res) {
+  const dotBox = $('#dot-detail');
+  dotBox.innerHTML = '';
+
+  const m = effectiveMode();
+  const picked = selectedVariantIdx();
+  const variants = m && m.variants ? picked.map(function (i) { return m.variants[i]; }).filter(Boolean) : [];
+  const segDetails = res.output.dotBySegment || [];
+
+  // 每段占 `segments` 的哪一截（与伤害分布表同一套游标）
+  const starts = [];
+  {
+    let cursor = 0;
+    for (const v of variants) {
+      starts.push(cursor);
+      cursor += (v.segments || []).length;
+    }
+  }
+
+  let any = false;
+  for (let vi = 0; vi < variants.length; vi++) {
+    const v = variants[vi];
+    const segCount = (v.segments || []).length;
+    const from = starts[vi];
+    const rows = [];
+    for (let k = from; k < from + segCount; k++) {
+      const d = segDetails[k];
+      if (!d) continue;
+      for (let i = 0; i < DOT_TYPES.length; i++) {
+        const t = DOT_TYPES[i];
+        const per = d.dotPerType[t] || 0;
+        const stacks = d.stacksPerType[t] || 0;
+        if (per <= 0 && stacks <= 0) continue;
+        rows.push({ type: t, per, stacks, unit: ' /层/秒' });
+      }
+      // 爆炸单独算（D-031）：它是独立机制，perStack 是「每层结算伤害」，不是每秒
+      const b = d.blast;
+      if (b && b.stacksPerSecond > 0) {
+        rows.push({ type: 'blast', per: b.perStack, stacks: b.stacksPerSecond, unit: ' /层' });
+      }
+    }
+    if (rows.length === 0) continue;
+    any = true;
+    // 分段标题：只有一种攻击方式时不显示（免得啰嗦）
+    if (variants.length > 1) {
+      dotBox.append(el('div', 'dot-seg-title', v.label || '伤害'));
+    }
+    for (const r of rows) {
+      const row = el('div', 'dot-row');
+      const dot = el('span', 'dt-dot');
+      dot.style.background = ELEMENT_COLOR[r.type] || '#888';
+      row.append(dot, el('span', 'dot-name', ELEMENT_LABEL[r.type]),
+        el('span', 'dot-stacks', r.stacks.toFixed(2) + ' 层/秒'),
+        el('span', 'dot-val', fmt(r.per) + r.unit));
+      dotBox.append(row);
+    }
+  }
+  if (!any) dotBox.append(el('div', 'muted', '无持续伤害'));
 }
 
 /**
@@ -606,30 +697,14 @@ function renderSplashDamage(res) {
   if (!b || b.stacksPerSecond <= 0) return; // 没有爆炸就不显示
 
   box.append(el('h2', 'section-title', '范围伤害'));
-  const rows = [];
-  rows.push(['每秒', fmt(b.splashPerSecond) + ' /秒']);
-  rows.push(['六秒合计', fmt(b.splash6s)]);
-
+  // 需求方 2026-11-12：「这里的六秒合计没删啊」——只留「每秒」，不再显示六秒合计。
+  const row = el('div', 'panel-row');
+  row.append(el('span', 'c-name', '对周围敌人'));
+  row.append(el('span', 'c-val', fmt(b.splashPerSecond) + ' /秒'));
   const table = el('div', 'panel-table');
-  const head = el('div', 'panel-row panel-head');
-  head.append(el('span', 'c-name', '对周围敌人'), el('span', 'c-base', ''), el('span', 'c-after', '数值'));
-  table.append(head);
-  for (let i = 0; i < rows.length; i++) {
-    const row = el('div', 'panel-row');
-    row.append(el('span', 'c-name', rows[i][0]));
-    row.append(el('span', 'c-base', ''));
-    row.append(el('span', 'c-after', rows[i][1]));
-    table.append(row);
-  }
+  table.append(row);
   box.append(table);
-
-  box.append(el('div', 'muted dot-note', b.splashActive
-    ? '每层系数 ' + BLAST_DETONATE_COEF + '（基础 ' + fmt(b.perStackDetonated) + ' 每层），范围 5 米'
-    : '未叠满 ' + BLAST_MAX_STACKS + ' 层，暂不触发范围伤害'));
 }
-
-const BLAST_DETONATE_COEF = 3;
-const BLAST_MAX_STACKS = 10;
 
 /** 暴击分档（D-033：常驻显示在伤害分布下面） */
 function renderCritTiers(res) {
@@ -1675,14 +1750,16 @@ function renderAll() {
  *
  * 这类武器是**骨架**：分类、暴击、射速有了，但伤害段还没录（例如暗黑分合剑的重剑 / 双剑两版）。
  * 界面要让用户一眼看出「这把武器还不能算」，而不是显示一片空表或 NaN。
+ *
+ * ⚠ 需求方 2026-11-12：数据错误标记（⚠）已全部去掉，这里只用**文字**说明状态，
+ *   因为它描述的是「这把武器还没有可算的数据」，而不是「数据有错」。
  */
 function renderPendingPanel() {
   const w = store.data.weapon;
   const titleEl = $('#weapon-title');
   const name = (w.nameZh || w.name) + '（' + w.name + '）';
-  titleEl.textContent = name + ' ' + ISSUE_MARK;
+  titleEl.textContent = name;
   titleEl.title = w._note || '面板未收录';
-  titleEl.classList.add('has-issue');
   const metaEl = $('#weapon-meta');
   if (metaEl) metaEl.textContent = '面板待补 · 暂不可计算';
   const switchBox = $('#mode-switch');
@@ -1946,10 +2023,8 @@ function renderWeaponOptions(groupId, typeKey) {
   const styleSel = $('#weapon-style');
   const list = filterByStyle(bucket.weapons, styleSel ? styleSel.value : 'all');
   for (const w of list) {
-    const issues = issuesOf(w.id);
-    const o = el('option', '', weaponLabel(w, issues));
+    const o = el('option', '', weaponLabel(w));
     o.value = w.id;
-    if (issues.length) o.title = issues.map(function (x) { return x.note; }).join('；');
     wsel.append(o);
   }
   wsel.onchange = function () { switchWeapon(wsel.value); };
@@ -1978,10 +2053,8 @@ function renderSearchResults(keyword) {
   wsel.innerHTML = '';
   const shown = hits.slice(0, 200);
   for (const w of shown) {
-    const issues = issuesOf(w.id);
-    const opt = el('option', '', weaponLabel(w, issues));
+    const opt = el('option', '', weaponLabel(w));
     opt.value = w.id;
-    if (issues.length) opt.title = issues.map(function (x) { return x.note; }).join('；');
     wsel.append(opt);
   }
   wsel.onchange = function () { switchWeapon(wsel.value); };
@@ -2055,7 +2128,7 @@ function syncWeaponSelect() {
   // （用 append 而不是 insertBefore：顺序其实无所谓，但 append 兼容性更好）
   const w = store.dataAll && store.dataAll.weaponById.get(cur);
   if (!w) return;
-  const opt = el('option', '', weaponLabel(w, issuesOf(cur)) + '（当前）');
+  const opt = el('option', '', weaponLabel(w) + '（当前）');
   opt.value = cur;
   wsel.append(opt);
   wsel.value = cur;

@@ -39,14 +39,17 @@
           </label>
         </div>
 
-        <div class="panel-head-row">
-          <h2 class="section-title">武器面板</h2>
+        <!-- 切换按钮独立一行，**在「武器面板」标题上方**、靠左（需求方 2026-11-12：
+             「切换按钮放到上面独立成行，不然切换的时候有跳动」「靠左」）。
+             这一行高度固定：没有按钮时也占位，单模式 / 多模式切换时下面的表不会上下跳。 -->
+        <div class="mode-row-slot">
           <div class="panel-head-actions">
             <span id="modified-badge" class="modified-badge" style="display:none">已修改</span>
             <div id="mode-switch" class="mode-switch"></div>
             <button id="open-editor" class="btn-ghost dev-only" type="button" style="display:none">编辑</button>
           </div>
         </div>
+        <h2 class="section-title">武器面板</h2>
         <div id="panel-table" class="panel-table"></div>
 
         <h2 class="section-title">伤害分布</h2>
