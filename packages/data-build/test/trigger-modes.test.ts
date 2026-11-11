@@ -75,8 +75,8 @@ test('赤毒·雌鹿 / 狂鲨 Prime：Burst / Semi-Auto / Auto 是三个射击�
   }
 });
 
-test('次要射击类扳机词也各自成模式（巴兹火枪信标）', () => {
-  const modes = modesOf(
+test('信标 / 炮台独立成模式，模式名就是它们自己（D-150，需求方 2026-11-12）', () => {
+  const buz = modesOf(
     weapon({
       name: 'Buzlok',
       trigger: 'Auto',
@@ -86,9 +86,75 @@ test('次要射击类扳机词也各自成模式（巴兹火枪信标）', () =>
       ],
     }),
   );
-  // Normal Attack 是主攻击锚点（模式一），Beacon 不是扳机词 → 仍归同一模式，作为攻击方式
-  assert.equal(modes.length, 1);
-  assert.equal(modes[0]!.variants.length, 2, '「信标」应为同一模式下的第二种攻击方式');
+  assert.equal(buz.length, 2, `巴兹火枪应为 2 个模式，实际 ${buz.length} 个`);
+  assert.equal(buz[1]!.variants.length, 1, '信标自成一个模式，一个攻击方式');
+  assert.equal(buz[1]!.variants[0]!.label, '直接命中');
+  assert.equal(buz[1]!.variants[0]!.segments[0]!.damage.puncture, 3);
+
+  const az = modesOf(
+    weapon({
+      name: 'Azima',
+      trigger: 'Auto',
+      attacks: [
+        { name: 'Normal Attack', shot_type: 'Hit-Scan', damage: { impact: 2, puncture: 5, slash: 13 } },
+        { name: 'Turret Expiry', damage: { blast: 75 } },
+      ],
+    }),
+  );
+  assert.equal(az.length, 2, `方位角应为 2 个模式，实际 ${az.length} 个`);
+  assert.equal(az[1]!.variants[0]!.segments[0]!.damage.blast, 75);
+});
+
+test('附肢寄生者：感染鱼叉单开一个射击模式，`Contact` 子段不重复成两行毒素', () => {
+  // WFCD 原文把同一次鱼叉命中拆成两条：Infested Harpoon + Infested Harpoon Contact（各 15 毒素）。
+  // 需求方 2026-11-12 晚：「鱼叉也单开成一个射击模式（像信标、炮台那样）」
+  // 且「附肢寄生者那个是**感染鱼叉**不是毒云」。
+  const modes = modesOf(
+    weapon({
+      name: 'Paracyst',
+      trigger: 'Burst',
+      attacks: [
+        { name: 'Normal Attack', shot_type: 'Projectile', damage: { toxin: 33 }, status_chance: 30 },
+        { name: 'Infested Harpoon', shot_type: 'Projectile', damage: { toxin: 15 }, status_chance: 30 },
+        { name: 'Infested Harpoon Contact', damage: { toxin: 15 }, status_chance: 30 },
+      ],
+    }),
+  );
+  assert.equal(modes.length, 2, `应为 2 个模式（主射击 + 感染鱼叉），实际 ${modes.length} 个`);
+  // 需求方 2026-11-12：模式名是「感染鱼叉」（模式里只有一种攻击方式，所以那个变体叫「直接命中」）
+  const harpoon = modes[1]!;
+  const segs = harpoon.variants.flatMap((v) => v.segments);
+  assert.equal(segs.length, 1, `感染鱼叉只应有 1 段毒素，实际 ${segs.length} 段`);
+  assert.equal(segs[0]!.damage.toxin, 15);
+  assert.equal(harpoon.variants.length, 1, '鱼叉模式里只有一个攻击方式');
+  // 模式名（`_label`）就是它自己的名字
+  assert.equal((harpoon as { _label?: string })._label, '感染鱼叉');
+});
+
+test('弹道武器的副模式名 = 触发它的那条攻击名（模式名不是攻击方式名）', () => {
+  // 需求方 2026-11-12：「信标、炮台独立成模式」——模式要叫「信标」/「炮台」
+  const buz = modesOf(
+    weapon({
+      name: 'Buzlok',
+      trigger: 'Auto',
+      attacks: [
+        { name: 'Normal Attack', shot_type: 'Projectile', damage: { impact: 30 } },
+        { name: 'Beacon', shot_type: 'Projectile', damage: { puncture: 3 } },
+      ],
+    }),
+  );
+  assert.equal(buz[1]!.variants[0]!.label, '直接命中');
+  const az = modesOf(
+    weapon({
+      name: 'Azima',
+      trigger: 'Auto',
+      attacks: [
+        { name: 'Normal Attack', shot_type: 'Hit-Scan', damage: { impact: 2 } },
+        { name: 'Turret Expiry', damage: { blast: 75 } },
+      ],
+    }),
+  );
+  assert.equal(az.length, 2);
 });
 
 test('同一次开火的段留在同一模式：霰弹弹丸 + 爆裂', () => {
@@ -140,6 +206,24 @@ test('同一次开火的附属段留在同一模式：磁道炮的吸引场', ()
   );
   // Charged Shot（锚点）+ Radial Attack 一个模式；Spear Throw（独立模式）+ Attraction Field 一个模式
   assert.equal(modes.length, 2, `应为 2 个模式，实际 ${modes.length} 个`);
+});
+
+test('开镜以后是另一个射击模式（D-150 第四轮，猛毒）', () => {
+  // 需求方 2026-11-12：「换，开镜以后不是一个模式了」
+  // WFCD：`Normal Attack`（冲击 96.9）+ `3.5x Zoom Radial Attack`（病毒 53，缺 shot_type）
+  const modes = modesOf(
+    weapon({
+      name: 'Komorex',
+      trigger: 'Semi',
+      attacks: [
+        { name: 'Normal Attack', shot_type: 'Projectile', damage: { impact: 9.7, puncture: 40.74, slash: 46.56 }, status_chance: 35 },
+        { name: '3.5x Zoom Radial Attack', damage: { viral: 53 }, status_chance: 34 },
+      ],
+    }),
+  );
+  assert.equal(modes.length, 2, `猛毒应为 2 个模式（普通 / 开镜），实际 ${modes.length} 个`);
+  assert.equal((modes[1] as { _label?: string })._label, '开镜');
+  assert.deepEqual(modes[1]!.variants[0]!.segments[0]!.damage, { viral: 53 });
 });
 
 test('灵化仍然只有一个模式：赘骨的射线 + 蓄力是两种攻击方式', () => {

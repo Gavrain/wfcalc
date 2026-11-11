@@ -128,16 +128,26 @@ try {
     !w.modes.some((m) => m.variants.some((v) => v.segments.some((s) => (s.damage.blast || 0) > 0))));
   check('范围伤害面板不显示', registry['#splash-damage'].children.length === 0,
     String(registry['#splash-damage'].children.length));
-  // 攻击方式：巴兹火枪有两段（本体 + 信标穿刺），按 D-148 拆成两个攻击方式，界面用复选框选
+  // 攻击方式：D-150（需求方 2026-11-12「信标、炮台独立成模式」）之后，
+  // 信标已经是**独立的射击模式**（mode2），不再和本体现在同一个模式里。
+  // 所以这里改成：巴兹火枪有 2 个射击模式，主模式只有一个攻击方式（本体），信标模式只有穿刺。
+  const modeIds = w.modes.map((m) => m.id);
+  check('巴兹火枪有 2 个射击模式（本体 + 信标）', modeIds.length === 2, modeIds.join('+'));
+  const buzlokBeacon = w.modes[1];
+  check('信标是独立模式且形态正确',
+    Boolean(buzlokBeacon) && buzlokBeacon.variants.length === 1 &&
+      buzlokBeacon.variants[0].segments.length === 1 &&
+      (buzlokBeacon.variants[0].segments[0].damage.puncture || 0) > 0,
+    buzlokBeacon ? JSON.stringify(buzlokBeacon.variants.map((v) => v.segments.map((s) => s.damage))) : '无 mode2');
   const variantCount = w.modes[0].variants.length;
-  check('巴兹火枪有两种攻击方式（本体 + 信标）', variantCount === 2, String(variantCount));
+  check('主模式只有一个攻击方式（本体）', variantCount === 1, String(variantCount));
 
   {
     // ⚠ 需求方 2026-11-12：「不同段的伤害分布是不一样的，为什么没有多个伤害分布表」
     //   「不需要合计啊，而且他们的触发是各自算的，你把他们合到一个表然后均摊触发率显然不对」
     //   所以现在是**每种攻击方式一张表，没有合计表**。这里逐表验证。
     const tables = readDamageTables();
-    check('巴兹火枪渲染出多张伤害分布表', tables.length >= 2, `${tables.length} 张：` +
+    check('巴兹火枪主模式渲染出一张伤害分布表', tables.length === 1, `${tables.length} 张：` +
       tables.map((t) => t.title).join(' / '));
     check('没有合计表（各段触发各自算，不能均摊）',
       !tables.some((t) => t.title === '合计'), tables.map((t) => t.title).join(' / '));

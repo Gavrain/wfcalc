@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-11T17:31:30.896Z",
+  "generatedAt": "2026-11-11T17:49:24.363Z",
   "source": "WFCD/warframe-items (MIT)",
   "category": "secondary",
   "count": 149,
@@ -599,7 +599,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "Slug"
         },
         {
           "id": "mode2",
@@ -1366,7 +1367,8 @@
                 "fireRate": 1
               }
             }
-          ]
+          ],
+          "_label": "Spore Impact"
         }
       ]
     },
@@ -1838,7 +1840,8 @@
           "override": {
             "critChance": 0,
             "critMultiplier": 1
-          }
+          },
+          "_label": "Projectile Impact"
         }
       ]
     },
@@ -2279,7 +2282,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "未蓄力投射物"
         }
       ]
     },
@@ -2332,7 +2336,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "Slug Impact"
         }
       ]
     },
@@ -2499,7 +2504,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "Projectile Impact"
         },
         {
           "id": "mode2",
@@ -3123,7 +3129,8 @@
           ],
           "override": {
             "statusChance": 0.1
-          }
+          },
+          "_label": "Blob Embed"
         },
         {
           "id": "incarnon",
@@ -3798,7 +3805,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "Rocket Impact"
         }
       ]
     },
@@ -3965,7 +3973,8 @@
                 "critMultiplier": 2
               }
             }
-          ]
+          ],
+          "_label": "Direct Hit"
         }
       ]
     },
@@ -4325,7 +4334,8 @@
                 "fireRate": 1
               }
             }
-          ]
+          ],
+          "_label": "Spore Impact"
         }
       ]
     },
@@ -4364,21 +4374,6 @@
               ]
             },
             {
-              "id": "attack2",
-              "label": "追踪孢子",
-              "segments": [
-                {
-                  "kind": "attack",
-                  "aoe": false,
-                  "damage": {
-                    "puncture": 11.5,
-                    "slash": 11.5
-                  },
-                  "procChance": 0.3
-                }
-              ]
-            },
-            {
               "id": "blast",
               "label": "范围伤害（范围伤害）",
               "segments": [
@@ -4408,10 +4403,34 @@
               "override": {
                 "statusChance": 0.5
               }
+            }
+          ]
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "semi",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
+            {
+              "id": "direct",
+              "label": "直接命中",
+              "segments": [
+                {
+                  "kind": "attack",
+                  "aoe": false,
+                  "damage": {
+                    "puncture": 11.5,
+                    "slash": 11.5
+                  },
+                  "procChance": 0.3
+                }
+              ]
             },
             {
-              "id": "blast3",
-              "label": "范围伤害（追踪孢子）",
+              "id": "blast",
+              "label": "范围伤害",
               "segments": [
                 {
                   "kind": "explosiveAttack",
@@ -4423,7 +4442,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "追踪孢子"
         }
       ]
     },
@@ -4937,7 +4957,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "Projectile Impact"
         }
       ]
     },
@@ -5563,7 +5584,8 @@
                 "statusChance": 0.1
               }
             }
-          ]
+          ],
+          "_label": "Mid-Flight Detonation"
         }
       ]
     },
@@ -5885,7 +5907,8 @@
           ],
           "override": {
             "fireRate": 3.667
-          }
+          },
+          "_label": "Rocket Impact"
         }
       ]
     },
@@ -6114,7 +6137,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "Normal Shot"
         },
         {
           "id": "charged",
@@ -6192,36 +6216,15 @@
       "reloadTime": 0.6,
       "modes": [
         {
-          "id": "primary",
-          "role": "charged",
+          "id": "mode2",
+          "role": "normal",
           "trigger": "charge",
           "bullets": 1,
           "multishot": 1,
           "variants": [
             {
               "id": "direct",
-              "label": "蓄力",
-              "trigger": "charge",
-              "segments": [
-                {
-                  "kind": "attack",
-                  "aoe": false,
-                  "damage": {
-                    "impact": 126,
-                    "puncture": 47.25,
-                    "slash": 141.75
-                  },
-                  "procChance": 0.14
-                }
-              ],
-              "override": {
-                "critChance": 0.5,
-                "critMultiplier": 3
-              }
-            },
-            {
-              "id": "attack2",
-              "label": "未蓄力",
+              "label": "直接命中",
               "segments": [
                 {
                   "kind": "attack",
@@ -6253,6 +6256,40 @@
               ],
               "override": {
                 "statusChance": 0.5
+              }
+            }
+          ],
+          "override": {
+            "statusChance": 0.5
+          },
+          "_label": "未蓄力直击"
+        },
+        {
+          "id": "primary",
+          "role": "charged",
+          "trigger": "charge",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
+            {
+              "id": "direct",
+              "label": "直接命中",
+              "trigger": "charge",
+              "segments": [
+                {
+                  "kind": "attack",
+                  "aoe": false,
+                  "damage": {
+                    "impact": 126,
+                    "puncture": 47.25,
+                    "slash": 141.75
+                  },
+                  "procChance": 0.14
+                }
+              ],
+              "override": {
+                "critChance": 0.5,
+                "critMultiplier": 3
               }
             }
           ],
@@ -7473,7 +7510,8 @@
           ],
           "override": {
             "fireRate": 4.33
-          }
+          },
+          "_label": "Rocket Impact"
         }
       ]
     },
@@ -7622,7 +7660,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "Mid-Flight Detonation"
         }
       ]
     },
@@ -7660,10 +7699,19 @@
                   "procChance": 0.16
                 }
               ]
-            },
+            }
+          ]
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
             {
-              "id": "attack2",
-              "label": "炮台过期",
+              "id": "direct",
+              "label": "直接命中",
               "segments": [
                 {
                   "kind": "attack",
@@ -7675,7 +7723,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "炮台"
         }
       ]
     },
@@ -8079,6 +8128,39 @@
               "label": "直接命中",
               "segments": [
                 {
+                  "kind": "explosiveAttack",
+                  "aoe": true,
+                  "damage": {
+                    "electric": 50
+                  },
+                  "procChance": 0.26
+                }
+              ],
+              "override": {
+                "critChance": 0.2,
+                "critMultiplier": 2,
+                "statusChance": 0.26
+              }
+            }
+          ],
+          "override": {
+            "critChance": 0.2,
+            "critMultiplier": 2,
+            "statusChance": 0.26
+          }
+        },
+        {
+          "id": "mode3",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
+            {
+              "id": "direct",
+              "label": "直接命中",
+              "segments": [
+                {
                   "kind": "attack",
                   "aoe": false,
                   "damage": {
@@ -8102,25 +8184,6 @@
                   "kind": "explosiveAttack",
                   "aoe": true,
                   "damage": {
-                    "electric": 50
-                  },
-                  "procChance": 0.26
-                }
-              ],
-              "override": {
-                "critChance": 0.2,
-                "critMultiplier": 2,
-                "statusChance": 0.26
-              }
-            },
-            {
-              "id": "blast2",
-              "label": "范围伤害（Active Radial Attack）",
-              "segments": [
-                {
-                  "kind": "explosiveAttack",
-                  "aoe": true,
-                  "damage": {
                     "electric": 250
                   },
                   "procChance": 0.26
@@ -8137,8 +8200,10 @@
           "override": {
             "critChance": 0.2,
             "critMultiplier": 2,
-            "statusChance": 0.26
-          }
+            "statusChance": 0.26,
+            "fireRate": 1
+          },
+          "_label": "Active Attack"
         }
       ]
     },
@@ -8188,6 +8253,29 @@
               "label": "直接命中",
               "segments": [
                 {
+                  "kind": "explosiveAttack",
+                  "aoe": true,
+                  "damage": {
+                    "electric": 50
+                  },
+                  "procChance": 0.26
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "mode3",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
+            {
+              "id": "direct",
+              "label": "直接命中",
+              "segments": [
+                {
                   "kind": "attack",
                   "aoe": false,
                   "damage": {
@@ -8208,20 +8296,6 @@
                   "kind": "explosiveAttack",
                   "aoe": true,
                   "damage": {
-                    "electric": 50
-                  },
-                  "procChance": 0.26
-                }
-              ]
-            },
-            {
-              "id": "blast2",
-              "label": "范围伤害（Active Radial Attack）",
-              "segments": [
-                {
-                  "kind": "explosiveAttack",
-                  "aoe": true,
-                  "damage": {
                     "electric": 250
                   },
                   "procChance": 0.26
@@ -8231,7 +8305,11 @@
                 "fireRate": 1
               }
             }
-          ]
+          ],
+          "override": {
+            "fireRate": 1
+          },
+          "_label": "Active Attack"
         }
       ]
     },
@@ -8283,7 +8361,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "Dart Impact"
         }
       ]
     },
@@ -8520,36 +8599,15 @@
       "reloadTime": 0.6,
       "modes": [
         {
-          "id": "primary",
-          "role": "charged",
+          "id": "mode2",
+          "role": "normal",
           "trigger": "charge",
           "bullets": 1,
           "multishot": 1,
           "variants": [
             {
               "id": "direct",
-              "label": "蓄力",
-              "trigger": "charge",
-              "segments": [
-                {
-                  "kind": "attack",
-                  "aoe": false,
-                  "damage": {
-                    "impact": 120,
-                    "puncture": 45,
-                    "slash": 135
-                  },
-                  "procChance": 0.04
-                }
-              ],
-              "override": {
-                "critChance": 0.48,
-                "critMultiplier": 2.6
-              }
-            },
-            {
-              "id": "attack2",
-              "label": "未蓄力",
+              "label": "直接命中",
               "segments": [
                 {
                   "kind": "attack",
@@ -8581,6 +8639,40 @@
               ],
               "override": {
                 "statusChance": 0.5
+              }
+            }
+          ],
+          "override": {
+            "statusChance": 0.5
+          },
+          "_label": "未蓄力直击"
+        },
+        {
+          "id": "primary",
+          "role": "charged",
+          "trigger": "charge",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
+            {
+              "id": "direct",
+              "label": "直接命中",
+              "trigger": "charge",
+              "segments": [
+                {
+                  "kind": "attack",
+                  "aoe": false,
+                  "damage": {
+                    "impact": 120,
+                    "puncture": 45,
+                    "slash": 135
+                  },
+                  "procChance": 0.04
+                }
+              ],
+              "override": {
+                "critChance": 0.48,
+                "critMultiplier": 2.6
               }
             }
           ],
@@ -8776,7 +8868,8 @@
                 "statusChance": 0.1
               }
             }
-          ]
+          ],
+          "_label": "Mid-Flight Detonation"
         }
       ]
     },

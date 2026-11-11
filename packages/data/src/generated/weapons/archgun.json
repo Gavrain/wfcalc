@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-11T17:31:30.901Z",
+  "generatedAt": "2026-11-11T17:49:24.372Z",
   "source": "WFCD/warframe-items (MIT)",
   "category": "archgun",
   "count": 20,
@@ -168,7 +168,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "Projectile Impact"
         }
       ]
     },
@@ -495,7 +496,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "Grenade Impact"
         }
       ]
     },
@@ -563,7 +565,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "Projectile Impact"
         }
       ]
     },
@@ -614,7 +617,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "1st Attack"
         },
         {
           "id": "mode2",
@@ -651,7 +655,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "2nd Attack"
         },
         {
           "id": "mode3",
@@ -688,7 +693,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "3rd Attack"
         },
         {
           "id": "mode4",
@@ -725,7 +731,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "4th Attack"
         },
         {
           "id": "mode5",
@@ -762,7 +769,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "5th Attack"
         },
         {
           "id": "mode6",
@@ -799,7 +807,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "6th Attack"
         }
       ]
     },
@@ -1105,7 +1114,8 @@
             "critMultiplier": 2.4,
             "statusChance": 0.16699999999999998,
             "fireRate": 0.25
-          }
+          },
+          "_label": "Grenade Impact"
         }
       ]
     },

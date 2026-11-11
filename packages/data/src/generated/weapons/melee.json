@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-11T17:31:30.898Z",
+  "generatedAt": "2026-11-11T17:49:24.367Z",
   "source": "WFCD/warframe-items (MIT)",
   "category": "melee",
   "count": 260,
@@ -303,7 +303,7 @@
             },
             {
               "id": "attack2",
-              "label": "Energy Wave",
+              "label": "能量波",
               "segments": [
                 {
                   "kind": "attack",
@@ -1212,10 +1212,19 @@
                   "procChance": 0.2
                 }
               ]
-            },
+            }
+          ]
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "unknown",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
             {
-              "id": "attack2",
-              "label": "Spectral Dagger",
+              "id": "direct",
+              "label": "直接命中",
               "segments": [
                 {
                   "kind": "attack",
@@ -1231,7 +1240,7 @@
             },
             {
               "id": "blast",
-              "label": "范围伤害（Spectral Dagger Explosion）",
+              "label": "范围伤害（幽灵匕首）",
               "segments": [
                 {
                   "kind": "explosiveAttack",
@@ -1278,7 +1287,8 @@
                 "statusChance": 0.1
               }
             }
-          ]
+          ],
+          "_label": "幽灵匕首"
         }
       ]
     },
@@ -1370,10 +1380,19 @@
                   "procChance": 0.41
                 }
               ]
-            },
+            }
+          ]
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "unknown",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
             {
-              "id": "attack2",
-              "label": "Corrosive Wave",
+              "id": "direct",
+              "label": "直接命中",
               "segments": [
                 {
                   "kind": "attack",
@@ -1442,7 +1461,12 @@
                 "statusChance": 0.1
               }
             }
-          ]
+          ],
+          "override": {
+            "critChance": 0.09,
+            "critMultiplier": 2
+          },
+          "_label": "腐蚀波"
         }
       ]
     },
@@ -2278,10 +2302,19 @@
                   "procChance": 0.38
                 }
               ]
-            },
+            }
+          ]
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "unknown",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
             {
-              "id": "attack2",
-              "label": "Energy Disk",
+              "id": "direct",
+              "label": "直接命中",
               "segments": [
                 {
                   "kind": "attack",
@@ -2332,7 +2365,11 @@
                 "statusChance": 0.1
               }
             }
-          ]
+          ],
+          "override": {
+            "fireRate": 1
+          },
+          "_label": "能量盘"
         }
       ]
     },
@@ -2734,10 +2771,19 @@
                   "procChance": 0.14
                 }
               ]
-            },
+            }
+          ]
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "unknown",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
             {
-              "id": "attack2",
-              "label": "Ranged Attack",
+              "id": "direct",
+              "label": "直接命中",
               "segments": [
                 {
                   "kind": "attack",
@@ -2783,7 +2829,8 @@
                 "statusChance": 0.1
               }
             }
-          ]
+          ],
+          "_label": "远程攻击"
         }
       ]
     },
@@ -2818,10 +2865,19 @@
                   "procChance": 0.28
                 }
               ]
-            },
+            }
+          ]
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "unknown",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
             {
-              "id": "attack2",
-              "label": "Energy Disk",
+              "id": "direct",
+              "label": "直接命中",
               "segments": [
                 {
                   "kind": "attack",
@@ -2871,7 +2927,11 @@
                 "statusChance": 0.3
               }
             }
-          ]
+          ],
+          "override": {
+            "fireRate": 1
+          },
+          "_label": "能量盘"
         }
       ]
     },
@@ -3637,10 +3697,19 @@
                   "procChance": 0.34
                 }
               ]
-            },
+            }
+          ]
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "unknown",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
             {
-              "id": "attack2",
-              "label": "First Shockwave",
+              "id": "direct",
+              "label": "直接命中",
               "segments": [
                 {
                   "kind": "attack",
@@ -3651,10 +3720,20 @@
                   "procChance": 0.34
                 }
               ]
-            },
+            }
+          ],
+          "_label": "第一道冲击波"
+        },
+        {
+          "id": "mode3",
+          "role": "normal",
+          "trigger": "unknown",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
             {
-              "id": "attack3",
-              "label": "Second Shockwave",
+              "id": "direct",
+              "label": "直接命中",
               "segments": [
                 {
                   "kind": "attack",
@@ -3701,7 +3780,8 @@
                 "statusChance": 0.1
               }
             }
-          ]
+          ],
+          "_label": "第二道冲击波"
         }
       ]
     },
@@ -3736,10 +3816,19 @@
                   "procChance": 0.24
                 }
               ]
-            },
+            }
+          ]
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "unknown",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
             {
-              "id": "attack2",
-              "label": "Heavy Attack Glaive",
+              "id": "direct",
+              "label": "直接命中",
               "segments": [
                 {
                   "kind": "attack",
@@ -3754,7 +3843,7 @@
             },
             {
               "id": "blast",
-              "label": "范围伤害（Heavy Attack Glaive AoE）",
+              "label": "范围伤害（重击回旋刃）",
               "segments": [
                 {
                   "kind": "explosiveAttack",
@@ -3801,7 +3890,8 @@
                 "statusChance": 0.1
               }
             }
-          ]
+          ],
+          "_label": "重击回旋刃"
         }
       ]
     },
@@ -3837,10 +3927,19 @@
                   "procChance": 0.2
                 }
               ]
-            },
+            }
+          ]
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "unknown",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
             {
-              "id": "attack2",
-              "label": "Polearm Throw",
+              "id": "direct",
+              "label": "直接命中",
               "segments": [
                 {
                   "kind": "attack",
@@ -3908,7 +4007,11 @@
                 "statusChance": 0.1
               }
             }
-          ]
+          ],
+          "override": {
+            "critChance": 0.3
+          },
+          "_label": "长柄武器投掷"
         }
       ]
     },
@@ -5667,10 +5770,19 @@
                   "procChance": 0.14
                 }
               ]
-            },
+            }
+          ]
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "unknown",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
             {
-              "id": "attack2",
-              "label": "Charged Projectile",
+              "id": "direct",
+              "label": "直接命中",
               "trigger": "charge",
               "segments": [
                 {
@@ -5720,7 +5832,11 @@
                 "statusChance": 0.1
               }
             }
-          ]
+          ],
+          "override": {
+            "fireRate": 0.833
+          },
+          "_label": "蓄力弹"
         }
       ]
     },
@@ -7429,7 +7545,7 @@
             },
             {
               "id": "attack2",
-              "label": "Ranged Attack",
+              "label": "远程攻击",
               "segments": [
                 {
                   "kind": "attack",
@@ -9016,10 +9132,19 @@
                   "procChance": 0.37
                 }
               ]
-            },
+            }
+          ]
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "unknown",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
             {
-              "id": "attack2",
-              "label": "First Heavy Attack - Toxic Spines",
+              "id": "direct",
+              "label": "直接命中",
               "segments": [
                 {
                   "kind": "attack",
@@ -9038,10 +9163,25 @@
                 "statusChance": 0.0616,
                 "fireRate": 2
               }
-            },
+            }
+          ],
+          "override": {
+            "critMultiplier": 1.7,
+            "statusChance": 0.0616,
+            "fireRate": 2
+          },
+          "_label": "重击 I·毒刺"
+        },
+        {
+          "id": "mode3",
+          "role": "normal",
+          "trigger": "unknown",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
             {
-              "id": "attack3",
-              "label": "Second Heavy Attack - Toxic Spines",
+              "id": "direct",
+              "label": "直接命中",
               "segments": [
                 {
                   "kind": "attack",
@@ -9095,7 +9235,13 @@
                 "statusChance": 0.28
               }
             }
-          ]
+          ],
+          "override": {
+            "critMultiplier": 1.7,
+            "statusChance": 0.12300000000000001,
+            "fireRate": 2
+          },
+          "_label": "重击 II·毒刺"
         }
       ]
     },
@@ -9197,10 +9343,19 @@
                   "procChance": 0.37
                 }
               ]
-            },
+            }
+          ]
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "unknown",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
             {
-              "id": "attack2",
-              "label": "Corrosive Wave",
+              "id": "direct",
+              "label": "直接命中",
               "segments": [
                 {
                   "kind": "attack",
@@ -9265,7 +9420,8 @@
                 "statusChance": 0.1
               }
             }
-          ]
+          ],
+          "_label": "腐蚀波"
         }
       ]
     },
@@ -12006,10 +12162,19 @@
                   "procChance": 0.2
                 }
               ]
-            },
+            }
+          ]
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "unknown",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
             {
-              "id": "attack2",
-              "label": "Charged Projectile",
+              "id": "direct",
+              "label": "直接命中",
               "trigger": "charge",
               "segments": [
                 {
@@ -12060,7 +12225,12 @@
                 "statusChance": 0.1
               }
             }
-          ]
+          ],
+          "override": {
+            "statusChance": 0.14,
+            "fireRate": 0.833
+          },
+          "_label": "蓄力弹"
         }
       ]
     },
@@ -13514,10 +13684,19 @@
                   "procChance": 0.24
                 }
               ]
-            },
+            }
+          ]
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "unknown",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
             {
-              "id": "attack2",
-              "label": "Spectral Dagger",
+              "id": "direct",
+              "label": "直接命中",
               "segments": [
                 {
                   "kind": "attack",
@@ -13533,7 +13712,7 @@
             },
             {
               "id": "blast",
-              "label": "范围伤害（Spectral Dagger Explosion）",
+              "label": "范围伤害（幽灵匕首）",
               "segments": [
                 {
                   "kind": "explosiveAttack",
@@ -13579,7 +13758,8 @@
                 "statusChance": 0.1
               }
             }
-          ]
+          ],
+          "_label": "幽灵匕首"
         }
       ]
     },
@@ -13757,10 +13937,19 @@
                   "procChance": 0.18
                 }
               ]
-            },
+            }
+          ]
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "unknown",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
             {
-              "id": "attack2",
-              "label": "First Heavy Attack - Ethereal Daggers",
+              "id": "direct",
+              "label": "直接命中",
               "segments": [
                 {
                   "kind": "attack",
@@ -13776,10 +13965,24 @@
                 "statusChance": 0.01,
                 "fireRate": 2
               }
-            },
+            }
+          ],
+          "override": {
+            "statusChance": 0.01,
+            "fireRate": 2
+          },
+          "_label": "重击 I·以太匕首"
+        },
+        {
+          "id": "mode3",
+          "role": "normal",
+          "trigger": "unknown",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
             {
-              "id": "attack3",
-              "label": "Second Heavy Attack - Ethereal Daggers",
+              "id": "direct",
+              "label": "直接命中",
               "segments": [
                 {
                   "kind": "attack",
@@ -13830,7 +14033,12 @@
                 "statusChance": 0.34
               }
             }
-          ]
+          ],
+          "override": {
+            "statusChance": 0.02,
+            "fireRate": 2
+          },
+          "_label": "重击 II·以太匕首"
         }
       ]
     },
@@ -14047,10 +14255,19 @@
                   "procChance": 0.3
                 }
               ]
-            },
+            }
+          ]
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "unknown",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
             {
-              "id": "attack2",
-              "label": "Soul Swarm Projectile",
+              "id": "direct",
+              "label": "直接命中",
               "segments": [
                 {
                   "kind": "attack",
@@ -14101,7 +14318,13 @@
                 "statusChance": 0.1
               }
             }
-          ]
+          ],
+          "override": {
+            "critChance": 0.11,
+            "critMultiplier": 1.9,
+            "statusChance": 0.23
+          },
+          "_label": "魂群弹"
         }
       ]
     },
@@ -15289,7 +15512,7 @@
             },
             {
               "id": "attack2",
-              "label": "Ranged Attack",
+              "label": "远程攻击",
               "segments": [
                 {
                   "kind": "attack",
@@ -15374,10 +15597,19 @@
                   "procChance": 0.1
                 }
               ]
-            },
+            }
+          ]
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "unknown",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
             {
-              "id": "attack2",
-              "label": "Spectral Axe",
+              "id": "direct",
+              "label": "直接命中",
               "segments": [
                 {
                   "kind": "attack",
@@ -15397,7 +15629,7 @@
             },
             {
               "id": "blast",
-              "label": "范围伤害（Spectral Axe Explosion）",
+              "label": "范围伤害（幽灵战斧）",
               "segments": [
                 {
                   "kind": "explosiveAttack",
@@ -15441,7 +15673,12 @@
                 }
               ]
             }
-          ]
+          ],
+          "override": {
+            "critChance": 0.13,
+            "statusChance": 0.33
+          },
+          "_label": "幽灵战斧"
         }
       ]
     },
@@ -16243,10 +16480,19 @@
                   "procChance": 0.2
                 }
               ]
-            },
+            }
+          ]
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "unknown",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
             {
-              "id": "attack2",
-              "label": "Spectral Blade",
+              "id": "direct",
+              "label": "直接命中",
               "segments": [
                 {
                   "kind": "attack",
@@ -16262,7 +16508,7 @@
             },
             {
               "id": "blast",
-              "label": "范围伤害（Spectral Blade Explosion）",
+              "label": "范围伤害（幽灵之刃）",
               "segments": [
                 {
                   "kind": "explosiveAttack",
@@ -16308,7 +16554,8 @@
                 "statusChance": 0.1
               }
             }
-          ]
+          ],
+          "_label": "幽灵之刃"
         }
       ]
     },
@@ -16944,10 +17191,19 @@
                   "procChance": 0.2
                 }
               ]
-            },
+            }
+          ]
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "unknown",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
             {
-              "id": "attack2",
-              "label": "Spectral Dagger",
+              "id": "direct",
+              "label": "直接命中",
               "segments": [
                 {
                   "kind": "attack",
@@ -16963,7 +17219,7 @@
             },
             {
               "id": "blast",
-              "label": "范围伤害（Spectral Dagger Explosion）",
+              "label": "范围伤害（幽灵匕首）",
               "segments": [
                 {
                   "kind": "explosiveAttack",
@@ -17009,7 +17265,8 @@
                 "statusChance": 0.1
               }
             }
-          ]
+          ],
+          "_label": "幽灵匕首"
         }
       ]
     },
@@ -17521,10 +17778,19 @@
                   "procChance": 0.12
                 }
               ]
-            },
+            }
+          ]
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "unknown",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
             {
-              "id": "attack2",
-              "label": "First Heavy Attack - Ethereal Daggers",
+              "id": "direct",
+              "label": "直接命中",
               "segments": [
                 {
                   "kind": "attack",
@@ -17540,10 +17806,24 @@
                 "statusChance": 0.01,
                 "fireRate": 2
               }
-            },
+            }
+          ],
+          "override": {
+            "statusChance": 0.01,
+            "fireRate": 2
+          },
+          "_label": "重击 I·以太匕首"
+        },
+        {
+          "id": "mode3",
+          "role": "normal",
+          "trigger": "unknown",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
             {
-              "id": "attack3",
-              "label": "Second Heavy Attack - Ethereal Daggers",
+              "id": "direct",
+              "label": "直接命中",
               "segments": [
                 {
                   "kind": "attack",
@@ -17594,7 +17874,12 @@
                 "statusChance": 0.28
               }
             }
-          ]
+          ],
+          "override": {
+            "statusChance": 0.02,
+            "fireRate": 2
+          },
+          "_label": "重击 II·以太匕首"
         }
       ]
     },
@@ -18406,10 +18691,19 @@
                   "procChance": 0.28
                 }
               ]
-            },
+            }
+          ]
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "unknown",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
             {
-              "id": "attack2",
-              "label": "Soul Swarm Projectile",
+              "id": "direct",
+              "label": "直接命中",
               "segments": [
                 {
                   "kind": "attack",
@@ -18460,7 +18754,13 @@
                 "statusChance": 0.1
               }
             }
-          ]
+          ],
+          "override": {
+            "critChance": 0.11,
+            "critMultiplier": 1.9,
+            "statusChance": 0.23
+          },
+          "_label": "魂群弹"
         }
       ]
     },
@@ -18499,7 +18799,7 @@
             },
             {
               "id": "attack2",
-              "label": "Ranged Attack",
+              "label": "远程攻击",
               "segments": [
                 {
                   "kind": "attack",
@@ -18588,7 +18888,7 @@
             },
             {
               "id": "attack2",
-              "label": "Ranged Attack",
+              "label": "远程攻击",
               "segments": [
                 {
                   "kind": "attack",
@@ -19417,10 +19717,19 @@
                   "procChance": 0.22
                 }
               ]
-            },
+            }
+          ]
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "unknown",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
             {
-              "id": "attack2",
-              "label": "Dagger Projectile",
+              "id": "direct",
+              "label": "直接命中",
               "segments": [
                 {
                   "kind": "attack",
@@ -19466,7 +19775,8 @@
                 "statusChance": 0.1
               }
             }
-          ]
+          ],
+          "_label": "匕首弹"
         }
       ]
     },

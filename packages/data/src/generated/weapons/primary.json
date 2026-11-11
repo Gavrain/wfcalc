@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-11T17:31:30.891Z",
+  "generatedAt": "2026-11-11T17:49:24.357Z",
   "source": "WFCD/warframe-items (MIT)",
   "category": "primary",
   "count": 196,
@@ -262,7 +262,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "Slug Impact"
         }
       ]
     },
@@ -357,7 +358,8 @@
                 "fireRate": 1
               }
             }
-          ]
+          ],
+          "_label": "Grenade Impact"
         },
         {
           "id": "incarnon",
@@ -643,26 +645,6 @@
                 "statusChance": 0.3,
                 "fireRate": 20
               }
-            },
-            {
-              "id": "blast",
-              "label": "范围伤害",
-              "segments": [
-                {
-                  "kind": "explosiveAttack",
-                  "aoe": true,
-                  "damage": {
-                    "heat": 3
-                  },
-                  "procChance": 0.3
-                }
-              ],
-              "override": {
-                "critChance": 0.3,
-                "critMultiplier": 3,
-                "statusChance": 0.3,
-                "fireRate": 20
-              }
             }
           ],
           "override": {
@@ -748,7 +730,8 @@
             "critChance": 0,
             "critMultiplier": 1,
             "statusChance": 0
-          }
+          },
+          "_label": "Orb Launch"
         }
       ]
     },
@@ -808,7 +791,8 @@
           ],
           "override": {
             "fireRate": 2.7
-          }
+          },
+          "_label": "Grenade Impact"
         }
       ]
     },
@@ -859,7 +843,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "Orb Launch"
         }
       ]
     },
@@ -1851,7 +1836,8 @@
           ],
           "override": {
             "fireRate": 1.33
-          }
+          },
+          "_label": "Grenade Impact"
         }
       ]
     },
@@ -2062,7 +2048,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "Grenade Impact"
         }
       ]
     },
@@ -2365,10 +2352,19 @@
                   "procChance": 0.35
                 }
               ]
-            },
+            }
+          ]
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "semi",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
             {
-              "id": "attack2",
-              "label": "3.5x Zoom Radial Attack",
+              "id": "direct",
+              "label": "直接命中",
               "segments": [
                 {
                   "kind": "attack",
@@ -2380,7 +2376,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "开镜"
         }
       ]
     },
@@ -3754,7 +3751,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "Grenade Impact"
         }
       ]
     },
@@ -3892,7 +3890,8 @@
           ],
           "override": {
             "fireRate": 1
-          }
+          },
+          "_label": "Cluster Bomb Contact"
         },
         {
           "id": "primary",
@@ -4037,7 +4036,7 @@
           "variants": [
             {
               "id": "direct",
-              "label": "炮击模式",
+              "label": "直接命中",
               "segments": [
                 {
                   "kind": "attack",
@@ -4050,8 +4049,32 @@
               ]
             },
             {
-              "id": "attack2",
-              "label": "炮击模式·集束炸弹",
+              "id": "blast",
+              "label": "范围伤害",
+              "segments": [
+                {
+                  "kind": "explosiveAttack",
+                  "aoe": true,
+                  "damage": {
+                    "blast": 175
+                  },
+                  "procChance": 0.29
+                }
+              ]
+            }
+          ],
+          "_label": "炮击模式"
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "semi",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
+            {
+              "id": "direct",
+              "label": "直接命中",
               "segments": [
                 {
                   "kind": "attack",
@@ -4070,21 +4093,7 @@
             },
             {
               "id": "blast",
-              "label": "范围伤害（Cannon Mode Explosion）",
-              "segments": [
-                {
-                  "kind": "explosiveAttack",
-                  "aoe": true,
-                  "damage": {
-                    "blast": 175
-                  },
-                  "procChance": 0.29
-                }
-              ]
-            },
-            {
-              "id": "blast2",
-              "label": "范围伤害（炮击模式·集束炸弹）",
+              "label": "范围伤害",
               "segments": [
                 {
                   "kind": "explosiveAttack",
@@ -4101,10 +4110,16 @@
                 "statusChance": 0.1
               }
             }
-          ]
+          ],
+          "override": {
+            "critChance": 0.15,
+            "critMultiplier": 2,
+            "statusChance": 0.2
+          },
+          "_label": "集束炸弹"
         },
         {
-          "id": "mode2",
+          "id": "mode3",
           "role": "normal",
           "trigger": "semi",
           "bullets": 1,
@@ -4221,7 +4236,8 @@
                 "fireRate": 1
               }
             }
-          ]
+          ],
+          "_label": "Projectile Impact"
         }
       ]
     },
@@ -4304,10 +4320,19 @@
                   "procChance": 0.21
                 }
               ]
-            },
+            }
+          ]
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
             {
-              "id": "attack2",
-              "label": "信标",
+              "id": "direct",
+              "label": "直接命中",
               "segments": [
                 {
                   "kind": "attack",
@@ -4325,7 +4350,14 @@
                 "fireRate": 1.67
               }
             }
-          ]
+          ],
+          "override": {
+            "critChance": 0,
+            "critMultiplier": 1,
+            "statusChance": 0,
+            "fireRate": 1.67
+          },
+          "_label": "信标"
         }
       ]
     },
@@ -4376,7 +4408,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "Grenade Impact"
         }
       ]
     },
@@ -4417,10 +4450,22 @@
               "override": {
                 "fireRate": 5
               }
-            },
+            }
+          ],
+          "override": {
+            "fireRate": 5
+          }
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "burst",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
             {
-              "id": "attack2",
-              "label": "鱼叉",
+              "id": "direct",
+              "label": "直接命中",
               "segments": [
                 {
                   "kind": "attack",
@@ -4441,8 +4486,11 @@
             }
           ],
           "override": {
-            "fireRate": 5
-          }
+            "critChance": 0.25,
+            "statusChance": 0.13,
+            "fireRate": 1.5
+          },
+          "_label": "鱼叉"
         }
       ]
     },
@@ -5205,10 +5253,19 @@
                   "procChance": 0.15
                 }
               ]
-            },
+            }
+          ]
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
             {
-              "id": "attack2",
-              "label": "感染球",
+              "id": "direct",
+              "label": "直接命中",
               "segments": [
                 {
                   "kind": "attack",
@@ -5243,7 +5300,13 @@
                 "statusChance": 0.39
               }
             }
-          ]
+          ],
+          "override": {
+            "critChance": 0,
+            "critMultiplier": 0,
+            "statusChance": 1
+          },
+          "_label": "感染球"
         }
       ]
     },
@@ -5282,19 +5345,23 @@
               "override": {
                 "fireRate": 8.33
               }
-            },
+            }
+          ],
+          "override": {
+            "fireRate": 8.33
+          }
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "burst",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
             {
-              "id": "attack2",
-              "label": "感染鱼叉",
+              "id": "direct",
+              "label": "直接命中",
               "segments": [
-                {
-                  "kind": "attack",
-                  "aoe": false,
-                  "damage": {
-                    "toxin": 15
-                  },
-                  "procChance": 0.3
-                },
                 {
                   "kind": "attack",
                   "aoe": false,
@@ -5312,8 +5379,11 @@
             }
           ],
           "override": {
-            "fireRate": 8.33
-          }
+            "critChance": 0,
+            "critMultiplier": 1,
+            "fireRate": 5
+          },
+          "_label": "感染鱼叉"
         }
       ]
     },
@@ -6048,7 +6118,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "Rocket Impact"
         }
       ]
     },
@@ -6261,7 +6332,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "Grenade Impact"
         }
       ]
     },
@@ -6301,7 +6373,7 @@
           "variants": [
             {
               "id": "direct",
-              "label": "炮击模式",
+              "label": "直接命中",
               "segments": [
                 {
                   "kind": "attack",
@@ -6314,8 +6386,32 @@
               ]
             },
             {
-              "id": "attack2",
-              "label": "炮击模式·集束炸弹",
+              "id": "blast",
+              "label": "范围伤害",
+              "segments": [
+                {
+                  "kind": "explosiveAttack",
+                  "aoe": true,
+                  "damage": {
+                    "blast": 673
+                  },
+                  "procChance": 0.31
+                }
+              ]
+            }
+          ],
+          "_label": "炮击模式"
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "semi",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
+            {
+              "id": "direct",
+              "label": "直接命中",
               "segments": [
                 {
                   "kind": "attack",
@@ -6329,21 +6425,7 @@
             },
             {
               "id": "blast",
-              "label": "范围伤害（Cannon Mode Explosion）",
-              "segments": [
-                {
-                  "kind": "explosiveAttack",
-                  "aoe": true,
-                  "damage": {
-                    "blast": 673
-                  },
-                  "procChance": 0.31
-                }
-              ]
-            },
-            {
-              "id": "blast2",
-              "label": "范围伤害（炮击模式·集束炸弹）",
+              "label": "范围伤害",
               "segments": [
                 {
                   "kind": "explosiveAttack",
@@ -6355,10 +6437,11 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "集束炸弹"
         },
         {
-          "id": "mode2",
+          "id": "mode3",
           "role": "normal",
           "trigger": "semi",
           "bullets": 1,
@@ -7069,7 +7152,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "Grenade Impact"
         }
       ]
     },
@@ -7202,7 +7286,8 @@
             "critMultiplier": 1.5,
             "statusChance": 0.37,
             "fireRate": 2
-          }
+          },
+          "_label": "Plasma Bomb Impact"
         },
         {
           "id": "mode3",
@@ -7257,7 +7342,8 @@
             "critMultiplier": 1.5,
             "statusChance": 0.37,
             "fireRate": 2
-          }
+          },
+          "_label": "Cluster Bombs Impact"
         }
       ]
     },
@@ -7309,7 +7395,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "Rocket Impact"
         }
       ]
     },
@@ -7809,25 +7896,6 @@
                 "critMultiplier": 3,
                 "fireRate": 20
               }
-            },
-            {
-              "id": "blast",
-              "label": "范围伤害",
-              "segments": [
-                {
-                  "kind": "explosiveAttack",
-                  "aoe": true,
-                  "damage": {
-                    "heat": 13
-                  },
-                  "procChance": 0.3
-                }
-              ],
-              "override": {
-                "critChance": 0.28,
-                "critMultiplier": 3,
-                "fireRate": 20
-              }
             }
           ],
           "override": {
@@ -8018,7 +8086,7 @@
           "variants": [
             {
               "id": "direct",
-              "label": "霰弹",
+              "label": "直接命中",
               "segments": [
                 {
                   "kind": "attack",
@@ -8031,10 +8099,19 @@
                   "procChance": 0.09
                 }
               ]
-            },
+            }
+          ]
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "semi",
+          "bullets": 1,
+          "multishot": 6,
+          "variants": [
             {
-              "id": "attack2",
-              "label": "空爆弹",
+              "id": "direct",
+              "label": "直接命中",
               "segments": [
                 {
                   "kind": "attack",
@@ -8072,7 +8149,14 @@
                 "fireRate": 0.667
               }
             }
-          ]
+          ],
+          "override": {
+            "critChance": 0.04,
+            "critMultiplier": 1.6,
+            "statusChance": 0.5,
+            "fireRate": 0.667
+          },
+          "_label": "空爆弹"
         }
       ]
     },
@@ -8600,7 +8684,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "Projectile Impact"
         },
         {
           "id": "mode2",
@@ -9283,7 +9368,8 @@
             "critChance": 0.38,
             "statusChance": 0.5,
             "fireRate": 1.33
-          }
+          },
+          "_label": "Grenade Impact"
         }
       ]
     },
@@ -9450,7 +9536,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "Arrow Impact"
         }
       ]
     },
@@ -9889,7 +9976,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "Partially Charged Shot"
         },
         {
           "id": "charged",
@@ -10125,7 +10213,8 @@
           "override": {
             "statusChance": 0.37,
             "fireRate": 2
-          }
+          },
+          "_label": "Plasma Bomb Impact"
         },
         {
           "id": "mode3",
@@ -10174,7 +10263,8 @@
           "override": {
             "statusChance": 0.37,
             "fireRate": 2
-          }
+          },
+          "_label": "Cluster Bombs Impact"
         }
       ]
     },
@@ -10323,7 +10413,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "Rocket Impact"
         }
       ]
     },
@@ -10453,7 +10544,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "Rocket Impact"
         }
       ]
     },
@@ -12038,7 +12130,8 @@
             "critMultiplier": 2.4,
             "statusChance": 0.5,
             "fireRate": 1.33
-          }
+          },
+          "_label": "Grenade Impact"
         }
       ]
     },
@@ -12414,7 +12507,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "Slug Impact"
         }
       ]
     },
@@ -12439,7 +12533,7 @@
           "variants": [
             {
               "id": "direct",
-              "label": "霰弹",
+              "label": "直接命中",
               "segments": [
                 {
                   "kind": "attack",
@@ -12452,10 +12546,19 @@
                   "procChance": 0.06
                 }
               ]
-            },
+            }
+          ]
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "semi",
+          "bullets": 1,
+          "multishot": 6,
+          "variants": [
             {
-              "id": "attack2",
-              "label": "空爆弹",
+              "id": "direct",
+              "label": "直接命中",
               "segments": [
                 {
                   "kind": "attack",
@@ -12491,7 +12594,13 @@
                 "statusChance": 0.28
               }
             }
-          ]
+          ],
+          "override": {
+            "critChance": 0.04,
+            "critMultiplier": 1.6,
+            "statusChance": 0.28
+          },
+          "_label": "空爆弹"
         }
       ]
     },
@@ -12819,7 +12928,8 @@
                 "fireRate": 1
               }
             }
-          ]
+          ],
+          "_label": "Projectile Impact"
         }
       ]
     },

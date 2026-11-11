@@ -199,6 +199,96 @@ const TRIGGER_NAMES: readonly RegExp[] = [
   /^(Lock-on Mode|Barrage Mode)$/i,
 ];
 
+/**
+ * 「独立弹道」：一种**自己飞出去的单发攻击**（鱼叉 / 长矛 / 榴弹 / 信标…）。
+ *
+ * 需求方 2026-11-12：「附肢寄生者那个是**感染鱼叉**」→ 同时选择了「鱼叉也单开成一个射击模式
+ * （像信标、炮台那样）」。WFCD 只把 `Infested Harpoon` 挂了 `Projectile`，
+ * `Infested Harpoon Contact` 没有 `shot_type`——前者开组，后者作为子段跟进来，最后按数值去重。
+ */
+const isOwnProjectile = (a: WfcdAttack): boolean => String(a.shot_type ?? '').toLowerCase() === 'projectile';
+
+/** 这条攻击是不是范围伤害（`shot_type === 'AoE'`，或 WFCD 漏标但确定是 AoE 的那几条） */
+const isAoEAttack = (a: WfcdAttack): boolean =>
+  String(a.shot_type ?? '').toLowerCase() === 'aoe' || forcedAoe(a.name);
+
+/**
+ * 这类名字是「另一个模式自己的子段」，**不是**独立弹道（D-150）。
+ *
+ * 钩铳的 10 点命中附带、磁道炮的吸引场、量子切割器的方块引爆都属此类：
+ * 它们的名字不像主攻击、又有 `shot_type: 'Projectile'`，但确实是同一次开火的一部分。
+ *
+ * ⚠ 钉成**具体名字**而不是词形（`\bRadial Attack$` / `Cluster Bomb`）——否则
+ *   异化者的 `Partial Reload Explosion`、量子切割器的 `Cube Explosion`、沙皇的
+ *   `Cannon Mode Cluster Bomb` 都会被拆成独立模式，把上一轮已经确认的划法弄反。
+ */
+const SUBPART_NAMES = /^(Attraction Field|Cube Explosion|Cube \(shot by player\)|Cannon Mode Explosion|Cannon Mode Cluster Bomb Explosion|Incarnon Form Radial Attack|Radial Attack|Auto Radial Attack)$/i;
+
+/**
+ * **按名字独立成模式的「附属攻击」**（D-150，需求方 2026-11-12）。
+ *
+ * 需求方：「信标、炮台独立成模式」。
+ * ```
+ * 巴兹火枪   Normal Attack 30/24/6   +  Beacon 穿刺 3          → 2 个模式
+ * 方位角     Normal Attack 2/5/13    +  Turret Expiry 爆 75    → 2 个模式
+ * ```
+ * 它们不是「同一次开火的子段」：信标是打在敌人身上的标记镖、炮台是投出去持续射击的物件，
+ * 各自有独立的触发时机，所以跟扳机词一样各算一个射击模式。
+ *
+ * ⚠ 其余「附属段」仍留在原模式里：`Infested Harpoon Contact`（附肢寄生者的鱼叉命中子段）、
+ *   `Attraction Field`（磁道炮的吸引场）、`Cube (shot by player)`（量子切割器的引爆）。
+ */
+const SIDE_ATTACK_NAMES: readonly RegExp[] = [/^Beacon$/i, /^Turret( Expiry)?$/i];
+
+/**
+ * **开镜模式**（D-150 第四轮，需求方 2026-11-12）：
+ * > 「换，开镜以后不是一个模式了」
+ *
+ * 猛毒（Komorex）在 WFCD 里是 `Normal Attack`（冲击 96.9）+ `3.5x Zoom Radial Attack`（病毒 53）。
+ * 开镜换的是**整个弹种与面板**，不是同一次开火里的爆炸段——所以名字里带 `X Zoom` / `Scoped`
+ * 的攻击自成一个射击模式（`shot_type` 在 WFCD 里是缺的，不能靠它判）。
+ *
+ * ⚠ 名字表只认「zoom / scoped」这类**明确的倍镜标记**：`Alt-Fire` / `Radial Attack` 之类
+ *   仍走原来的规则，避免把普通的副模式／爆炸段误拆。
+ */
+const ZOOM_ATTACK_NAMES: readonly RegExp[] = [/\b\d+(\.\d+)?x\s+zoom\b/i, /\bzoomed\b|\bscoped\b/i];
+
+/**
+ * 「独立弹道」的名字（D-150 第二轮，需求方 2026-11-12 晚）：
+ * > 「鱼叉也单开成一个射击模式（像信标、炮台那样）」
+ *
+ * 判据是需求方的原话：「一个射击模式一般只会有一个投射物命中，只有赘骨的灵化是个例外」。
+ * 一条攻击**自己飞出去**（`shot_type === 'Projectile'`）、名字又不是主锚点 / 扳机词 / 既有的
+ * 附属攻击（信标 / 炮台）→ 它跟主射击并列，单开一个模式；它带 `Explosion` 子段的话跟随在它下面。
+ *
+ * ⚠ 与 `SIDE_ATTACK_NAMES` 的分工：信标 / 炮台在 WFCD 里分别是 `Projectile` / 无 shot_type，
+ *   走名字表；这里的弹道靠 `shot_type` 判，名字表只管「哪些名字看起来像弹道」。
+ */
+const isBallisticAim = (a: WfcdAttack): boolean => isOwnProjectile(a) && !isAoEAttack(a);
+
+/**
+ * 一条弹道自己的 **AoE 子段**（`Ranged Attack` 的 `Ranged Attack Explosion`）：
+ * 名字以它的名字开头（含主干去掉子段词后相同）的那条 AoE。只有这类才跟随弹道单开模式。
+ */
+function isOwnAoeChild(parentName: string, childName: string): boolean {
+  const stem = (n: string): string => String(n ?? '').toLowerCase().replace(/\s*radial attack$/, '').trim();
+  const p = stem(parentName);
+  const c = stem(childName);
+  return c === p || c.startsWith(p + ' ');
+}
+
+/**
+ * 上面这条路是「跟随父弹道」的命名依据；当前实现里「`xxx Explosion` / `xxx Contact`
+ * 紧随弹道」本身就由 `BOMB_SWITCH` 与「归当前组」规则覆盖，`isOwnAoeChild` 留作
+ * 其它需要按名字判定从属关系的场合（例如核对导出顺序反常的情况）。
+ */
+void isOwnAoeChild;
+
+/** 中文名查表用（模式名 / 攻击方式名共用） */
+function zhOf(name: string): string | undefined {
+  return ZH_OF[String(name ?? '').trim().toLowerCase()];
+}
+
 /** 同义/从属关系：带这些词的是「另一个模式的段」，不是新模式 */
 const SUBPART: readonly RegExp[] = [
   /Radial Attack/i,
@@ -261,6 +351,83 @@ const SIDE_WEAPON = /^(Cube|Quill)\b/i;
 const THROW_SWITCH = /^(Partial Reload|Reload From Empty)\b/i;
 
 const matchesAny = (name: string, list: readonly RegExp[]): boolean => list.some((re) => re.test(name));
+
+/**
+ * WFCD 攻击名 → 中文名（需求方：界面一律中文）。
+ *
+ * 两个用途（D-150）：
+ *   1. 攻击方式标签（`直接命中` / `范围伤害（集束炸弹）`）；
+ *   2. **模式名**：拆出来的副模式用触发它的那条攻击名当名字
+ *      ——「信标」「炮台」「感染鱼叉」都是模式名，不是攻击方式名。
+ *
+ * 空串 = 锚点名（`Normal Attack`），只用于「直接命中」判定，不当模式名。
+ */
+const ZH_OF: Readonly<Record<string, string>> = {
+  'normal attack': '',
+  'normal': '',
+  'primary': '',
+  'incarnon form': '',
+  'incarnon form held': '射线',
+  'incarnon form charge': '蓄力',
+  'incarnon form held damage': '射线',
+  'incarnon form charge attack': '蓄力',
+  'plasma bomb': '等离子炸弹',
+  'cluster bombs': '集束炸弹',
+  'grenade': '榴弹',
+  'poison cloud': '毒云',
+  'radial attack': '范围伤害',
+  'alt-fire': '次要射击',
+  'secondary fire': '次要射击',
+  'beam': '',
+  'beacon': '信标',
+  'turret expiry': '炮台',
+  // ── D-150 拆出独立模式后，直出英文的次要射击名 ──
+  'buckshot': '霰弹',
+  'air burst projectile': '空爆弹',
+  'auto': '全自动',
+  'charged shot': '蓄力',
+  'charged shot laser': '蓄力激光',
+  'cannon mode projectile': '炮击模式',
+  'cannon mode cluster bomb': '炮击模式·集束炸弹',
+  'cube (direct hit)': '方块直击',
+  'cube explosion': '方块爆炸',
+  'cube (shot by player)': '方块引爆',
+  'harpoon': '鱼叉',
+  'infested harpoon': '感染鱼叉',
+  'infested orb': '感染球',
+  'spear throw': '投掷长矛',
+  'projectile': '投射物',
+  'rocket': '火箭',
+  'homing spore': '追踪孢子',
+  'uncharged': '未蓄力',
+  'uncharged projectile': '未蓄力投射物',
+  'fully charged projectile': '满蓄力投射物',
+  'fully stacked orb singularity': '满层球体奇点',
+  'corrosive dot': '腐蚀持续伤害',
+  // ── D-150 第二轮：弹道 / 近战飞掷 / 重击弹道（WFCD 的原名，界面一律中文）──
+  'contact': '命中',
+  'uncharged direct hit': '未蓄力直击',
+  'cannon mode cluster bomb contact': '集束炸弹',
+  'homing spore contact': '追踪孢子',
+  'spectral dagger': '幽灵匕首',
+  'spectral blade': '幽灵之刃',
+  'spectral axe': '幽灵战斧',
+  'corrosive wave': '腐蚀波',
+  'energy disk': '能量盘',
+  'energy wave': '能量波',
+  'ranged attack': '远程攻击',
+  'first shockwave': '第一道冲击波',
+  'second shockwave': '第二道冲击波',
+  'heavy attack glaive': '重击回旋刃',
+  'polearm throw': '长柄武器投掷',
+  'charged projectile': '蓄力弹',
+  'dagger projectile': '匕首弹',
+  'soul swarm projectile': '魂群弹',
+  'first heavy attack - toxic spines': '重击 I·毒刺',
+  'second heavy attack - toxic spines': '重击 II·毒刺',
+  'first heavy attack - ethereal daggers': '重击 I·以太匕首',
+  'second heavy attack - ethereal daggers': '重击 II·以太匕首',
+};
 
 /** 攻击名主干 → 稳定 id（`Partial Reload` → `copartialreload`） */
 const slug = (s: string): string =>
@@ -360,49 +527,7 @@ function groupAttackVariants(attacks: readonly WfcdAttack[]): { id: string; labe
     // 所以不再拼「某某·爆炸」，而是和普通模式用同一套叫法：
     //   非 AoE → 直接命中；AoE → 范围伤害。
     // 同一侧有多种时再加原名区分（`等离子炸弹` / `集束炸弹` 都是命中段）。
-    const ZH: Record<string, string> = {
-      'normal attack': '',
-      'normal': '',
-      'primary': '',
-      'incarnon form': '',
-      'incarnon form held': '射线',
-      'incarnon form charge': '蓄力',
-      'incarnon form held damage': '射线',
-      'incarnon form charge attack': '蓄力',
-      'plasma bomb': '等离子炸弹',
-      'cluster bombs': '集束炸弹',
-      'grenade': '榴弹',
-      'poison cloud': '毒云',
-      'radial attack': '范围伤害',
-      'alt-fire': '次要射击',
-      'secondary fire': '次要射击',
-      'beam': '',
-      'beacon': '信标',
-      // ── D-150 拆出独立模式后，直出英文的次要射击名（需求方：一律中文名展示）──
-      'buckshot': '霰弹',
-      'air burst projectile': '空爆弹',
-      'auto': '全自动',
-      'charged shot': '蓄力',
-      'charged shot laser': '蓄力激光',
-      'cannon mode projectile': '炮击模式',
-      'cannon mode cluster bomb': '炮击模式·集束炸弹',
-      'cube (direct hit)': '方块直击',
-      'cube explosion': '方块爆炸',
-      'cube (shot by player)': '方块引爆',
-      'turret expiry': '炮台过期',
-      'harpoon': '鱼叉',
-      'infested harpoon': '感染鱼叉',
-      'infested orb': '感染球',
-      'spear throw': '投掷长矛',
-      'projectile': '投射物',
-      'rocket': '火箭',
-      'homing spore': '追踪孢子',
-      'uncharged': '未蓄力',
-      'uncharged projectile': '未蓄力投射物',
-      'fully charged projectile': '满蓄力投射物',
-      'fully stacked orb singularity': '满层球体奇点',
-      'corrosive dot': '腐蚀持续伤害',
-    };
+    const ZH = ZH_OF;
     // 查译名用**原始攻击名**（`Normal Attack`），不是剥过子段词的主干（`Normal`）——
     // 否则 `ZH` 里的 `'normal attack'` 永远匹配不上，标签会漏成英文原名。
     const rawName = String(g.attacks[0]?.name ?? '').trim();
@@ -410,8 +535,7 @@ function groupAttackVariants(attacks: readonly WfcdAttack[]): { id: string; labe
       ZH[g.key.toLowerCase()] ??
       ZH[rawName.toLowerCase()] ??
       // 表外名字：用**原始名**（比剥过子段词的主干可读），仍没有就退回主干
-      (rawName || g.key);
-    // 标签规则（需求方 2026-11-12：用「直接命中 / 范围伤害」区分，别拼「某某·爆炸」）：
+      (rawName || g.key);    // 标签规则（需求方 2026-11-12：用「直接命中 / 范围伤害」区分，别拼「某某·爆炸」）：
     //   · 爆炸段 → 「范围伤害」（多段时后面带原名，如「范围伤害（集束炸弹）」）
     //   · 命中段 → 「直接命中」；但如果这一段换了**发射方式**（射线 / 蓄力），就用那个名字，
     //     否则赘骨灵化里「射线」和「蓄力」都显示成「直接命中」就分不出来了
@@ -464,6 +588,28 @@ function groupAttackVariants(attacks: readonly WfcdAttack[]): { id: string; labe
     used.add(id);
     return { id, label, attacks: g.attacks };
   });
+}
+
+/**
+ * 两条攻击是不是**同一次开火的同一种伤害**（D-150）。
+ *
+ * 需求方 2026-11-12：「附肢寄生者那个是**感染鱼叉**不是毒云」——界面上「感染鱼叉」下出现两行毒素。
+ * 那是 WFCD 把同一次命中的鱼叉拆成了 `Infested Harpoon` + `Infested Harpoon Contact`（各 15 毒素）。
+ * 判断依据就用需求方给的判据：**一个射击模式一般只会有一个投射物命中**。
+ * 同名、同伤害、同触发率的两条不可能是两种独立射击，只能是同一发的子段。
+ *
+ * ⚠ 只合**同名字**的：`Infested Harpoon`（15）与 `Normal Attack`（33）名字不同，
+ *   前者是独立模式（鱼叉），后者是主射击，两者都留。
+ */
+function isSameShotDuplicate(a: WfcdAttack, b: WfcdAttack): boolean {
+  const sig = (x: WfcdAttack): string =>
+    JSON.stringify([
+      Object.entries(x.damage ?? {})
+        .filter(([, v]) => v)
+        .sort(([k1], [k2]) => (k1 < k2 ? -1 : 1)),
+      x.status_chance ?? null,
+    ]);
+  return sig(a) === sig(b);
 }
 
 
@@ -531,10 +677,36 @@ function groupAttacks(attacks: readonly WfcdAttack[]): { name: string; attacks: 
     // `Burst Mode` / `Semi-Auto Mode` / `Auto`，每一条都是一个独立射击模式。
     // 锚点与扳机词先判——它们定义"模式本身"，后面的子段（`Radial Attack` / `Explosion`…）
     // 才归到当前扳机组里。
-    if (matchesAny(name, TRIGGER_NAMES)) {
+    if (matchesAny(name, TRIGGER_NAMES) || matchesAny(name, SIDE_ATTACK_NAMES) || matchesAny(name, ZOOM_ATTACK_NAMES)) {
       current = { name, attacks: [a] };
       groups.push(current);
       currentBomb = null;
+      currentSide = null;
+      continue;
+    }
+    // ── 独立弹道（D-150）：自己飞出去的投射物（鱼叉 / 长矛 / 榴弹…）各起一个模式 ──
+    //
+    // 需求方 2026-11-12 晚：「鱼叉也单开成一个射击模式（像信标、炮台那样）」。
+    // 判据就是那句「一个射击模式一般只会有一个投射物命中」——一条投射物攻击自成一组，
+    // 它后面紧跟的 `xxx Explosion` / `xxx Contact` 等子段跟着进组，其余攻击留在原模式。
+    //
+    // ⚠ `Radial Attack` / `Attraction Field` / `Cube (shot by player)` 这类子段名字挡掉，
+    //   它们虽然也是投射物，但属于同一次开火的一部分（钩铳的命中附带、磁道炮的吸引场）。
+    // ⚠ 范围伤害（AoE）不是弹道本体，不开组（`Cannon Mode Cluster Bomb Contact` 是集束炸弹的命中，
+    //   它自己的 `Cluster Bomb Explosion` 跟随，但那条不是「投射物」所以不进这个分支）。
+    if (
+      isBallisticAim(a) &&
+      !SUBPART_NAMES.test(name) &&
+      !matchesAny(name, PRIMARY_ANCHORS) &&
+      !matchesAny(name, SEPARATE_MODE) &&
+      !SIDE_WEAPON.test(name) &&
+      !THROW_SWITCH.test(name) &&
+      !BOMB_SWITCH.test(name) &&
+      !isAoEAttack(a)
+    ) {
+      current = { name, attacks: [a] };
+      groups.push(current);
+      currentBomb = { name, attacks: current.attacks }; // 它的 AoE / Contact 子段都跟进来
       currentSide = null;
       continue;
     }
@@ -591,7 +763,12 @@ function groupAttacks(attacks: readonly WfcdAttack[]): { name: string; attacks: 
   const split: { name: string; attacks: WfcdAttack[] }[] = [];
   for (const g of groups) {
     // 该组是否已经有自己的锚点（主攻击 / 独立模式 / 扳机词）开场
-    const gAnchor = matchesAny(g.name, PRIMARY_ANCHORS) || matchesAny(g.name, SEPARATE_MODE) || matchesAny(g.name, TRIGGER_NAMES);
+    const gAnchor =
+      matchesAny(g.name, PRIMARY_ANCHORS) ||
+      matchesAny(g.name, SEPARATE_MODE) ||
+      matchesAny(g.name, TRIGGER_NAMES) ||
+      matchesAny(g.name, SIDE_ATTACK_NAMES) ||
+      matchesAny(g.name, ZOOM_ATTACK_NAMES);
     const stay: WfcdAttack[] = [];
     const standalone: WfcdAttack[] = [];
     for (const a of g.attacks) {
@@ -600,12 +777,35 @@ function groupAttacks(attacks: readonly WfcdAttack[]): { name: string; attacks: 
       // 组里已经有锚点打头 → 它就定义了这个模式本身，不再往外拆；
       // 只有「整组都没有锚点」时才把扳机词拆出来（否则量子切割器的 `Cube (shot by player)`
       // 这种附属段会被单拎成第三个模式）。
-      const splitOut = !isAnchorName && !gAnchor && matchesAny(n, TRIGGER_NAMES);
+      const splitOut =
+        !isAnchorName &&
+        !gAnchor &&
+        (matchesAny(n, TRIGGER_NAMES) || matchesAny(n, SIDE_ATTACK_NAMES));
       if (splitOut) standalone.push(a);
       else stay.push(a);
     }
     if (stay.length > 0) split.push({ name: g.name, attacks: stay });
     for (const a of standalone) split.push({ name: String(a.name ?? ''), attacks: [a] });
+  }
+
+  // ── D-150：同一模式内的「重复子段」去重 ──
+  //
+  // 附肢寄生者的「感染鱼叉」在 WFCD 里是 `Infested Harpoon` + `Infested Harpoon Contact` 两条，
+  // 数值一模一样（各 15 毒素、触发 30%）。按「一个射击模式一般只会有一个投射物命中」，
+  // 这是同一次开火的同一发，不能算两段——否则界面上同一种毒素会显示两行。
+  for (const g of split) {
+    const subpartStem = (n: string): string =>
+      String(n ?? '')
+        .trim()
+        .toLowerCase()
+        .replace(/\s+(contact|impact|explosion|explode|detonation|radial attack|aoe|direct hit)$/i, '')
+        .trim();
+    const kept: WfcdAttack[] = [];
+    for (const a of g.attacks) {
+      const dup = kept.some((k) => isSameShotDuplicate(k, a) && subpartStem(k.name) === subpartStem(a.name));
+      if (!dup) kept.push(a);
+    }
+    g.attacks = kept;
   }
   return split;
 }
@@ -930,12 +1130,41 @@ export function cleanWfcdWeapons(raw: readonly WfcdWeapon[]): WfcdCleanResult {
             : trigger;
       const isBeam = modeTrigger === 'held';
 
-      // ── 模式标签与 id（需求方 2026-11-12）──
+      // ── 模式标签与 id（需求方 2026-11-12 / 2026-11-12 晚）──
       //
       // 拆出来的副模式**一律叫「次要射击」**，与幻离子副模式的叫法一致；
       // 原始攻击名（`Cube` / `Partial Reload` / `Reload From Empty`）写进 `_note` 供溯源。
+      //
+      // ⚠ D-150 修正：模式**名 = 触发它的那条攻击名**，攻击方式（变体）一律叫「直接命中 / 范围伤害」。
+      //   需求方 2026-11-12：
+      //   > 「信标、炮台独立成模式」
+      //   > 「附肢寄生者那个是**感染鱼叉**不是毒云，毒云是托里德主要模式会带的」
+      //   所以巴兹火枪 ＝ 主模式 + 「信标」模式、方位角 ＝ 主模式 + 「炮台」模式、
+      //   附肢寄生者 ＝ 主模式 + 「感染鱼叉」模式；模式内的两段（15+15）才是同一次开火的子段。
+      //   不能再把攻击方式名拿来当模式名（旧行为会把标在攻击方式上的「信标」当成模式标题，
+      //   而模式本身没有名字）。
       const isSideGroup = SIDE_WEAPON.test(g.name) || THROW_SWITCH.test(g.name);
       const sideNote = isSideGroup ? `来源攻击：${g.attacks.map((a) => a.name).join(' / ')}` : undefined;
+
+      /**
+       * 该模式自己的展示名（`_label`），没有则不出。
+       *
+       * 规则：**取触发这个模式的那条攻击名**，中文化；主攻击锚点（`Normal Attack` / `Burst Mode`
+       * / `Incarnon Form`…）与「换弹方式」这类名字不当作模式名（前者是默认主模式，后者用「次要射击」）。
+       */
+      const modeLabel = ((): string | undefined => {
+        if (isSideGroup) return '次要射击';
+        const first = String(g.attacks[0]?.name ?? '');
+        if (!first) return undefined;
+        if (matchesAny(first, PRIMARY_ANCHORS) || matchesAny(first, SEPARATE_MODE) || matchesAny(first, TRIGGER_NAMES)) {
+          return undefined;
+        }
+        if (isIncarnon) return undefined;
+        // 开镜模式：模式名直接叫「开镜」，而不是「3.5x Zoom Radial Attack」这种导出原名
+        if (matchesAny(first, ZOOM_ATTACK_NAMES)) return '开镜';
+        // 未知名字不硬占位：出英文原名比空串更容易被发现
+        return zhOf(first) ?? first;
+      })();
 
       const mode: AttackMode = {
         id,
@@ -945,7 +1174,7 @@ export function cleanWfcdWeapons(raw: readonly WfcdWeapon[]): WfcdCleanResult {
         multishot: round4(w.multishot ?? 1),
         variants,
         ...(roleOverride ? { override: roleOverride } : {}),
-        ...(isSideGroup ? { _label: '次要射击' } : {}),
+        ...(modeLabel ? { _label: modeLabel } : {}),
         ...(sideNote ? { _note: sideNote } : {}),
       };
       modes.push(mode);

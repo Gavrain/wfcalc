@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-11T17:31:30.903Z",
+  "generatedAt": "2026-11-11T17:49:24.373Z",
   "source": "WFCD/warframe-items (MIT)",
   "category": "companion",
   "count": 24,
@@ -108,7 +108,8 @@
           ],
           "override": {
             "critMultiplier": 1.8
-          }
+          },
+          "_label": "Direct Hit"
         }
       ]
     },
@@ -245,7 +246,8 @@
           ],
           "override": {
             "fireRate": 2.5
-          }
+          },
+          "_label": "Projectile Impact"
         }
       ]
     },
@@ -1032,7 +1034,8 @@
                 "statusChance": 0.2
               }
             }
-          ]
+          ],
+          "_label": "Impact"
         }
       ]
     },
