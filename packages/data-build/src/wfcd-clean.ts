@@ -185,7 +185,26 @@ const SUBPART: readonly RegExp[] = [
   /^Orb /i,
 ];
 
+/**
+ * 「按名字切换的弹种」：名字本身就是一个独立的射击方式，但**不在** `SEPARATE_MODE` 里。
+ *
+ * 典型是幻离子（Phantasma）：`Plasma Bomb Impact / Plasma Bomb Explosion /
+ * Cluster Bombs Impact / Cluster Bombs Explosion` 是它的**副模式子母弹**，
+ * 主模式是一条射线（`Beam`）。之前这些名字既不是锚点也不匹配 `SEPARATE_MODE`，
+ * 于是被 `.` 之后的「挂到前一个锚点」规则吞进了射线主模式 ——
+ * 结果射线主模式里混进了 15/73/3/18 四段子母弹伤害，主模式伤害虚高。
+ *
+ * 判据取「名字的第一个词」：同一把武器里，凡是以某个**非主锚点首词**开头的攻击，
+ * 若该首词不是 SUBPART（Impact/Explosion/AoE…），就以它为首起一个独立模式，
+ * 其后同首词的攻击（含 Explosion / Impact 等子段）都归这个模式。
+ *
+ * 例：`Plasma Bomb Impact` → 首词 `Plasma`，且不是 SUBPART → 新模式；
+ *     `Plasma Bomb Explosion` → 同首词 → 归上一个 `Plasma` 模式。
+ */
+const BOMB_SWITCH = /^(Plasma Bomb|Cluster Bombs?|Cluster|Bomb|Grenade|Rocket|Missile|Charge Bombs?)/i;
+
 const matchesAny = (name: string, list: readonly RegExp[]): boolean => list.some((re) => re.test(name));
+
 
 /** 是否有明确的独立模式锚点（不算主攻击锚点） */
 function hasSeparateModeAnchor(attacks: readonly WfcdAttack[]): boolean {
@@ -207,17 +226,38 @@ function groupAttacks(attacks: readonly WfcdAttack[]): { name: string; attacks: 
   if (anchors.length === 0) return fallbackGroups(attacks);
 
   let current: { name: string; attacks: WfcdAttack[] } | null = null;
+  // 当前"弹种"组：BOMB_SWITCH 命中的那一段所开的组。同弹种的后续子段都归它，
+  // 即使中间没有新的锚点。
+  let currentBomb: { name: string; attacks: WfcdAttack[] } | null = null;
   for (const a of attacks) {
-    const isAnchor = matchesAny(a.name, SEPARATE_MODE) || matchesAny(a.name, PRIMARY_ANCHORS);
+    const name = String(a.name ?? '');
+    const isAnchor = matchesAny(name, SEPARATE_MODE) || matchesAny(name, PRIMARY_ANCHORS);
     if (isAnchor) {
-      current = { name: a.name, attacks: [a] };
+      current = { name, attacks: [a] };
       groups.push(current);
+      currentBomb = null; // 新锚点打断弹种分组
+      continue;
+    }
+    // ── 弹种切换：`Cluster Bombs Impact` 开新组，`Cluster Bombs Explosion` 归它 ──
+    const bomb = name.match(BOMB_SWITCH)?.[1] ?? null;
+    if (bomb) {
+      if (currentBomb && currentBomb.name.toLowerCase().startsWith(bomb.toLowerCase())) {
+        currentBomb.attacks.push(a);
+      } else {
+        currentBomb = { name: name, attacks: [a] };
+        groups.push(currentBomb);
+      }
+      continue;
+    }
+    // 其余子段归当前锚点（若有），否则归当前弹种组
+    if (currentBomb) {
+      currentBomb.attacks.push(a);
     } else if (current) {
       current.attacks.push(a);
     } else {
-      // 锚点之前的孤立子段（例如 "1st Attack" 之前没有）→ 挂到第一个组
-      groups.push({ name: a.name, attacks: [a] });
-      current = groups[groups.length - 1]!;
+      // 锚点之前的孤立子段 → 自成一组的起点
+      current = { name: name, attacks: [a] };
+      groups.push(current);
     }
   }
   return groups;
@@ -386,20 +426,36 @@ export function cleanWfcdWeapons(raw: readonly WfcdWeapon[]): WfcdCleanResult {
           ? { ...(override ?? {}), magazineSize: 0, reloadTime: 0 }
           : override;
 
+      // ── 该模式的扳机 ──
+      // D-148 规则 1：扳机 `Held` → 射线。但**扳机是按模式算的**，不是整把武器共用一个：
+      // 幻离子（Phantasma）武器级 trigger 是 Held（主模式射线），它的副模式
+      // `Plasma Bomb` / `Cluster Bombs` 是投射物 + 范围，不是射线。
+      //
+      // ⚠ 射线的攻击名多数是 `Normal Attack` / `Primary`，**不是** `Beam`
+      //   （安培克斯 / 导热聚焦枪 / 噬菌者 / 火鸡 / 冷冻光束 都是 Normal Attack），
+      //   所以不能按名字判。可靠判据是 `shot_type`：射线是 `Hit-Scan`，
+      //   而幻离子的子母弹是 `Projectile` / `AoE`。
+      //
+      //   该模式内存在 Hit-Scan 攻击 → 保持武器级 Held（射线）；
+      //   全是 Projectile / AoE → 这个模式不是射线。
+      const modeHasHitscan = g.attacks.some((a) => String(a.shot_type ?? '').toLowerCase() === 'hit-scan');
+      const modeHasBeamAttack = g.attacks.some((a) => isHeldAttack(a.name) || /^(Beam|Held)$/i.test(String(a.name ?? '')));
+      const modeTrigger: TriggerKind = trigger === 'held' && !modeHasHitscan && !modeHasBeamAttack ? 'semi' : trigger;
+
       const mode: AttackMode = {
         id,
         role,
-        trigger,
+        trigger: modeTrigger,
         bullets: 1,
         multishot: round4(w.multishot ?? 1),
         variants: [{ id: 'direct', label: '直接命中', segments: segs }],
         ...(roleOverride ? { override: roleOverride } : {}),
       };
-      // 射线判定只认「扳机 Held」或「该模式内有非 AoE 的 Held 攻击」。
+      // 射线判定只认「该模式的扳机 Held」或「该模式内有非 AoE 的 Held 攻击」。
       // 攻击名单先暂存在模式对象上，判定后即删，不进入产出。
       const beamHits = g.attacks.filter((a) => isHeldAttack(a.name) && String(a.shot_type ?? '').toLowerCase() !== 'aoe');
       (mode as AttackMode & { _beamAttacks?: boolean })._beamAttacks = beamHits.length > 0;
-      const beam = isBeamMode(mode);
+      const beam = modeTrigger === 'held' || beamHits.length > 0;
       delete (mode as AttackMode & { _beamAttacks?: boolean })._beamAttacks;
       modes.push(mode);
       if (beam) beamModeIds.push(id);
