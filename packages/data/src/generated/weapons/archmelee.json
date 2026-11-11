@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-11T15:57:45.710Z",
+  "generatedAt": "2026-11-11T16:14:29.588Z",
   "source": "WFCD/warframe-items (MIT)",
   "category": "archmelee",
   "count": 8,
@@ -36,7 +36,10 @@
                   },
                   "procChance": 0.05
                 }
-              ]
+              ],
+              "override": {
+                "critMultiplier": 1.3
+              }
             }
           ],
           "override": {

@@ -26,9 +26,9 @@ const mode: any = {
 
 const near = (a: number, b: number, eps = 1e-9) => assert.ok(Math.abs(a - b) < eps, `${a} != ${b}`);
 const perStack = (fr: number) =>
-  compute({ ...base, id: 'X', name: 'X', fireRate: fr }, mode, [], {}, false).output.dotPerSecond as number;
+  compute({ ...base, id: 'X', name: 'X', fireRate: fr }, mode, [], {}).output.dotPerSecond as number;
 const sixSec = (fr: number) =>
-  compute({ ...base, id: 'X', name: 'X', fireRate: fr }, mode, [], {}, false).output.dot6s as number;
+  compute({ ...base, id: 'X', name: 'X', fireRate: fr }, mode, [], {}).output.dot6s as number;
 
 describe('每层秒伤与射速无关（D-043）', () => {
   it('射速 10 → 20，每层秒伤不变', () => {
@@ -47,7 +47,7 @@ describe('每层秒伤与射速无关（D-043）', () => {
   });
 
   it('每层秒伤等于**实际存在**的类型的每跳伤害之和（不含层数/射速/多重）', () => {
-    const res = compute({ ...base, id: 'X', name: 'X', fireRate: 10 }, mode, [], {}, false);
+    const res = compute({ ...base, id: 'X', name: 'X', fireRate: 10 }, mode, [], {});
     const seg: any = res.segments[0];
     // D-055：只累加配装里真的有的元素（面板仅 slash）
     const present = new Set(Object.keys(seg.finalHit));
@@ -62,7 +62,7 @@ describe('每层秒伤与射速无关（D-043）', () => {
   });
 
   it('多重 Mod 不改变每层秒伤，但会提高六秒总伤', () => {
-    const noMs = compute({ ...base, id: 'X', name: 'X', fireRate: 10 }, mode, [], {}, false);
+    const noMs = compute({ ...base, id: 'X', name: 'X', fireRate: 10 }, mode, [], {});
     const withMs = compute({ ...base, id: 'X', name: 'X', fireRate: 10 }, mode, [
       { stat: 'multishot', form: 'pct', amount: 90, source: 'split_chamber' },
     ], {}, false);

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-11T15:57:45.710Z",
+  "generatedAt": "2026-11-11T16:14:29.589Z",
   "source": "WFCD/warframe-items (MIT)",
   "category": "companion",
   "count": 24,
@@ -38,7 +38,10 @@
                   },
                   "procChance": 0.1
                 }
-              ]
+              ],
+              "override": {
+                "fireRate": 1.5
+              }
             }
           ],
           "override": {
@@ -68,7 +71,7 @@
           "variants": [
             {
               "id": "direct",
-              "label": "直接命中",
+              "label": "Direct Hit",
               "segments": [
                 {
                   "kind": "attack",
@@ -77,7 +80,16 @@
                     "impact": 10
                   },
                   "procChance": 0.1
-                },
+                }
+              ],
+              "override": {
+                "critMultiplier": 1.8
+              }
+            },
+            {
+              "id": "attack2",
+              "label": "Cold Field",
+              "segments": [
                 {
                   "kind": "attack",
                   "aoe": false,
@@ -86,7 +98,12 @@
                   },
                   "procChance": 0.3
                 }
-              ]
+              ],
+              "override": {
+                "critMultiplier": 1.8,
+                "statusChance": 0.3,
+                "fireRate": 1
+              }
             }
           ],
           "override": {
@@ -156,6 +173,7 @@
             {
               "id": "direct",
               "label": "直接命中",
+              "trigger": "held",
               "segments": [
                 {
                   "kind": "attack",
@@ -192,7 +210,7 @@
           "variants": [
             {
               "id": "direct",
-              "label": "直接命中",
+              "label": "Projectile",
               "segments": [
                 {
                   "kind": "attack",
@@ -201,7 +219,16 @@
                     "puncture": 10
                   },
                   "procChance": 0.22
-                },
+                }
+              ],
+              "override": {
+                "fireRate": 2.5
+              }
+            },
+            {
+              "id": "blast",
+              "label": "范围伤害·爆炸",
+              "segments": [
                 {
                   "kind": "explosiveAttack",
                   "aoe": true,
@@ -210,7 +237,10 @@
                   },
                   "procChance": 0.22
                 }
-              ]
+              ],
+              "override": {
+                "fireRate": 2.5
+              }
             }
           ],
           "override": {
@@ -252,7 +282,10 @@
                   },
                   "procChance": 0.075
                 }
-              ]
+              ],
+              "override": {
+                "critMultiplier": 1.8
+              }
             }
           ],
           "override": {
@@ -294,7 +327,10 @@
                   },
                   "procChance": 0.15
                 }
-              ]
+              ],
+              "override": {
+                "fireRate": 1.5
+              }
             }
           ],
           "override": {
@@ -495,7 +531,10 @@
                   },
                   "procChance": 0.05
                 }
-              ]
+              ],
+              "override": {
+                "critMultiplier": 2.3
+              }
             }
           ],
           "override": {
@@ -537,7 +576,11 @@
                   },
                   "procChance": 0.1
                 }
-              ]
+              ],
+              "override": {
+                "critMultiplier": 2.1,
+                "fireRate": 1.5
+              }
             }
           ],
           "override": {
@@ -577,7 +620,13 @@
                     "toxin": 15
                   },
                   "procChance": 0.2
-                },
+                }
+              ]
+            },
+            {
+              "id": "attack2",
+              "label": "Toxin Embed",
+              "segments": [
                 {
                   "kind": "attack",
                   "aoe": false,
@@ -586,7 +635,10 @@
                   },
                   "procChance": 0.2
                 }
-              ]
+              ],
+              "override": {
+                "fireRate": 1
+              }
             }
           ]
         }
@@ -743,7 +795,10 @@
                   },
                   "procChance": 0.045
                 }
-              ]
+              ],
+              "override": {
+                "critMultiplier": 1.8
+              }
             }
           ],
           "override": {
@@ -774,6 +829,7 @@
             {
               "id": "direct",
               "label": "直接命中",
+              "trigger": "held",
               "segments": [
                 {
                   "kind": "attack",
@@ -811,6 +867,7 @@
             {
               "id": "direct",
               "label": "直接命中",
+              "trigger": "held",
               "segments": [
                 {
                   "kind": "attack",
@@ -856,7 +913,16 @@
                     "puncture": 4.05
                   },
                   "procChance": 0.3
-                },
+                }
+              ],
+              "override": {
+                "fireRate": 0.25
+              }
+            },
+            {
+              "id": "blast",
+              "label": "Explosion·爆炸",
+              "segments": [
                 {
                   "kind": "explosiveAttack",
                   "aoe": true,
@@ -866,7 +932,10 @@
                   },
                   "procChance": 0.3
                 }
-              ]
+              ],
+              "override": {
+                "fireRate": 0.25
+              }
             }
           ],
           "override": {
@@ -897,6 +966,7 @@
             {
               "id": "direct",
               "label": "直接命中",
+              "trigger": "held",
               "segments": [
                 {
                   "kind": "attack",
@@ -933,7 +1003,7 @@
           "variants": [
             {
               "id": "direct",
-              "label": "直接命中",
+              "label": "Impact",
               "segments": [
                 {
                   "kind": "attack",
@@ -942,7 +1012,13 @@
                     "heat": 500
                   },
                   "procChance": 0.1
-                },
+                }
+              ]
+            },
+            {
+              "id": "blast",
+              "label": "范围伤害·爆炸",
+              "segments": [
                 {
                   "kind": "explosiveAttack",
                   "aoe": true,
@@ -951,7 +1027,10 @@
                   },
                   "procChance": 0.2
                 }
-              ]
+              ],
+              "override": {
+                "statusChance": 0.2
+              }
             }
           ]
         }

@@ -105,7 +105,7 @@ describe('爆炸不计入每层秒伤、但计入总伤（D-057）', () => {
   ];
 
   it('每层秒伤不含爆炸的贡献', () => {
-    const withBlast = compute(weapon, weapon.modes[0], blastMods, {}, false);
+    const withBlast = compute(weapon, weapon.modes[0], blastMods, {});
     const seg: any = withBlast.segments[0];
     const present = new Set(Object.keys(seg.finalHit));
     let dotOnly = 0;
@@ -119,7 +119,7 @@ describe('爆炸不计入每层秒伤、但计入总伤（D-057）', () => {
   });
 
   it('爆炸计入六秒异常状态总伤', () => {
-    const withBlast = compute(weapon, weapon.modes[0], blastMods, {}, false);
+    const withBlast = compute(weapon, weapon.modes[0], blastMods, {});
     const seg: any = withBlast.segments[0];
     const present = new Set(Object.keys(seg.finalHit));
     let dotPart = 0;
@@ -133,7 +133,7 @@ describe('爆炸不计入每层秒伤、但计入总伤（D-057）', () => {
   });
 
   it('输出口径的名称已改为「六秒异常状态总伤」', () => {
-    const res = compute(weapon, weapon.modes[0], [], {}, false);
+    const res = compute(weapon, weapon.modes[0], [], {});
     const line = res.output.lines.find((l: any) => l.id === 'dot6s');
     assert.equal(line.label, '六秒异常状态总伤');
   });

@@ -19,7 +19,7 @@
  *   · 0 个独立模式锚点时，退化为「一个射击模式」：无爆发的攻击归主模式，带爆发的另起；
  *     Barrage / Quill / 导弹类攻击按「按名字切换」处理，各自成一个模式（不合并相加）。
  */
-import type { AttackMode, DamageSegment, ModeRole, PanelOverride, TriggerKind, Weapon } from '../../core/src/weapon.ts';
+import type { AttackMode, DamageSegment, ModeRole, ModeVariant, PanelOverride, TriggerKind, Weapon } from '../../core/src/weapon.ts';
 import type { DamageSpread, DamageType } from '../../core/src/damage-types.ts';
 
 // ─────────────────────────────────────────────────────────────
@@ -209,6 +209,95 @@ const BOMB_SWITCH = /^(Plasma Bomb|Cluster Bombs?|Cluster|Bomb|Grenade|Rocket|Mi
 
 const matchesAny = (name: string, list: readonly RegExp[]): boolean => list.some((re) => re.test(name));
 
+/**
+ * 把同一模式内的攻击拆成「攻击方式」（对应内核的 `ModeVariant`）。
+ *
+ * 需求方 2026-11-12：
+ * > 「灵化只有一个，那是一个灵化模式下的多个攻击方式，打出去有弹头命中跟爆炸伤害。」
+ * > 「赘骨也只是灵化模式下存在两个扳机，一个是射线一个是蓄力。」
+ *
+ * 所以一个模式内的攻击不是一股脑相加，而是先按「攻击方式」归类，界面上分开勾选。
+ *
+ * 归类分两层：
+ *   1. **先按伤害判定类型**分：`shot_type === 'AoE'` 的是「爆炸」，其余是「命中」。
+ *      需求方要的正是在面板上分开看到「弹头命中」和「爆炸」两行；
+ *   2. 同一判定类型里，再按**名字去掉子段词后的主干**细分
+ *      （`Plasma Bomb` 与 `Cluster Bombs` 是两种不同的弹种，不该合并）。
+ *
+ * ```
+ * Incarnon Form                 → 命中组
+ * Incarnon Form Radial Attack   → 爆炸组     ← 同属灵化模式，但界面分开显示
+ * Plasma Bomb Impact            → 命中组「Plasma Bomb」
+ * Plasma Bomb Explosion         → 爆炸组「Plasma Bomb」
+ * ```
+ * 只有一种攻击方式时沿用旧行为：单个 `direct` 变体（界面不显示选择器）。
+ */
+function groupAttackVariants(attacks: readonly WfcdAttack[]): { id: string; label: string; attacks: WfcdAttack[] }[] {
+  /** 末尾的子段词：只用来给「攻击方式」起名，不参与是否分组的判断 */
+  const TAIL = /\s*(Impact|Explosion|Explode|Detonation|Radial Attack|AoE|Damage|Contact|Direct Hit)$/i;
+
+  /** 攻击名的主干（去掉子段词），用于同判定类型内的细分与命名 */
+  const stemOf = (name: string): string => {
+    let key = String(name ?? '').trim();
+    let prev = '';
+    while (prev !== key) {
+      prev = key;
+      key = key.replace(TAIL, '').trim();
+    }
+    return key || String(name ?? '').trim();
+  };
+
+  const isAoe = (a: WfcdAttack): boolean => String(a.shot_type ?? '').toLowerCase() === 'aoe';
+
+  // 先按「命中 / 爆炸」两大层，再按主干细分
+  const buckets: { key: string; aoe: boolean; attacks: WfcdAttack[] }[] = [];
+  for (const a of attacks) {
+    const aoe = isAoe(a);
+    const stem = stemOf(a.name);
+    const hit = buckets.find((b) => b.aoe === aoe && b.key.toLowerCase() === stem.toLowerCase());
+    if (hit) hit.attacks.push(a);
+    else buckets.push({ key: stem, aoe, attacks: [a] });
+  }
+
+  // 只有一种攻击方式 → 单个变体，沿用 direct（与改动前完全一致）
+  if (buckets.length <= 1) {
+    return [{ id: 'direct', label: '直接命中', attacks: [...attacks] }];
+  }
+
+  // 多种：命中组排前、爆炸组排后；id 必须**唯一**（override 与界面勾选都按 id 认）
+  buckets.sort((a, b) => Number(a.aoe) - Number(b.aoe));
+  const used = new Set<string>();
+  return buckets.map((g, i) => {
+    // 标签：wfcd 的攻击名是英文，界面要中文。常见名字给固定译名，其余保留原名
+    const ZH: Record<string, string> = {
+      'normal attack': '直接命中',
+      'primary': '直接命中',
+      'incarnon form': '灵化',
+      'incarnon form held': '灵化射线',
+      'incarnon form charge': '灵化蓄力',
+      'plasma bomb': '等离子炸弹',
+      'cluster bombs': '集束炸弹',
+      'grenade': '榴弹',
+      'poison cloud': '毒云',
+      'radial attack': '范围伤害',
+      'alt-fire': '次要射击',
+      'secondary fire': '次要射击',
+    };
+    const zh = ZH[g.key.toLowerCase()] ?? g.key;
+    const label = g.aoe ? `${zh}·爆炸` : `${zh}`;
+    // id 首选 direct / blast / attackN；重名就加序号，保证唯一
+    // （重力奇点拟成枪的灵化有两个爆炸段，都叫 blast 会撞车）
+    let id = i === 0 ? 'direct' : g.aoe ? 'blast' : `attack${i + 1}`;
+    if (used.has(id)) {
+      let n = 2;
+      while (used.has(`${id}${n}`)) n++;
+      id = `${id}${n}`;
+    }
+    used.add(id);
+    return { id, label, attacks: g.attacks };
+  });
+}
+
 
 /** 是否有明确的独立模式锚点（不算主攻击锚点） */
 function hasSeparateModeAnchor(attacks: readonly WfcdAttack[]): boolean {
@@ -233,8 +322,28 @@ function groupAttacks(attacks: readonly WfcdAttack[]): { name: string; attacks: 
   // 当前"弹种"组：BOMB_SWITCH 命中的那一段所开的组。同弹种的后续子段都归它，
   // 即使中间没有新的锚点。
   let currentBomb: { name: string; attacks: WfcdAttack[] } | null = null;
+  // 当前「灵化」组：**灵化永远只有一个模式**（需求方 2026-11-12），
+  // 所以 `Incarnon Form` / `Incarnon Form Held Damage` / `Incarnon Form Radial Attack`
+  // 这些攻击统统并进同一个灵化组，作为它下面的多种「攻击方式」（变体），不各起一个模式。
+  // 之前每遇到一个 `Incarnon Form*` 锚点就开一个新组，布莱顿 Prime 因此被拆成
+  // incarnon / incarnon2 两个模式，是错的。
+  let incarnonGroup: { name: string; attacks: WfcdAttack[] } | null = null;
+  const isIncarnonName = (n: string): boolean => /^\s*Incarnon\s/i.test(n);
+
   for (const a of attacks) {
     const name = String(a.name ?? '');
+    // 灵化：不是新模式，是同一个灵化模式下的另一种攻击方式
+    if (isIncarnonName(name)) {
+      if (!incarnonGroup) {
+        incarnonGroup = { name, attacks: [a] };
+        groups.push(incarnonGroup);
+      } else {
+        incarnonGroup.attacks.push(a);
+      }
+      current = incarnonGroup;
+      currentBomb = null;
+      continue;
+    }
     const isAnchor = matchesAny(name, SEPARATE_MODE) || matchesAny(name, PRIMARY_ANCHORS);
     if (isAnchor) {
       current = { name, attacks: [a] };
@@ -461,28 +570,73 @@ export function cleanWfcdWeapons(raw: readonly WfcdWeapon[]): WfcdCleanResult {
     const beamModeIds: string[] = [];
 
     for (const [gi, g] of grouped.entries()) {
-      const segs: DamageSegment[] = [];
-      for (const a of g.attacks) {
-        const s = toSegment(a, warnings, `${w.name}#${g.name}`);
-        if (s) segs.push(s);
+      // ── 该模式内的「攻击方式」（变体）──
+      //
+      // 需求方 2026-11-12：一个模式内可以有多种攻击方式（弹头命中 / 爆炸 / 射线 / 蓄力），
+      // 它们在界面上**分开显示并各带复选框**，用户选哪些参与计算。
+      // 所以这里按「攻击组」把 g.attacks 拆成若干个变体，而不是全塞进一个变体里。
+      //
+      // 判定同一攻击方式：名字去掉末尾的 Impact / Explosion / AoE 等子段词后相同，
+      // 例如 `Plasma Bomb Impact` 与 `Plasma Bomb Explosion` 同属「Plasma Bomb」这一种攻击。
+      const variantGroups = groupAttackVariants(g.attacks);
+      const variants: ModeVariant[] = [];
+      for (const vg of variantGroups) {
+        const segs: DamageSegment[] = [];
+        for (const a of vg.attacks) {
+          const s = toSegment(a, warnings, `${w.name}#${g.name}`);
+          if (s) segs.push(s);
+        }
+        if (segs.length === 0) continue;
+        // 该攻击方式自己的扳机（D-148 + 需求方 2026-11-12）
+        //
+        // 同一个模式里可以有两种扳机并存——典型是赘骨（Onos）的灵化：
+        // `Incarnon Form Held Damage` 是射线、`Incarnon Form Charge Attack` 是蓄力。
+        // 所以这里逐条攻击方式判，判不出时返回 undefined（回退到模式扳机）。
+        //
+        // 判据（只看名字与 shot_type）：
+        //   1. 名字含 `Held` 且不是 AoE → `held`（射线）。**名字优先**：
+        //      赘骨的 `Incarnon Form Held Damage` 在 WFCD 里被记成 `Projectile`，
+        //      但需求方明确它是射线，所以不能单靠 shot_type；
+        //   2. 名字含 `Charge` / `Charged` → `charge`（蓄力）；
+        //   3. 全部是 Hit-Scan 且武器级是 `held` → `held`（普通射线武器的命中攻击）；
+        //   4. 否则 undefined（跟随模式扳机）。
+        const vgName = vg.attacks.map((a) => String(a.name ?? '')).join(' ');
+        const vgHasHeld = vg.attacks.some(
+          (a) => isHeldAttack(a.name) && String(a.shot_type ?? '').toLowerCase() !== 'aoe',
+        );
+        const vgHasCharge = /\bCharge(d)?\b/i.test(vgName) && !vgHasHeld;
+        const vgHasHitscan = vg.attacks.some((a) => String(a.shot_type ?? '').toLowerCase() === 'hit-scan');
+        const variantTrigger: TriggerKind | undefined = vgHasHeld
+          ? 'held'
+          : vgHasCharge
+            ? 'charge'
+            : vgHasHitscan && trigger === 'held'
+              ? 'held'
+              : undefined;
+        const vOverride = attackOverride(vg.attacks[0]!, w);
+        const v: ModeVariant = {
+          id: vg.id,
+          label: vg.label,
+          segments: segs,
+          ...(variantTrigger ? { trigger: variantTrigger } : {}),
+          ...(vOverride ? { override: vOverride } : {}),
+          defaultSelected: true,
+        };
+        variants.push(v);
       }
-      if (segs.length === 0) continue;
+      if (variants.length === 0) continue;
 
-      const isIncarnon = /Incarnon Form/i.test(g.name);
+      const isIncarnon = /^\s*Incarnon\s/i.test(g.name);
       const role: ModeRole = isIncarnon
         ? 'incarnon'
         : /^(Charged Shot|Quick Shot|Uncharged Shot|Charge|Uncharged Horizontal\/Vertical Shot|Perfect Shot)$/i.test(g.name)
           ? 'charged'
           : 'normal';
-      // 模式 id：灵化 `incarnon` / `incarnon2` / `incarnon3`…；其余 primary / mode2 / mode3…
-      //
-      // ⚠ D-110：灵化模式**可能不止一个**（布莱顿 Prime 的灵化 = 直接命中 + 范围爆炸两个模式，
-      //   奏凯的直击/范围、赘骨的连射/蓄力同理）。id 必须去重，否则两个模式撞名，
-      //   override 按 id 匹配时会全部落到第一个模式上。
+      // 模式 id：灵化固定 `incarnon`（**灵化永远只有一个模式**，其下多种攻击方式都在 variants 里）；
+      // 其余 primary / charged / mode2 / mode3…
       let id: string;
       if (isIncarnon) {
-        const incNo = modes.filter((m) => m.role === 'incarnon').length + 1;
-        id = incNo === 1 ? 'incarnon' : `incarnon${incNo}`;
+        id = 'incarnon';
       } else if (gi === 0) {
         id = 'primary';
       } else if (role === 'charged' && modes.every((m) => m.role !== 'charged')) {
@@ -492,11 +646,11 @@ export function cleanWfcdWeapons(raw: readonly WfcdWeapon[]): WfcdCleanResult {
       }
 
       // 灵化没有弹匣/装填概念（充能弹药不建模）；其余模式共用武器级弹匣/装填。
-      const override = attackOverride(g.attacks[0]!, w);
+      const firstOverride = attackOverride(g.attacks[0]!, w);
       const roleOverride: PanelOverride | undefined =
         role === 'incarnon'
-          ? { ...(override ?? {}), magazineSize: 0, reloadTime: 0 }
-          : override;
+          ? { ...(firstOverride ?? {}), magazineSize: 0, reloadTime: 0 }
+          : firstOverride;
 
       // ── 该模式的扳机（= 射线的唯一判据，D-148）──
       //
@@ -507,7 +661,7 @@ export function cleanWfcdWeapons(raw: readonly WfcdWeapon[]): WfcdCleanResult {
       //     那个模式要落成 `held`，才算射线。
       //
       // 判据全用扳机 + `shot_type`，不看武器名：
-      //   1. 该模式内有「名字含 Held 且不是 AoE」的攻击 → `held`（这条优先，能救巴什穆）；
+      //   1. 该模式内有「名字含 Held 且不是 AoE」的攻击 → `held`；
       //   2. 否则武器级是 `held`，但该模式内没有 `Hit-Scan` 攻击（全是 Projectile / AoE）→ 不是射线，落 `semi`；
       //   3. 其余保持武器级扳机。
       //
@@ -531,7 +685,7 @@ export function cleanWfcdWeapons(raw: readonly WfcdWeapon[]): WfcdCleanResult {
         trigger: modeTrigger,
         bullets: 1,
         multishot: round4(w.multishot ?? 1),
-        variants: [{ id: 'direct', label: '直接命中', segments: segs }],
+        variants,
         ...(roleOverride ? { override: roleOverride } : {}),
       };
       modes.push(mode);

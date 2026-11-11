@@ -34,14 +34,14 @@ const blastMods: any[] = [
 
 describe('爆炸每层伤害（D-056）', () => {
   it('合成出的爆炸能算出非零的每层伤害', () => {
-    const res = compute(weapon, weapon.modes[0], blastMods, {}, false);
+    const res = compute(weapon, weapon.modes[0], blastMods, {});
     assert.ok(res.segments[0].finalHit.blast > 0, '命中分布里应有爆炸');
     assert.ok(res.output.blast.perStack > 0,
       `每层伤害应 > 0，实际 ${res.output.blast.perStack}`);
   });
 
   it('每层伤害 = 全类型基础值 × 0.3 × 暴击期望（基础值里已含暴击期望）', () => {
-    const res = compute(weapon, weapon.modes[0], blastMods, {}, false);
+    const res = compute(weapon, weapon.modes[0], blastMods, {});
     const seg: any = res.segments[0];
     // ⚠ D-107：面板里的基础分布（**不含**元素 Mod 加量）= 冲击 100
     const baseTotal = Object.values(seg.tickBase).reduce((a: number, v: any) => a + v, 0);
@@ -51,7 +51,7 @@ describe('爆炸每层伤害（D-056）', () => {
   });
 
   it('每层伤害量级合理（不超过基础值的 3 倍）', () => {
-    const res = compute(weapon, weapon.modes[0], blastMods, {}, false);
+    const res = compute(weapon, weapon.modes[0], blastMods, {});
     const seg: any = res.segments[0];
     const baseTotal = Object.values(seg.tickBase).reduce((a: number, v: any) => a + v, 0);
     // 系数 0.3 × 暴击期望(1.2) = 0.36 倍基础值，绝不该是几十倍
@@ -61,21 +61,21 @@ describe('爆炸每层伤害（D-056）', () => {
 
   it('暴击不计入时（暴率 0）每层伤害 = 基础值 × 0.3', () => {
     const noCrit: any = { ...weapon, critChance: 0 };
-    const res = compute(noCrit, noCrit.modes[0], blastMods, {}, false);
+    const res = compute(noCrit, noCrit.modes[0], blastMods, {});
     const seg: any = res.segments[0];
     const baseTotal = Object.values(seg.tickBase).reduce((a: number, v: any) => a + v, 0);
     near(res.output.blast.perStack, baseTotal * 0.3);
   });
 
   it('没有爆炸元素时每层伤害仍为 0（D-055 不被破坏）', () => {
-    const res = compute(weapon, weapon.modes[0], [], {}, false);
+    const res = compute(weapon, weapon.modes[0], [], {});
     near(res.output.blast.perStack, 0);
     near(res.output.blast.perSecond, 0);
     assert.equal(res.output.blast.stacksPerSecond, 0);
   });
 
   it('爆炸倍率随暴伤提升，且是**倍率**不是绝对伤害', () => {
-    const a = compute(weapon, weapon.modes[0], blastMods, {}, false);
+    const a = compute(weapon, weapon.modes[0], blastMods, {});
     const b = compute(weapon, weapon.modes[0], [
       ...blastMods,
       { stat: 'critMultiplier', form: 'pct', amount: 100, source: 'vital_sense' },

@@ -35,7 +35,7 @@ const hs = (enabled: boolean, mult = 3) => ({ headshot: { enabled, multiplier: m
 
 const dotOf = (opts: any, contribs: any[] = []) => {
   const w = makeWeapon();
-  const r = compute(w, w.modes[0], contribs, opts, false);
+  const r = compute(w, w.modes[0], contribs, opts);
   const seg: any = r.segments[0];
   return { res: r, seg, tick: seg.dotTicks.find((t: any) => t.type === 'slash') };
 };
@@ -65,24 +65,24 @@ describe('爆头作用在 DoT 基础值上（D-062 / D-063）', () => {
   it('爆头 × 暴击率 0 时，DoT 只吃纯爆头倍率（3 倍，不是 6 倍）', () => {
     const w = makeWeapon();
     w.critChance = 0;
-    const a = compute(w, w.modes[0], [], hs(false), false);
-    const b = compute(w, w.modes[0], [], hs(true, 3), false);
+    const a = compute(w, w.modes[0], [], hs(false));
+    const b = compute(w, w.modes[0], [], hs(true, 3));
     near(b.segments[0].dotTicks[0].tick / a.segments[0].dotTicks[0].tick, 3);
   });
 
   it('爆头 × 全额暴击时，DoT 提升 12 倍（3 × 2 × 2）', () => {
     const w = makeWeapon();
     w.critChance = 1;
-    const a = compute(w, w.modes[0], [], hs(false), false);
-    const b = compute(w, w.modes[0], [], hs(true, 3), false);
+    const a = compute(w, w.modes[0], [], hs(false));
+    const b = compute(w, w.modes[0], [], hs(true, 3));
     // 非爆头：cd = 2；爆头：3 × 2 × 2 = 12 → 比值 6
     near(b.segments[0].dotTicks[0].tick / a.segments[0].dotTicks[0].tick, 12 / 2);
   });
 
   it('爆头暴击 ×2 按暴击率加权（不是恒定 2 倍）', () => {
     const w = makeWeapon(); // cc 0.5, cd 2
-    const a = compute(w, w.modes[0], [], hs(false), false);
-    const b = compute(w, w.modes[0], [], hs(true, 3), false);
+    const a = compute(w, w.modes[0], [], hs(false));
+    const b = compute(w, w.modes[0], [], hs(true, 3));
     // 非爆头期望 1.5；爆头期望 7.5 → 比值 5
     near(b.segments[0].dotTicks[0].tick / a.segments[0].dotTicks[0].tick, 5);
   });
@@ -104,8 +104,8 @@ describe('爆头作用在 DoT 基础值上（D-062 / D-063）', () => {
       { stat: 'elemental:heat', form: 'pct', amount: 90, source: 'h' },
       { stat: 'elemental:cold', form: 'pct', amount: 90, source: 'c' },
     ];
-    const a = compute(w, w.modes[0], mods, hs(false), false);
-    const b = compute(w, w.modes[0], mods, hs(true, 3), false);
+    const a = compute(w, w.modes[0], mods, hs(false));
+    const b = compute(w, w.modes[0], mods, hs(true, 3));
     // 全额暴击：非爆头 cd=2；爆头 3×2×2=12 → 比值 6
     near(b.output.blast.perStack / a.output.blast.perStack, 6);
   });

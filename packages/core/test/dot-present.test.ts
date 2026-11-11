@@ -33,7 +33,7 @@ const slashOnly: any = {
 
 describe('没有的元素不触发（D-055）', () => {
   it('只配切割时，火/毒/电/毒气/爆炸的层数与秒伤都是 0', () => {
-    const res = compute(weapon, slashOnly, [], {}, false);
+    const res = compute(weapon, slashOnly, [], {});
     const out: any = res.output;
     const seg: any = res.segments[0];
     const present = new Set(Object.keys(seg.finalHit));
@@ -48,7 +48,7 @@ describe('没有的元素不触发（D-055）', () => {
   });
 
   it('每层秒伤合计只包含存在的元素', () => {
-    const res = compute(weapon, slashOnly, [], {}, false);
+    const res = compute(weapon, slashOnly, [], {});
     const out: any = res.output;
     const seg: any = res.segments[0];
     const present = new Set(Object.keys(seg.finalHit));
@@ -59,7 +59,7 @@ describe('没有的元素不触发（D-055）', () => {
   });
 
   it('配装里没有爆炸时，爆炸机制不产生伤害', () => {
-    const res = compute(weapon, slashOnly, [], {}, false);
+    const res = compute(weapon, slashOnly, [], {});
     const out: any = res.output;
     near(out.blast.perStack, 0);
     near(out.blast.perSecond, 0);
@@ -67,7 +67,7 @@ describe('没有的元素不触发（D-055）', () => {
   });
 
   it('装上火 Mod 后，火才从 0 变成非零', () => {
-    const before = compute(weapon, slashOnly, [], {}, false);
+    const before = compute(weapon, slashOnly, [], {});
     const after = compute(weapon, slashOnly, [
       { stat: 'elemental:heat', form: 'pct', amount: 90, source: 'hellfire' },
     ], {}, false);
@@ -77,7 +77,7 @@ describe('没有的元素不触发（D-055）', () => {
   });
 
   it('六秒总伤也只算存在的元素', () => {
-    const res = compute(weapon, slashOnly, [], {}, false);
+    const res = compute(weapon, slashOnly, [], {});
     const out: any = res.output;
     // 只有切割有贡献
     assert.ok(out.dot6s > 0);
@@ -131,7 +131,7 @@ describe('D-109：异常是否存在，只看「当前面板复合后」有没�
   };
 
   it('只有火 Mod、没有毒 → 不该出现毒气行', () => {
-    const res = compute(weapon, slashOnly, [mod('elemental:heat', 0)], {}, false);
+    const res = compute(weapon, slashOnly, [mod('elemental:heat', 0)], {});
     assert.ok(!(res.segments[0].finalHit.gas > 0), '命中分布里不该有毒气');
     assert.ok(!rowsOf(res).includes('gas'), '界面上不该有毒气行');
   });
@@ -158,7 +158,7 @@ describe('D-109：异常是否存在，只看「当前面板复合后」有没�
   });
 
   it('玄骸火参与合成（需求方选 B）：玄骸火 + 毒 Mod 会合成毒气', () => {
-    const res = compute(weapon, slashOnly, [mod('elemental:toxin', 0)], kuva('heat'), false);
+    const res = compute(weapon, slashOnly, [mod('elemental:toxin', 0)], kuva('heat'));
     assert.ok(res.segments[0].finalHit.gas > 0, '玄骸火应与毒合成毒气');
     assert.ok(rowsOf(res).includes('gas'), '界面上应有毒气行');
   });
@@ -172,7 +172,7 @@ describe('D-109：异常是否存在，只看「当前面板复合后」有没�
     ];
     for (const contribs of cases) {
       for (const opts of [{}, kuva('heat')]) {
-        const res = compute(weapon, slashOnly, contribs, opts, false);
+        const res = compute(weapon, slashOnly, contribs, opts);
         for (const t of core.DOT_TYPES) {
           const per = res.output.dotPerType[t] ?? 0;
           const st = res.output.stacksPerType[t] ?? 0;

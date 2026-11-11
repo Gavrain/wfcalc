@@ -90,8 +90,15 @@ function emitToPanel(w: EmitWeapon): Weapon {
         bullets: m.bullets,
         multishot: m.multishot,
         ...(m.burst ? { burst: m.burst } : {}),
-        // D-080：段只属于变体，模式上不再有 `segments`
-        variants: m.variants,
+        // D-080 / D-148：段只属于「攻击方式」（变体），模式上不再有 `segments`
+        variants: m.variants.map((v) => ({
+          id: v.id,
+          label: v.label,
+          ...(v.trigger ? { trigger: v.trigger as AttackMode['trigger'] } : {}),
+          segments: v.segments,
+          ...(v.override ? { override: v.override } : {}),
+          ...(v.defaultSelected === false ? { defaultSelected: false } : {}),
+        })),
         ...(m.override ? { override: m.override } : {}),
       };
     }),

@@ -32,12 +32,24 @@ export interface EmitSegment {
   procChance: number;
 }
 
-/** 模式内的面板变体（D-080）：直接命中 / 爆炸，各自独立面板 */
+/**
+ * 模式内的一种**攻击方式**（D-080 的变体 / D-148 明确其含义）。
+ *
+ * 一个模式可以有多种攻击方式（弹头命中 / 爆炸 / 射线 / 蓄力），界面分开显示并各带复选框，
+ * 用户选哪些参与计算（需求方 2026-11-12）。
+ */
 export interface EmitVariant {
   id: string;
   label: string;
+  /**
+   * 该攻击方式自己的扳机（D-148）。缺省 = 跟随模式的扳机。
+   * 只有「同一模式内两种扳机并存」才有值——典型是赘骨的灵化（一条射线、一条蓄力）。
+   */
+  trigger?: string;
   segments: EmitSegment[];
   override?: PanelOverride;
+  /** 默认是否勾选参与计算（缺省 = 勾选） */
+  defaultSelected?: boolean;
 }
 
 export interface EmitMode {
@@ -113,12 +125,15 @@ const emitSegment = (s: DamageSegment): EmitSegment => ({
 });
 
 function toEmitMode(m: AttackMode): EmitMode {
-  // D-080：变体（直接命中 / 爆炸）各自独立成面板；模式上不再有 `segments`
+  // D-080 / D-148：模式内的每种「攻击方式」各自成面板；模式上不再有 `segments`
   const variants: EmitVariant[] = m.variants.map((v) => ({
     id: v.id,
     label: v.label,
+    // 攻击方式自己的扳机（赘骨灵化：射线 + 蓄力）；没写就跟随模式
+    ...(v.trigger ? { trigger: v.trigger } : {}),
     segments: v.segments.map(emitSegment),
     ...(v.override ? { override: { ...v.override } } : {}),
+    ...(v.defaultSelected === false ? { defaultSelected: false } : {}),
   }));
   return {
     id: m.id,

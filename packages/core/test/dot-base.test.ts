@@ -42,7 +42,7 @@ describe('DoT 基础值取全类型之和（§6.2）', () => {
       { stat: 'elemental:heat', form: 'pct', amount: 90, source: 'hellfire' },
       { stat: 'elemental:toxin', form: 'pct', amount: 90, source: 'infected' },
     ];
-    const res = compute(weapon, mode, contribs, {}, false);
+    const res = compute(weapon, mode, contribs, {});
     const seg: any = res.segments[0];
     assert.ok(seg.finalHit.gas > 0, '合成后应有毒气伤害');
 
@@ -61,7 +61,7 @@ describe('DoT 基础值取全类型之和（§6.2）', () => {
       { stat: 'baseDamage', form: 'pct', amount: 100, source: 'serration' },
       { stat: 'elemental:heat', form: 'pct', amount: 90, source: 'hellfire' },
     ];
-    const res = compute(weapon, mode, contribs, {}, false);
+    const res = compute(weapon, mode, contribs, {});
     const seg: any = res.segments[0];
     // 命中：冲击 200 + 火 180（= 新面板 200 × 90%）
     near(seg.finalHit.impact, 200);
@@ -80,7 +80,7 @@ describe('DoT 基础值取全类型之和（§6.2）', () => {
     const contribs: any[] = [
       { stat: 'elemental:heat', form: 'pct', amount: 90, source: 'hellfire' },
     ];
-    const res = compute(weapon, mode, contribs, {}, false);
+    const res = compute(weapon, mode, contribs, {});
     const seg: any = res.segments[0];
     const bases = seg.dotTicks.map((t: any) => t.baseValue);
     const uniq = [...new Set(bases.map((b: number) => Math.round(b * 1e6) / 1e6))];

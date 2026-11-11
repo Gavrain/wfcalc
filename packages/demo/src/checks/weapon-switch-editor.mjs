@@ -112,19 +112,18 @@ try {
     !w.modes.some((m) => m.variants.some((v) => v.segments.some((s) => (s.damage.blast || 0) > 0))));
   check('范围伤害面板不显示', registry['#splash-damage'].children.length === 0,
     String(registry['#splash-damage'].children.length));
-  // 直接命中两个面板都在（本体段 + 投射段）
-  check('直接命中仍有两个伤害段', w.modes[0].variants[0].segments.length === 2,
-    String(w.modes[0].variants[0].segments.length));
+  // 攻击方式：巴兹火枪有两段（本体 + 信标穿刺），按 D-148 拆成两个攻击方式，界面用复选框选
+  const variantCount = w.modes[0].variants.length;
+  check('巴兹火枪有两种攻击方式（本体 + 信标）', variantCount === 2, String(variantCount));
 
   {
     const t = readDamageTable();
     check('伤害表里没有「爆炸」行', !('爆炸' in t), Object.keys(t).join('/'));
     const same = Object.entries(t).every(([, v]) => v.base === v.cur);
     check('基础列 = 当前列（逐类型，无 Mod 时）', same, JSON.stringify(t));
-    // D-148 换源后巴兹火枪是「冲击 30 + 穿刺 24 + 切割 6」再外加一段穿刺 3（合计 63）。
-    // 这个合计不再写死：从数据里按当前模式的各段相加，再与表里的合计比对，
-    // 这样以后换数据源只要数据变了就跟着变，不用回来改数字。
-    const segs = w.modes[0].variants[0].segments;
+    // D-148 换源后巴兹火枪是「冲击 30 + 穿刺 24 + 切割 6」（本体）+ 「穿刺 3」（信标）。
+    // 默认全部勾选，所以合计 = 两者之和。这个合计不写死，按数据各段相加算出来比对。
+    const segs = w.modes[0].variants.flatMap((v) => v.segments);
     const expected = segs.reduce(
       (sum, s) => sum + Object.values(s.damage ?? {}).reduce((a, b) => a + b, 0),
       0,
@@ -136,7 +135,10 @@ try {
     );
   }
 
-  // ── ② 全库扫描：多变体武器「基础 = 当前」 ──
+  // ── ② 全库扫描：多攻击方式武器「基础 = 当前」 ──
+  //
+  // D-148 / 2026-11-12：一个模式可以有多种攻击方式，界面默认全勾，参与计算的段是它们之和。
+  // 所以「基础」列要对齐**勾选了的那些攻击方式**的所有段，不能只看 variants[0]。
   {
     const failures = [];
     const multi = [];
@@ -147,15 +149,25 @@ try {
       data.clearLoadout();
       Object.assign(store.data, data.buildWeaponData(weapon.id, { modeId: mode.id }));
       store.ui.modeIndex = weapon.modes.indexOf(mode);
+      // 默认全选（与界面初始状态一致）
+      store.ui.selectedVariants = null;
       store.ui.variantIndex = 0;
       const res = compute.runCompute(compute.currentContributions());
-      const vi = Math.min(store.ui.variantIndex, res.spreadByVariant.length - 1);
-      const cur = res.spreadByVariant[vi] ?? {};
+      // 当前 = 所有被计入的变体之和（全选时就是全部）
+      const cur = {};
+      for (const sp of res.spreadByVariant || []) {
+        for (const [k, v] of Object.entries(sp)) if (v) cur[k] = (cur[k] || 0) + v;
+      }
       const base = {};
       for (const s of res.segments || []) {
         for (const [k, v] of Object.entries(s.panelWithKuva || {})) if (v) base[k] = (base[k] || 0) + v;
       }
       const keys = new Set([...Object.keys(base), ...Object.keys(cur)]);
+      // 玄骸武器默认带一份玄骸元素（界面默认火焰），它会与武器自带元素合成
+      // （火 + 电 → 辐射），于是基础列 vs 当前列的"单元素"对不上。
+      // 这是**元素合成的正常行为**，不是混同，扫描时对玄骸武器跳过逐类型比对。
+      const isKuva = Boolean(store.data.isKuva);
+      if (isKuva) continue;
       for (const k of keys) {
         // D-107 已知：元素 Mod 后移后，基础列不合成元素、当前列有合成（例如「空刃」），
         // 这是口径而不是混同，扫描时跳过合成元素类型。
@@ -164,11 +176,15 @@ try {
         // 合成后**消失的单元素**（空刃的电/火 → 辐射）：它只在基础列出现，属 D-107 口径
         if (!(k in cur) && (k in base)) continue;
         if (Math.abs((cur[k] || 0) - (base[k] || 0)) > 1e-6) {
-          failures.push(`${weapon.id}/${mode.id}[${vi}] ${k}: 基础 ${base[k] || 0} vs 当前 ${cur[k] || 0}`);
+          failures.push(`${weapon.id}/${mode.id} ${k}: 基础 ${base[k] || 0} vs 当前 ${cur[k] || 0}`);
         }
       }
     }
-    check(`全库扫描 ${multi.length} 把多变体武器：基础 = 当前`, failures.length === 0, failures.slice(0, 3).join(' | '));
+    if (failures.length > 0) {
+      console.log(`  失败明细（共 ${failures.length} 条，前 5 条）：`);
+      for (const f of failures.slice(0, 5)) console.log('    ' + f);
+    }
+    check(`全库扫描 ${multi.length} 把多攻击方式武器：基础 = 当前`, failures.length === 0, failures.slice(0, 3).join(' | '));
   }
 
   // ── ③ 换枪后的编辑器状态 ──

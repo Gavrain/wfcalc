@@ -52,7 +52,7 @@ function makeWeapon(): core.Weapon {
 describe('面板数值下沉到模式级（D-050）', () => {
   it('没写 override 的模式完全用武器级（行为不变）', () => {
     const w = makeWeapon();
-    const res = compute(w, w.modes[0], [], {}, false);
+    const res = compute(w, w.modes[0], [], {});
     const seg: any = res.segments[0];
     near(seg.critChance, 0.2);
     near(seg.critDamage, 2);
@@ -61,7 +61,7 @@ describe('面板数值下沉到模式级（D-050）', () => {
 
   it('模式级覆盖的暴击/暴伤生效', () => {
     const w = makeWeapon();
-    const res = compute(w, w.modes[1], [], {}, false);
+    const res = compute(w, w.modes[1], [], {});
     const seg: any = res.segments[0];
     near(seg.critChance, 0.5);
     near(seg.critDamage, 3);
@@ -69,13 +69,13 @@ describe('面板数值下沉到模式级（D-050）', () => {
 
   it('模式级覆盖的射速生效', () => {
     const w = makeWeapon();
-    const res = compute(w, w.modes[1], [], {}, false);
+    const res = compute(w, w.modes[1], [], {});
     near(res.output.fireRate, 4);
   });
 
   it('只覆盖部分字段时，其余仍回退武器级', () => {
     const w = makeWeapon();
-    const res = compute(w, w.modes[2], [], {}, false);
+    const res = compute(w, w.modes[2], [], {});
     const seg: any = res.segments[0];
     near(seg.critChance, 0.35); // 覆盖了
     near(seg.critDamage, 2); // 没覆盖 → 回退
@@ -84,8 +84,8 @@ describe('面板数值下沉到模式级（D-050）', () => {
 
   it('模式级弹匣/装填生效，影响持续伤害', () => {
     const w = makeWeapon();
-    const a = compute(w, w.modes[0], [], {}, false);
-    const b = compute(w, w.modes[2], [], {}, false);
+    const a = compute(w, w.modes[0], [], {});
+    const b = compute(w, w.modes[2], [], {});
     // incarnon 弹匣 12、装填 1 秒；primary 弹匣 30、装填 2 秒
     assert.notEqual(a.output.lines.find((l: any) => l.id === 'sustainedDps').value,
       b.output.lines.find((l: any) => l.id === 'sustainedDps').value);
@@ -93,7 +93,7 @@ describe('面板数值下沉到模式级（D-050）', () => {
 
   it('三个模式可以算出三套不同的暴击', () => {
     const w = makeWeapon();
-    const ccs = w.modes.map((m: any) => compute(w, m, [], {}, false).segments[0].critChance);
+    const ccs = w.modes.map((m: any) => compute(w, m, [], {}).segments[0].critChance);
     assert.equal(new Set(ccs).size, 3, `三个模式暴率应各不相同，实际 ${JSON.stringify(ccs)}`);
   });
 

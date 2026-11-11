@@ -185,6 +185,31 @@ body {
 .mode-btn:last-child { border-right: 0; }
 .mode-btn:hover { background: var(--panel-3); color: var(--text); }
 .mode-btn.active { background: var(--accent); color: #10141a; font-weight: 600; }
+
+/* 攻击方式多选（需求方 2026-11-12）：每种攻击方式一个复选框，选中的高亮，
+   与"统计口径"的选中样式一致。全部勾选 = 各段相加。 */
+.variant-row { gap: 0; align-items: stretch; }
+.variant-row .variant-tip {
+  display: inline-flex; align-items: center; padding: 0 8px;
+  font-size: 11px; color: var(--muted); border-right: 1px solid var(--line);
+  background: var(--panel-2);
+}
+.variant-btn {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 10px; cursor: pointer; user-select: none;
+  font-size: 11.5px; color: var(--muted); background: var(--panel-2);
+  border-right: 1px solid var(--line);
+  transition: background 0.12s, color 0.12s;
+}
+.variant-btn:last-child { border-right: 0; }
+.variant-btn:hover { background: var(--panel-3); color: var(--text); }
+.variant-btn.active { background: var(--accent); color: #10141a; font-weight: 600; }
+.variant-btn .variant-check { accent-color: #10141a; margin: 0; cursor: pointer; }
+.variant-btn .variant-trig {
+  font-size: 10px; padding: 0 4px; border-radius: 3px;
+  background: rgba(0, 0, 0, 0.18); opacity: 0.85;
+}
+.variant-btn.active .variant-trig { background: rgba(0, 0, 0, 0.22); }
 .slot-area-actions { display: inline-flex; align-items: center; gap: 8px; }
 
 /* 「全部卸下」等次要操作按钮 */

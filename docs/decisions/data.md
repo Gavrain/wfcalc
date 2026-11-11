@@ -1474,6 +1474,45 @@ UI 显示扳机与伤害类型、哈尔武补 `_manual`、删除 `overrides.ts` 
 
 **验证**：typecheck 通过；单测 **468 项全绿**；`demo:check` 全部通过；`demo:editor-check` 全部通过。
 
+#### 2026-11-12 第四轮：灵化只有一个模式 + 攻击方式可勾选（已实施）
+
+需求方 2026-11-12 更正了两处：
+
+> 「肯定只有一个灵化模式啊，那不是一个灵化模式下的多个攻击方式吗，打出去有弹头命中跟爆炸伤害。
+> 一把武器可能有多个射击模式，按 trigger 区分，有三模式的是狂鲨 Prime，灵化只有可能有一个。
+> 赘骨也只是灵化模式下存在两个扳机，一个是射线一个是蓄力。」
+
+> 「（多攻击方式）选 2，而且要加入复选框，可以选择加入计算的攻击段，ui 可以像切换统计口径那样，选中的高亮。」
+
+**结构改法**
+
+1. **灵化永远只有 1 个模式**。`Incarnon Form` / `Incarnon Form Held Damage` /
+   `Incarnon Form Radial Attack` 这些攻击不再各起一个模式，而是并进同一个灵化模式，作为它下面的
+   **多种「攻击方式」**（内核的 `ModeVariant`）。上一轮我拆成 `incarnon` / `incarnon2` 是错的。
+2. **攻击方式按「命中 / 爆炸」两层分组**：`shot_type === 'AoE'` 的是爆炸，其余是命中；
+   同一层内再按名字主干细分（`Plasma Bomb` 与 `Cluster Bombs` 是两种弹种）。
+   这样布莱顿 Prime 的灵化就是「灵化 + 灵化·爆炸」两行，界面分开显示。
+3. **攻击方式可以有自己的扳机**（`ModeVariant.trigger`）。只有「同一模式内两种扳机并存」才写，
+   典型是赘骨的灵化：`Incarnon Form Held Damage` 是射线、`Incarnon Form Charge Attack` 是蓄力。
+   ⚠ 判据**名字优先**于 `shot_type`：赘骨的 Held 那条在 WFCD 里被记成 `Projectile`，
+   按 shot_type 判不出射线。
+4. 变体 id 必须唯一（重力奇点拟成枪有两个爆炸段，都叫 `blast` 会撞车），重名加序号。
+
+**界面**：模式下面的那一排从「单选切换」改成**复选框多选**，选中的高亮（与统计口径同款），
+全部勾选 = 各段相加。切换武器 / 模式时恢复全选。每种攻击方式的扳机若与模式不同，格子里标出来。
+
+**内核**：`compute()` 的第 5 个参数从 `variantIndex: number` 改成
+`variantSelection?: number | number[]`——传下标数组就是多选，不传 = 全选。
+兼容旧的布尔值（以前那里是 `beam`），布尔一律当"全选"，避免老调用点把模式算空。
+
+**顺带修掉的 bug**
+
+- `effectiveModeFor()` 一直把变体**摊平成 `variants[0]`** 再交给内核，
+  等于复选框形同虚设（取消勾选后伤害不变）。已改为整模式传入，由内核按选择挑。
+
+**验证**：typecheck 通过；单测 **477 项全绿**（新增 `variant-selection.test.ts` 9 项）；
+`demo:check` 全部通过；`demo:editor-check` 全部通过。
+
 
 ## 已取代（只留指引）
 

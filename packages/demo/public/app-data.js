@@ -89,10 +89,11 @@ export function buildWeaponData(weaponId, options = {}) {
     if (isArcaneUsableOn(a, weapon, entry)) primaryArcanes.push(a);
   });
 
-  // 模式与变体索引按"默认模式"复位
+  // 模式与攻击方式按"默认模式"复位（换武器后攻击方式全部重新勾选）
   const defaultModeId = options.modeId || 'primary';
   const primaryIdx = weapon.modes.findIndex(function (m) { return m.id === defaultModeId; });
   store.ui.modeIndex = primaryIdx >= 0 ? primaryIdx : 0;
+  store.ui.selectedVariants = null;
   store.ui.variantIndex = 0;
 
   return {

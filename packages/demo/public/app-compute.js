@@ -14,22 +14,18 @@ import { modName } from './app-data.js';
 import { EXILUS_INDEX, MAX_SLOTS, SLOT_COUNT, store } from './app-store.js';
 
 /**
- * 当前模式 / 变体的**生效形态**：把变体的段与 override 合并成一个扁平模式，交给 core。
- * （core 的 `panelStats` 也支持变体，这里保持单入口。）
+ * 当前模式的**生效形态**：交给 core 的 `AttackMode`。
+ *
+ * D-148 / 需求方 2026-11-12：一个模式可以有多种「攻击方式」（弹头命中 / 爆炸 / 射线 / 蓄力），
+ * 用户用复选框选哪些参与计算。所以这里**不能**再把变体摊平成单个模式
+ * （以前取 `variants[variantIndex]`，等于永远只算一种），
+ * 而是把整个模式连同 `variants` 交给 core，由 core 按 `selectedVariants` 挑。
  */
 export function effectiveModeFor(weapon, ui) {
   if (!weapon) return null;
   const modes = weapon.modes;
   const m = modes[Math.min(ui.modeIndex, modes.length - 1)] ?? modes[0];
-  if (!m) return null;
-  const vs = m.variants ?? [];
-  const v = vs.length ? (vs[Math.min(ui.variantIndex, vs.length - 1)] ?? vs[0]) : null;
-  if (!v) return m;
-  return {
-    ...m,
-    segments: v.segments,
-    ...(v.override ? { override: { ...(m.override ?? {}), ...v.override } } : {}),
-  };
+  return m ?? null;
 }
 
 export function currentContributions() {
@@ -199,15 +195,16 @@ export function runCompute(contribs, coOverride) {
     //   现在的形状：`coOverride` 只带数值，贡献由调用方自己拼好传进来。
     if (Array.isArray(coOverride.contribs)) contribs = contribs.concat(coOverride.contribs);
   }
-  // D-120：**只算当前选中的面板变体**。以前把「直接命中 + 爆炸」两个变体的段摊平一起算，
-  // 界面的「基础」列把它们加在一起（巴兹火枪多出爆炸 40）。
+  // D-120 / D-148 / 需求方 2026-11-12：只算**勾选了的攻击方式**。
+  // 以前把「直接命中 + 爆炸」两个变体的段摊平一起算，界面的「基础」列把它们加在一起
+  // （巴兹火枪多出爆炸 40）；现在每种攻击方式各带一个复选框，用户勾哪些就算哪些。
+  // `store.ui.selectedVariants` 为 null 表示全选。
   return compute(
     store.data.weapon,
     effectiveModeFor(store.data.weapon, store.ui),
     contribs,
     opts,
-    false,
-    Math.max(0, store.ui.variantIndex | 0),
+    store.ui.selectedVariants ?? undefined,
   );
 }
 

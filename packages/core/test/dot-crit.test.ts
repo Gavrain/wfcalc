@@ -38,7 +38,7 @@ const dotPerSecond = (r: any) => r.output.dotPerSecond as number;
 
 describe('DoT 享受暴击（§6.2 ①）', () => {
   it('暴击几率 Mod 会提升 DoT 输出', () => {
-    const base = compute(weapon, mode, [], {}, false);
+    const base = compute(weapon, mode, [], {});
     const withCrit = compute(weapon, mode, [
       { stat: 'critChance', form: 'pct', amount: 150, source: 'point_strike' },
     ], {}, false);
@@ -47,7 +47,7 @@ describe('DoT 享受暴击（§6.2 ①）', () => {
   });
 
   it('暴击伤害 Mod 会提升 DoT 输出', () => {
-    const base = compute(weapon, mode, [], {}, false);
+    const base = compute(weapon, mode, [], {});
     const withCd = compute(weapon, mode, [
       { stat: 'critMultiplier', form: 'pct', amount: 120, source: 'vital_sense' },
     ], {}, false);
@@ -56,7 +56,7 @@ describe('DoT 享受暴击（§6.2 ①）', () => {
   });
 
   it('基础值含暴击期望：dotBase = 剔除元素加量的命中伤 × (1 + 暴率 × (暴伤 − 1))', () => {
-    const res = compute(weapon, mode, [], {}, false);
+    const res = compute(weapon, mode, [], {});
     const seg: any = res.segments[0];
     const cc = seg.critChance;
     const cd = seg.critDamage;
@@ -68,13 +68,13 @@ describe('DoT 享受暴击（§6.2 ①）', () => {
 
   it('暴击几率 0 时，DoT 基础值等于原始命中伤', () => {
     const noCrit: any = { ...weapon, critChance: 0 };
-    const res = compute(noCrit, mode, [], {}, false);
+    const res = compute(noCrit, mode, [], {});
     const seg: any = res.segments[0];
     near(seg.dotTicks[0].baseValue, 100);
   });
 
   it('暴击提升的幅度与期望倍率一致', () => {
-    const base = compute(weapon, mode, [], {}, false);
+    const base = compute(weapon, mode, [], {});
     const withCd = compute(weapon, mode, [
       { stat: 'critMultiplier', form: 'pct', amount: 100, source: 'vital_sense' },
     ], {}, false);

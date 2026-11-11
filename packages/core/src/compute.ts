@@ -11,7 +11,7 @@
  */
 import type { DamageSpread } from './damage-types.ts';
 import { spreadTotal } from './damage-types.ts';
-import type { AttackMode, DamageSegment, Weapon } from './weapon.ts';
+import type { AttackMode, DamageSegment, ModeVariant, Weapon } from './weapon.ts';
 import { allSegments, panelStats } from './weapon.ts';
 import type { Contribution } from './contributions.ts';
 import { addSpread } from './elements.ts';
@@ -78,23 +78,57 @@ export interface ComputeResult {
 }
 
 /**
+ * 把「勾选了哪些攻击方式」解析成实际参与计算的变体列表。
+ *
+ * @returns `undefined` 表示模式内全部变体都参与；数组表示只算这些（可能为空）。
+ */
+function resolveVariantSelection(
+  mode: AttackMode,
+  selection: number | readonly number[] | undefined,
+): ModeVariant[] | undefined {
+  const all = mode.variants ?? [];
+  if (selection === undefined) return undefined;
+
+  // 兼容旧调用：第 5 个参数以前是 `beam: boolean`，老代码可能还传着 false/true。
+  // 布尔值一律视为"没指定"，让全部变体参与（否则 false 会被当成下标 0、true 当成 1）。
+  if (typeof selection === 'boolean') return undefined;
+
+  const idxs = typeof selection === 'number' ? [selection] : selection;
+  if (typeof selection === 'number' && !Number.isFinite(selection)) return undefined;
+
+  const picked: ModeVariant[] = [];
+  for (const i of idxs) {
+    const v = all[i];
+    if (v) picked.push(v);
+  }
+  // 保持模式里的原始顺序，避免用户勾选顺序影响段序（段序会影响元素合成与展示）
+  return all.filter((v) => picked.includes(v));
+}
+
+/**
  * 一站式计算。
  *
- * 「是不是射线」由模式自己决定（`mode.beam`，D-148），这里不再接收 `beam` 参数。
+ * 「是不是射线」由模式自己决定（扳机 `held`，D-148），这里不再接收 `beam` 参数。
+ *
+ * @param variantSelection 只算哪些「攻击方式」（模式内的变体）。
+ *   **需求方 2026-11-12**：界面上每种攻击方式（弹头命中 / 爆炸 / 射线 / 蓄力）各有复选框，
+ *   用户勾选哪些就只算哪些，全部勾上即"各段相加"。
+ *   · 不传 → 模式内**全部**变体都参与（等价于全选）；
+ *   · 传下标 `number` → 只算这一个（兼容旧调用，D-120）；
+ *   · 传下标数组 `number[]` → 只算选中的这几个。
+ *   选空数组表示一种都不算，结果全为 0。
  */
 export function compute(
   weapon: Weapon,
   mode: AttackMode,
   contribs: readonly Contribution[],
   options: CtxOptions = {},
-  variantIndex?: number,
+  variantSelection?: number | readonly number[],
 ): ComputeResult {
-  // D-120：单变体结算。传了 `variantIndex` 就**只算这一个面板变体**，
-  // `segments` / `totalSpread` / `spreadByVariant` 都只含它——以前把「直接命中 + 爆炸」
-  // 摊平后一起累加，界面的「基础」列把两个变体加在了一起（巴兹火枪的基础面板凭空多出爆炸 40）。
-  // 不传则保持原行为（所有变体一起算）。
-  const only = variantIndex !== undefined ? mode.variants?.[variantIndex] : undefined;
-  const scopedMode: AttackMode = only ? { ...mode, variants: [only] } : mode;
+  // D-120 / D-148：按选中的「攻击方式」缩小 `mode.variants`，
+  // `segments` / `totalSpread` / `spreadByVariant` 都只含选中的那几个。
+  const selected = resolveVariantSelection(mode, variantSelection);
+  const scopedMode: AttackMode = selected ? { ...mode, variants: selected } : mode;
   const ctx: Ctx = buildContext(weapon, scopedMode, contribs, options);
 
   // D-080：段只属于变体，模式上不再有 `segments`。这里把（已缩到选中变体的）各段摊平：

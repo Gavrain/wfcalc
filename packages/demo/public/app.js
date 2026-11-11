@@ -163,9 +163,12 @@ function modeSegments(m) {
   return out;
 }
 
-/** 当前模式内的**面板变体**（D-080）。 *
- * 命中与爆炸不再挤在同一个面板里：它们是同一模式下的两个独立面板，
- * 各自有自己的触发/暴击与配装。单段模式只有 1 个变体，界面不显示切换。
+/**
+ * 当前模式内的**攻击方式**（D-080 / D-148）。
+ *
+ * 命中与爆炸是同一模式下的两种攻击方式，各自有自己的段与可选面板覆盖。
+ * 需求方 2026-11-12：界面把它们分开显示，每种带一个**复选框**，
+ * 用户选哪些参与计算，选中的高亮（像切换统计口径那样）。
  */
 function currentVariant() {
   const m = currentMode();
@@ -173,6 +176,35 @@ function currentVariant() {
   const vs = m.variants ?? [];
   if (vs.length === 0) return null;
   return vs[Math.min(state.variantIndex, vs.length - 1)] ?? vs[0];
+}
+
+/** 当前模式内勾选了哪些攻击方式（下标数组）；`null` 表示全选 */
+function selectedVariantIdx() {
+  const m = currentMode();
+  if (!m) return [];
+  const vs = m.variants ?? [];
+  const sel = state.selectedVariants;
+  if (!Array.isArray(sel)) return vs.map(function (_, i) { return i; });
+  return sel.filter(function (i) { return i >= 0 && i < vs.length; });
+}
+
+/** 某一种攻击方式当前是否被勾选 */
+function isVariantSelected(i) {
+  return selectedVariantIdx().indexOf(i) >= 0;
+}
+
+/** 勾选/取消勾选某种攻击方式（至少保留一种，全不选会让面板变成 0，容易误操作） */
+function toggleVariant(i) {
+  const m = currentMode();
+  if (!m) return;
+  const vs = m.variants ?? [];
+  const cur = selectedVariantIdx();
+  const next = cur.indexOf(i) >= 0 ? cur.filter(function (x) { return x !== i; }) : cur.concat([i]).sort(function (a, b) { return a - b; });
+  if (next.length === 0) return; // 不允许全部取消
+  state.selectedVariants = next.length === vs.length ? null : next;
+  // 同步旧字段，保持「当前变体」的其他用途（如拆解展示）不落空
+  state.variantIndex = next[0];
+  renderAll();
 }
 
 /** 当前变体的**生效模式**：把变体的段与 override 合并后交给 core（实现在 app-compute.js） */
@@ -233,7 +265,9 @@ function renderModeSwitch() {
       (function (idx) {
         btn.addEventListener('click', function () {
           state.modeIndex = idx;
-          state.variantIndex = 0; // 切模式后变体回到第一个
+          // 切模式后攻击方式全部重新勾选（新模式的攻击方式与旧模式无关）
+          state.selectedVariants = null;
+          state.variantIndex = 0;
           renderAll();
         });
       })(i);
@@ -242,22 +276,33 @@ function renderModeSwitch() {
     box.append(row);
   }
 
-  // 第二排：当前模式内的面板变体（D-080，单变体不显示）
+  // 第二排：当前模式内的**攻击方式**，多选复选框（需求方 2026-11-12）
+  //
+  // 一个模式可以有多种攻击方式（弹头命中 / 爆炸 / 射线 / 蓄力），全勾 = 各段相加。
+  // 只有一种时不显示（绝大多数武器）。
   const variants = currentMode() ? (currentMode().variants ?? []) : [];
   if (variants.length > 1) {
     const row = el('div', 'variant-row');
+    const tip = el('span', 'variant-tip', '参与计算：');
+    row.append(tip);
     for (let i = 0; i < variants.length; i++) {
       const v = variants[i];
-      const btn = el('button', 'mode-btn variant-btn' + (i === state.variantIndex ? ' active' : ''), v.label);
-      btn.type = 'button';
-      btn.title = v.id + ' · ' + v.segments.map(function (s) { return s.kind; }).join(' + ');
-      (function (idx) {
-        btn.addEventListener('click', function () {
-          state.variantIndex = idx;
-          renderAll();
-        });
-      })(i);
-      row.append(btn);
+      const on = isVariantSelected(i);
+      const cb = el('input');
+      cb.type = 'checkbox';
+      cb.checked = on;
+      cb.className = 'variant-check';
+      cb.title = v.id + ' · ' + v.segments.map(function (s) { return s.kind; }).join(' + ');
+      cb.addEventListener('change', function () { toggleVariant(i); });
+      // 整块可点（复选框 + 文字），选中时高亮——与统计口径的选中样式一致
+      const label = el('label', 'variant-btn' + (on ? ' active' : ''));
+      label.append(cb);
+      label.append(el('span', '', v.label));
+      // 这一种攻击方式自己的扳机（赘骨灵化：射线 / 蓄力），与模式不一致时标出来
+      if (v.trigger && currentMode() && v.trigger !== currentMode().trigger) {
+        label.append(el('span', 'variant-trig', TRIGGER_ZH[v.trigger] || v.trigger));
+      }
+      row.append(label);
     }
     box.append(row);
   }
@@ -270,6 +315,22 @@ const MODE_LABEL = {
   charged: '蓄力',
   alt: '切换',
   incarnon: '灵化',
+};
+
+/**
+ * 扳机的中文名（D-148）。
+ *
+ * 需求方 2026-11-11 规则 8：「UI 要显示当前模式的扳机与伤害判定类型」。
+ * 射线唯一判据就是扳机 `held`，所以界面直接把扳机标出来。
+ */
+const TRIGGER_ZH = {
+  auto: '全自动',
+  semi: '半自动',
+  burst: '点射',
+  charge: '蓄力',
+  held: '射线',
+  active: '激活',
+  unknown: '未知',
 };
 
 /**
@@ -350,26 +411,49 @@ function renderPanel(res) {
     }
   }
   // 兜底：内核没给出分段结果时退回原始面板（非玄骸武器两者相同）
+  // D-148 / 2026-11-12：只取**勾选了的攻击方式**的段，不能把全部变体都算进来。
   if (!res.segments || res.segments.length === 0) {
-    const curVariant = currentVariant();
-    for (const s of (curVariant ? curVariant.segments : effectiveMode().segments)) {
-      for (const [t, v] of Object.entries(s.damage)) {
-        if (typeof v === 'number' && v !== 0) orig[t] = (orig[t] || 0) + v;
+    const m = effectiveMode();
+    const picked = selectedVariantIdx();
+    for (const i of picked) {
+      const v = m && m.variants ? m.variants[i] : null;
+      if (!v) continue;
+      for (const s of v.segments || []) {
+        for (const [t, val] of Object.entries(s.damage)) {
+          if (typeof val === 'number' && val !== 0) orig[t] = (orig[t] || 0) + val;
+        }
       }
     }
   }
-  // ⚠ 当前列必须用**当前变体**的分布，不能用 res.totalSpread：
-  //   totalSpread 是所有变体之和，与"当前变体的基础分布"并列会把命中和爆炸混成一个面板
+  // ⚠ 当前列必须只含**勾选了的攻击方式**，不能用 res.totalSpread：
+  //   totalSpread 是所有变体之和，与"当前攻击方式的基础分布"并列会把命中和爆炸混成一个面板
   //   （巴什穆 / 巴兹火枪，需求方 2026-11-06 反馈）。
-  const vi = Math.min(state.variantIndex, (res.spreadByVariant.length || 1) - 1);
-  const spread = res.spreadByVariant[vi] ?? res.totalSpread;
+  // ⚠ D-148 / 2026-11-12：现在支持**多选**——勾选了几种就把这几种的分布相加，
+  //   内核已经按 `selectedVariants` 缩过 variants，所以 `spreadByVariant` 里只剩选中的那几个。
+  const spread = {};
+  for (const s of res.spreadByVariant || []) {
+    for (const [t, v] of Object.entries(s)) {
+      if (typeof v === 'number' && v !== 0) spread[t] = (spread[t] || 0) + v;
+    }
+  }
   const typeSet = [];
   const push = function (t) { if (typeSet.indexOf(t) < 0) typeSet.push(t); };
   Object.keys(orig).forEach(push);
   Object.keys(spread).forEach(push);
 
   // 当前触发几率（含触发几率 Mod，射线另算）——不是面板静态值
-  const procNow = totalProcChance(effectiveMode().segments[0].procChance, currentContributions(), false);
+  // D-148：段现在在变体里（模式上不再有 segments），取第一个勾选攻击方式的第一段
+  const firstVariant = (function () {
+    const m = effectiveMode();
+    const idx = selectedVariantIdx();
+    if (!m || !m.variants) return null;
+    return m.variants[idx[0]] ?? m.variants[0] ?? null;
+  })();
+  const procNow = totalProcChance(
+    (firstVariant && firstVariant.segments && firstVariant.segments[0] ? firstVariant.segments[0].procChance : 0),
+    currentContributions(),
+    false,
+  );
   const totalSpread = spreadTotalOf(spread);
   const dmgRows = typeSet.map(function (t) {
     // 某类型的单弹头触发率 = 当前触发几率 × 该类型在伤害分布里的占比

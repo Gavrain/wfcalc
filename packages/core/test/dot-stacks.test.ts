@@ -37,7 +37,7 @@ const contribs: any[] = [
 
 describe('异常状态层数单位（D-036）', () => {
   it('每秒层数 = 单发层数 × 射速（不是单发层数）', () => {
-    const res = compute(weapon, mode, contribs, {}, false);
+    const res = compute(weapon, mode, contribs, {});
     const out: any = res.output;
     const fireRate: number = out.fireRate;
     assert.ok(fireRate > 0, '射速应大于 0');
@@ -49,7 +49,7 @@ describe('异常状态层数单位（D-036）', () => {
   });
 
   it('层数与 DoT 每秒伤害自洽', () => {
-    const res = compute(weapon, mode, contribs, {}, false);
+    const res = compute(weapon, mode, contribs, {});
     const out: any = res.output;
     for (const t of DOT_TYPES) {
       const stacks: number | undefined = out.stacksPerType[t];

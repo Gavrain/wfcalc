@@ -46,35 +46,36 @@ function baseOf(variant: { segments: readonly DamageSegment[] }): Record<string,
 }
 
 describe('多变体武器：无 Mod 时「当前」必须等于「基础」', () => {
-  it('巴什穆（Basmu）：各模式无 Mod 时「当前」等于其自身各段之和', async () => {
+  it('巴什穆（Basmu）：每种攻击方式单独算时「当前」等于它自己各段之和', async () => {
     const all = await loadAllWeapons();
     const w = all.find((x) => x.id === 'SentRifleNewWarGun');
     assert.ok(w, '找不到巴什穆');
-    // D-148：换源到 WFCD 后，巴什穆是「主模式（auto，电击 + 火焰爆炸段）+ 副模式（held 射线）」，
-    //        需求方 2026-11-11 确认「一个模式内所有段相加」，所以这里逐模式验证自洽：
-    //        每个模式的当前面板 = 该模式自己各段基础值之和，不能混进别的模式的段。
+    // D-148 + 需求方 2026-11-12：一个模式内可以有多种「攻击方式」（命中 / 爆炸），
+    //   界面用复选框选哪些参与计算。所以这里逐个攻击方式验证：
+    //   只勾这一种时，当前面板就等于这一种自己的各段之和，不能混进别的攻击方式。
     assert.ok(w.modes.length >= 2, `巴什穆应有多个模式，实际 ${w.modes.length}`);
     const hasBeam = w.modes.some((m) => m.trigger === 'held');
     assert.ok(hasBeam, '巴什穆的次要射击（名为 Held）应是射线模式');
 
     for (const m of w.modes) {
-      const res = compute(w, { ...m, segments: m.variants[0]!.segments } as unknown as AttackMode, [], {});
-      const own: Record<string, number> = {};
-      for (const v of m.variants) {
+      for (let vi = 0; vi < m.variants.length; vi++) {
+        const v = m.variants[vi]!;
+        // 只勾这一个攻击方式（传下标数组）
+        const res = compute(w, m, [], {}, [vi]);
+        const own: Record<string, number> = {};
         for (const seg of v.segments) {
           for (const [k, val] of Object.entries(seg.damage ?? {})) own[k] = (own[k] ?? 0) + (val ?? 0);
         }
-      }
-      const cur = res.spreadByVariant[0]!;
-      assert.equal(
-        sumSpread(cur),
-        sumSpread(own as never),
-        `模式 ${m.id} 的当前面板应等于其各段之和`,
-      );
-      // 该模式没有的伤害类型，当前面板里不能出现
-      for (const k of Object.keys(cur) as (keyof typeof cur)[]) {
-        if ((cur[k] ?? 0) > 0) {
-          assert.ok(own[k] !== undefined, `模式 ${m.id} 混入了自身没有的伤害类型 ${String(k)}`);
+        const cur = res.spreadByVariant[0]!;
+        assert.equal(
+          sumSpread(cur),
+          sumSpread(own as never),
+          `模式 ${m.id} / 攻击方式 ${v.id} 单选时应等于其各段之和`,
+        );
+        for (const k of Object.keys(cur) as (keyof typeof cur)[]) {
+          if ((cur[k] ?? 0) > 0) {
+            assert.ok(own[k] !== undefined, `${m.id}/${v.id} 混入了自身没有的伤害类型 ${String(k)}`);
+          }
         }
       }
     }

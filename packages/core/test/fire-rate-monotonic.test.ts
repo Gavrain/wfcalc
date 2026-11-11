@@ -24,7 +24,7 @@ const mk = (fr: number, mag = 70, reload = 1.7) => ({
 
 const dot6s = (fr: number, mag = 70, reload = 1.7) => {
   const w = mk(fr, mag, reload);
-  return compute(w, w.modes[0], [], {}, false).output.lines.find((l: any) => l.id === 'dot6s').value;
+  return compute(w, w.modes[0], [], {}).output.lines.find((l: any) => l.id === 'dot6s').value;
 };
 
 describe('射速单调性（D-067）', () => {
@@ -102,7 +102,7 @@ describe('毫秒精度开火占比（D-067）', () => {
     const w: any = mk(10, 10, 2);
     // D-080：段只属于变体——直接改变体内的段
     w.modes[0].variants[0].segments[0].damage = { slash: 100 };
-    const r = compute(w, w.modes[0], [], {}, false);
+    const r = compute(w, w.modes[0], [], {});
     const seg: any = r.segments[0];
     const tick = seg.dotTicks.find((t: any) => t.type === 'slash').tick;
     const perSec = r.output.stacksPerType.slash;

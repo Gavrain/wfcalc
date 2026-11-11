@@ -62,8 +62,8 @@ describe('暴率 >100% 时爆头暴击正确生效（D-064）', () => {
         variants: [{ id: 'direct', label: '直接命中', segments: [{ kind: 'impact', procChance: 0.5, damage: { slash: 100 } }] }] }],
     });
     const hs = { headshot: { enabled: true, multiplier: 3 } };
-    const a = compute(mk(1), mk(1).modes[0], [], hs, false).segments[0].dotTicks[0].tick;
-    const b = compute(mk(1.5), mk(1.5).modes[0], [], hs, false).segments[0].dotTicks[0].tick;
+    const a = compute(mk(1), mk(1).modes[0], [], hs).segments[0].dotTicks[0].tick;
+    const b = compute(mk(1.5), mk(1.5).modes[0], [], hs).segments[0].dotTicks[0].tick;
     assert.ok(b > a, `暴率 150% (${b}) 应高于 100% (${a})`);
     near(b / a, 15 / 12); // 分档期望 2.5 vs 2.0
   });

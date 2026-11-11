@@ -53,7 +53,7 @@ describe('DoT 加权每层秒伤（D-060 / D-061）', () => {
       .reduce((a: number, t: string) => a + (spread[t] ?? 0), 0);
 
   it('加权合计 = Σ(每层秒伤 × 占比)，分母只算有 DoT 的类型', () => {
-    const res = compute(weapon, weapon.modes[0], slashPlusHeat, {}, false);
+    const res = compute(weapon, weapon.modes[0], slashPlusHeat, {});
     const seg: any = res.segments[0];
     // D-107：触发池看命中分布；"有 DoT 的类型"是 DOT_TYPES，不是 Object.keys
     const denom = dotTotalOf(seg.finalHit);
@@ -85,7 +85,7 @@ describe('DoT 加权每层秒伤（D-060 / D-061）', () => {
   });
 
   it('各占 50% 时，合计是未加权的一半', () => {
-    const res = compute(weapon, weapon.modes[0], slashPlusHeat, {}, false);
+    const res = compute(weapon, weapon.modes[0], slashPlusHeat, {});
     const seg: any = res.segments[0];
     let unweighted = 0;
     for (const t of seg.dotTicks) {
@@ -108,14 +108,14 @@ describe('DoT 加权每层秒伤（D-060 / D-061）', () => {
 
   it('单个 DoT 类型占 100% 时，加权值等于它自己的每层秒伤', () => {
     // 只有切割，无元素
-    const res = compute(weapon, weapon.modes[0], [], {}, false);
+    const res = compute(weapon, weapon.modes[0], [], {});
     const seg: any = res.segments[0];
     const slashTick = seg.dotTicks.find((t: any) => t.type === 'slash');
     near(res.output.dotPerSecond, slashTick.tick);
   });
 
   it('「每层秒伤」单值仍是不含权重的原始值（供展示各类型）', () => {
-    const res = compute(weapon, weapon.modes[0], slashPlusHeat, {}, false);
+    const res = compute(weapon, weapon.modes[0], slashPlusHeat, {});
     const seg: any = res.segments[0];
     const heatTick = seg.dotTicks.find((t: any) => t.type === 'heat');
     // dotPerType 存的是原始每层秒伤，不加权
@@ -134,7 +134,7 @@ describe('DoT 加权每层秒伤（D-060 / D-061）', () => {
   });
 
   it('六秒总伤不受加权改动影响（它本来就乘了占比）', () => {
-    const res = compute(weapon, weapon.modes[0], slashPlusHeat, {}, false);
+    const res = compute(weapon, weapon.modes[0], slashPlusHeat, {});
     const seg: any = res.segments[0];
     const present = new Set(Object.keys(seg.finalHit));
     const firing = core.buildFiringTimeline(30, 10, 2);
@@ -150,7 +150,7 @@ describe('DoT 加权每层秒伤（D-060 / D-061）', () => {
   });
 
   it('输出口径名称已改为「DoT 加权每层秒伤」', () => {
-    const res = compute(weapon, weapon.modes[0], [], {}, false);
+    const res = compute(weapon, weapon.modes[0], [], {});
     const line = res.output.lines.find((l: any) => l.id === 'dotPerSecond');
     assert.equal(line.label, 'DoT 加权每层秒伤');
   });
