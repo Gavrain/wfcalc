@@ -120,9 +120,15 @@ describe('半自动炮轰系列：装备条件（只看武器本身的射击模�
     const w = JSON.parse(await readFile(join(ROOT, 'packages/data/src/generated/weapons/primary.json'), 'utf8'));
     const torid = w.weapons.find((x: { id: string }) => x.id === 'BioWeapon');
     assert.ok(torid, '找不到 Torid');
-    // D-092：毒云（无 projectile 的 impact 段）不再算独立模式
-    assert.equal(torid.modes.length, 1);
-    assert.equal(torid.modes[0].trigger, 'semi');
+    // D-092：毒云（无 projectile 的 impact 段）不再算独立模式——它现在并进主模式的爆炸段里。
+    // D-148：换源到 WFCD 后，托里德的**灵化形态**被识别成独立模式（role=incarnon），
+    //        这是对的；`isSemiAutoOnlyWeapon` 本来就会剔掉灵化模式，所以仍然可装。
+    const ownModes = torid.modes.filter((m: { role: string }) => m.role !== 'incarnon');
+    assert.equal(ownModes.length, 1, '剔掉灵化后应只剩 1 个射击模式');
+    assert.equal(ownModes[0].trigger, 'semi');
+    // 主模式里应含一段 AoE（毒云），不另起模式
+    const segs = ownModes[0].variants.flatMap((v: { segments: { aoe?: boolean }[] }) => v.segments);
+    assert.ok(segs.some((s: { aoe?: boolean }) => s.aoe), '毒云/爆炸段应在主模式内');
     assert.equal(isSemiAutoOnlyWeapon(torid.modes), true);
   });
 });

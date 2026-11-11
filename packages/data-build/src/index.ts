@@ -13,14 +13,16 @@
  */
 import { mkdirSync, writeFileSync, existsSync, readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
-import { FetchError, fetchSource } from './fetch.ts';
+import { fetchSource, FetchError } from './fetch.ts';
 import { cleanWeapons, EXCLUDED_CATEGORIES, type CleanedWeapon } from './clean.ts';
+import { cleanWfcdWeapons, type CleanedWfcdWeapon, type WfcdCleanResult } from './wfcd-clean.ts';
+import { fetchAllWfcdWeapons, WfcdFetchError } from './wfcd-fetch.ts';
+import { fillFromOfficialExport } from './wfcd-fallback.ts';
 import { diffWeapons, formatDiffReport, type DiffReport } from './diff.ts';
 import { applyOverrides, type AppliedOverride } from './overrides.ts';
 import { toEmitWeapon, type EmitWeapon } from './emit.ts';
-import { resolveName, nameCoverage, type LanguageDict } from './localize.ts';
+import { buildLangKeyByWeaponId, buildZhByEnglishName, resolveZhForWfcdWeapon, stripNamePrefix, type LanguageDict } from './localize.ts';
 import { WEAPON_OVERRIDES } from '../../data/src/manual/overrides.ts';
-import type { ExportWeapons } from './types.ts';
 import type { AttackMode, Weapon } from '../../core/src/weapon.ts';
 
 const repoRoot = resolve(import.meta.dirname, '../../..');
@@ -94,6 +96,52 @@ function emitToPanel(w: EmitWeapon): Weapon {
       };
     }),
   };
+}
+
+/** WFCD 清洗统计（D-148 换源后的报告格式） */
+function formatWfcdStats(stats: WfcdCleanResult['stats']): string {
+  return [
+    '抓取统计（WFCD）',
+    '='.repeat(60),
+    `条目总数：${stats.total}`,
+    `无攻击丢弃：${stats.droppedNoAttack}`,
+    `清洗后保留：${stats.kept}`,
+    `多攻击模式武器：${stats.multiMode}`,
+    `射线模式：${stats.beamModes}`,
+    `扳机未知：${stats.unknownTrigger}`,
+  ].join('\n');
+}
+
+/** WFCD 换源后的合理性检查 */
+function wfcdSanityProblems(clean: WfcdCleanResult, expected?: number): string[] {
+  const problems: string[] = [];
+  const { stats } = clean;
+
+  if (stats.kept === 0) problems.push('清洗后武器数为 0，清洗规则可能全部失配。');
+
+  if (stats.total > 0) {
+    const keepRatio = stats.kept / stats.total;
+    if (keepRatio < 0.5) {
+      problems.push(
+        `保留率仅 ${(keepRatio * 100).toFixed(1)}%（${stats.kept}/${stats.total}），低于 50%，清洗规则可能过严。`,
+      );
+    }
+  }
+
+  if (expected != null && Math.abs(stats.kept - expected) > Math.max(10, expected * 0.1)) {
+    problems.push(`武器数与上一版差异过大：上一版 ${expected}，本次 ${stats.kept}。`);
+  }
+
+  if (stats.beamModes === 0) problems.push('没有任何射线模式，扳机归一可能失配。');
+
+  // 扳机未知占比过高 → WFCD 的 trigger 字段可能改了取值
+  if (stats.total > 0 && stats.unknownTrigger / stats.total > 0.4) {
+    problems.push(
+      `扳机未知占 ${((stats.unknownTrigger / stats.total) * 100).toFixed(1)}%，WFCD 的 trigger 字段可能改了取值。`,
+    );
+  }
+
+  return problems;
 }
 
 function formatStats(stats: ReturnType<typeof cleanWeapons>['stats']): string {
@@ -175,43 +223,101 @@ function writeReports(statsLine: string, warnings: string[], diff: DiffReport): 
 async function main(): Promise<number> {
   const args = parseArgs(process.argv.slice(2));
 
-  console.log(`[1/4] 抓取数据源${args.force ? '（忽略缓存）' : ''}...`);
-  const raw = await fetchSource<ExportWeapons>('weapons', { force: args.force });
-  console.log(`      导出条目：${Object.keys(raw).length}`);
+  /**
+   * 兜底武器（WFCD 未收录、由官方导出补齐）的 id → 官方语言键。
+   * 这些武器的 `name` 字段此时还是语言键，需要按 key 解析中英文名。
+   */
+  let fallbackLangKeys = new Map<string, string>();
+
+  // ── 武器数据源：WFCD（D-148，需求方 2026-11-11 确认"官方数据错太多，只当参考"）──
+  console.log(`[1/5] 抓取 WFCD 武器数据${args.force ? '（忽略缓存）' : ''}...`);
+  const wfcdRaw = await fetchAllWfcdWeapons({
+    force: args.force,
+    insecureTls: process.env.WFCD_INSECURE_TLS === '1',
+  });
+  console.log(`      WFCD 条目：${wfcdRaw.length}`);
 
   console.log('[2/5] 清洗...');
-  const clean = cleanWeapons(raw);
-  // 清洗产出的武器带 `languageKey`（只在本阶段用），`Weapon` 本身没有这个字段
-  const cleaned: CleanedWeapon[] = clean.weapons;
-  const statsLine = formatStats(clean.stats);
+  const clean = cleanWfcdWeapons(wfcdRaw);
+  const statsLine = formatWfcdStats(clean.stats);
   console.log(statsLine);
 
-  // 语言包：把导出的语言键解析成中英文显示名
-  console.log('[3/5] 解析名称（语言包）...');
+  // WFCD 不收录显赫武器（圣剑刀 / 女武神爪 / 铁棒…）与哈尔武，直接换源会让它们消失。
+  // 这些武器用官方导出补齐并标记来源（官方数据只当参考，见 D-148）。
+  let cleaned: CleanedWfcdWeapon[] = clean.weapons;
+  let statsLineForReport = statsLine;
+  {
+    const officialRaw = await fetchSource<Record<string, unknown>>('weapons', { force: args.force });
+    const officialClean = cleanWeapons(officialRaw as never);
+    const { weapons, filled } = fillFromOfficialExport(clean.weapons, officialClean.weapons as CleanedWeapon[]);
+    cleaned = weapons as CleanedWfcdWeapon[];
+    // 兜底武器的 name 还是语言键，这里先记下来，等语言包加载后再解析
+    fallbackLangKeys = new Map(
+      (weapons.filter((w) => (w as { _fromOfficialExport?: true })._fromOfficialExport) as CleanedWeapon[])
+        .map((w) => [w.id, w.languageKey ?? '']),
+    );
+    if (filled.length > 0) {
+      console.log(`\nWFCD 未收录、用官方导出补齐 ${filled.length} 把（模式已标 _manual: export-missing）：`);
+      console.log(`  ${filled.join(', ')}`);
+      statsLineForReport += `\n官方导出补齐（WFCD 未收录）：${filled.length} 把\n  ${filled.join(', ')}`;
+    }
+  }
+  console.log(`      最终武器数：${cleaned.length}`);
+  console.log(`      射线模式：${clean.stats.beamModes}（判据见 D-148：扳机 Held）`);
+
+  // 语言包：WFCD 给的是英文显示名，用「英文名 → 中文名」反查；
+  // 兜底武器（显赫武器）的 name 还是官方导出的语言键，走原来的按键解析。
+  console.log('[3/5] 解析中文名（语言包）...');
   let zhDict: LanguageDict = {};
   let enDict: LanguageDict = {};
   try {
     zhDict = await fetchSource<LanguageDict>('langZh', { force: args.force });
     enDict = await fetchSource<LanguageDict>('langEn', { force: args.force });
-    const keys = cleaned.map((w) => w.languageKey ?? '').filter(Boolean);
-    const coverage = nameCoverage(keys, zhDict);
-    console.log(`      中文包 ${Object.keys(zhDict).length} 条，武器名命中 ${coverage.hit}/${coverage.total}（${(coverage.ratio * 100).toFixed(1)}%）`);
-    if (coverage.missingSamples.length > 0) {
-      console.log(`      未命中样例：${coverage.missingSamples.slice(0, 5).join(', ')}`);
+    const zhByEn = buildZhByEnglishName(enDict, zhDict);
+    // 兜底用的语言键表来自官方导出；拿不到也不影响主流程（中文名会退回语言键末段）
+    let langKeyById = new Map<string, string>();
+    try {
+      const official = await fetchSource<Record<string, { name?: string }>>('weapons', { force: args.force });
+      langKeyById = buildLangKeyByWeaponId(official);
+    } catch {
+      console.log('      （官方导出取不到，跳过 uniqueName 兜底）');
     }
-  } catch (err) {
-    console.log(`      ⚠️ 语言包获取失败，名称将回退到内部名：${(err as Error).message}`);
-  }
 
-  for (const w of cleaned) {
-    const resolved = resolveName(w.languageKey, zhDict, enDict);
-    w.name = resolved.en;
-    if (resolved.zh) w.nameZh = resolved.zh;
-    delete w.languageKey;
+    let hit = 0;
+    const missing: string[] = [];
+    for (const w of cleaned) {
+      // 兜底武器的 name 是语言键 → 按 key 解析中英文名
+      const langKey = fallbackLangKeys.get(w.id);
+      if (langKey) {
+        const zh = zhDict[langKey];
+        const en = enDict[langKey];
+        if (en) w.name = en;
+        if (zh) {
+          w.nameZh = stripNamePrefix(zh);
+          hit++;
+        } else if (missing.length < 20) {
+          missing.push(langKey);
+        }
+        continue;
+      }
+
+      const zh = resolveZhForWfcdWeapon(zhDict, zhByEn, langKeyById, w);
+      if (zh) {
+        w.nameZh = zh;
+        hit++;
+      } else if (missing.length < 20) {
+        missing.push(w.name);
+      }
+    }
+    const total = cleaned.length;
+    console.log(`      中文名命中 ${hit}/${total}（${((hit / total) * 100).toFixed(1)}%）`);
+    if (missing.length > 0) console.log(`      未命中：${missing.join(', ')}`);
+  } catch (err) {
+    console.log(`      ⚠️ 语言包获取失败，界面将显示英文名：${(err as Error).message}`);
   }
 
   // 应用人工覆盖层（蓄力时间反推射速等）
-  const applied: AppliedOverride[] = applyOverrides(clean.weapons, WEAPON_OVERRIDES);
+  const applied: AppliedOverride[] = applyOverrides(cleaned, WEAPON_OVERRIDES);
   if (applied.length > 0) {
     console.log(`\n人工覆盖已应用 ${applied.length} 处：`);
     for (const a of applied) console.log(`  ${a.weaponId}.${a.field}: ${a.from ?? '(无)'} → ${a.to}  （${a.reason}）`);
@@ -220,12 +326,12 @@ async function main(): Promise<number> {
   console.log('[4/5] 对比上一版...');
   const previous = loadPrevious();
   const diff = previous
-    ? diffWeapons(previous, clean.weapons)
+    ? diffWeapons(previous, cleaned)
     : { added: [], removed: [], changed: [], unchanged: 0, needsAttention: true };
   console.log(previous ? formatDiffReport(diff) : '（无上一版，首次生成）');
 
   console.log('[5/5] 合理性检查...');
-  const problems = sanityProblems(clean, previous?.length);
+  const problems = wfcdSanityProblems(clean, previous?.length);
   if (problems.length > 0) {
     console.log('⚠️  发现以下问题，需要你确认：');
     for (const p of problems) console.log(`   - ${p}`);
@@ -244,9 +350,9 @@ async function main(): Promise<number> {
 
   // 按分类拆分输出，便于人工按武器类型查找与修改
   const files: Record<string, EmitWeapon[]> = { primary: [], secondary: [], melee: [], archgun: [], archmelee: [], companion: [], unknown: [] };
-  for (const w of clean.weapons) {
-    const exportKey = findExportKey(raw, w.id);
-    const variantType = exportKey ? raw[exportKey]?.variantType : undefined;
+  for (const w of cleaned) {
+    // WFCD 不带 variantType，Prime / Kuva 等标记改由名字与 id 判断
+    const variantType = undefined;
     files[w.category]!.push(toEmitWeapon(w, applied, { variantType }));
   }
 
@@ -256,6 +362,7 @@ async function main(): Promise<number> {
     counts[cat] = list.length;
     const body = {
       generatedAt: new Date().toISOString(),
+      source: 'WFCD/warframe-items (MIT)',
       category: cat,
       count: list.length,
       note: '暴率/触发为 0~1 小数；伤害分布为绝对值；procChance 同为 0~1；kuva 表示需用户在计算器里选元素与加成（25%~60%）',
@@ -270,7 +377,7 @@ async function main(): Promise<number> {
     JSON.stringify(
       {
         generatedAt: new Date().toISOString(),
-        source: 'https://browse.wf/warframe-public-export-plus/ExportWeapons.json',
+        source: 'WFCD/warframe-items (MIT)',
         stats: clean.stats,
         categories: counts,
         manualOverrides: applied.length,
@@ -289,22 +396,18 @@ async function main(): Promise<number> {
   return 0;
 }
 
-/** 由武器 id 反查导出键（用于取 variantType 等元数据） */
-function findExportKey(raw: ExportWeapons, id: string): string {
-  for (const key of Object.keys(raw)) {
-    if ((key.split('/').pop() ?? '') === id) return key;
-  }
-  return '';
-}
-
 try {
   process.exitCode = await main();
 } catch (err) {
-  if (err instanceof FetchError) {
+  if (err instanceof WfcdFetchError || err instanceof FetchError) {
     console.error('\n❌ 抓取失败，已停止（未做任何写入）。');
-    console.error(`   类型：${err.kind}`);
-    console.error(`   详情：${err.message}`);
-    console.error(`   建议：${err.hint}`);
+    if (err instanceof FetchError) {
+      console.error(`   类型：${err.kind}`);
+      console.error(`   详情：${err.message}`);
+      console.error(`   建议：${err.hint}`);
+    } else {
+      console.error(`   详情：${err.message}`);
+    }
     console.error('\n请决定如何继续（例如：检查网络后重跑 / 使用 --force / 放弃本次更新）。');
     process.exitCode = 1;
   } else {

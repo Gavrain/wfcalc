@@ -62,7 +62,7 @@ const panelWithKuva = core.applyKuvaBonus(panel, opts.kuva);
 const baseAfterBaseDamage = core.applyBaseDamage(panelWithKuva, seg, contribs, 0, 0);
 const elements = core.applyElements(baseAfterBaseDamage, contribs, 'hit');
 
-const res = core.compute(weapon, mode, contribs, opts, false);
+const res = core.compute(weapon, mode, contribs, opts);
 const s2 = res.segments[0];
 
 const out = {

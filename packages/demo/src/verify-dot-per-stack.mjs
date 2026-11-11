@@ -19,7 +19,7 @@ function run(ids, extra = []) {
     for (const x of adapter.modToContributions(m, m.maxRank, i)) c.push(x);
   }
   for (const x of extra) c.push(x);
-  return core.compute(karak, karak.modes[0], c, { kuva: { type: 'heat', ratio: 0.6 }, faction: 'none' }, false);
+  return core.compute(karak, karak.modes[0], c, { kuva: { type: 'heat', ratio: 0.6 }, faction: 'none' });
 }
 
 const ids = ['serration', 'split_chamber', 'point_strike', 'vital_sense', 'hellfire', 'infected_clip', 'vigilante_armaments', 'heavy_caliber'];

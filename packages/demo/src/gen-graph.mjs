@@ -48,7 +48,7 @@ const opts = {
 };
 
 const mode = weapon.modes[0];
-const res = core.compute(weapon, mode, contribs, opts, false);
+const res = core.compute(weapon, mode, contribs, opts);
 const st = res.state;
 const r = (n, d = 4) => (typeof n === 'number' ? Number(n.toFixed(d)) : n);
 const sp = (o) => Object.fromEntries(Object.entries(o).filter(([, v]) => Math.abs(v) > 1e-9).map(([k, v]) => [k, r(v)]));

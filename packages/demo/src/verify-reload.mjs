@@ -18,7 +18,7 @@ function run(ids) {
     const m = mods.find((x) => x.id === id);
     for (const x of adapter.modToContributions(m, m.maxRank, i)) c.push(x);
   }
-  return core.compute(karak, karak.modes[0], c, { kuva: { type: 'heat', ratio: 0.6 }, faction: 'none' }, false);
+  return core.compute(karak, karak.modes[0], c, { kuva: { type: 'heat', ratio: 0.6 }, faction: 'none' });
 }
 
 const base = run(['serration', 'split_chamber']);

@@ -43,7 +43,7 @@ describe('非玄骸武器不吃玄骸加成', () => {
     const torid = all.find((w) => w.id === 'BioWeapon');
     assert.ok(torid);
     const mode = flat(torid.modes[0]!);
-    const spread = compute(torid, mode, [], { kuva: null } as never, false).totalSpread;
+    const spread = compute(torid, mode, [], { kuva: null } as never).totalSpread;
     // 托里德本体是毒素武器，不该出现毒气（那是火+毒的合成结果）
     assert.equal(spread.gas, undefined, '非玄骸武器不应出现玄骸合成元素');
     assert.ok((spread.toxin ?? 0) > 0);
@@ -54,7 +54,7 @@ describe('非玄骸武器不吃玄骸加成', () => {
     const torid = all.find((w) => w.id === 'BioWeapon');
     assert.ok(torid);
     const mode = flat(torid.modes[0]!);
-    const spread = compute(torid, mode, [], { kuva: { type: 'heat', ratio: 0.6 } } as never, false).totalSpread;
+    const spread = compute(torid, mode, [], { kuva: { type: 'heat', ratio: 0.6 } } as never).totalSpread;
     assert.ok((spread.gas ?? 0) > 0, '传了 kuva 应出现毒气');
   });
 });

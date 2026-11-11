@@ -44,9 +44,8 @@ export function simulateWith(
   mode: AttackMode,
   contribs: readonly Contribution[],
   options: CtxOptions = {},
-  beam = false,
 ): ComputeResult {
-  return compute(weapon, mode, contribs, options, beam);
+  return compute(weapon, mode, contribs, options);
 }
 
 /**
@@ -66,12 +65,11 @@ export function gainOf(
   replaced: readonly Contribution[],
   metric: OutputId,
   options: CtxOptions = {},
-  beam = false,
 ): number | null {
-  const currentValue: number = metricValue(simulateWith(weapon, mode, base, options, beam), metric);
+  const currentValue: number = metricValue(simulateWith(weapon, mode, base, options), metric);
 
   const next: Contribution[] = base.filter((c) => !replaced.includes(c)).concat(candidate);
-  const nextValue: number = metricValue(simulateWith(weapon, mode, next, options, beam), metric);
+  const nextValue: number = metricValue(simulateWith(weapon, mode, next, options), metric);
 
   if (currentValue === 0) return null;
   return nextValue / currentValue - 1;
@@ -89,13 +87,12 @@ export function gainsFor(
   replaced: readonly Contribution[],
   metric: OutputId,
   options: CtxOptions = {},
-  beam = false,
 ): (number | null)[] {
-  const currentValue = metricValue(simulateWith(weapon, mode, base, options, beam), metric);
+  const currentValue = metricValue(simulateWith(weapon, mode, base, options), metric);
   const baseWithout: Contribution[] = base.filter((c) => !replaced.includes(c));
   return candidates.map((cand) => {
     if (currentValue === 0) return null;
-    const value: number = metricValue(simulateWith(weapon, mode, baseWithout.concat(cand), options, beam), metric);
+    const value: number = metricValue(simulateWith(weapon, mode, baseWithout.concat(cand), options), metric);
     return value / currentValue - 1;
   });
 }

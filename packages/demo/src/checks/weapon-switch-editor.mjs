@@ -121,8 +121,19 @@ try {
     check('伤害表里没有「爆炸」行', !('爆炸' in t), Object.keys(t).join('/'));
     const same = Object.entries(t).every(([, v]) => v.base === v.cur);
     check('基础列 = 当前列（逐类型，无 Mod 时）', same, JSON.stringify(t));
-    check('直接命中合计 = 135', t.__total && t.__total.cur === '135.00' && t.__total.base === '135.00',
-      JSON.stringify(t.__total));
+    // D-148 换源后巴兹火枪是「冲击 30 + 穿刺 24 + 切割 6」再外加一段穿刺 3（合计 63）。
+    // 这个合计不再写死：从数据里按当前模式的各段相加，再与表里的合计比对，
+    // 这样以后换数据源只要数据变了就跟着变，不用回来改数字。
+    const segs = w.modes[0].variants[0].segments;
+    const expected = segs.reduce(
+      (sum, s) => sum + Object.values(s.damage ?? {}).reduce((a, b) => a + b, 0),
+      0,
+    );
+    check(
+      `直接命中合计 = ${expected}（按数据各段相加）`,
+      t.__total && Number(t.__total.cur) === Number(expected.toFixed(2)) && t.__total.base === t.__total.cur,
+      `${JSON.stringify(t.__total)} vs 数据 ${expected}`,
+    );
   }
 
   // ── ② 全库扫描：多变体武器「基础 = 当前」 ──

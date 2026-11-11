@@ -39,7 +39,7 @@ for (const [i, [id]] of BUILD.entries()) {
 }
 
 const opts = { kuva: { type: 'heat', ratio: 0.5 }, faction: 'none', headshot: { enabled: false, multiplier: 3 } };
-const res = core.compute(weapon, mode, contribs, opts, false);
+const res = core.compute(weapon, mode, contribs, opts);
 const seg = res.segments[0];
 const ps = core.panelStats(weapon, mode);
 

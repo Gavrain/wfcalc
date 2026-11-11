@@ -1,7 +1,8 @@
 {
-  "generatedAt": "2026-11-08T09:10:51.651Z",
+  "generatedAt": "2026-11-11T15:57:45.703Z",
+  "source": "WFCD/warframe-items (MIT)",
   "category": "secondary",
-  "count": 148,
+  "count": 149,
   "note": "暴率/触发为 0~1 小数；伤害分布为绝对值；procChance 同为 0~1；kuva 表示需用户在计算器里选元素与加成（25%~60%）",
   "weapons": [
     {
@@ -28,29 +29,13 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
-                  "aoe": false,
-                  "damage": {
-                    "impact": 10,
-                    "puncture": 10,
-                    "slash": 20
-                  },
-                  "procChance": 0.06
-                },
-                {
                   "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "puncture": 12
                   },
                   "procChance": 0.26
-                }
-              ]
-            },
-            {
-              "id": "blast",
-              "label": "爆炸",
-              "segments": [
+                },
                 {
                   "kind": "explosiveAttack",
                   "aoe": true,
@@ -89,7 +74,7 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "puncture": 17.5,
@@ -108,7 +93,6 @@
       "name": "Telos Akbolto",
       "nameZh": "终极·螺钉双枪",
       "category": "secondary",
-      "variant": "syndicate",
       "critChance": 0.13,
       "critMultiplier": 2,
       "statusChance": 0.29,
@@ -171,7 +155,7 @@
                   "damage": {
                     "toxin": 43
                   },
-                  "procChance": 0
+                  "procChance": 0.1
                 }
               ]
             }
@@ -184,7 +168,6 @@
       "name": "Akjagara Prime",
       "nameZh": "觉醒双枪 Prime",
       "category": "secondary",
-      "variant": "prime",
       "critChance": 0.18,
       "critMultiplier": 2.2,
       "statusChance": 0.32,
@@ -198,17 +181,13 @@
           "trigger": "burst",
           "bullets": 1,
           "multishot": 1,
-          "burst": {
-            "count": 2,
-            "delay": 0
-          },
           "variants": [
             {
               "id": "direct",
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "impact": 3.8,
@@ -219,7 +198,10 @@
                 }
               ]
             }
-          ]
+          ],
+          "override": {
+            "fireRate": 5
+          }
         }
       ]
     },
@@ -247,7 +229,7 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "impact": 13,
@@ -267,7 +249,6 @@
       "name": "Aklex Prime",
       "nameZh": "雷克斯双枪 Prime",
       "category": "secondary",
-      "variant": "prime",
       "critChance": 0.25,
       "critMultiplier": 2,
       "statusChance": 0.25,
@@ -287,7 +268,7 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "impact": 15,
@@ -307,7 +288,6 @@
       "name": "Akvasto Prime",
       "nameZh": "瓦斯托双枪 Prime",
       "category": "secondary",
-      "variant": "prime",
       "critChance": 0.22,
       "critMultiplier": 2.4,
       "statusChance": 0.22,
@@ -327,7 +307,7 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "impact": 16.5,
@@ -366,7 +346,7 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "impact": 3,
@@ -411,7 +391,7 @@
                     "impact": 6.4,
                     "puncture": 57.6
                   },
-                  "procChance": 0.022
+                  "procChance": 0.022000000000000002
                 }
               ]
             }
@@ -443,7 +423,7 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "impact": 6,
@@ -474,7 +454,7 @@
           "id": "primary",
           "role": "normal",
           "trigger": "semi",
-          "bullets": 7,
+          "bullets": 1,
           "multishot": 7,
           "variants": [
             {
@@ -482,14 +462,14 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "impact": 33.6,
                     "puncture": 4.2,
                     "slash": 4.2
                   },
-                  "procChance": 0.22
+                  "procChance": 0.031400000000000004
                 }
               ]
             }
@@ -521,7 +501,7 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "impact": 1.8,
@@ -560,7 +540,7 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "impact": 10.2,
@@ -599,16 +579,6 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
-                  "aoe": false,
-                  "damage": {
-                    "impact": 15,
-                    "puncture": 120,
-                    "slash": 15
-                  },
-                  "procChance": 0.1
-                },
-                {
                   "kind": "attack",
                   "aoe": false,
                   "damage": {
@@ -626,7 +596,7 @@
           "id": "mode2",
           "role": "normal",
           "trigger": "semi",
-          "bullets": 10,
+          "bullets": 1,
           "multishot": 1,
           "variants": [
             {
@@ -634,18 +604,23 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "impact": 4.4,
                     "puncture": 17.6,
                     "slash": 66
                   },
-                  "procChance": 0.9
+                  "procChance": 0.09
                 }
               ]
             }
-          ]
+          ],
+          "override": {
+            "critChance": 0.02,
+            "critMultiplier": 2,
+            "statusChance": 0.09
+          }
         }
       ]
     },
@@ -684,7 +659,11 @@
                 }
               ]
             }
-          ]
+          ],
+          "override": {
+            "statusChance": 0.025,
+            "fireRate": 6.67
+          }
         },
         {
           "id": "charged",
@@ -705,40 +684,14 @@
                     "puncture": 80,
                     "slash": 10
                   },
-                  "procChance": 0
+                  "procChance": 0.1
                 }
               ]
             }
-          ]
-        },
-        {
-          "id": "mode3",
-          "role": "normal",
-          "trigger": "burst",
-          "bullets": 1,
-          "multishot": 1,
-          "burst": {
-            "count": 4,
-            "delay": 0.05
-          },
-          "variants": [
-            {
-              "id": "direct",
-              "label": "直接命中",
-              "segments": [
-                {
-                  "kind": "attack",
-                  "aoe": false,
-                  "damage": {
-                    "impact": 6.25,
-                    "puncture": 12.5,
-                    "slash": 6.25
-                  },
-                  "procChance": 0.025
-                }
-              ]
-            }
-          ]
+          ],
+          "override": {
+            "critChance": 0.15
+          }
         },
         {
           "id": "incarnon",
@@ -762,8 +715,13 @@
               ]
             }
           ],
-          "_manual": "panel-reused",
-          "_note": "灵化形态面板未收录，暂复用基础面板"
+          "override": {
+            "critChance": 0.2,
+            "critMultiplier": 2,
+            "statusChance": 0.2,
+            "magazineSize": 0,
+            "reloadTime": 0
+          }
         }
       ]
     },
@@ -791,7 +749,7 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "impact": 3,
@@ -805,9 +763,9 @@
           ]
         },
         {
-          "id": "mode2",
-          "role": "normal",
-          "trigger": "unknown",
+          "id": "incarnon",
+          "role": "incarnon",
+          "trigger": "auto",
           "bullets": 1,
           "multishot": 1,
           "variants": [
@@ -816,7 +774,7 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "heat": 100
@@ -825,7 +783,15 @@
                 }
               ]
             }
-          ]
+          ],
+          "override": {
+            "critChance": 0.26,
+            "critMultiplier": 3.4,
+            "statusChance": 0.24,
+            "fireRate": 12,
+            "magazineSize": 0,
+            "reloadTime": 0
+          }
         }
       ]
     },
@@ -834,7 +800,6 @@
       "name": "Bronco Prime",
       "nameZh": "野马 Prime",
       "category": "secondary",
-      "variant": "prime",
       "critChance": 0.06,
       "critMultiplier": 2,
       "statusChance": 0.1286,
@@ -846,7 +811,7 @@
           "id": "primary",
           "role": "normal",
           "trigger": "semi",
-          "bullets": 7,
+          "bullets": 1,
           "multishot": 7,
           "variants": [
             {
@@ -854,14 +819,14 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "impact": 40,
                     "puncture": 5,
                     "slash": 5
                   },
-                  "procChance": 0.9
+                  "procChance": 0.1286
                 }
               ]
             }
@@ -871,7 +836,7 @@
           "id": "incarnon",
           "role": "incarnon",
           "trigger": "semi",
-          "bullets": 7,
+          "bullets": 1,
           "multishot": 7,
           "variants": [
             {
@@ -879,20 +844,26 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "impact": 27.2,
                     "puncture": 3.4,
                     "slash": 3.4
                   },
-                  "procChance": 1.8
+                  "procChance": 0.2571
                 }
               ]
             }
           ],
-          "_manual": "panel-reused",
-          "_note": "灵化形态面板未收录，暂复用基础面板"
+          "override": {
+            "critChance": 0.24,
+            "critMultiplier": 3.2,
+            "statusChance": 0.2571,
+            "fireRate": 3,
+            "magazineSize": 0,
+            "reloadTime": 0
+          }
         }
       ]
     },
@@ -914,17 +885,13 @@
           "trigger": "burst",
           "bullets": 1,
           "multishot": 1,
-          "burst": {
-            "count": 3,
-            "delay": 0.04
-          },
           "variants": [
             {
               "id": "direct",
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "impact": 21,
@@ -935,25 +902,24 @@
                 }
               ]
             }
-          ]
+          ],
+          "override": {
+            "fireRate": 3.5
+          }
         },
         {
-          "id": "mode2",
-          "role": "normal",
+          "id": "incarnon",
+          "role": "incarnon",
           "trigger": "burst",
           "bullets": 1,
           "multishot": 1,
-          "burst": {
-            "count": 3,
-            "delay": 0.04
-          },
           "variants": [
             {
               "id": "direct",
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "impact": 28,
@@ -964,7 +930,15 @@
                 }
               ]
             }
-          ]
+          ],
+          "override": {
+            "critChance": 0.2,
+            "critMultiplier": 3,
+            "statusChance": 0.2,
+            "fireRate": 3.5,
+            "magazineSize": 0,
+            "reloadTime": 0
+          }
         }
       ]
     },
@@ -983,7 +957,30 @@
         {
           "id": "primary",
           "role": "normal",
-          "trigger": "unknown",
+          "trigger": "held",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
+            {
+              "id": "direct",
+              "label": "直接命中",
+              "segments": [
+                {
+                  "kind": "attack",
+                  "aoe": false,
+                  "damage": {
+                    "magnetic": 16
+                  },
+                  "procChance": 0.2
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "incarnon",
+          "role": "incarnon",
+          "trigger": "semi",
           "bullets": 1,
           "multishot": 1,
           "variants": [
@@ -1000,22 +997,45 @@
                   "procChance": 0.22
                 }
               ]
-            },
+            }
+          ],
+          "override": {
+            "critChance": 0.14,
+            "statusChance": 0.22,
+            "fireRate": 1,
+            "magazineSize": 0,
+            "reloadTime": 0
+          }
+        },
+        {
+          "id": "incarnon2",
+          "role": "incarnon",
+          "trigger": "semi",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
             {
-              "id": "blast",
-              "label": "爆炸",
+              "id": "direct",
+              "label": "直接命中",
               "segments": [
                 {
                   "kind": "explosiveAttack",
                   "aoe": true,
                   "damage": {
-                    "magnetic": 16
+                    "cold": 660
                   },
-                  "procChance": 0.2
+                  "procChance": 0.22
                 }
               ]
             }
-          ]
+          ],
+          "override": {
+            "critChance": 0.14,
+            "statusChance": 0.22,
+            "fireRate": 1,
+            "magazineSize": 0,
+            "reloadTime": 0
+          }
         }
       ]
     },
@@ -1024,7 +1044,6 @@
       "name": "Synoid Gammacor",
       "nameZh": "枢议·咖玛腕甲枪",
       "category": "secondary",
-      "variant": "syndicate",
       "critChance": 0.2,
       "critMultiplier": 2,
       "statusChance": 0.28,
@@ -1035,7 +1054,30 @@
         {
           "id": "primary",
           "role": "normal",
-          "trigger": "unknown",
+          "trigger": "held",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
+            {
+              "id": "direct",
+              "label": "直接命中",
+              "segments": [
+                {
+                  "kind": "attack",
+                  "aoe": false,
+                  "damage": {
+                    "magnetic": 21
+                  },
+                  "procChance": 0.28
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "incarnon",
+          "role": "incarnon",
+          "trigger": "semi",
           "bullets": 1,
           "multishot": 1,
           "variants": [
@@ -1052,22 +1094,41 @@
                   "procChance": 0.28
                 }
               ]
-            },
+            }
+          ],
+          "override": {
+            "fireRate": 1,
+            "magazineSize": 0,
+            "reloadTime": 0
+          }
+        },
+        {
+          "id": "incarnon2",
+          "role": "incarnon",
+          "trigger": "semi",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
             {
-              "id": "blast",
-              "label": "爆炸",
+              "id": "direct",
+              "label": "直接命中",
               "segments": [
                 {
                   "kind": "explosiveAttack",
                   "aoe": true,
                   "damage": {
-                    "magnetic": 21
+                    "cold": 800
                   },
                   "procChance": 0.28
                 }
               ]
             }
-          ]
+          ],
+          "override": {
+            "fireRate": 1,
+            "magazineSize": 0,
+            "reloadTime": 0
+          }
         }
       ]
     },
@@ -1076,7 +1137,6 @@
       "name": "Coda Catabolyst",
       "nameZh": "终幕·异化者",
       "category": "secondary",
-      "variant": "kuva",
       "kuva": {
         "bonusRange": [
           0.25,
@@ -1111,12 +1171,44 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "corrosive": 56
                   },
                   "procChance": 0.5
+                },
+                {
+                  "kind": "attack",
+                  "aoe": false,
+                  "damage": {
+                    "impact": 11
+                  },
+                  "procChance": 0.43
+                },
+                {
+                  "kind": "explosiveAttack",
+                  "aoe": true,
+                  "damage": {
+                    "corrosive": 74
+                  },
+                  "procChance": 0.43
+                },
+                {
+                  "kind": "attack",
+                  "aoe": false,
+                  "damage": {
+                    "impact": 11
+                  },
+                  "procChance": 0.59
+                },
+                {
+                  "kind": "explosiveAttack",
+                  "aoe": true,
+                  "damage": {
+                    "corrosive": 658
+                  },
+                  "procChance": 0.59
                 }
               ]
             }
@@ -1129,7 +1221,6 @@
       "name": "Coda Pox",
       "nameZh": "终幕·脓痘",
       "category": "secondary",
-      "variant": "kuva",
       "kuva": {
         "bonusRange": [
           0.25,
@@ -1164,18 +1255,18 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
-                  "aoe": false,
-                  "damage": {
-                    "toxin": 77
-                  },
-                  "procChance": 0.25
-                },
-                {
                   "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "toxin": 55
+                  },
+                  "procChance": 0.45
+                },
+                {
+                  "kind": "explosiveAttack",
+                  "aoe": true,
+                  "damage": {
+                    "toxin": 35
                   },
                   "procChance": 0.45
                 }
@@ -1190,7 +1281,6 @@
       "name": "Coda Tysis",
       "nameZh": "终幕·啐沫者",
       "category": "secondary",
-      "variant": "kuva",
       "kuva": {
         "bonusRange": [
           0.25,
@@ -1233,6 +1323,14 @@
                     "slash": 26
                   },
                   "procChance": 0.5
+                },
+                {
+                  "kind": "attack",
+                  "aoe": false,
+                  "damage": {
+                    "corrosive": 59
+                  },
+                  "procChance": 0.5
                 }
               ]
             }
@@ -1255,7 +1353,7 @@
         {
           "id": "primary",
           "role": "normal",
-          "trigger": "semi",
+          "trigger": "charge",
           "bullets": 1,
           "multishot": 1,
           "variants": [
@@ -1264,7 +1362,7 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "impact": 44.8,
@@ -1275,11 +1373,14 @@
                 }
               ]
             }
-          ]
+          ],
+          "override": {
+            "fireRate": 1.8
+          }
         },
         {
-          "id": "mode2",
-          "role": "normal",
+          "id": "incarnon",
+          "role": "incarnon",
           "trigger": "charge",
           "bullets": 1,
           "multishot": 1,
@@ -1289,7 +1390,7 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "impact": 160,
@@ -1299,7 +1400,44 @@
                 }
               ]
             }
-          ]
+          ],
+          "override": {
+            "critChance": 0.2,
+            "statusChance": 0.4,
+            "fireRate": 1,
+            "magazineSize": 0,
+            "reloadTime": 0
+          }
+        },
+        {
+          "id": "incarnon2",
+          "role": "incarnon",
+          "trigger": "charge",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
+            {
+              "id": "direct",
+              "label": "直接命中",
+              "segments": [
+                {
+                  "kind": "explosiveAttack",
+                  "aoe": true,
+                  "damage": {
+                    "heat": 600
+                  },
+                  "procChance": 0.4
+                }
+              ]
+            }
+          ],
+          "override": {
+            "critChance": 0.2,
+            "statusChance": 0.4,
+            "fireRate": 1,
+            "magazineSize": 0,
+            "reloadTime": 0
+          }
         }
       ]
     },
@@ -1319,7 +1457,7 @@
           "id": "primary",
           "role": "normal",
           "trigger": "semi",
-          "bullets": 7,
+          "bullets": 1,
           "multishot": 7,
           "variants": [
             {
@@ -1332,7 +1470,7 @@
                   "damage": {
                     "radiation": 40
                   },
-                  "procChance": 0.9
+                  "procChance": 0.1286
                 }
               ]
             }
@@ -1370,13 +1508,7 @@
                     "blast": 200
                   },
                   "procChance": 0.22
-                }
-              ]
-            },
-            {
-              "id": "blast",
-              "label": "爆炸",
-              "segments": [
+                },
                 {
                   "kind": "explosiveAttack",
                   "aoe": true,
@@ -1390,9 +1522,9 @@
           ]
         },
         {
-          "id": "mode2",
-          "role": "normal",
-          "trigger": "auto",
+          "id": "incarnon",
+          "role": "incarnon",
+          "trigger": "charge",
           "bullets": 1,
           "multishot": 1,
           "variants": [
@@ -1400,14 +1532,6 @@
               "id": "direct",
               "label": "直接命中",
               "segments": [
-                {
-                  "kind": "impact",
-                  "aoe": false,
-                  "damage": {
-                    "impact": 10
-                  },
-                  "procChance": 0.1
-                },
                 {
                   "kind": "attack",
                   "aoe": false,
@@ -1418,7 +1542,15 @@
                 }
               ]
             }
-          ]
+          ],
+          "override": {
+            "critChance": 0.18,
+            "critMultiplier": 1.8,
+            "statusChance": 0.18,
+            "fireRate": 6,
+            "magazineSize": 0,
+            "reloadTime": 0
+          }
         }
       ]
     },
@@ -1459,8 +1591,8 @@
           ]
         },
         {
-          "id": "mode2",
-          "role": "normal",
+          "id": "incarnon",
+          "role": "incarnon",
           "trigger": "auto",
           "bullets": 1,
           "multishot": 1,
@@ -1480,7 +1612,15 @@
                 }
               ]
             }
-          ]
+          ],
+          "override": {
+            "critChance": 0.5,
+            "critMultiplier": 3,
+            "statusChance": 0.18,
+            "fireRate": 6.67,
+            "magazineSize": 0,
+            "reloadTime": 0
+          }
         }
       ]
     },
@@ -1514,7 +1654,7 @@
                     "impact": 6.4,
                     "puncture": 57.6
                   },
-                  "procChance": 0.022
+                  "procChance": 0.022000000000000002
                 }
               ]
             }
@@ -1546,19 +1686,13 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "impact": 150
                   },
                   "procChance": 0
-                }
-              ]
-            },
-            {
-              "id": "blast",
-              "label": "爆炸",
-              "segments": [
+                },
                 {
                   "kind": "explosiveAttack",
                   "aoe": true,
@@ -1569,7 +1703,11 @@
                 }
               ]
             }
-          ]
+          ],
+          "override": {
+            "critChance": 0,
+            "critMultiplier": 1
+          }
         }
       ]
     },
@@ -1578,22 +1716,6 @@
       "name": "Tenet Cycron",
       "nameZh": "信条·循环离子枪",
       "category": "secondary",
-      "variant": "kuva",
-      "kuva": {
-        "bonusRange": [
-          0.25,
-          0.6
-        ],
-        "elements": [
-          "cold",
-          "heat",
-          "toxin",
-          "electric",
-          "magnetic",
-          "radiation",
-          "impact"
-        ]
-      },
       "critChance": 0.2,
       "critMultiplier": 1.8,
       "statusChance": 0.4,
@@ -1613,7 +1735,7 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "heat": 22
@@ -1631,22 +1753,6 @@
       "name": "Tenet Detron",
       "nameZh": "信条·德特昂",
       "category": "secondary",
-      "variant": "kuva",
-      "kuva": {
-        "bonusRange": [
-          0.25,
-          0.6
-        ],
-        "elements": [
-          "cold",
-          "heat",
-          "toxin",
-          "electric",
-          "magnetic",
-          "radiation",
-          "impact"
-        ]
-      },
       "critChance": 0.18,
       "critMultiplier": 2,
       "statusChance": 0.1,
@@ -1658,7 +1764,7 @@
           "id": "primary",
           "role": "normal",
           "trigger": "semi",
-          "bullets": 10,
+          "bullets": 1,
           "multishot": 10,
           "variants": [
             {
@@ -1671,7 +1777,7 @@
                   "damage": {
                     "radiation": 26
                   },
-                  "procChance": 1
+                  "procChance": 0.1
                 }
               ]
             }
@@ -1680,8 +1786,8 @@
         {
           "id": "mode2",
           "role": "normal",
-          "trigger": "burst",
-          "bullets": 10,
+          "trigger": "semi",
+          "bullets": 1,
           "multishot": 10,
           "variants": [
             {
@@ -1694,11 +1800,14 @@
                   "damage": {
                     "radiation": 26
                   },
-                  "procChance": 1
+                  "procChance": 0.1
                 }
               ]
             }
-          ]
+          ],
+          "override": {
+            "fireRate": 2
+          }
         }
       ]
     },
@@ -1707,22 +1816,6 @@
       "name": "Tenet Plinx",
       "nameZh": "信条·漫射者",
       "category": "secondary",
-      "variant": "kuva",
-      "kuva": {
-        "bonusRange": [
-          0.25,
-          0.6
-        ],
-        "elements": [
-          "cold",
-          "heat",
-          "toxin",
-          "electric",
-          "magnetic",
-          "radiation",
-          "impact"
-        ]
-      },
       "critChance": 0.44,
       "critMultiplier": 3,
       "statusChance": 0.12,
@@ -1742,7 +1835,7 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "heat": 30,
@@ -1755,9 +1848,9 @@
           ]
         },
         {
-          "id": "charged",
-          "role": "charged",
-          "trigger": "charge",
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "semi",
           "bullets": 1,
           "multishot": 1,
           "variants": [
@@ -1774,22 +1867,41 @@
                   "procChance": 0.2
                 }
               ]
-            },
+            }
+          ],
+          "override": {
+            "critChance": 0.4,
+            "statusChance": 0.2,
+            "fireRate": 1
+          }
+        },
+        {
+          "id": "mode3",
+          "role": "normal",
+          "trigger": "semi",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
             {
-              "id": "blast",
-              "label": "爆炸",
+              "id": "direct",
+              "label": "直接命中",
               "segments": [
                 {
                   "kind": "explosiveAttack",
                   "aoe": true,
                   "damage": {
-                    "radiation": 500
+                    "radiation": 100
                   },
-                  "procChance": 0.2
+                  "procChance": 0.5
                 }
               ]
             }
-          ]
+          ],
+          "override": {
+            "critChance": 0.4,
+            "statusChance": 0.5,
+            "fireRate": 1
+          }
         }
       ]
     },
@@ -1817,7 +1929,7 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "heat": 20,
@@ -1859,43 +1971,18 @@
                   "aoe": false,
                   "damage": {
                     "impact": 11.2,
-                    "puncture": 8.96,
-                    "slash": 7.84
+                    "puncture": 9,
+                    "slash": 7.8
                   },
                   "procChance": 0.14
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "id": "mode2",
-          "role": "normal",
-          "trigger": "semi",
-          "bullets": 1,
-          "multishot": 1,
-          "variants": [
-            {
-              "id": "direct",
-              "label": "直接命中",
-              "segments": [
-                {
-                  "kind": "impact",
-                  "aoe": false,
-                  "damage": {
-                    "impact": 11.61,
-                    "puncture": 2.7,
-                    "slash": 12.69
-                  },
-                  "procChance": 0.31
                 },
                 {
                   "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "impact": 11.2,
-                    "puncture": 8.96,
-                    "slash": 7.84
+                    "puncture": 9,
+                    "slash": 7.8
                   },
                   "procChance": 0.14
                 }
@@ -1929,7 +2016,7 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "puncture": 8,
@@ -1974,13 +2061,7 @@
                     "radiation": 44
                   },
                   "procChance": 0.28
-                }
-              ]
-            },
-            {
-              "id": "blast",
-              "label": "爆炸",
-              "segments": [
+                },
                 {
                   "kind": "explosiveAttack",
                   "aoe": true,
@@ -1988,22 +2069,7 @@
                     "radiation": 88
                   },
                   "procChance": 0.28
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "id": "charged",
-          "role": "charged",
-          "trigger": "charge",
-          "bullets": 1,
-          "multishot": 1,
-          "variants": [
-            {
-              "id": "direct",
-              "label": "直接命中",
-              "segments": [
+                },
                 {
                   "kind": "attack",
                   "aoe": false,
@@ -2011,13 +2077,7 @@
                     "radiation": 44
                   },
                   "procChance": 0.28
-                }
-              ]
-            },
-            {
-              "id": "blast",
-              "label": "爆炸",
-              "segments": [
+                },
                 {
                   "kind": "explosiveAttack",
                   "aoe": true,
@@ -2064,13 +2124,7 @@
                     "puncture": 20
                   },
                   "procChance": 0.4
-                }
-              ]
-            },
-            {
-              "id": "blast",
-              "label": "爆炸",
-              "segments": [
+                },
                 {
                   "kind": "explosiveAttack",
                   "aoe": true,
@@ -2109,7 +2163,7 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "puncture": 7.56,
@@ -2128,7 +2182,6 @@
       "name": "Spectra Vandal",
       "nameZh": "光谱切割器·破坏者",
       "category": "secondary",
-      "variant": "variant",
       "critChance": 0.2,
       "critMultiplier": 2,
       "statusChance": 0.28,
@@ -2148,7 +2201,7 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "puncture": 9.24,
@@ -2186,7 +2239,7 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "puncture": 36,
@@ -2230,13 +2283,7 @@
                     "impact": 50
                   },
                   "procChance": 0.32
-                }
-              ]
-            },
-            {
-              "id": "blast",
-              "label": "爆炸",
-              "segments": [
+                },
                 {
                   "kind": "explosiveAttack",
                   "aoe": true,
@@ -2252,13 +2299,9 @@
         {
           "id": "mode2",
           "role": "normal",
-          "trigger": "burst",
+          "trigger": "auto",
           "bullets": 1,
           "multishot": 1,
-          "burst": {
-            "count": 3,
-            "delay": 0.08
-          },
           "variants": [
             {
               "id": "direct",
@@ -2304,7 +2347,7 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "puncture": 1,
@@ -2323,7 +2366,6 @@
       "name": "Dex Furis",
       "nameZh": "Dex 盗贼双枪",
       "category": "secondary",
-      "variant": "variant",
       "critChance": 0.14,
       "critMultiplier": 2,
       "statusChance": 0.28,
@@ -2343,7 +2385,7 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "impact": 2.4,
@@ -2420,7 +2462,7 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "impact": 44.1,
@@ -2440,7 +2482,6 @@
       "name": "Akmagnus Prime",
       "nameZh": "麦格努斯双枪 Prime",
       "category": "secondary",
-      "variant": "prime",
       "critChance": 0.28,
       "critMultiplier": 2.8,
       "statusChance": 0.28,
@@ -2460,7 +2501,7 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "impact": 44.1,
@@ -2499,7 +2540,7 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "impact": 22.5,
@@ -2507,6 +2548,43 @@
                     "slash": 45
                   },
                   "procChance": 0.12
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "DuelistPistols",
+      "name": "Aksondol",
+      "category": "secondary",
+      "critChance": 0.24,
+      "critMultiplier": 2.6,
+      "statusChance": 0.22,
+      "fireRate": 4,
+      "magazineSize": 8,
+      "reloadTime": 2.6,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "semi",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
+            {
+              "id": "direct",
+              "label": "直接命中",
+              "segments": [
+                {
+                  "kind": "attack",
+                  "aoe": false,
+                  "damage": {
+                    "cold": 70,
+                    "puncture": 70
+                  },
+                  "procChance": 0.22
                 }
               ]
             }
@@ -2550,29 +2628,6 @@
           ]
         },
         {
-          "id": "mode2",
-          "role": "normal",
-          "trigger": "unknown",
-          "bullets": 1,
-          "multishot": 1,
-          "variants": [
-            {
-              "id": "direct",
-              "label": "直接命中",
-              "segments": [
-                {
-                  "kind": "impact",
-                  "aoe": false,
-                  "damage": {
-                    "radiation": 30
-                  },
-                  "procChance": 0.18
-                }
-              ]
-            }
-          ]
-        },
-        {
           "id": "incarnon",
           "role": "incarnon",
           "trigger": "held",
@@ -2584,7 +2639,7 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "incarnon",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "radiation": 30
@@ -2598,15 +2653,15 @@
             "critChance": 0.14,
             "critMultiplier": 1.6,
             "statusChance": 0.18,
-            "fireRate": 2
-          },
-          "_manual": "entered",
-          "_note": "连射穿透 5 米；灵化充能 350"
+            "fireRate": 2,
+            "magazineSize": 0,
+            "reloadTime": 0
+          }
         },
         {
           "id": "incarnon2",
           "role": "incarnon",
-          "trigger": "charged",
+          "trigger": "auto",
           "bullets": 1,
           "multishot": 1,
           "variants": [
@@ -2615,8 +2670,8 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "incarnon",
-                  "aoe": true,
+                  "kind": "attack",
+                  "aoe": false,
                   "damage": {
                     "heat": 2200
                   },
@@ -2629,10 +2684,41 @@
             "critChance": 0.38,
             "critMultiplier": 3.2,
             "statusChance": 0.26,
-            "fireRate": 0.25
-          },
-          "_manual": "entered",
-          "_note": "强制触发火焰；蓄力每次耗 50 弹药"
+            "fireRate": 0.25,
+            "magazineSize": 0,
+            "reloadTime": 0
+          }
+        },
+        {
+          "id": "incarnon3",
+          "role": "incarnon",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
+            {
+              "id": "direct",
+              "label": "直接命中",
+              "segments": [
+                {
+                  "kind": "explosiveAttack",
+                  "aoe": true,
+                  "damage": {
+                    "heat": 1100
+                  },
+                  "procChance": 0.26
+                }
+              ]
+            }
+          ],
+          "override": {
+            "critChance": 0.38,
+            "critMultiplier": 3.2,
+            "statusChance": 0.26,
+            "fireRate": 0.25,
+            "magazineSize": 0,
+            "reloadTime": 0
+          }
         }
       ]
     },
@@ -2660,7 +2746,7 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "impact": 80,
@@ -2714,8 +2800,8 @@
         {
           "id": "mode2",
           "role": "normal",
-          "trigger": "semi",
-          "bullets": 3,
+          "trigger": "auto",
+          "bullets": 1,
           "multishot": 1,
           "variants": [
             {
@@ -2729,11 +2815,17 @@
                     "puncture": 30.8,
                     "slash": 46.2
                   },
-                  "procChance": 0.37
+                  "procChance": 0.12300000000000001
                 }
               ]
             }
-          ]
+          ],
+          "override": {
+            "critChance": 0.03,
+            "critMultiplier": 1.5,
+            "statusChance": 0.12300000000000001,
+            "fireRate": 1.5
+          }
         }
       ]
     },
@@ -2761,12 +2853,12 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
-                    "impact": 2.4,
-                    "puncture": 16.8,
-                    "slash": 4.8
+                    "impact": 12.33,
+                    "puncture": 12.33,
+                    "slash": 12.33
                   },
                   "procChance": 0.15
                 }
@@ -2796,54 +2888,72 @@
           "multishot": 1,
           "variants": [
             {
-              "id": "blast",
-              "label": "爆炸",
+              "id": "direct",
+              "label": "直接命中",
               "segments": [
+                {
+                  "kind": "explosiveAttack",
+                  "aoe": true,
+                  "damage": {
+                    "corrosive": 4
+                  },
+                  "procChance": 0.1
+                },
                 {
                   "kind": "explosiveAttack",
                   "aoe": true,
                   "damage": {
                     "corrosive": 75
                   },
-                  "procChance": 0
+                  "procChance": 0.1
                 }
               ]
             }
-          ]
+          ],
+          "override": {
+            "statusChance": 0.1
+          }
         },
         {
-          "id": "mode2",
-          "role": "normal",
-          "trigger": "charge",
-          "bullets": 1,
-          "multishot": 1,
-          "variants": [
-            {
-              "id": "blast",
-              "label": "爆炸",
-              "segments": [
-                {
-                  "kind": "explosiveAttack",
-                  "aoe": true,
-                  "damage": {
-                    "corrosive": 75
-                  },
-                  "procChance": 0
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "id": "mode3",
-          "role": "normal",
+          "id": "incarnon",
+          "role": "incarnon",
           "trigger": "auto",
           "bullets": 1,
           "multishot": 1,
           "variants": [
             {
-              "id": "blast",
-              "label": "爆炸",
+              "id": "direct",
+              "label": "直接命中",
+              "segments": [
+                {
+                  "kind": "explosiveAttack",
+                  "aoe": true,
+                  "damage": {
+                    "corrosive": 50
+                  },
+                  "procChance": 0.2
+                }
+              ]
+            }
+          ],
+          "override": {
+            "critChance": 0.15,
+            "critMultiplier": 2,
+            "statusChance": 0.2,
+            "magazineSize": 0,
+            "reloadTime": 0
+          }
+        },
+        {
+          "id": "incarnon2",
+          "role": "incarnon",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
+            {
+              "id": "direct",
+              "label": "直接命中",
               "segments": [
                 {
                   "kind": "explosiveAttack",
@@ -2855,7 +2965,44 @@
                 }
               ]
             }
-          ]
+          ],
+          "override": {
+            "critChance": 0.15,
+            "critMultiplier": 2,
+            "statusChance": 0.2,
+            "magazineSize": 0,
+            "reloadTime": 0
+          }
+        },
+        {
+          "id": "incarnon3",
+          "role": "incarnon",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
+            {
+              "id": "direct",
+              "label": "直接命中",
+              "segments": [
+                {
+                  "kind": "explosiveAttack",
+                  "aoe": true,
+                  "damage": {
+                    "corrosive": 200
+                  },
+                  "procChance": 0.2
+                }
+              ]
+            }
+          ],
+          "override": {
+            "critChance": 0.15,
+            "critMultiplier": 2,
+            "statusChance": 0.2,
+            "magazineSize": 0,
+            "reloadTime": 0
+          }
         }
       ]
     },
@@ -2875,7 +3022,7 @@
           "id": "primary",
           "role": "normal",
           "trigger": "semi",
-          "bullets": 10,
+          "bullets": 1,
           "multishot": 10,
           "variants": [
             {
@@ -2883,14 +3030,14 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "impact": 9,
                     "puncture": 5,
                     "slash": 6
                   },
-                  "procChance": 0.51
+                  "procChance": 0.051
                 }
               ]
             }
@@ -2922,7 +3069,7 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "impact": 10.2,
@@ -2961,7 +3108,7 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "electric": 11,
@@ -2978,20 +3125,16 @@
         {
           "id": "mode2",
           "role": "normal",
-          "trigger": "burst",
+          "trigger": "auto",
           "bullets": 1,
           "multishot": 1,
-          "burst": {
-            "count": 4,
-            "delay": 0
-          },
           "variants": [
             {
               "id": "direct",
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "electric": 11,
@@ -3003,7 +3146,13 @@
                 }
               ]
             }
-          ]
+          ],
+          "override": {
+            "critChance": 0.27,
+            "critMultiplier": 2.5,
+            "statusChance": 0.19,
+            "fireRate": 2.5
+          }
         }
       ]
     },
@@ -3022,6 +3171,29 @@
         {
           "id": "primary",
           "role": "normal",
+          "trigger": "held",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
+            {
+              "id": "direct",
+              "label": "直接命中",
+              "segments": [
+                {
+                  "kind": "attack",
+                  "aoe": false,
+                  "damage": {
+                    "heat": 29
+                  },
+                  "procChance": 0.21
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "incarnon",
+          "role": "incarnon",
           "trigger": "semi",
           "bullets": 1,
           "multishot": 1,
@@ -3039,10 +3211,27 @@
                   "procChance": 0.41
                 }
               ]
-            },
+            }
+          ],
+          "override": {
+            "critChance": 0.18,
+            "critMultiplier": 3,
+            "statusChance": 0.41,
+            "fireRate": 1.5,
+            "magazineSize": 0,
+            "reloadTime": 0
+          }
+        },
+        {
+          "id": "incarnon2",
+          "role": "incarnon",
+          "trigger": "semi",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
             {
-              "id": "blast",
-              "label": "爆炸",
+              "id": "direct",
+              "label": "直接命中",
               "segments": [
                 {
                   "kind": "explosiveAttack",
@@ -3051,18 +3240,18 @@
                     "blast": 450
                   },
                   "procChance": 0.41
-                },
-                {
-                  "kind": "explosiveAttack",
-                  "aoe": true,
-                  "damage": {
-                    "heat": 29
-                  },
-                  "procChance": 0.21
                 }
               ]
             }
-          ]
+          ],
+          "override": {
+            "critChance": 0.18,
+            "critMultiplier": 3,
+            "statusChance": 0.41,
+            "fireRate": 1.5,
+            "magazineSize": 0,
+            "reloadTime": 0
+          }
         }
       ]
     },
@@ -3084,28 +3273,27 @@
           "trigger": "burst",
           "bullets": 1,
           "multishot": 1,
-          "burst": {
-            "count": 2,
-            "delay": 0.05
-          },
           "variants": [
             {
               "id": "direct",
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "impact": 36.75,
-                    "puncture": 6.125,
-                    "slash": 6.125
+                    "puncture": 6.13,
+                    "slash": 6.13
                   },
                   "procChance": 0.13
                 }
               ]
             }
-          ]
+          ],
+          "override": {
+            "fireRate": 2.83
+          }
         }
       ]
     },
@@ -3133,14 +3321,43 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
-                    "impact": 3,
-                    "puncture": 3,
-                    "slash": 9
+                    "impact": 6,
+                    "puncture": 6,
+                    "slash": 18
                   },
                   "procChance": 0.69
+                }
+              ]
+            }
+          ],
+          "override": {
+            "statusChance": 0.69,
+            "fireRate": 1
+          }
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 5,
+          "variants": [
+            {
+              "id": "direct",
+              "label": "直接命中",
+              "segments": [
+                {
+                  "kind": "attack",
+                  "aoe": false,
+                  "damage": {
+                    "impact": 6,
+                    "puncture": 6,
+                    "slash": 18
+                  },
+                  "procChance": 0.138
                 }
               ]
             }
@@ -3172,7 +3389,7 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "radiation": 22
@@ -3209,12 +3426,12 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
-                    "impact": 6.3,
-                    "puncture": 8.5,
-                    "slash": 12
+                    "impact": 6.11,
+                    "puncture": 8.25,
+                    "slash": 11.64
                   },
                   "procChance": 0.01
                 }
@@ -3240,7 +3457,7 @@
           "id": "primary",
           "role": "normal",
           "trigger": "semi",
-          "bullets": 15,
+          "bullets": 1,
           "multishot": 15,
           "variants": [
             {
@@ -3248,14 +3465,14 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "impact": 18.8,
                     "puncture": 23.5,
                     "slash": 4.7
                   },
-                  "procChance": 0.99
+                  "procChance": 0.066
                 }
               ]
             }
@@ -3287,14 +3504,14 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
-                    "impact": 8.3333,
-                    "puncture": 8.3333,
-                    "slash": 8.3334
+                    "impact": 33.67,
+                    "puncture": 33.67,
+                    "slash": 33.67
                   },
-                  "procChance": 0.1
+                  "procChance": 0.13
                 }
               ]
             }
@@ -3332,18 +3549,28 @@
                     "impact": 200
                   },
                   "procChance": 0.19
-                }
-              ]
-            },
-            {
-              "id": "blast",
-              "label": "爆炸",
-              "segments": [
+                },
                 {
                   "kind": "explosiveAttack",
                   "aoe": true,
                   "damage": {
                     "blast": 300
+                  },
+                  "procChance": 0.19
+                },
+                {
+                  "kind": "attack",
+                  "aoe": false,
+                  "damage": {
+                    "impact": 75
+                  },
+                  "procChance": 0.19
+                },
+                {
+                  "kind": "explosiveAttack",
+                  "aoe": true,
+                  "damage": {
+                    "blast": 90
                   },
                   "procChance": 0.19
                 }
@@ -3377,14 +3604,43 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
-                    "impact": 3,
-                    "puncture": 3,
-                    "slash": 9
+                    "impact": 6,
+                    "puncture": 6,
+                    "slash": 18
                   },
                   "procChance": 0.69
+                }
+              ]
+            }
+          ],
+          "override": {
+            "statusChance": 0.69,
+            "fireRate": 1.334
+          }
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 5,
+          "variants": [
+            {
+              "id": "direct",
+              "label": "直接命中",
+              "segments": [
+                {
+                  "kind": "attack",
+                  "aoe": false,
+                  "damage": {
+                    "impact": 6,
+                    "puncture": 6,
+                    "slash": 18
+                  },
+                  "procChance": 0.138
                 }
               ]
             }
@@ -3416,7 +3672,7 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "impact": 14.19,
@@ -3463,13 +3719,7 @@
                     "slash": 2.7
                   },
                   "procChance": 0.19
-                }
-              ]
-            },
-            {
-              "id": "blast",
-              "label": "爆炸",
-              "segments": [
+                },
                 {
                   "kind": "explosiveAttack",
                   "aoe": true,
@@ -3500,7 +3750,7 @@
           "id": "primary",
           "role": "normal",
           "trigger": "semi",
-          "bullets": 7,
+          "bullets": 1,
           "multishot": 7,
           "variants": [
             {
@@ -3508,24 +3758,24 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "impact": 33.6,
                     "puncture": 4.2,
                     "slash": 4.2
                   },
-                  "procChance": 0.66
+                  "procChance": 0.0943
                 }
               ]
             }
           ]
         },
         {
-          "id": "mode2",
-          "role": "normal",
+          "id": "incarnon",
+          "role": "incarnon",
           "trigger": "semi",
-          "bullets": 7,
+          "bullets": 1,
           "multishot": 7,
           "variants": [
             {
@@ -3533,18 +3783,26 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "impact": 13.2,
                     "puncture": 2.2,
                     "slash": 6.6
                   },
-                  "procChance": 1.32
+                  "procChance": 0.1886
                 }
               ]
             }
-          ]
+          ],
+          "override": {
+            "critChance": 0.2,
+            "critMultiplier": 3,
+            "statusChance": 0.1886,
+            "fireRate": 2.5,
+            "magazineSize": 0,
+            "reloadTime": 0
+          }
         }
       ]
     },
@@ -3572,7 +3830,7 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "impact": 1.8,
@@ -3611,7 +3869,7 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "impact": 13,
@@ -3625,8 +3883,8 @@
           ]
         },
         {
-          "id": "mode2",
-          "role": "normal",
+          "id": "incarnon",
+          "role": "incarnon",
           "trigger": "semi",
           "bullets": 1,
           "multishot": 1,
@@ -3642,11 +3900,19 @@
                     "impact": 300,
                     "radiation": 700
                   },
-                  "procChance": 0.4
+                  "procChance": 0.22
                 }
               ]
             }
-          ]
+          ],
+          "override": {
+            "critChance": 0.3,
+            "critMultiplier": 3,
+            "statusChance": 0.22,
+            "fireRate": 0.67,
+            "magazineSize": 0,
+            "reloadTime": 0
+          }
         }
       ]
     },
@@ -3674,12 +3940,44 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "corrosive": 53
                   },
                   "procChance": 0.43
+                },
+                {
+                  "kind": "attack",
+                  "aoe": false,
+                  "damage": {
+                    "impact": 11
+                  },
+                  "procChance": 0.43
+                },
+                {
+                  "kind": "explosiveAttack",
+                  "aoe": true,
+                  "damage": {
+                    "corrosive": 203
+                  },
+                  "procChance": 0.43
+                },
+                {
+                  "kind": "attack",
+                  "aoe": false,
+                  "damage": {
+                    "impact": 11
+                  },
+                  "procChance": 0.59
+                },
+                {
+                  "kind": "explosiveAttack",
+                  "aoe": true,
+                  "damage": {
+                    "corrosive": 1997
+                  },
+                  "procChance": 0.59
                 }
               ]
             }
@@ -3711,18 +4009,18 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
-                  "aoe": false,
-                  "damage": {
-                    "toxin": 77
-                  },
-                  "procChance": 0.25
-                },
-                {
                   "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "toxin": 50
+                  },
+                  "procChance": 0.35
+                },
+                {
+                  "kind": "explosiveAttack",
+                  "aoe": true,
+                  "damage": {
+                    "toxin": 20
                   },
                   "procChance": 0.35
                 }
@@ -3756,16 +4054,6 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
-                  "aoe": false,
-                  "damage": {
-                    "impact": 14.19,
-                    "puncture": 3.3,
-                    "slash": 15.51
-                  },
-                  "procChance": 0.13
-                },
-                {
                   "kind": "attack",
                   "aoe": false,
                   "damage": {
@@ -3773,20 +4061,39 @@
                     "puncture": 13.8
                   },
                   "procChance": 0.3
-                }
-              ]
-            },
-            {
-              "id": "blast",
-              "label": "爆炸",
-              "segments": [
+                },
                 {
                   "kind": "explosiveAttack",
                   "aoe": true,
                   "damage": {
                     "toxin": 61
                   },
-                  "procChance": 0
+                  "procChance": 0.3
+                },
+                {
+                  "kind": "explosiveAttack",
+                  "aoe": true,
+                  "damage": {
+                    "toxin": 953
+                  },
+                  "procChance": 0.5
+                },
+                {
+                  "kind": "attack",
+                  "aoe": false,
+                  "damage": {
+                    "puncture": 11.5,
+                    "slash": 11.5
+                  },
+                  "procChance": 0.3
+                },
+                {
+                  "kind": "explosiveAttack",
+                  "aoe": true,
+                  "damage": {
+                    "toxin": 333
+                  },
+                  "procChance": 0.3
                 }
               ]
             }
@@ -3818,7 +4125,7 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "impact": 7.5,
@@ -3832,9 +4139,9 @@
           ]
         },
         {
-          "id": "mode2",
-          "role": "normal",
-          "trigger": "auto",
+          "id": "incarnon",
+          "role": "incarnon",
+          "trigger": "semi",
           "bullets": 1,
           "multishot": 1,
           "variants": [
@@ -3843,7 +4150,7 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "impact": 15,
@@ -3854,7 +4161,15 @@
                 }
               ]
             }
-          ]
+          ],
+          "override": {
+            "critChance": 0.11,
+            "critMultiplier": 3,
+            "statusChance": 0.43,
+            "fireRate": 4.5,
+            "magazineSize": 0,
+            "reloadTime": 0
+          }
         }
       ]
     },
@@ -3890,6 +4205,14 @@
                     "slash": 17
                   },
                   "procChance": 0.5
+                },
+                {
+                  "kind": "attack",
+                  "aoe": false,
+                  "damage": {
+                    "corrosive": 27
+                  },
+                  "procChance": 0.5
                 }
               ]
             }
@@ -3912,7 +4235,7 @@
         {
           "id": "primary",
           "role": "normal",
-          "trigger": "semi",
+          "trigger": "held",
           "bullets": 1,
           "multishot": 1,
           "variants": [
@@ -3921,30 +4244,8 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
-                  "aoe": false,
-                  "damage": {
-                    "toxin": 14
-                  },
-                  "procChance": 0
-                },
-                {
                   "kind": "attack",
                   "aoe": false,
-                  "damage": {
-                    "impact": 10
-                  },
-                  "procChance": 0
-                }
-              ]
-            },
-            {
-              "id": "blast",
-              "label": "爆炸",
-              "segments": [
-                {
-                  "kind": "explosiveAttack",
-                  "aoe": true,
                   "damage": {
                     "toxin": 35
                   },
@@ -3997,7 +4298,7 @@
           "id": "incarnon",
           "role": "incarnon",
           "trigger": "auto",
-          "bullets": 2,
+          "bullets": 1,
           "multishot": 1,
           "variants": [
             {
@@ -4012,13 +4313,18 @@
                     "puncture": 14,
                     "slash": 18
                   },
-                  "procChance": 0.32
+                  "procChance": 0.16
                 }
               ]
             }
           ],
-          "_manual": "panel-reused",
-          "_note": "灵化形态面板未收录，暂复用基础面板"
+          "override": {
+            "critChance": 0.18,
+            "critMultiplier": 2,
+            "statusChance": 0.16,
+            "magazineSize": 0,
+            "reloadTime": 0
+          }
         }
       ]
     },
@@ -4027,7 +4333,6 @@
       "name": "Kuva Brakk",
       "nameZh": "赤毒·布拉克",
       "category": "secondary",
-      "variant": "kuva",
       "kuva": {
         "bonusRange": [
           0.25,
@@ -4054,7 +4359,7 @@
           "id": "primary",
           "role": "normal",
           "trigger": "semi",
-          "bullets": 10,
+          "bullets": 1,
           "multishot": 10,
           "variants": [
             {
@@ -4062,14 +4367,14 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "impact": 6.75,
                     "puncture": 3.75,
                     "slash": 4.5
                   },
-                  "procChance": 1.11
+                  "procChance": 0.111
                 }
               ]
             }
@@ -4082,7 +4387,6 @@
       "name": "Kuva Kraken",
       "nameZh": "赤毒·北海巨妖",
       "category": "secondary",
-      "variant": "kuva",
       "kuva": {
         "bonusRange": [
           0.25,
@@ -4111,28 +4415,27 @@
           "trigger": "burst",
           "bullets": 1,
           "multishot": 1,
-          "burst": {
-            "count": 3,
-            "delay": 0.03
-          },
           "variants": [
             {
               "id": "direct",
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "impact": 32.25,
-                    "puncture": 5.375,
-                    "slash": 5.375
+                    "puncture": 5.38,
+                    "slash": 5.38
                   },
                   "procChance": 0.29
                 }
               ]
             }
-          ]
+          ],
+          "override": {
+            "fireRate": 2.83
+          }
         },
         {
           "id": "mode2",
@@ -4146,18 +4449,21 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "impact": 32.25,
-                    "puncture": 5.375,
-                    "slash": 5.375
+                    "puncture": 5.38,
+                    "slash": 5.38
                   },
                   "procChance": 0.29
                 }
               ]
             }
-          ]
+          ],
+          "override": {
+            "fireRate": 4.17
+          }
         }
       ]
     },
@@ -4166,7 +4472,6 @@
       "name": "Kuva Nukor",
       "nameZh": "赤毒·努寇微波枪",
       "category": "secondary",
-      "variant": "kuva",
       "kuva": {
         "bonusRange": [
           0.25,
@@ -4201,7 +4506,7 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "radiation": 21
@@ -4219,7 +4524,6 @@
       "name": "Kuva Seer",
       "nameZh": "赤毒·预言者",
       "category": "secondary",
-      "variant": "kuva",
       "kuva": {
         "bonusRange": [
           0.25,
@@ -4262,13 +4566,7 @@
                     "slash": 36.68
                   },
                   "procChance": 0.33
-                }
-              ]
-            },
-            {
-              "id": "blast",
-              "label": "爆炸",
-              "segments": [
+                },
                 {
                   "kind": "explosiveAttack",
                   "aoe": true,
@@ -4322,7 +4620,7 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "impact": 11.61,
@@ -4339,7 +4637,7 @@
     },
     {
       "id": "LasGooPistolPlayerWeapon",
-      "name": "EFV-8 Mars",
+      "name": "Efv-8 Mars",
       "nameZh": "艾弗旺-8 火星",
       "category": "secondary",
       "critChance": 0.27,
@@ -4361,7 +4659,7 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "impact": 20,
@@ -4376,30 +4674,7 @@
         {
           "id": "mode2",
           "role": "normal",
-          "trigger": "charge",
-          "bullets": 1,
-          "multishot": 1,
-          "variants": [
-            {
-              "id": "direct",
-              "label": "直接命中",
-              "segments": [
-                {
-                  "kind": "impact",
-                  "aoe": false,
-                  "damage": {
-                    "impact": 20
-                  },
-                  "procChance": 0.1
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "id": "charged",
-          "role": "charged",
-          "trigger": "charge",
+          "trigger": "semi",
           "bullets": 1,
           "multishot": 1,
           "variants": [
@@ -4416,10 +4691,23 @@
                   "procChance": 0.33
                 }
               ]
-            },
+            }
+          ],
+          "override": {
+            "statusChance": 0.33,
+            "fireRate": 1.5
+          }
+        },
+        {
+          "id": "mode3",
+          "role": "normal",
+          "trigger": "semi",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
             {
-              "id": "blast",
-              "label": "爆炸",
+              "id": "direct",
+              "label": "直接命中",
               "segments": [
                 {
                   "kind": "explosiveAttack",
@@ -4431,7 +4719,10 @@
                 }
               ]
             }
-          ]
+          ],
+          "override": {
+            "statusChance": 0.33
+          }
         }
       ]
     },
@@ -4459,7 +4750,7 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "impact": 72,
@@ -4478,7 +4769,6 @@
       "name": "Lato Prime",
       "nameZh": "拉托 Prime",
       "category": "secondary",
-      "variant": "prime",
       "critChance": 0.3,
       "critMultiplier": 2.6,
       "statusChance": 0.2,
@@ -4498,7 +4788,7 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "impact": 6,
@@ -4515,7 +4805,7 @@
           "id": "incarnon",
           "role": "incarnon",
           "trigger": "semi",
-          "bullets": 2,
+          "bullets": 1,
           "multishot": 1,
           "variants": [
             {
@@ -4523,20 +4813,26 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "impact": 19.5,
                     "puncture": 19.5,
                     "slash": 39
                   },
-                  "procChance": 0.3
+                  "procChance": 0.15
                 }
               ]
             }
           ],
-          "_manual": "panel-reused",
-          "_note": "灵化形态面板未收录，暂复用基础面板"
+          "override": {
+            "critChance": 0.36,
+            "critMultiplier": 3.2,
+            "statusChance": 0.15,
+            "fireRate": 4,
+            "magazineSize": 0,
+            "reloadTime": 0
+          }
         }
       ]
     },
@@ -4545,7 +4841,6 @@
       "name": "Lato Vandal",
       "nameZh": "拉托·破坏者",
       "category": "secondary",
-      "variant": "variant",
       "critChance": 0.26,
       "critMultiplier": 2.4,
       "statusChance": 0.1,
@@ -4565,7 +4860,7 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "impact": 6.9,
@@ -4582,7 +4877,7 @@
           "id": "incarnon",
           "role": "incarnon",
           "trigger": "semi",
-          "bullets": 2,
+          "bullets": 1,
           "multishot": 1,
           "variants": [
             {
@@ -4590,20 +4885,25 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "impact": 19,
                     "puncture": 19,
                     "slash": 38
                   },
-                  "procChance": 0.2
+                  "procChance": 0.1
                 }
               ]
             }
           ],
-          "_manual": "panel-reused",
-          "_note": "灵化形态面板未收录，暂复用基础面板"
+          "override": {
+            "critChance": 0.34,
+            "critMultiplier": 3,
+            "fireRate": 4,
+            "magazineSize": 0,
+            "reloadTime": 0
+          }
         }
       ]
     },
@@ -4631,16 +4931,6 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
-                  "aoe": false,
-                  "damage": {
-                    "impact": 0.6,
-                    "puncture": 5.1,
-                    "slash": 0.3
-                  },
-                  "procChance": 0.1
-                },
-                {
                   "kind": "attack",
                   "aoe": false,
                   "damage": {
@@ -4658,10 +4948,9 @@
     },
     {
       "id": "MK1Furis",
-      "name": "MK1-Furis",
+      "name": "Mk1-Furis",
       "nameZh": "MK1-盗贼",
       "category": "secondary",
-      "variant": "starter",
       "critChance": 0.05,
       "critMultiplier": 2,
       "statusChance": 0.01,
@@ -4681,7 +4970,7 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "impact": 1.95,
@@ -4697,7 +4986,7 @@
         {
           "id": "incarnon",
           "role": "incarnon",
-          "trigger": "unknown",
+          "trigger": "auto",
           "bullets": 1,
           "multishot": 1,
           "variants": [
@@ -4706,7 +4995,7 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "heat": 60
@@ -4716,17 +5005,22 @@
               ]
             }
           ],
-          "_manual": "panel-reused",
-          "_note": "灵化形态面板未收录，暂复用基础面板"
+          "override": {
+            "critChance": 0.2,
+            "critMultiplier": 3,
+            "statusChance": 0.08,
+            "fireRate": 12,
+            "magazineSize": 0,
+            "reloadTime": 0
+          }
         }
       ]
     },
     {
       "id": "MK1Kunai",
-      "name": "MK1-Kunai",
+      "name": "Mk1-Kunai",
       "nameZh": "MK1-苦无",
       "category": "secondary",
-      "variant": "starter",
       "critChance": 0.05,
       "critMultiplier": 2,
       "statusChance": 0.025,
@@ -4763,7 +5057,7 @@
           "id": "incarnon",
           "role": "incarnon",
           "trigger": "auto",
-          "bullets": 2,
+          "bullets": 1,
           "multishot": 1,
           "variants": [
             {
@@ -4778,13 +5072,17 @@
                     "puncture": 8.4,
                     "slash": 10.8
                   },
-                  "procChance": 0.1
+                  "procChance": 0.05
                 }
               ]
             }
           ],
-          "_manual": "panel-reused",
-          "_note": "灵化形态面板未收录，暂复用基础面板"
+          "override": {
+            "critChance": 0.14,
+            "statusChance": 0.05,
+            "magazineSize": 0,
+            "reloadTime": 0
+          }
         }
       ]
     },
@@ -4812,7 +5110,7 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "impact": 44.1,
@@ -4832,7 +5130,6 @@
       "name": "Sancti Castanas",
       "nameZh": "圣洁·雷爆信镖",
       "category": "secondary",
-      "variant": "syndicate",
       "critChance": 0.24,
       "critMultiplier": 2,
       "statusChance": 0.34,
@@ -4848,16 +5145,24 @@
           "multishot": 1,
           "variants": [
             {
-              "id": "blast",
-              "label": "爆炸",
+              "id": "direct",
+              "label": "直接命中",
               "segments": [
+                {
+                  "kind": "attack",
+                  "aoe": false,
+                  "damage": {
+                    "electric": 300
+                  },
+                  "procChance": 0.34
+                },
                 {
                   "kind": "explosiveAttack",
                   "aoe": true,
                   "damage": {
                     "electric": 300
                   },
-                  "procChance": 0.34
+                  "procChance": 0.1
                 }
               ]
             }
@@ -4870,7 +5175,6 @@
       "name": "Secura Dual Cestra",
       "nameZh": "保障·锡斯特双枪",
       "category": "secondary",
-      "variant": "syndicate",
       "critChance": 0.16,
       "critMultiplier": 1.6,
       "statusChance": 0.28,
@@ -4909,7 +5213,6 @@
       "name": "Pandero Prime",
       "nameZh": "手鼓 Prime",
       "category": "secondary",
-      "variant": "prime",
       "critChance": 0.3,
       "critMultiplier": 2.8,
       "statusChance": 0.24,
@@ -4929,7 +5232,7 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "impact": 26,
@@ -4945,7 +5248,7 @@
         {
           "id": "mode2",
           "role": "normal",
-          "trigger": "burst",
+          "trigger": "semi",
           "bullets": 1,
           "multishot": 1,
           "variants": [
@@ -4954,7 +5257,7 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "impact": 26,
@@ -4965,7 +5268,10 @@
                 }
               ]
             }
-          ]
+          ],
+          "override": {
+            "fireRate": 4.17
+          }
         }
       ]
     },
@@ -4993,7 +5299,7 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "impact": 10,
@@ -5007,10 +5313,10 @@
           ]
         },
         {
-          "id": "mode2",
-          "role": "normal",
+          "id": "incarnon",
+          "role": "incarnon",
           "trigger": "semi",
-          "bullets": 2,
+          "bullets": 1,
           "multishot": 1,
           "variants": [
             {
@@ -5018,18 +5324,25 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "impact": 16,
                     "puncture": 16,
                     "slash": 32
                   },
-                  "procChance": 0.12
+                  "procChance": 0.06
                 }
               ]
             }
-          ]
+          ],
+          "override": {
+            "critChance": 0.16,
+            "critMultiplier": 2.6,
+            "fireRate": 3.5,
+            "magazineSize": 0,
+            "reloadTime": 0
+          }
         }
       ]
     },
@@ -5038,7 +5351,6 @@
       "name": "Afuris Prime",
       "nameZh": "盗贼双枪 Prime",
       "category": "secondary",
-      "variant": "prime",
       "critChance": 0.16,
       "critMultiplier": 2,
       "statusChance": 0.3,
@@ -5058,7 +5370,7 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "impact": 3.9,
@@ -5078,7 +5390,6 @@
       "name": "Akbolto Prime",
       "nameZh": "螺钉双枪 Prime",
       "category": "secondary",
-      "variant": "prime",
       "critChance": 0.36,
       "critMultiplier": 2.8,
       "statusChance": 0.14,
@@ -5118,7 +5429,6 @@
       "name": "Akarius Prime",
       "nameZh": "阿利乌双枪 Prime",
       "category": "secondary",
-      "variant": "prime",
       "critChance": 0.18,
       "critMultiplier": 2,
       "statusChance": 0.34,
@@ -5132,25 +5442,11 @@
           "trigger": "burst",
           "bullets": 1,
           "multishot": 1,
-          "burst": {
-            "count": 2,
-            "delay": 0.12
-          },
           "variants": [
             {
               "id": "direct",
               "label": "直接命中",
               "segments": [
-                {
-                  "kind": "impact",
-                  "aoe": false,
-                  "damage": {
-                    "impact": 15,
-                    "puncture": 120,
-                    "slash": 15
-                  },
-                  "procChance": 0.25
-                },
                 {
                   "kind": "attack",
                   "aoe": false,
@@ -5158,13 +5454,7 @@
                     "impact": 68
                   },
                   "procChance": 0.34
-                }
-              ]
-            },
-            {
-              "id": "blast",
-              "label": "爆炸",
-              "segments": [
+                },
                 {
                   "kind": "explosiveAttack",
                   "aoe": true,
@@ -5175,7 +5465,10 @@
                 }
               ]
             }
-          ]
+          ],
+          "override": {
+            "fireRate": 3.667
+          }
         }
       ]
     },
@@ -5184,7 +5477,6 @@
       "name": "Akbronco Prime",
       "nameZh": "野马双枪 Prime",
       "category": "secondary",
-      "variant": "prime",
       "critChance": 0.06,
       "critMultiplier": 2,
       "statusChance": 0.1286,
@@ -5196,7 +5488,7 @@
           "id": "primary",
           "role": "normal",
           "trigger": "semi",
-          "bullets": 7,
+          "bullets": 1,
           "multishot": 7,
           "variants": [
             {
@@ -5204,14 +5496,14 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "impact": 40,
                     "puncture": 5,
                     "slash": 5
                   },
-                  "procChance": 0.9
+                  "procChance": 0.1286
                 }
               ]
             }
@@ -5224,7 +5516,6 @@
       "name": "Aksomati Prime",
       "nameZh": "轻灵月神双枪 Prime",
       "category": "secondary",
-      "variant": "prime",
       "critChance": 0.24,
       "critMultiplier": 3,
       "statusChance": 0.18,
@@ -5244,7 +5535,7 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "impact": 2,
@@ -5264,7 +5555,6 @@
       "name": "Akstiletto Prime",
       "nameZh": "史提托双枪 Prime",
       "category": "secondary",
-      "variant": "prime",
       "critChance": 0.15,
       "critMultiplier": 2,
       "statusChance": 0.3,
@@ -5284,7 +5574,7 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "impact": 21.6,
@@ -5304,7 +5594,6 @@
       "name": "Athodai Prime",
       "nameZh": "阿索代 Prime",
       "category": "secondary",
-      "variant": "prime",
       "critChance": 0.4,
       "critMultiplier": 2,
       "statusChance": 0.1,
@@ -5324,7 +5613,7 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "heat": 56,
@@ -5339,7 +5628,7 @@
         {
           "id": "mode2",
           "role": "normal",
-          "trigger": "unknown",
+          "trigger": "auto",
           "bullets": 1,
           "multishot": 1,
           "variants": [
@@ -5348,7 +5637,7 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "heat": 100
@@ -5357,7 +5646,13 @@
                 }
               ]
             }
-          ]
+          ],
+          "override": {
+            "critChance": 0.2,
+            "critMultiplier": 2.5,
+            "statusChance": 0.35,
+            "fireRate": 12
+          }
         }
       ]
     },
@@ -5366,7 +5661,6 @@
       "name": "Ballistica Prime",
       "nameZh": "布里斯提卡 Prime",
       "category": "secondary",
-      "variant": "prime",
       "critChance": 0.2,
       "critMultiplier": 2,
       "statusChance": 0.15,
@@ -5378,23 +5672,13 @@
           "id": "primary",
           "role": "normal",
           "trigger": "charge",
-          "bullets": 4,
+          "bullets": 1,
           "multishot": 4,
           "variants": [
             {
               "id": "direct",
               "label": "直接命中",
               "segments": [
-                {
-                  "kind": "impact",
-                  "aoe": false,
-                  "damage": {
-                    "impact": 2.4,
-                    "puncture": 11.2,
-                    "slash": 2.4
-                  },
-                  "procChance": 0.6
-                },
                 {
                   "kind": "attack",
                   "aoe": false,
@@ -5403,7 +5687,7 @@
                     "puncture": 22,
                     "slash": 16
                   },
-                  "procChance": 0.6
+                  "procChance": 0.15
                 }
               ]
             }
@@ -5413,7 +5697,7 @@
           "id": "charged",
           "role": "charged",
           "trigger": "charge",
-          "bullets": 4,
+          "bullets": 1,
           "multishot": 4,
           "variants": [
             {
@@ -5428,7 +5712,7 @@
                     "puncture": 41.8,
                     "slash": 30.4
                   },
-                  "procChance": 0.6
+                  "procChance": 0.15
                 }
               ]
             }
@@ -5456,8 +5740,13 @@
               ]
             }
           ],
-          "_manual": "panel-reused",
-          "_note": "灵化形态面板未收录，暂复用基础面板"
+          "override": {
+            "critChance": 0.3,
+            "critMultiplier": 2.5,
+            "statusChance": 0.3,
+            "magazineSize": 0,
+            "reloadTime": 0
+          }
         }
       ]
     },
@@ -5466,7 +5755,6 @@
       "name": "Epitaph Prime",
       "nameZh": "葬铭 Prime",
       "category": "secondary",
-      "variant": "prime",
       "critChance": 0.04,
       "critMultiplier": 1.8,
       "statusChance": 0.14,
@@ -5476,53 +5764,6 @@
       "modes": [
         {
           "id": "primary",
-          "role": "normal",
-          "trigger": "charge",
-          "bullets": 1,
-          "multishot": 1,
-          "variants": [
-            {
-              "id": "direct",
-              "label": "直接命中",
-              "segments": [
-                {
-                  "kind": "impact",
-                  "aoe": false,
-                  "damage": {
-                    "impact": 150
-                  },
-                  "procChance": 0
-                },
-                {
-                  "kind": "attack",
-                  "aoe": false,
-                  "damage": {
-                    "impact": 40,
-                    "puncture": 30,
-                    "slash": 30
-                  },
-                  "procChance": 0.5
-                }
-              ]
-            },
-            {
-              "id": "blast",
-              "label": "爆炸",
-              "segments": [
-                {
-                  "kind": "explosiveAttack",
-                  "aoe": true,
-                  "damage": {
-                    "blast": 30
-                  },
-                  "procChance": 0.5
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "id": "charged",
           "role": "charged",
           "trigger": "charge",
           "bullets": 1,
@@ -5541,10 +5782,32 @@
                     "slash": 141.75
                   },
                   "procChance": 0.14
+                },
+                {
+                  "kind": "attack",
+                  "aoe": false,
+                  "damage": {
+                    "impact": 40,
+                    "puncture": 30,
+                    "slash": 30
+                  },
+                  "procChance": 0.5
+                },
+                {
+                  "kind": "explosiveAttack",
+                  "aoe": true,
+                  "damage": {
+                    "blast": 30
+                  },
+                  "procChance": 0.5
                 }
               ]
             }
-          ]
+          ],
+          "override": {
+            "critChance": 0.5,
+            "critMultiplier": 3
+          }
         }
       ]
     },
@@ -5553,7 +5816,6 @@
       "name": "Hikou Prime",
       "nameZh": "飞扬 Prime",
       "category": "secondary",
-      "variant": "prime",
       "critChance": 0.06,
       "critMultiplier": 1.8,
       "statusChance": 0.28,
@@ -5593,7 +5855,6 @@
       "name": "Hystrix Prime",
       "nameZh": "豪猪 Prime",
       "category": "secondary",
-      "variant": "prime",
       "critChance": 0.28,
       "critMultiplier": 2.2,
       "statusChance": 0.2,
@@ -5612,16 +5873,6 @@
               "id": "direct",
               "label": "直接命中",
               "segments": [
-                {
-                  "kind": "impact",
-                  "aoe": false,
-                  "damage": {
-                    "impact": 21.6,
-                    "puncture": 3.6,
-                    "slash": 10.8
-                  },
-                  "procChance": 0.3
-                },
                 {
                   "kind": "attack",
                   "aoe": false,
@@ -5718,7 +5969,6 @@
       "name": "Knell Prime",
       "nameZh": "丧钟 Prime",
       "category": "secondary",
-      "variant": "prime",
       "critChance": 0.4,
       "critMultiplier": 2,
       "statusChance": 0.1,
@@ -5738,7 +5988,7 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "impact": 75.6,
@@ -5758,7 +6008,6 @@
       "name": "Kompressa Prime",
       "nameZh": "卡帕压力枪 Prime",
       "category": "secondary",
-      "variant": "prime",
       "critChance": 0.16,
       "critMultiplier": 1.8,
       "statusChance": 0.36,
@@ -5770,7 +6019,7 @@
           "id": "primary",
           "role": "normal",
           "trigger": "auto",
-          "bullets": 4,
+          "bullets": 1,
           "multishot": 4,
           "variants": [
             {
@@ -5783,7 +6032,15 @@
                   "damage": {
                     "viral": 2
                   },
-                  "procChance": 1.44
+                  "procChance": 0.36
+                },
+                {
+                  "kind": "explosiveAttack",
+                  "aoe": true,
+                  "damage": {
+                    "viral": 46
+                  },
+                  "procChance": 0.36
                 }
               ]
             }
@@ -5796,7 +6053,6 @@
       "name": "Lex Prime",
       "nameZh": "雷克斯 Prime",
       "category": "secondary",
-      "variant": "prime",
       "critChance": 0.25,
       "critMultiplier": 2,
       "statusChance": 0.25,
@@ -5816,7 +6072,7 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "impact": 18,
@@ -5852,8 +6108,14 @@
               ]
             }
           ],
-          "_manual": "panel-reused",
-          "_note": "灵化形态面板未收录，暂复用基础面板"
+          "override": {
+            "critChance": 0.35,
+            "critMultiplier": 3,
+            "statusChance": 0.44,
+            "fireRate": 0.67,
+            "magazineSize": 0,
+            "reloadTime": 0
+          }
         }
       ]
     },
@@ -5862,7 +6124,6 @@
       "name": "Spira Prime",
       "nameZh": "旋刃飞刀 Prime",
       "category": "secondary",
-      "variant": "prime",
       "critChance": 0.3,
       "critMultiplier": 3,
       "statusChance": 0.14,
@@ -5902,7 +6163,6 @@
       "name": "Magnus Prime",
       "nameZh": "麦格努斯 Prime",
       "category": "secondary",
-      "variant": "prime",
       "critChance": 0.28,
       "critMultiplier": 2.8,
       "statusChance": 0.28,
@@ -5922,7 +6182,7 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "impact": 44.1,
@@ -5942,7 +6202,6 @@
       "name": "Pyrana Prime",
       "nameZh": "食人鱼 Prime",
       "category": "secondary",
-      "variant": "prime",
       "critChance": 0.24,
       "critMultiplier": 2.2,
       "statusChance": 0.036,
@@ -5954,7 +6213,7 @@
           "id": "primary",
           "role": "normal",
           "trigger": "auto",
-          "bullets": 10,
+          "bullets": 1,
           "multishot": 10,
           "variants": [
             {
@@ -5962,14 +6221,14 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "impact": 1.92,
                     "puncture": 1.92,
                     "slash": 20.16
                   },
-                  "procChance": 0.36
+                  "procChance": 0.036000000000000004
                 }
               ]
             }
@@ -5982,7 +6241,6 @@
       "name": "Sicarus Prime",
       "nameZh": "暗杀者 Prime",
       "category": "secondary",
-      "variant": "prime",
       "critChance": 0.25,
       "critMultiplier": 2,
       "statusChance": 0.2,
@@ -5996,17 +6254,13 @@
           "trigger": "burst",
           "bullets": 1,
           "multishot": 1,
-          "burst": {
-            "count": 3,
-            "delay": 0.04
-          },
           "variants": [
             {
               "id": "direct",
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "impact": 20,
@@ -6017,25 +6271,24 @@
                 }
               ]
             }
-          ]
+          ],
+          "override": {
+            "fireRate": 5
+          }
         },
         {
-          "id": "mode2",
-          "role": "normal",
+          "id": "incarnon",
+          "role": "incarnon",
           "trigger": "burst",
           "bullets": 1,
           "multishot": 1,
-          "burst": {
-            "count": 3,
-            "delay": 0.04
-          },
           "variants": [
             {
               "id": "direct",
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "impact": 24,
@@ -6046,7 +6299,14 @@
                 }
               ]
             }
-          ]
+          ],
+          "override": {
+            "critChance": 0.3,
+            "critMultiplier": 3,
+            "fireRate": 5,
+            "magazineSize": 0,
+            "reloadTime": 0
+          }
         }
       ]
     },
@@ -6055,7 +6315,6 @@
       "name": "Vasto Prime",
       "nameZh": "瓦斯托 Prime",
       "category": "secondary",
-      "variant": "prime",
       "critChance": 0.22,
       "critMultiplier": 2.4,
       "statusChance": 0.22,
@@ -6075,7 +6334,7 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "impact": 16.5,
@@ -6089,10 +6348,10 @@
           ]
         },
         {
-          "id": "mode2",
-          "role": "normal",
-          "trigger": "burst",
-          "bullets": 6,
+          "id": "incarnon",
+          "role": "incarnon",
+          "trigger": "semi",
+          "bullets": 1,
           "multishot": 1,
           "variants": [
             {
@@ -6100,18 +6359,25 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "impact": 10.5,
                     "puncture": 10.5,
                     "slash": 49
                   },
-                  "procChance": 0.4
+                  "procChance": 0.0667
                 }
               ]
             }
-          ]
+          ],
+          "override": {
+            "critChance": 0.3,
+            "critMultiplier": 3.2,
+            "statusChance": 0.0667,
+            "magazineSize": 0,
+            "reloadTime": 0
+          }
         }
       ]
     },
@@ -6120,7 +6386,6 @@
       "name": "Velox Prime",
       "nameZh": "逐电 Prime",
       "category": "secondary",
-      "variant": "prime",
       "critChance": 0.14,
       "critMultiplier": 2,
       "statusChance": 0.32,
@@ -6140,7 +6405,7 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "impact": 6.48,
@@ -6160,7 +6425,6 @@
       "name": "Zakti Prime",
       "nameZh": "毒芽 Prime",
       "category": "secondary",
-      "variant": "prime",
       "critChance": 0.08,
       "critMultiplier": 1.8,
       "statusChance": 0.42,
@@ -6180,21 +6444,19 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
-                  "aoe": false,
-                  "damage": {
-                    "impact": 19,
-                    "puncture": 19,
-                    "slash": 38
-                  },
-                  "procChance": 0.15
-                },
-                {
                   "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "impact": 12,
                     "puncture": 18
+                  },
+                  "procChance": 0.42
+                },
+                {
+                  "kind": "explosiveAttack",
+                  "aoe": true,
+                  "damage": {
+                    "gas": 100
                   },
                   "procChance": 0.42
                 }
@@ -6209,7 +6471,6 @@
       "name": "Prisma Angstrum",
       "nameZh": "棱晶·安格斯壮",
       "category": "secondary",
-      "variant": "variant",
       "critChance": 0.18,
       "critMultiplier": 2.2,
       "statusChance": 0.26,
@@ -6235,20 +6496,14 @@
                     "blast": 200
                   },
                   "procChance": 0.26
-                }
-              ]
-            },
-            {
-              "id": "blast",
-              "label": "爆炸",
-              "segments": [
+                },
                 {
                   "kind": "explosiveAttack",
                   "aoe": true,
                   "damage": {
                     "blast": 250
                   },
-                  "procChance": 0
+                  "procChance": 0.26
                 }
               ]
             }
@@ -6257,7 +6512,7 @@
         {
           "id": "incarnon",
           "role": "incarnon",
-          "trigger": "auto",
+          "trigger": "charge",
           "bullets": 1,
           "multishot": 1,
           "variants": [
@@ -6265,14 +6520,6 @@
               "id": "direct",
               "label": "直接命中",
               "segments": [
-                {
-                  "kind": "impact",
-                  "aoe": false,
-                  "damage": {
-                    "impact": 10
-                  },
-                  "procChance": 0.1
-                },
                 {
                   "kind": "attack",
                   "aoe": false,
@@ -6284,8 +6531,13 @@
               ]
             }
           ],
-          "_manual": "panel-reused",
-          "_note": "灵化形态面板未收录，暂复用基础面板"
+          "override": {
+            "critChance": 0.26,
+            "statusChance": 0.2,
+            "fireRate": 6,
+            "magazineSize": 0,
+            "reloadTime": 0
+          }
         }
       ]
     },
@@ -6294,7 +6546,6 @@
       "name": "Prisma Twin Gremlins",
       "nameZh": "棱晶·双子小精灵",
       "category": "secondary",
-      "variant": "variant",
       "critChance": 0.23,
       "critMultiplier": 1.9,
       "statusChance": 0.23,
@@ -6313,16 +6564,6 @@
               "id": "direct",
               "label": "直接命中",
               "segments": [
-                {
-                  "kind": "impact",
-                  "aoe": false,
-                  "damage": {
-                    "impact": 2.4,
-                    "puncture": 16.8,
-                    "slash": 4.8
-                  },
-                  "procChance": 0.15
-                },
                 {
                   "kind": "attack",
                   "aoe": false,
@@ -6362,16 +6603,6 @@
               "id": "direct",
               "label": "直接命中",
               "segments": [
-                {
-                  "kind": "impact",
-                  "aoe": false,
-                  "damage": {
-                    "impact": 21.6,
-                    "puncture": 3.6,
-                    "slash": 10.8
-                  },
-                  "procChance": 0.3
-                },
                 {
                   "kind": "attack",
                   "aoe": false,
@@ -6468,7 +6699,6 @@
       "name": "Rakta Ballistica",
       "nameZh": "绯红·布里斯提卡",
       "category": "secondary",
-      "variant": "syndicate",
       "critChance": 0.05,
       "critMultiplier": 1.5,
       "statusChance": 0.1,
@@ -6499,7 +6729,11 @@
                 }
               ]
             }
-          ]
+          ],
+          "override": {
+            "statusChance": 0.05,
+            "fireRate": 6.67
+          }
         },
         {
           "id": "charged",
@@ -6520,40 +6754,14 @@
                     "puncture": 270,
                     "slash": 15
                   },
-                  "procChance": 0
+                  "procChance": 0.1
                 }
               ]
             }
-          ]
-        },
-        {
-          "id": "mode3",
-          "role": "normal",
-          "trigger": "burst",
-          "bullets": 1,
-          "multishot": 1,
-          "burst": {
-            "count": 4,
-            "delay": 0.05
-          },
-          "variants": [
-            {
-              "id": "direct",
-              "label": "直接命中",
-              "segments": [
-                {
-                  "kind": "attack",
-                  "aoe": false,
-                  "damage": {
-                    "impact": 18.75,
-                    "puncture": 37.5,
-                    "slash": 18.75
-                  },
-                  "procChance": 0.05
-                }
-              ]
-            }
-          ]
+          ],
+          "override": {
+            "critChance": 0.2
+          }
         },
         {
           "id": "incarnon",
@@ -6577,8 +6785,13 @@
               ]
             }
           ],
-          "_manual": "panel-reused",
-          "_note": "灵化形态面板未收录，暂复用基础面板"
+          "override": {
+            "critChance": 0.25,
+            "critMultiplier": 2.2,
+            "statusChance": 0.25,
+            "magazineSize": 0,
+            "reloadTime": 0
+          }
         }
       ]
     },
@@ -6606,7 +6819,7 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "impact": 22.5,
@@ -6620,10 +6833,10 @@
           ]
         },
         {
-          "id": "mode2",
-          "role": "normal",
-          "trigger": "burst",
-          "bullets": 6,
+          "id": "incarnon",
+          "role": "incarnon",
+          "trigger": "semi",
+          "bullets": 1,
           "multishot": 1,
           "variants": [
             {
@@ -6631,18 +6844,25 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "impact": 7.5,
                     "puncture": 7.5,
                     "slash": 15
                   },
-                  "procChance": 0.16
+                  "procChance": 0.026699999999999998
                 }
               ]
             }
-          ]
+          ],
+          "override": {
+            "critChance": 0.3,
+            "critMultiplier": 2.8,
+            "statusChance": 0.026699999999999998,
+            "magazineSize": 0,
+            "reloadTime": 0
+          }
         }
       ]
     },
@@ -6651,7 +6871,6 @@
       "name": "Vaykor Marelok",
       "nameZh": "勇气·玛瑞火枪",
       "category": "secondary",
-      "variant": "syndicate",
       "critChance": 0.2,
       "critMultiplier": 1.5,
       "statusChance": 0.35,
@@ -6671,7 +6890,7 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "impact": 96,
@@ -6704,25 +6923,11 @@
           "trigger": "burst",
           "bullets": 1,
           "multishot": 1,
-          "burst": {
-            "count": 2,
-            "delay": 0.12
-          },
           "variants": [
             {
               "id": "direct",
               "label": "直接命中",
               "segments": [
-                {
-                  "kind": "impact",
-                  "aoe": false,
-                  "damage": {
-                    "impact": 15,
-                    "puncture": 120,
-                    "slash": 15
-                  },
-                  "procChance": 0.25
-                },
                 {
                   "kind": "attack",
                   "aoe": false,
@@ -6730,24 +6935,21 @@
                     "impact": 68
                   },
                   "procChance": 0.28
-                }
-              ]
-            },
-            {
-              "id": "blast",
-              "label": "爆炸",
-              "segments": [
+                },
                 {
                   "kind": "explosiveAttack",
                   "aoe": true,
                   "damage": {
                     "blast": 419
                   },
-                  "procChance": 0
+                  "procChance": 0.28
                 }
               ]
             }
-          ]
+          ],
+          "override": {
+            "fireRate": 4.33
+          }
         }
       ]
     },
@@ -6789,8 +6991,8 @@
           ]
         },
         {
-          "id": "mode2",
-          "role": "normal",
+          "id": "incarnon",
+          "role": "incarnon",
           "trigger": "auto",
           "bullets": 1,
           "multishot": 1,
@@ -6811,7 +7013,46 @@
                 }
               ]
             }
-          ]
+          ],
+          "override": {
+            "critChance": 0.3,
+            "critMultiplier": 3,
+            "statusChance": 0.2,
+            "fireRate": 3,
+            "magazineSize": 0,
+            "reloadTime": 0
+          }
+        },
+        {
+          "id": "incarnon2",
+          "role": "incarnon",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
+            {
+              "id": "direct",
+              "label": "直接命中",
+              "segments": [
+                {
+                  "kind": "explosiveAttack",
+                  "aoe": true,
+                  "damage": {
+                    "heat": 160
+                  },
+                  "procChance": 0.3
+                }
+              ]
+            }
+          ],
+          "override": {
+            "critChance": 0.3,
+            "critMultiplier": 3,
+            "statusChance": 0.3,
+            "fireRate": 3,
+            "magazineSize": 0,
+            "reloadTime": 0
+          }
         }
       ]
     },
@@ -6835,9 +7076,17 @@
           "multishot": 1,
           "variants": [
             {
-              "id": "blast",
-              "label": "爆炸",
+              "id": "direct",
+              "label": "直接命中",
               "segments": [
+                {
+                  "kind": "attack",
+                  "aoe": false,
+                  "damage": {
+                    "electric": 160
+                  },
+                  "procChance": 0.22
+                },
                 {
                   "kind": "explosiveAttack",
                   "aoe": true,
@@ -6876,7 +7125,7 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "impact": 2,
@@ -6884,29 +7133,14 @@
                     "slash": 13
                   },
                   "procChance": 0.16
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "id": "mode2",
-          "role": "normal",
-          "trigger": "semi",
-          "bullets": 1,
-          "multishot": 1,
-          "variants": [
-            {
-              "id": "direct",
-              "label": "直接命中",
-              "segments": [
+                },
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "blast": 75
                   },
-                  "procChance": 0.1
+                  "procChance": 0.16
                 }
               ]
             }
@@ -6930,7 +7164,7 @@
           "id": "primary",
           "role": "normal",
           "trigger": "auto",
-          "bullets": 12,
+          "bullets": 1,
           "multishot": 12,
           "variants": [
             {
@@ -6938,14 +7172,14 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "impact": 2.2,
                     "puncture": 2.2,
                     "slash": 17.6
                   },
-                  "procChance": 0.3
+                  "procChance": 0.025
                 }
               ]
             }
@@ -6984,7 +7218,7 @@
                     "puncture": 15.6,
                     "slash": 7.8
                   },
-                  "procChance": 0
+                  "procChance": 0.1
                 }
               ]
             }
@@ -7016,7 +7250,7 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "impact": 16.8,
@@ -7049,10 +7283,6 @@
           "trigger": "burst",
           "bullets": 1,
           "multishot": 1,
-          "burst": {
-            "count": 2,
-            "delay": 0
-          },
           "variants": [
             {
               "id": "direct",
@@ -7067,13 +7297,7 @@
                     "slash": 11.52
                   },
                   "procChance": 0.14
-                }
-              ]
-            },
-            {
-              "id": "blast",
-              "label": "爆炸",
-              "segments": [
+                },
                 {
                   "kind": "explosiveAttack",
                   "aoe": true,
@@ -7081,22 +7305,7 @@
                     "heat": 46
                   },
                   "procChance": 0.14
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "id": "mode2",
-          "role": "normal",
-          "trigger": "unknown",
-          "bullets": 1,
-          "multishot": 1,
-          "variants": [
-            {
-              "id": "direct",
-              "label": "直接命中",
-              "segments": [
+                },
                 {
                   "kind": "attack",
                   "aoe": false,
@@ -7106,13 +7315,7 @@
                     "slash": 23.04
                   },
                   "procChance": 0.26
-                }
-              ]
-            },
-            {
-              "id": "blast",
-              "label": "爆炸",
-              "segments": [
+                },
                 {
                   "kind": "explosiveAttack",
                   "aoe": true,
@@ -7123,7 +7326,10 @@
                 }
               ]
             }
-          ]
+          ],
+          "override": {
+            "fireRate": 1.83
+          }
         }
       ]
     },
@@ -7151,7 +7357,7 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "impact": 18,
@@ -7167,7 +7373,7 @@
         {
           "id": "mode2",
           "role": "normal",
-          "trigger": "burst",
+          "trigger": "semi",
           "bullets": 1,
           "multishot": 1,
           "variants": [
@@ -7176,7 +7382,7 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "impact": 18,
@@ -7187,7 +7393,10 @@
                 }
               ]
             }
-          ]
+          ],
+          "override": {
+            "fireRate": 4.17
+          }
         }
       ]
     },
@@ -7252,26 +7461,65 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
-                    "impact": 8.4,
-                    "puncture": 3.6
+                    "electric": 100
                   },
-                  "procChance": 0.1
+                  "procChance": 0.26
+                }
+              ]
+            }
+          ],
+          "override": {
+            "critChance": 0.2,
+            "critMultiplier": 2,
+            "statusChance": 0.26
+          }
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "auto",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
+            {
+              "id": "direct",
+              "label": "直接命中",
+              "segments": [
+                {
+                  "kind": "explosiveAttack",
+                  "aoe": true,
+                  "damage": {
+                    "electric": 50
+                  },
+                  "procChance": 0.26
                 },
                 {
                   "kind": "attack",
                   "aoe": false,
                   "damage": {
-                    "impact": 17.5,
-                    "puncture": 7.5
+                    "electric": 350
                   },
-                  "procChance": 0
+                  "procChance": 0.26
+                },
+                {
+                  "kind": "explosiveAttack",
+                  "aoe": true,
+                  "damage": {
+                    "electric": 250
+                  },
+                  "procChance": 0.26
                 }
               ]
             }
-          ]
+          ],
+          "override": {
+            "critChance": 0.2,
+            "critMultiplier": 2,
+            "statusChance": 0.26
+          }
         }
       ]
     },
@@ -7306,27 +7554,13 @@
                   "procChance": 0.26
                 }
               ]
-            },
-            {
-              "id": "blast",
-              "label": "爆炸",
-              "segments": [
-                {
-                  "kind": "explosiveAttack",
-                  "aoe": true,
-                  "damage": {
-                    "electric": 50
-                  },
-                  "procChance": 0.26
-                }
-              ]
             }
           ]
         },
         {
           "id": "mode2",
           "role": "normal",
-          "trigger": "semi",
+          "trigger": "auto",
           "bullets": 1,
           "multishot": 1,
           "variants": [
@@ -7335,19 +7569,21 @@
               "label": "直接命中",
               "segments": [
                 {
+                  "kind": "explosiveAttack",
+                  "aoe": true,
+                  "damage": {
+                    "electric": 50
+                  },
+                  "procChance": 0.26
+                },
+                {
                   "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "electric": 350
                   },
                   "procChance": 0.26
-                }
-              ]
-            },
-            {
-              "id": "blast",
-              "label": "爆炸",
-              "segments": [
+                },
                 {
                   "kind": "explosiveAttack",
                   "aoe": true,
@@ -7386,21 +7622,19 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
-                  "aoe": false,
-                  "damage": {
-                    "impact": 19,
-                    "puncture": 19,
-                    "slash": 38
-                  },
-                  "procChance": 0.15
-                },
-                {
                   "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "impact": 12,
                     "puncture": 18
+                  },
+                  "procChance": 0.2
+                },
+                {
+                  "kind": "explosiveAttack",
+                  "aoe": true,
+                  "damage": {
+                    "gas": 80
                   },
                   "procChance": 0.2
                 }
@@ -7434,7 +7668,7 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "heat": 48,
@@ -7449,7 +7683,7 @@
         {
           "id": "mode2",
           "role": "normal",
-          "trigger": "unknown",
+          "trigger": "auto",
           "bullets": 1,
           "multishot": 1,
           "variants": [
@@ -7458,7 +7692,7 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "heat": 88
@@ -7467,7 +7701,12 @@
                 }
               ]
             }
-          ]
+          ],
+          "override": {
+            "critChance": 0.18,
+            "statusChance": 0.24,
+            "fireRate": 12
+          }
         }
       ]
     },
@@ -7495,7 +7734,7 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "impact": 4.32,
@@ -7526,38 +7765,6 @@
           "id": "primary",
           "role": "normal",
           "trigger": "auto",
-          "bullets": 4,
-          "multishot": 4,
-          "variants": [
-            {
-              "id": "direct",
-              "label": "直接命中",
-              "segments": [
-                {
-                  "kind": "impact",
-                  "aoe": false,
-                  "damage": {
-                    "toxin": 56
-                  },
-                  "procChance": 0.1
-                },
-                {
-                  "kind": "attack",
-                  "aoe": false,
-                  "damage": {
-                    "puncture": 8,
-                    "toxin": 32
-                  },
-                  "procChance": 0.72
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "id": "mode2",
-          "role": "normal",
-          "trigger": "semi",
           "bullets": 1,
           "multishot": 4,
           "variants": [
@@ -7568,6 +7775,15 @@
                 {
                   "kind": "attack",
                   "aoe": false,
+                  "damage": {
+                    "puncture": 8,
+                    "toxin": 32
+                  },
+                  "procChance": 0.18
+                },
+                {
+                  "kind": "explosiveAttack",
+                  "aoe": true,
                   "damage": {
                     "toxin": 40
                   },
@@ -7603,7 +7819,7 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "impact": 63,
@@ -7632,53 +7848,6 @@
       "modes": [
         {
           "id": "primary",
-          "role": "normal",
-          "trigger": "charge",
-          "bullets": 1,
-          "multishot": 1,
-          "variants": [
-            {
-              "id": "direct",
-              "label": "直接命中",
-              "segments": [
-                {
-                  "kind": "impact",
-                  "aoe": false,
-                  "damage": {
-                    "impact": 150
-                  },
-                  "procChance": 0
-                },
-                {
-                  "kind": "attack",
-                  "aoe": false,
-                  "damage": {
-                    "impact": 40,
-                    "puncture": 30,
-                    "slash": 30
-                  },
-                  "procChance": 0.5
-                }
-              ]
-            },
-            {
-              "id": "blast",
-              "label": "爆炸",
-              "segments": [
-                {
-                  "kind": "explosiveAttack",
-                  "aoe": true,
-                  "damage": {
-                    "blast": 20
-                  },
-                  "procChance": 0.5
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "id": "charged",
           "role": "charged",
           "trigger": "charge",
           "bullets": 1,
@@ -7697,10 +7866,32 @@
                     "slash": 135
                   },
                   "procChance": 0.04
+                },
+                {
+                  "kind": "attack",
+                  "aoe": false,
+                  "damage": {
+                    "impact": 40,
+                    "puncture": 30,
+                    "slash": 30
+                  },
+                  "procChance": 0.5
+                },
+                {
+                  "kind": "explosiveAttack",
+                  "aoe": true,
+                  "damage": {
+                    "blast": 20
+                  },
+                  "procChance": 0.5
                 }
               ]
             }
-          ]
+          ],
+          "override": {
+            "critChance": 0.48,
+            "critMultiplier": 2.6
+          }
         }
       ]
     },
@@ -7720,7 +7911,7 @@
           "id": "primary",
           "role": "normal",
           "trigger": "auto",
-          "bullets": 4,
+          "bullets": 1,
           "multishot": 4,
           "variants": [
             {
@@ -7733,7 +7924,15 @@
                   "damage": {
                     "viral": 2
                   },
-                  "procChance": 1.2
+                  "procChance": 0.3
+                },
+                {
+                  "kind": "explosiveAttack",
+                  "aoe": true,
+                  "damage": {
+                    "viral": 42
+                  },
+                  "procChance": 0.3
                 }
               ]
             }
@@ -7759,17 +7958,13 @@
           "trigger": "burst",
           "bullets": 1,
           "multishot": 1,
-          "burst": {
-            "count": 2,
-            "delay": 0
-          },
           "variants": [
             {
               "id": "direct",
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "impact": 5.4,
@@ -7780,7 +7975,10 @@
                 }
               ]
             }
-          ]
+          ],
+          "override": {
+            "fireRate": 5
+          }
         }
       ]
     },
@@ -7800,7 +7998,7 @@
           "id": "primary",
           "role": "normal",
           "trigger": "auto",
-          "bullets": 2,
+          "bullets": 1,
           "multishot": 2,
           "variants": [
             {
@@ -7808,14 +8006,14 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "impact": 4,
-                    "puncture": 3.3333,
-                    "slash": 2.6667
+                    "puncture": 3.33,
+                    "slash": 2.67
                   },
-                  "procChance": 0.33
+                  "procChance": 0.165
                 }
               ]
             }
@@ -7843,8 +8041,8 @@
           "multishot": 1,
           "variants": [
             {
-              "id": "blast",
-              "label": "爆炸",
+              "id": "direct",
+              "label": "直接命中",
               "segments": [
                 {
                   "kind": "explosiveAttack",
@@ -7852,7 +8050,15 @@
                   "damage": {
                     "blast": 120
                   },
-                  "procChance": 0
+                  "procChance": 0.26
+                },
+                {
+                  "kind": "explosiveAttack",
+                  "aoe": true,
+                  "damage": {
+                    "blast": 250
+                  },
+                  "procChance": 0.1
                 }
               ]
             }
@@ -7865,7 +8071,6 @@
       "name": "Mara Detron",
       "nameZh": "苦痛·德特昂",
       "category": "secondary",
-      "variant": "variant",
       "critChance": 0.08,
       "critMultiplier": 1.5,
       "statusChance": 0.1371,
@@ -7877,7 +8082,7 @@
           "id": "primary",
           "role": "normal",
           "trigger": "semi",
-          "bullets": 7,
+          "bullets": 1,
           "multishot": 7,
           "variants": [
             {
@@ -7890,7 +8095,7 @@
                   "damage": {
                     "radiation": 40
                   },
-                  "procChance": 0.96
+                  "procChance": 0.1371
                 }
               ]
             }
@@ -7903,7 +8108,6 @@
       "name": "Viper Wraith",
       "nameZh": "蝰蛇·亡魂",
       "category": "secondary",
-      "variant": "variant",
       "critChance": 0.19,
       "critMultiplier": 2,
       "statusChance": 0.09,
@@ -7923,7 +8127,7 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "impact": 14.4,
@@ -7943,7 +8147,6 @@
       "name": "Twin Vipers Wraith",
       "nameZh": "双子蝰蛇·亡魂",
       "category": "secondary",
-      "variant": "variant",
       "critChance": 0.19,
       "critMultiplier": 2,
       "statusChance": 0.09,
@@ -7963,7 +8166,7 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "impact": 14.4,
@@ -8002,16 +8205,6 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
-                  "aoe": false,
-                  "damage": {
-                    "impact": 15,
-                    "puncture": 120,
-                    "slash": 15
-                  },
-                  "procChance": 0.25
-                },
-                {
                   "kind": "attack",
                   "aoe": false,
                   "damage": {
@@ -8027,7 +8220,7 @@
         {
           "id": "incarnon",
           "role": "incarnon",
-          "trigger": "auto",
+          "trigger": "semi",
           "bullets": 1,
           "multishot": 1,
           "variants": [
@@ -8036,38 +8229,15 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "incarnon",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "impact": 100
                   },
                   "procChance": 0.22
-                }
-              ]
-            }
-          ],
-          "override": {
-            "critChance": 0.22,
-            "critMultiplier": 2.2,
-            "statusChance": 0.22,
-            "fireRate": 6.67
-          },
-          "_manual": "entered",
-          "_note": "灵化充能 216"
-        },
-        {
-          "id": "incarnon2",
-          "role": "incarnon",
-          "trigger": "auto",
-          "bullets": 1,
-          "multishot": 1,
-          "variants": [
-            {
-              "id": "direct",
-              "label": "直接命中",
-              "segments": [
+                },
                 {
-                  "kind": "incarnon",
+                  "kind": "explosiveAttack",
                   "aoe": true,
                   "damage": {
                     "radiation": 300
@@ -8078,13 +8248,10 @@
             }
           ],
           "override": {
-            "critChance": 0.22,
-            "critMultiplier": 2.2,
-            "statusChance": 0.22,
-            "fireRate": 6.67
-          },
-          "_manual": "entered",
-          "_note": "范围 2 米，2 米外 80%；投射物 40 米/秒，精准度 4"
+            "fireRate": 6.67,
+            "magazineSize": 0,
+            "reloadTime": 0
+          }
         }
       ]
     },
@@ -8093,7 +8260,6 @@
       "name": "Zylok Prime",
       "nameZh": "席尔火枪 Prime",
       "category": "secondary",
-      "variant": "prime",
       "critChance": 0.12,
       "critMultiplier": 2.4,
       "statusChance": 0.36,
@@ -8104,7 +8270,7 @@
         {
           "id": "primary",
           "role": "normal",
-          "trigger": "semi",
+          "trigger": "charge",
           "bullets": 1,
           "multishot": 1,
           "variants": [
@@ -8113,7 +8279,7 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "impact": 63,
@@ -8124,11 +8290,14 @@
                 }
               ]
             }
-          ]
+          ],
+          "override": {
+            "fireRate": 1.8
+          }
         },
         {
-          "id": "mode2",
-          "role": "normal",
+          "id": "incarnon",
+          "role": "incarnon",
           "trigger": "charge",
           "bullets": 1,
           "multishot": 1,
@@ -8138,7 +8307,7 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "impact": 200,
@@ -8148,7 +8317,44 @@
                 }
               ]
             }
-          ]
+          ],
+          "override": {
+            "critChance": 0.26,
+            "statusChance": 0.4,
+            "fireRate": 1,
+            "magazineSize": 0,
+            "reloadTime": 0
+          }
+        },
+        {
+          "id": "incarnon2",
+          "role": "incarnon",
+          "trigger": "charge",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
+            {
+              "id": "direct",
+              "label": "直接命中",
+              "segments": [
+                {
+                  "kind": "explosiveAttack",
+                  "aoe": true,
+                  "damage": {
+                    "heat": 700
+                  },
+                  "procChance": 0.4
+                }
+              ]
+            }
+          ],
+          "override": {
+            "critChance": 0.26,
+            "statusChance": 0.4,
+            "fireRate": 1,
+            "magazineSize": 0,
+            "reloadTime": 0
+          }
         }
       ]
     }

@@ -69,17 +69,28 @@ describe('数据层：灵化模式已被单独标记', () => {
     const ws = await loadWeapons('primary');
     const w = ws.find((x) => x.id === 'PrimeBurston');
     assert.ok(w);
-    assert.equal(w.modes.length, 2);
-    assert.equal(w.modes[0]!.role, 'normal');
-    assert.equal(w.modes[0]!.trigger, 'burst');
-    assert.equal(w.modes[1]!.role, 'incarnon');
+    // D-148：换源到 WFCD 后，伯斯顿 Prime 的灵化含「直接命中」+「范围爆炸」两种发射，
+    // 拆成 incarnon / incarnon2 两个模式（D-110 早就说明灵化可能不止一个）。
+    const own = w.modes.filter((m) => m.role !== 'incarnon');
+    assert.equal(own.length, 1, '本体应只有 1 个模式');
+    assert.equal(own[0]!.role, 'normal');
+    assert.equal(own[0]!.trigger, 'burst');
+    const inc = w.modes.filter((m) => m.role === 'incarnon');
+    assert.ok(inc.length >= 1, '应有灵化模式');
+    const ids = w.modes.map((m) => m.id);
+    assert.equal(new Set(ids).size, ids.length, `模式 id 必须唯一，实际 ${ids.join('/')}`);
   });
 
   it('布莱顿 Prime 的灵化模式被标出来', async () => {
     const ws = await loadWeapons('primary');
     const w = ws.find((x) => x.id === 'BratonPrime');
     assert.ok(w);
-    assert.equal(w.modes.filter((m) => m.role === 'incarnon').length, 1);
+    // D-110：灵化模式**可能不止一个**——布莱顿 Prime 的灵化含「直接命中」与「范围爆炸」两种发射，
+    // WFCD 把它们拆成两个模式（都标 role=incarnon）。这里只要求至少一个、且 id 唯一。
+    const inc = w.modes.filter((m) => m.role === 'incarnon');
+    assert.ok(inc.length >= 1, '应有灵化模式');
+    const ids = inc.map((m) => m.id);
+    assert.equal(new Set(ids).size, ids.length, `灵化模式 id 必须唯一，实际 ${ids.join('/')}`);
   });
 
   it('灵化标记只出现在清单内的武器上（抽样对照）', async () => {

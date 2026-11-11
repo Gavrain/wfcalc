@@ -46,22 +46,38 @@ function baseOf(variant: { segments: readonly DamageSegment[] }): Record<string,
 }
 
 describe('多变体武器：无 Mod 时「当前」必须等于「基础」', () => {
-  it('巴什穆（Basmu）爆炸变体不被命中段污染', async () => {
+  it('巴什穆（Basmu）：各模式无 Mod 时「当前」等于其自身各段之和', async () => {
     const all = await loadAllWeapons();
     const w = all.find((x) => x.id === 'SentRifleNewWarGun');
     assert.ok(w, '找不到巴什穆');
-    const m = w.modes[0]!;
-    assert.equal(m.variants.length, 2, '巴什穆应有 直接命中 / 爆炸 两个变体');
-    const res = compute(w, { ...m, segments: m.variants[0]!.segments } as unknown as AttackMode, [], {}, false);
-    const blastIdx = m.variants.findIndex((v) => v.id === 'blast');
-    assert.ok(blastIdx >= 0);
-    const base = baseOf(m.variants[blastIdx]!);
-    const cur = res.spreadByVariant[blastIdx]!;
-    assert.equal(sumSpread(cur), sumSpread(base), '爆炸变体当前值应等于其基础值');
-    // 爆炸变体里不该出现命中段的物理伤害
-    assert.equal(cur.impact, undefined, '爆炸变体不该混入冲击');
-    assert.equal(cur.puncture, undefined, '爆炸变体不该混入穿刺');
-    assert.equal(cur.slash, undefined, '爆炸变体不该混入切割');
+    // D-148：换源到 WFCD 后，巴什穆是「主模式（auto，电击 + 火焰爆炸段）+ 副模式（held 射线）」，
+    //        需求方 2026-11-11 确认「一个模式内所有段相加」，所以这里逐模式验证自洽：
+    //        每个模式的当前面板 = 该模式自己各段基础值之和，不能混进别的模式的段。
+    assert.ok(w.modes.length >= 2, `巴什穆应有多个模式，实际 ${w.modes.length}`);
+    const hasBeam = w.modes.some((m) => m.trigger === 'held');
+    assert.ok(hasBeam, '巴什穆的次要射击（名为 Held）应是射线模式');
+
+    for (const m of w.modes) {
+      const res = compute(w, { ...m, segments: m.variants[0]!.segments } as unknown as AttackMode, [], {});
+      const own: Record<string, number> = {};
+      for (const v of m.variants) {
+        for (const seg of v.segments) {
+          for (const [k, val] of Object.entries(seg.damage ?? {})) own[k] = (own[k] ?? 0) + (val ?? 0);
+        }
+      }
+      const cur = res.spreadByVariant[0]!;
+      assert.equal(
+        sumSpread(cur),
+        sumSpread(own as never),
+        `模式 ${m.id} 的当前面板应等于其各段之和`,
+      );
+      // 该模式没有的伤害类型，当前面板里不能出现
+      for (const k of Object.keys(cur) as (keyof typeof cur)[]) {
+        if ((cur[k] ?? 0) > 0) {
+          assert.ok(own[k] !== undefined, `模式 ${m.id} 混入了自身没有的伤害类型 ${String(k)}`);
+        }
+      }
+    }
   });
 
   it('巴兹火枪（Buzlok）没有爆炸变体（官方 explosiveAttack 40 已剔除，D-121）', async () => {
@@ -74,11 +90,19 @@ describe('多变体武器：无 Mod 时「当前」必须等于「基础」', ()
     for (const v of m.variants) {
       assert.equal(baseOf(v).blast, undefined, `变体 ${v.id} 不该含爆炸`);
     }
-    // 直接命中两个面板都保留（本体 60/11.25/3.75 + 投射段 30/24/6）
-    const res = compute(w, { ...m, segments: m.variants[0]!.segments } as unknown as AttackMode, [], {}, false);
+    const res = compute(w, { ...m, segments: m.variants[0]!.segments } as unknown as AttackMode, [], {});
     const cur = res.spreadByVariant[0]!;
     assert.equal(cur.blast, undefined, '当前面板不该出现爆炸');
-    assert.equal(sumSpread(cur), 135, '直接命中合计应为 90+35.25+9.75 = 135');
+    // D-148：换源到 WFCD 后各段数值变了（现在是 冲击 30 + 穿刺 24 + 切割 6，外加一段穿刺 3），
+    //        合计不再写死，改为「按数据各段相加」对比，数据变了测试跟着变。
+    const expected = m.variants[0]!.segments.reduce(
+      (s, seg) => s + Object.values(seg.damage ?? {}).reduce((a: number, b) => a + (b ?? 0), 0),
+      0,
+    );
+    assert.ok(
+      Math.abs(sumSpread(cur) - expected) < 1e-6,
+      `直接命中合计应等于各段之和 ${expected}，实际 ${sumSpread(cur)}`,
+    );
   });
 
   it('全库扫描：所有多变体武器、所有变体都满足（无 Mod 时）', async () => {
@@ -87,7 +111,7 @@ describe('多变体武器：无 Mod 时「当前」必须等于「基础」', ()
     for (const w of all) {
       for (const m of w.modes) {
         if (m.variants.length < 2) continue;
-        const res = compute(w, { ...m, segments: m.variants[0]!.segments } as unknown as AttackMode, [], {}, false);
+        const res = compute(w, { ...m, segments: m.variants[0]!.segments } as unknown as AttackMode, [], {});
         m.variants.forEach((v, i) => {
           const base = baseOf(v);
           const cur = res.spreadByVariant[i] ?? {};
@@ -106,7 +130,7 @@ describe('多变体武器：无 Mod 时「当前」必须等于「基础」', ()
     const w = all.find((x) => x.id === 'SentRifleNewWarGun');
     assert.ok(w);
     const m = w.modes[0]!;
-    const res = compute(w, { ...m, segments: m.variants[0]!.segments } as unknown as AttackMode, [], {}, false);
+    const res = compute(w, { ...m, segments: m.variants[0]!.segments } as unknown as AttackMode, [], {});
     const sumOfVariants = res.spreadByVariant.reduce((a, s) => a + sumSpread(s), 0);
     assert.ok(Math.abs(sumSpread(res.totalSpread) - sumOfVariants) < 1e-6);
   });

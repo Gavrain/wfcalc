@@ -1,7 +1,8 @@
 {
-  "generatedAt": "2026-11-08T09:10:51.661Z",
+  "generatedAt": "2026-11-11T15:57:45.710Z",
+  "source": "WFCD/warframe-items (MIT)",
   "category": "companion",
-  "count": 19,
+  "count": 24,
   "note": "暴率/触发为 0~1 小数；伤害分布为绝对值；procChance 同为 0~1；kuva 表示需用户在计算器里选元素与加成（25%~60%）",
   "weapons": [
     {
@@ -22,25 +23,11 @@
           "trigger": "burst",
           "bullets": 1,
           "multishot": 1,
-          "burst": {
-            "count": 3,
-            "delay": 0.4
-          },
           "variants": [
             {
               "id": "direct",
               "label": "直接命中",
               "segments": [
-                {
-                  "kind": "impact",
-                  "aoe": false,
-                  "damage": {
-                    "impact": 2,
-                    "puncture": 17,
-                    "slash": 1
-                  },
-                  "procChance": 0.1
-                },
                 {
                   "kind": "attack",
                   "aoe": false,
@@ -53,7 +40,10 @@
                 }
               ]
             }
-          ]
+          ],
+          "override": {
+            "fireRate": 1.5
+          }
         }
       ]
     },
@@ -81,7 +71,7 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "impact": 10
@@ -92,13 +82,16 @@
                   "kind": "attack",
                   "aoe": false,
                   "damage": {
-                    "impact": 10
+                    "cold": 20
                   },
-                  "procChance": 0
+                  "procChance": 0.3
                 }
               ]
             }
-          ]
+          ],
+          "override": {
+            "critMultiplier": 1.8
+          }
         }
       ]
     },
@@ -126,7 +119,7 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "impact": 1.5,
@@ -165,7 +158,7 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "cold": 5
@@ -196,10 +189,6 @@
           "trigger": "burst",
           "bullets": 1,
           "multishot": 1,
-          "burst": {
-            "count": 3,
-            "delay": 0.4
-          },
           "variants": [
             {
               "id": "direct",
@@ -212,10 +201,21 @@
                     "puncture": 10
                   },
                   "procChance": 0.22
+                },
+                {
+                  "kind": "explosiveAttack",
+                  "aoe": true,
+                  "damage": {
+                    "blast": 100
+                  },
+                  "procChance": 0.22
                 }
               ]
             }
-          ]
+          ],
+          "override": {
+            "fireRate": 2.5
+          }
         }
       ]
     },
@@ -254,7 +254,10 @@
                 }
               ]
             }
-          ]
+          ],
+          "override": {
+            "critMultiplier": 1.8
+          }
         }
       ]
     },
@@ -276,25 +279,11 @@
           "trigger": "burst",
           "bullets": 1,
           "multishot": 1,
-          "burst": {
-            "count": 5,
-            "delay": 0.2
-          },
           "variants": [
             {
               "id": "direct",
               "label": "直接命中",
               "segments": [
-                {
-                  "kind": "impact",
-                  "aoe": false,
-                  "damage": {
-                    "impact": 2.5,
-                    "puncture": 21.25,
-                    "slash": 1.25
-                  },
-                  "procChance": 0.1
-                },
                 {
                   "kind": "attack",
                   "aoe": false,
@@ -307,7 +296,10 @@
                 }
               ]
             }
-          ]
+          ],
+          "override": {
+            "fireRate": 1.5
+          }
         }
       ]
     },
@@ -335,7 +327,7 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "impact": 2,
@@ -343,6 +335,87 @@
                     "slash": 17
                   },
                   "procChance": 0.04
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "PrimeHeliosGlaiveWeapon",
+      "name": "Deconstructor Prime",
+      "nameZh": "分离 Prime",
+      "category": "companion",
+      "critChance": 0,
+      "critMultiplier": 1,
+      "statusChance": 0.25,
+      "fireRate": 1.3333,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "unknown",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
+            {
+              "id": "direct",
+              "label": "直接命中",
+              "segments": [
+                {
+                  "kind": "attack",
+                  "aoe": false,
+                  "damage": {
+                    "impact": 160
+                  },
+                  "procChance": 0.25
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "unknown",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
+            {
+              "id": "direct",
+              "label": "直接命中",
+              "segments": [
+                {
+                  "kind": "attack",
+                  "aoe": false,
+                  "damage": {
+                    "puncture": 160
+                  },
+                  "procChance": 0.25
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "mode3",
+          "role": "normal",
+          "trigger": "unknown",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
+            {
+              "id": "direct",
+              "label": "直接命中",
+              "segments": [
+                {
+                  "kind": "attack",
+                  "aoe": false,
+                  "damage": {
+                    "slash": 160
+                  },
+                  "procChance": 0.25
                 }
               ]
             }
@@ -381,7 +454,7 @@
                     "puncture": 38.5,
                     "slash": 11
                   },
-                  "procChance": 0
+                  "procChance": 0.1
                 }
               ]
             }
@@ -405,7 +478,7 @@
           "id": "primary",
           "role": "normal",
           "trigger": "auto",
-          "bullets": 6,
+          "bullets": 1,
           "multishot": 6,
           "variants": [
             {
@@ -413,18 +486,21 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "impact": 38.25,
                     "puncture": 2.25,
                     "slash": 4.5
                   },
-                  "procChance": 0.3
+                  "procChance": 0.05
                 }
               ]
             }
-          ]
+          ],
+          "override": {
+            "critMultiplier": 2.3
+          }
         }
       ]
     },
@@ -446,25 +522,11 @@
           "trigger": "burst",
           "bullets": 1,
           "multishot": 1,
-          "burst": {
-            "count": 4,
-            "delay": 0.3
-          },
           "variants": [
             {
               "id": "direct",
               "label": "直接命中",
               "segments": [
-                {
-                  "kind": "impact",
-                  "aoe": false,
-                  "damage": {
-                    "impact": 2.2,
-                    "puncture": 18.7,
-                    "slash": 1.1
-                  },
-                  "procChance": 0.15
-                },
                 {
                   "kind": "attack",
                   "aoe": false,
@@ -477,7 +539,11 @@
                 }
               ]
             }
-          ]
+          ],
+          "override": {
+            "critMultiplier": 2.1,
+            "fireRate": 1.5
+          }
         }
       ]
     },
@@ -505,12 +571,10 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
-                    "impact": 4,
-                    "puncture": 4,
-                    "slash": 4
+                    "toxin": 15
                   },
                   "procChance": 0.2
                 },
@@ -552,18 +616,91 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
-                  "aoe": false,
-                  "damage": {
-                    "impact": 10
-                  },
-                  "procChance": 0.1
-                },
-                {
                   "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "electric": 175
+                  },
+                  "procChance": 0.25
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "SentGlaiveWeapon",
+      "name": "Deconstructor",
+      "nameZh": "分离",
+      "category": "companion",
+      "critChance": 0,
+      "critMultiplier": 1,
+      "statusChance": 0.25,
+      "fireRate": 1.3333,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "unknown",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
+            {
+              "id": "direct",
+              "label": "直接命中",
+              "segments": [
+                {
+                  "kind": "attack",
+                  "aoe": false,
+                  "damage": {
+                    "impact": 130
+                  },
+                  "procChance": 0.25
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "mode2",
+          "role": "normal",
+          "trigger": "unknown",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
+            {
+              "id": "direct",
+              "label": "直接命中",
+              "segments": [
+                {
+                  "kind": "attack",
+                  "aoe": false,
+                  "damage": {
+                    "puncture": 130
+                  },
+                  "procChance": 0.25
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "mode3",
+          "role": "normal",
+          "trigger": "unknown",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
+            {
+              "id": "direct",
+              "label": "直接命中",
+              "segments": [
+                {
+                  "kind": "attack",
+                  "aoe": false,
+                  "damage": {
+                    "slash": 130
                   },
                   "procChance": 0.25
                 }
@@ -589,7 +726,7 @@
           "id": "primary",
           "role": "normal",
           "trigger": "auto",
-          "bullets": 6,
+          "bullets": 1,
           "multishot": 6,
           "variants": [
             {
@@ -597,18 +734,21 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "impact": 29.75,
                     "puncture": 1.75,
                     "slash": 3.5
                   },
-                  "procChance": 0.27
+                  "procChance": 0.045
                 }
               ]
             }
-          ]
+          ],
+          "override": {
+            "critMultiplier": 1.8
+          }
         }
       ]
     },
@@ -617,7 +757,6 @@
       "name": "Verglas Prime",
       "nameZh": "冰凇 Prime",
       "category": "companion",
-      "variant": "prime",
       "critChance": 0.14,
       "critMultiplier": 2.2,
       "statusChance": 0.36,
@@ -637,7 +776,7 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "cold": 32
@@ -674,7 +813,7 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "cold": 26
@@ -704,40 +843,20 @@
           "trigger": "burst",
           "bullets": 1,
           "multishot": 1,
-          "burst": {
-            "count": 4,
-            "delay": 0.1
-          },
           "variants": [
             {
               "id": "direct",
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
-                  "aoe": false,
-                  "damage": {
-                    "impact": 1,
-                    "puncture": 1,
-                    "slash": 1
-                  },
-                  "procChance": 0.2
-                },
-                {
                   "kind": "attack",
                   "aoe": false,
                   "damage": {
-                    "impact": 5.5,
-                    "puncture": 4.5
+                    "impact": 4.95,
+                    "puncture": 4.05
                   },
                   "procChance": 0.3
-                }
-              ]
-            },
-            {
-              "id": "blast",
-              "label": "爆炸",
-              "segments": [
+                },
                 {
                   "kind": "explosiveAttack",
                   "aoe": true,
@@ -749,7 +868,10 @@
                 }
               ]
             }
-          ]
+          ],
+          "override": {
+            "fireRate": 0.25
+          }
         }
       ]
     },
@@ -777,7 +899,7 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "electric": 5
@@ -814,12 +936,128 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "impact",
+                  "kind": "attack",
                   "aoe": false,
                   "damage": {
                     "heat": 500
                   },
                   "procChance": 0.1
+                },
+                {
+                  "kind": "explosiveAttack",
+                  "aoe": true,
+                  "damage": {
+                    "blast": 100
+                  },
+                  "procChance": 0.2
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ZanukaPetMeleeWeaponIP",
+      "name": "Batoten",
+      "nameZh": "巴托腾",
+      "category": "companion",
+      "critChance": 0.1,
+      "critMultiplier": 3,
+      "statusChance": 0.15,
+      "fireRate": 1,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "unknown",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
+            {
+              "id": "direct",
+              "label": "直接命中",
+              "segments": [
+                {
+                  "kind": "attack",
+                  "aoe": false,
+                  "damage": {
+                    "impact": 150,
+                    "puncture": 150
+                  },
+                  "procChance": 0.15
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ZanukaPetMeleeWeaponIS",
+      "name": "Lacerten",
+      "nameZh": "莱斯腾",
+      "category": "companion",
+      "critChance": 0.1,
+      "critMultiplier": 3,
+      "statusChance": 0.15,
+      "fireRate": 1,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "unknown",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
+            {
+              "id": "direct",
+              "label": "直接命中",
+              "segments": [
+                {
+                  "kind": "attack",
+                  "aoe": false,
+                  "damage": {
+                    "impact": 150,
+                    "slash": 150
+                  },
+                  "procChance": 0.15
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ZanukaPetMeleeWeaponPS",
+      "name": "Akaten",
+      "nameZh": "阿卡腾",
+      "category": "companion",
+      "critChance": 0.1,
+      "critMultiplier": 3,
+      "statusChance": 0.15,
+      "fireRate": 1,
+      "modes": [
+        {
+          "id": "primary",
+          "role": "normal",
+          "trigger": "unknown",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
+            {
+              "id": "direct",
+              "label": "直接命中",
+              "segments": [
+                {
+                  "kind": "attack",
+                  "aoe": false,
+                  "damage": {
+                    "puncture": 150,
+                    "slash": 150
+                  },
+                  "procChance": 0.15
                 }
               ]
             }

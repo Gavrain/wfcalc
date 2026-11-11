@@ -37,7 +37,12 @@ export interface Ctx {
   /** 全部贡献（Mod / 赋能 / 自定义），已摊成同一张表 */
   contribs: readonly Contribution[];
   options: CtxOptions;
-  /** 射线标记（D-010：人工表，未确认前一律按非射线算） */
+  /**
+   * 射线标记。**由模式自己决定**（D-148）：取 `mode.beam`。
+   *
+   * 以前是调用方传的布尔值（D-010 人工表），现已改为数据层按扳机 + `shot_type` 判好写在模式上，
+   * 所以同一个武器的不同模式可以有各自的取值（幻离子的射线主模式 vs 子母弹副模式）。
+   */
   beam: boolean;
   headshot: HeadshotOptions;
   faction: Faction;
@@ -47,12 +52,26 @@ export interface Ctx {
   coStatusTypes: number;
 }
 
+/**
+ * 该模式是不是射线（D-148）。**只认扳机**：`trigger === 'held'`。
+ *
+ * 数据层按 WFCD 把扳机归一好（`Held` → `'held'`），所以这里不需要额外的标记字段。
+ */
+export function isBeamMode(mode: AttackMode): boolean {
+  return mode.trigger === 'held';
+}
+
+/**
+ * 构造结算上下文。
+ *
+ * 「是不是射线」**不再由调用方传入**（D-148）：直接取 `mode.beam`，
+ * 数据层按扳机（`Held`）+ `shot_type`（`Hit-Scan`）判好后写在模式上。
+ */
 export function buildContext(
   weapon: Weapon,
   mode: AttackMode,
   contribs: readonly Contribution[],
   options: CtxOptions = {},
-  beam = false,
 ): Ctx {
   const headshot: HeadshotOptions = options.headshot ?? { enabled: false, multiplier: 3.0 };
   return {
@@ -60,7 +79,7 @@ export function buildContext(
     mode,
     contribs,
     options,
-    beam,
+    beam: isBeamMode(mode),
     headshot,
     faction: options.faction ?? 'none',
     coStacks: options.coStacks ?? 0,

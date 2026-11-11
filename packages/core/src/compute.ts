@@ -77,12 +77,16 @@ export interface ComputeResult {
   moddedPanelTotal: number;
 }
 
+/**
+ * 一站式计算。
+ *
+ * 「是不是射线」由模式自己决定（`mode.beam`，D-148），这里不再接收 `beam` 参数。
+ */
 export function compute(
   weapon: Weapon,
   mode: AttackMode,
   contribs: readonly Contribution[],
   options: CtxOptions = {},
-  beam = false,
   variantIndex?: number,
 ): ComputeResult {
   // D-120：单变体结算。传了 `variantIndex` 就**只算这一个面板变体**，
@@ -91,7 +95,7 @@ export function compute(
   // 不传则保持原行为（所有变体一起算）。
   const only = variantIndex !== undefined ? mode.variants?.[variantIndex] : undefined;
   const scopedMode: AttackMode = only ? { ...mode, variants: [only] } : mode;
-  const ctx: Ctx = buildContext(weapon, scopedMode, contribs, options, beam);
+  const ctx: Ctx = buildContext(weapon, scopedMode, contribs, options);
 
   // D-080：段只属于变体，模式上不再有 `segments`。这里把（已缩到选中变体的）各段摊平：
   // 每个段仍独立结算，结果按变体顺序排列。

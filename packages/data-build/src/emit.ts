@@ -43,6 +43,10 @@ export interface EmitVariant {
 export interface EmitMode {
   id: string;
   role: string;
+  /**
+   * 该模式的扳机。**射线的唯一判据**（D-148）：`'held'` 即射线，不另设 `beam` 字段。
+   * 同一把武器的不同模式可以有各自的扳机（幻离子：主模式 held，子母弹副模式非 held）。
+   */
   trigger: string;
   bullets: number;
   multishot: number;
@@ -119,6 +123,7 @@ function toEmitMode(m: AttackMode): EmitMode {
   return {
     id: m.id,
     role: m.role,
+    // D-148：模式扳机就是射线的判据（held = 射线），不另设 beam 字段
     trigger: m.trigger,
     bullets: m.bullets,
     multishot: m.multishot,

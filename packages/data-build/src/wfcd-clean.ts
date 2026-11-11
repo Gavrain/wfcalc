@@ -57,6 +57,10 @@ export interface WfcdWeapon {
   accuracy?: number;
   tags?: string[];
   isPrime?: boolean;
+  /** 武器类型（`Shotgun` / `Bow` / `Zaw Component` …），用于收录边界判定 */
+  type?: string;
+  /** 是否可精通；`false` 的一般是 PvP 变体或非正式武器 */
+  masterable?: boolean;
   attacks?: WfcdAttack[];
 }
 
@@ -323,13 +327,31 @@ export function toSegment(a: WfcdAttack, warnings: string[], context: string): D
   };
 }
 
-/** 攻击级面板 → 模式级 override（暴击/触发/射速只有和武器级不同时才写） */
+/**
+ * 攻击级面板 → 模式级 override（暴击/触发/射速只有和武器级**实质不同**时才写）。
+ *
+ * ⚠ D-148：必须用容差比较。WFCD 的武器级字段是 4 位小数，攻击级只给 2 位
+ * （艾弗旺-5：武器级 `7.8333`、攻击级 `7.83`；震地枪：`9.3333` vs `9.33`），
+ * 严格比较会为几乎所有武器都生成一份模式级 override。
+ * 而模式级 override 在合并时优先于武器级，于是"在编辑器里改武器级面板"
+ * 会被这份浮点噪声盖掉——显示保存成功、页面却不变。
+ *
+ * 容差取 0.011（比两位小数的舍入误差 0.005 略大，又不至于吃掉真正的差异）。
+ */
+const CLOSE = 0.011;
+const differs = (a: number | undefined, b: number | undefined): boolean =>
+  typeof a === 'number' && typeof b === 'number' && Math.abs(a - b) > CLOSE;
+
 function attackOverride(a: WfcdAttack, weapon: WfcdWeapon): PanelOverride | undefined {
   const o: PanelOverride = {};
-  if (typeof a.crit_chance === 'number' && a.crit_chance / 100 !== (weapon.criticalChance ?? 0)) o.critChance = a.crit_chance / 100;
-  if (typeof a.crit_mult === 'number' && a.crit_mult !== weapon.criticalMultiplier) o.critMultiplier = a.crit_mult;
-  if (typeof a.status_chance === 'number' && a.status_chance / 100 !== (weapon.procChance ?? 0)) o.statusChance = a.status_chance / 100;
-  if (typeof a.speed === 'number' && a.speed !== weapon.fireRate) o.fireRate = a.speed;
+  if (differs(a.crit_chance != null ? a.crit_chance / 100 : undefined, weapon.criticalChance)) {
+    o.critChance = a.crit_chance! / 100;
+  }
+  if (differs(a.crit_mult, weapon.criticalMultiplier)) o.critMultiplier = a.crit_mult!;
+  if (differs(a.status_chance != null ? a.status_chance / 100 : undefined, weapon.procChance)) {
+    o.statusChance = a.status_chance! / 100;
+  }
+  if (differs(a.speed, weapon.fireRate)) o.fireRate = a.speed!;
   return Object.keys(o).length > 0 ? o : undefined;
 }
 
@@ -350,6 +372,30 @@ export function toCategory(w: WfcdWeapon): Weapon['category'] {
   return CATEGORY[w.productCategory ?? ''] ?? 'unknown';
 }
 
+/**
+ * 这条 WFCD 条目是否**不该收**（D-148 换源后的收录边界）。
+ *
+ * 官方导出有 `productCategory` 过滤，WFCD 的字段体系不同，需要按它自己的特征判：
+ *
+ * | 条目 | 特征 | 处理 | 依据 |
+ * |---|---|---|---|
+ * | 天工造武刀身（Balla / Cyath / Dehtat…） | `type: 'Zaw Component'`、`tags` 含 `Zaw` | **不收** | 是组件不是武器；面板随握柄/环决定，本轮不做（D-148 规则 9） |
+ * | PvP 变体（`PvPVariantTipOne` …） | `masterable: false`、uniqueName 含 `PvP` | **不收** | 与人形 PvP 模式绑定，不进 PvE 计算 |
+ * | 漂泊者手枪（Sirocco） | `productCategory: 'OperatorAmps'` | **不收** | 指挥官武器，沿用既定排除 |
+ * | 新武器（Nunchasa / Aksondol / Steflos Prime / Corufell Prime） | `masterable: true` | **收** | 是正式武器，只是官方导出还没有 |
+ *
+ * @returns 排除原因；保留则返回 null
+ */
+export function exclusionReason(w: WfcdWeapon): string | null {
+  if (w.productCategory === 'OperatorAmps') return '指挥官武器（OperatorAmps）';
+  const type = String(w.type ?? '');
+  if (/Zaw Component/i.test(type)) return '天工造武刀身组件';
+  if ((w.tags ?? []).includes('Zaw')) return '天工造武组件';
+  if (String(w.uniqueName ?? '').includes('PvP')) return 'PvP 变体';
+  if (w.masterable === false) return '非可精通（PvP / 变体）';
+  return null;
+}
+
 /** 武器 id：取 uniqueName 最后一段（与官方导出键一致，便于跨源对照） */
 export function toWeaponId(w: WfcdWeapon): string {
   const parts = (w.uniqueName ?? '').split('/');
@@ -359,10 +405,12 @@ export function toWeaponId(w: WfcdWeapon): string {
 const round4 = (v: number): number => Math.round(v * 10000) / 10000;
 
 export interface CleanedWfcdWeapon extends Weapon {
-  /** 该模式是否射线（扳机 Held 或含 Held 攻击），供界面标注与计算使用 */
+  /** 射线模式 id 列表（判据：模式扳机 = `held`），供界面标注 */
   beamModeIds: string[];
   /** 供对照：原始武器名 */
   wfcdName: string;
+  /** WFCD 的 uniqueName，用于回查官方语言包补中文名（D-148） */
+  uniqueName?: string;
 }
 
 export interface WfcdCleanResult {
@@ -371,6 +419,8 @@ export interface WfcdCleanResult {
     total: number;
     kept: number;
     droppedNoAttack: number;
+    /** 命中收录边界被排除的条目数（天工刀身 / PvP 变体 / 指挥官武器） */
+    excluded: number;
     multiMode: number;
     beamModes: number;
     unknownTrigger: number;
@@ -386,10 +436,18 @@ export interface WfcdCleanResult {
 export function cleanWfcdWeapons(raw: readonly WfcdWeapon[]): WfcdCleanResult {
   const warnings: string[] = [];
   const weapons: CleanedWfcdWeapon[] = [];
-  const stats = { total: 0, kept: 0, droppedNoAttack: 0, multiMode: 0, beamModes: 0, unknownTrigger: 0 };
+  const stats = {
+    total: 0, kept: 0, droppedNoAttack: 0, multiMode: 0, beamModes: 0, unknownTrigger: 0, excluded: 0,
+  };
 
   for (const w of raw) {
     stats.total++;
+    // 收录边界：天工刀身 / PvP 变体 / 指挥官武器 一律不收（见 exclusionReason）
+    const why = exclusionReason(w);
+    if (why) {
+      stats.excluded++;
+      continue;
+    }
     const attacks = w.attacks ?? [];
     if (attacks.length === 0) {
       stats.droppedNoAttack++;
@@ -416,8 +474,22 @@ export function cleanWfcdWeapons(raw: readonly WfcdWeapon[]): WfcdCleanResult {
         : /^(Charged Shot|Quick Shot|Uncharged Shot|Charge|Uncharged Horizontal\/Vertical Shot|Perfect Shot)$/i.test(g.name)
           ? 'charged'
           : 'normal';
-      // 模式 id：灵化固定 incarnon；其余 primary / mode2 / mode3…
-      const id = isIncarnon ? 'incarnon' : gi === 0 ? 'primary' : role === 'charged' && modes.every((m) => m.role !== 'charged') ? 'charged' : `mode${modes.length + 1}`;
+      // 模式 id：灵化 `incarnon` / `incarnon2` / `incarnon3`…；其余 primary / mode2 / mode3…
+      //
+      // ⚠ D-110：灵化模式**可能不止一个**（布莱顿 Prime 的灵化 = 直接命中 + 范围爆炸两个模式，
+      //   奏凯的直击/范围、赘骨的连射/蓄力同理）。id 必须去重，否则两个模式撞名，
+      //   override 按 id 匹配时会全部落到第一个模式上。
+      let id: string;
+      if (isIncarnon) {
+        const incNo = modes.filter((m) => m.role === 'incarnon').length + 1;
+        id = incNo === 1 ? 'incarnon' : `incarnon${incNo}`;
+      } else if (gi === 0) {
+        id = 'primary';
+      } else if (role === 'charged' && modes.every((m) => m.role !== 'charged')) {
+        id = 'charged';
+      } else {
+        id = `mode${modes.length + 1}`;
+      }
 
       // 灵化没有弹匣/装填概念（充能弹药不建模）；其余模式共用武器级弹匣/装填。
       const override = attackOverride(g.attacks[0]!, w);
@@ -426,21 +498,32 @@ export function cleanWfcdWeapons(raw: readonly WfcdWeapon[]): WfcdCleanResult {
           ? { ...(override ?? {}), magazineSize: 0, reloadTime: 0 }
           : override;
 
-      // ── 该模式的扳机 ──
-      // D-148 规则 1：扳机 `Held` → 射线。但**扳机是按模式算的**，不是整把武器共用一个：
-      // 幻离子（Phantasma）武器级 trigger 是 Held（主模式射线），它的副模式
-      // `Plasma Bomb` / `Cluster Bombs` 是投射物 + 范围，不是射线。
+      // ── 该模式的扳机（= 射线的唯一判据，D-148）──
+      //
+      // 扳机按**模式**算，不是整把武器共用一个：
+      //   · 幻离子（Phantasma）武器级 `Held`（主模式射线），副模式 `Plasma Bomb` / `Cluster Bombs`
+      //     是投射物 + 范围，不是射线 → 那些模式的扳机落成 `semi`；
+      //   · 巴什穆（Basmu）武器级 `Auto`，但它有一条名为 `Held` 的攻击（次要射击）→
+      //     那个模式要落成 `held`，才算射线。
+      //
+      // 判据全用扳机 + `shot_type`，不看武器名：
+      //   1. 该模式内有「名字含 Held 且不是 AoE」的攻击 → `held`（这条优先，能救巴什穆）；
+      //   2. 否则武器级是 `held`，但该模式内没有 `Hit-Scan` 攻击（全是 Projectile / AoE）→ 不是射线，落 `semi`；
+      //   3. 其余保持武器级扳机。
       //
       // ⚠ 射线的攻击名多数是 `Normal Attack` / `Primary`，**不是** `Beam`
       //   （安培克斯 / 导热聚焦枪 / 噬菌者 / 火鸡 / 冷冻光束 都是 Normal Attack），
-      //   所以不能按名字判。可靠判据是 `shot_type`：射线是 `Hit-Scan`，
-      //   而幻离子的子母弹是 `Projectile` / `AoE`。
-      //
-      //   该模式内存在 Hit-Scan 攻击 → 保持武器级 Held（射线）；
-      //   全是 Projectile / AoE → 这个模式不是射线。
+      //   所以不能只看名字，必须结合 `shot_type`。
       const modeHasHitscan = g.attacks.some((a) => String(a.shot_type ?? '').toLowerCase() === 'hit-scan');
-      const modeHasBeamAttack = g.attacks.some((a) => isHeldAttack(a.name) || /^(Beam|Held)$/i.test(String(a.name ?? '')));
-      const modeTrigger: TriggerKind = trigger === 'held' && !modeHasHitscan && !modeHasBeamAttack ? 'semi' : trigger;
+      const modeHasHeldAttack = g.attacks.some(
+        (a) => isHeldAttack(a.name) && String(a.shot_type ?? '').toLowerCase() !== 'aoe',
+      );
+      const modeTrigger: TriggerKind = modeHasHeldAttack
+        ? 'held'
+        : trigger === 'held' && !modeHasHitscan
+          ? 'semi'
+          : trigger;
+      const isBeam = modeTrigger === 'held';
 
       const mode: AttackMode = {
         id,
@@ -451,14 +534,8 @@ export function cleanWfcdWeapons(raw: readonly WfcdWeapon[]): WfcdCleanResult {
         variants: [{ id: 'direct', label: '直接命中', segments: segs }],
         ...(roleOverride ? { override: roleOverride } : {}),
       };
-      // 射线判定只认「该模式的扳机 Held」或「该模式内有非 AoE 的 Held 攻击」。
-      // 攻击名单先暂存在模式对象上，判定后即删，不进入产出。
-      const beamHits = g.attacks.filter((a) => isHeldAttack(a.name) && String(a.shot_type ?? '').toLowerCase() !== 'aoe');
-      (mode as AttackMode & { _beamAttacks?: boolean })._beamAttacks = beamHits.length > 0;
-      const beam = modeTrigger === 'held' || beamHits.length > 0;
-      delete (mode as AttackMode & { _beamAttacks?: boolean })._beamAttacks;
       modes.push(mode);
-      if (beam) beamModeIds.push(id);
+      if (isBeam) beamModeIds.push(id);
     }
 
     if (modes.length === 0) {
@@ -488,6 +565,7 @@ export function cleanWfcdWeapons(raw: readonly WfcdWeapon[]): WfcdCleanResult {
       modes,
       beamModeIds,
       wfcdName: w.name,
+      ...(w.uniqueName ? { uniqueName: w.uniqueName } : {}),
     });
   }
 

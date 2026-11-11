@@ -22,6 +22,16 @@ import type { DamageSpread, DamageType } from './damage-types.ts';
 /** 官方导出的触发方式（stateName）去掉语言路径后的短名 */
 export type TriggerKind = 'auto' | 'semi' | 'burst' | 'charge' | 'held' | 'active' | 'unknown';
 
+/**
+ * 该模式是不是射线（D-148）。
+ *
+ * **只认扳机**：`trigger === 'held'` 就是射线，其余都不是。
+ * 数据层负责把 WFCD 的扳机归一成 `TriggerKind`，所以这里不需要额外的 `beam` 字段。
+ */
+export function isBeamTrigger(trigger: TriggerKind): boolean {
+  return trigger === 'held';
+}
+
 /** 伤害段类型（D-078：不含 embedDeathAttack，它不产生伤害） */
 export type SegmentKind = 'impact' | 'attack' | 'explosiveAttack';
 
@@ -91,6 +101,13 @@ export interface AttackMode {
   /** 稳定 id：`primary` / `mode2` / `charged` / `incarnon` */
   id: string;
   role: ModeRole;
+  /**
+   * 该模式的扳机。**射线的唯一判据**（D-148）：`'held'` 即射线。
+   *
+   * 数据层按 WFCD 归一：`Held` → `'held'`；其余 `Auto / Semi / Burst / Charge / Active / Duplex`
+   * 各自映射。同一个武器的不同模式可以有各自的扳机——幻离子主模式 `Held`（射线），
+   * 子母弹副模式按投射物算，不是 `Held`。
+   */
   trigger: TriggerKind;
   /** 该段的弹头数（导出 fireIterations）。**不参与伤害计算**，只做溯源（D-009） */
   bullets: number;

@@ -84,7 +84,7 @@ describe('WeaponState 与结算链一致（D-075 安全网）', () => {
           behead: undefined,
           kuva: build.kuva,
           headshot: { enabled: false, multiplier: 3 },
-        } as never, false);
+        } as never);
         const st = res.state;
         const c = st.computed;
 
@@ -157,7 +157,7 @@ describe('多段武器：每段各有 computed（D-075 补齐）', () => {  /** 
 
   it('perSegment 数量 = 段数，且每段 computed 与该段 finalHit 一致', () => {
     const w = multiSegmentWeapon();
-    const res = compute(w, w.modes[0]!, [], { headshot: { enabled: false, multiplier: 3 } } as never, false);
+    const res = compute(w, w.modes[0]!, [], { headshot: { enabled: false, multiplier: 3 } } as never);
     assert.equal(res.perSegment.length, res.segments.length);
     for (const [i, s] of res.segments.entries()) {
       const total = Object.values(s.finalHit).reduce<number>((a, b) => a + (b ?? 0), 0);
@@ -169,7 +169,7 @@ describe('多段武器：每段各有 computed（D-075 补齐）', () => {  /** 
     const w = multiSegmentWeapon();
     const res = compute(w, w.modes[0]!, [pct('baseDamage', 165, 'serration')], {
       headshot: { enabled: false, multiplier: 3 },
-    } as never, false);
+    } as never);
     for (const [i, s] of res.segments.entries()) {
       const seg = res.perSegment[i]!.computed;
       for (const [t, v] of Object.entries(s.panelWithKuva)) {
@@ -183,13 +183,13 @@ describe('多段武器：每段各有 computed（D-075 补齐）', () => {  /** 
 
   it('state 取主段；perSegment[0] 与主段一致', () => {
     const w = multiSegmentWeapon();
-    const res = compute(w, w.modes[0]!, [], { headshot: { enabled: false, multiplier: 3 } } as never, false);
+    const res = compute(w, w.modes[0]!, [], { headshot: { enabled: false, multiplier: 3 } } as never);
     near(res.state.computed.命中分布总伤, res.perSegment[0]!.computed.命中分布总伤, 1e-12);
   });
 
   it('所有段合计 = totalSpread（state 只覆盖主段，合计要看 totalSpread）', () => {
     const w = multiSegmentWeapon();
-    const res = compute(w, w.modes[0]!, [], { headshot: { enabled: false, multiplier: 3 } } as never, false);
+    const res = compute(w, w.modes[0]!, [], { headshot: { enabled: false, multiplier: 3 } } as never);
     const sum = res.perSegment.reduce((a, s) => a + s.computed.命中分布总伤, 0);
     near(sum, res.moddedPanelTotal, 1e-9, '多段合计');
   });
@@ -200,7 +200,7 @@ describe('镀层类（co）进 state 的基伤面板（D-024 回归）', () => {
     const w = makeWeapon(1);
     // 步枪才能 +40%/层，y=2，a=3 → +240%
     const contribs = [pct('co', 40, 'galvanized_aptitude'), pct('baseDamage', 165, 'serration')];
-    const res = compute(w, w.modes[0]!, contribs, { coStacks: 2, coStatusTypes: 3 } as never, false);
+    const res = compute(w, w.modes[0]!, contribs, { coStacks: 2, coStatusTypes: 3 } as never);
     const factor = 1 + 1.65 + 0.4 * 3 * 2; // = 2.65 + 2.4 = 5.05
     const panelTotal = 7.13 + 6.21 + 9.66; // 23
     near(res.state.computed.基伤面板总伤, panelTotal * factor, 1e-9, '基伤面板总伤');
@@ -217,7 +217,7 @@ describe('镀层类（co）进 state 的基伤面板（D-024 回归）', () => {
   it('a=0 时 co 不生效', () => {
     const w = makeWeapon(1);
     const contribs = [pct('co', 40, 'galvanized_aptitude')];
-    const res = compute(w, w.modes[0]!, contribs, { coStacks: 2, coStatusTypes: 0 } as never, false);
+    const res = compute(w, w.modes[0]!, contribs, { coStacks: 2, coStatusTypes: 0 } as never);
     near(res.state.computed.基伤面板总伤, 23, 1e-9);
   });
 });
