@@ -253,15 +253,24 @@ function renderModeSwitch() {
   box.innerHTML = '';
   const modes = store.data.weapon.modes;
 
-  // 第一排：模式（单模式武器不显示）
-  if (modes.length > 1) {
+  // 一排搞定：模式 + 当前模式内的**攻击方式**（需求方 2026-11-12）
+  //
+  // > 「这ui太丑了，跟切换攻击模式一样做成扁扁的，他们可以放在同一行。」
+  //
+  // 所以两种控件做成同一种扁平胶囊，排在同一条 `.mode-row` 里：
+  //   模式是单选；攻击方式是多选（复选框），全勾 = 各段相加。
+  // 只有一种攻击方式时不显示（绝大多数武器）。
+  const variants = currentMode() ? (currentMode().variants ?? []) : [];
+  const showVariants = variants.length > 1;
+
+  if (modes.length > 1 || showVariants) {
     const row = el('div', 'mode-row');
     for (let i = 0; i < modes.length; i++) {
       const m = modes[i];
       // D-141：数据层给的中文模式名（`_label`）优先，例如重力奇点的「球体融合 / 球体爆炸」
       const btn = el('button', 'mode-btn' + (i === state.modeIndex ? ' active' : ''), m._label || MODE_LABEL[m.id] || m.id);
       btn.type = 'button';
-          btn.title = (m._label ? m._label + ' · ' : '') + m.id + ' · ' + m.trigger + (m._note ? '\n' + m._note : '');
+      btn.title = (m._label ? m._label + ' · ' : '') + m.id + ' · ' + (TRIGGER_ZH[m.trigger] || m.trigger) + (m._note ? '\n' + m._note : '');
       (function (idx) {
         btn.addEventListener('click', function () {
           state.modeIndex = idx;
@@ -273,36 +282,29 @@ function renderModeSwitch() {
       })(i);
       row.append(btn);
     }
-    box.append(row);
-  }
 
-  // 第二排：当前模式内的**攻击方式**，多选复选框（需求方 2026-11-12）
-  //
-  // 一个模式可以有多种攻击方式（弹头命中 / 爆炸 / 射线 / 蓄力），全勾 = 各段相加。
-  // 只有一种时不显示（绝大多数武器）。
-  const variants = currentMode() ? (currentMode().variants ?? []) : [];
-  if (variants.length > 1) {
-    const row = el('div', 'variant-row');
-    const tip = el('span', 'variant-tip', '参与计算：');
-    row.append(tip);
-    for (let i = 0; i < variants.length; i++) {
-      const v = variants[i];
-      const on = isVariantSelected(i);
-      const cb = el('input');
-      cb.type = 'checkbox';
-      cb.checked = on;
-      cb.className = 'variant-check';
-      cb.title = v.id + ' · ' + v.segments.map(function (s) { return s.kind; }).join(' + ');
-      cb.addEventListener('change', function () { toggleVariant(i); });
-      // 整块可点（复选框 + 文字），选中时高亮——与统计口径的选中样式一致
-      const label = el('label', 'variant-btn' + (on ? ' active' : ''));
-      label.append(cb);
-      label.append(el('span', '', v.label));
-      // 这一种攻击方式自己的扳机（赘骨灵化：射线 / 蓄力），与模式不一致时标出来
-      if (v.trigger && currentMode() && v.trigger !== currentMode().trigger) {
-        label.append(el('span', 'variant-trig', TRIGGER_ZH[v.trigger] || v.trigger));
+    if (showVariants) {
+      // 分隔符：让「模式」与「攻击方式」两段在视觉上分开，但仍在同一行
+      row.append(el('span', 'mode-sep'));
+      for (let i = 0; i < variants.length; i++) {
+        const v = variants[i];
+        const on = isVariantSelected(i);
+        const cb = el('input');
+        cb.type = 'checkbox';
+        cb.checked = on;
+        cb.className = 'variant-check';
+        cb.title = v.id + ' · ' + v.segments.map(function (s) { return s.kind; }).join(' + ');
+        cb.addEventListener('change', function () { toggleVariant(i); });
+        // 与模式按钮同一种扁平胶囊，选中时高亮
+        const label = el('label', 'mode-btn variant-btn' + (on ? ' active' : ''));
+        label.append(cb);
+        label.append(el('span', '', v.label));
+        // 这一种攻击方式自己的扳机与模式不同时标出来（赘骨灵化：射线 / 蓄力）
+        if (v.trigger && currentMode() && v.trigger !== currentMode().trigger) {
+          label.append(el('span', 'variant-trig', TRIGGER_ZH[v.trigger] || v.trigger));
+        }
+        row.append(label);
       }
-      row.append(label);
     }
     box.append(row);
   }

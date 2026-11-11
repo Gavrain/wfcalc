@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-11T16:14:29.580Z",
+  "generatedAt": "2026-11-11T16:22:55.645Z",
   "source": "WFCD/warframe-items (MIT)",
   "category": "secondary",
   "count": 149,
@@ -40,7 +40,7 @@
             },
             {
               "id": "blast",
-              "label": "范围伤害·爆炸",
+              "label": "范围伤害",
               "segments": [
                 {
                   "kind": "explosiveAttack",
@@ -1035,7 +1035,7 @@
           "variants": [
             {
               "id": "direct",
-              "label": "灵化",
+              "label": "直接命中",
               "segments": [
                 {
                   "kind": "attack",
@@ -1054,7 +1054,7 @@
             },
             {
               "id": "blast",
-              "label": "灵化·爆炸",
+              "label": "范围伤害",
               "segments": [
                 {
                   "kind": "explosiveAttack",
@@ -1127,7 +1127,7 @@
           "variants": [
             {
               "id": "direct",
-              "label": "灵化",
+              "label": "直接命中",
               "segments": [
                 {
                   "kind": "attack",
@@ -1144,7 +1144,7 @@
             },
             {
               "id": "blast",
-              "label": "灵化·爆炸",
+              "label": "范围伤害",
               "segments": [
                 {
                   "kind": "explosiveAttack",
@@ -1254,7 +1254,7 @@
             },
             {
               "id": "blast",
-              "label": "Partial Reload·爆炸",
+              "label": "范围伤害（Partial Reload）",
               "segments": [
                 {
                   "kind": "explosiveAttack",
@@ -1271,7 +1271,7 @@
             },
             {
               "id": "blast2",
-              "label": "Reload From Empty·爆炸",
+              "label": "范围伤害（Reload From Empty）",
               "segments": [
                 {
                   "kind": "explosiveAttack",
@@ -1327,7 +1327,7 @@
           "variants": [
             {
               "id": "direct",
-              "label": "Spore",
+              "label": "直接命中",
               "segments": [
                 {
                   "kind": "attack",
@@ -1341,7 +1341,7 @@
             },
             {
               "id": "blast",
-              "label": "毒云·爆炸",
+              "label": "范围伤害",
               "segments": [
                 {
                   "kind": "explosiveAttack",
@@ -1396,7 +1396,7 @@
           "variants": [
             {
               "id": "direct",
-              "label": "直接命中",
+              "label": "Normal",
               "segments": [
                 {
                   "kind": "attack",
@@ -1483,7 +1483,7 @@
           "variants": [
             {
               "id": "direct",
-              "label": "灵化",
+              "label": "直接命中",
               "segments": [
                 {
                   "kind": "attack",
@@ -1503,7 +1503,7 @@
             },
             {
               "id": "blast",
-              "label": "灵化·爆炸",
+              "label": "范围伤害",
               "segments": [
                 {
                   "kind": "explosiveAttack",
@@ -1589,7 +1589,7 @@
           "variants": [
             {
               "id": "direct",
-              "label": "Single Rocket",
+              "label": "直接命中",
               "segments": [
                 {
                   "kind": "attack",
@@ -1603,7 +1603,7 @@
             },
             {
               "id": "blast",
-              "label": "Single Rocket·爆炸",
+              "label": "范围伤害",
               "segments": [
                 {
                   "kind": "explosiveAttack",
@@ -1791,7 +1791,7 @@
           "variants": [
             {
               "id": "direct",
-              "label": "Projectile",
+              "label": "直接命中",
               "segments": [
                 {
                   "kind": "attack",
@@ -1809,7 +1809,7 @@
             },
             {
               "id": "blast",
-              "label": "Explosion·爆炸",
+              "label": "范围伤害",
               "segments": [
                 {
                   "kind": "explosiveAttack",
@@ -2099,7 +2099,7 @@
           "variants": [
             {
               "id": "direct",
-              "label": "直接命中",
+              "label": "Normal",
               "segments": [
                 {
                   "kind": "attack",
@@ -2226,7 +2226,7 @@
             },
             {
               "id": "blast",
-              "label": "Uncharged·爆炸",
+              "label": "范围伤害（Uncharged）",
               "segments": [
                 {
                   "kind": "explosiveAttack",
@@ -2244,7 +2244,7 @@
             },
             {
               "id": "blast2",
-              "label": "Fully Charged·爆炸",
+              "label": "范围伤害（Fully Charged）",
               "trigger": "charge",
               "segments": [
                 {
@@ -2282,7 +2282,7 @@
           "variants": [
             {
               "id": "direct",
-              "label": "Slug",
+              "label": "直接命中",
               "segments": [
                 {
                   "kind": "attack",
@@ -2298,7 +2298,7 @@
             },
             {
               "id": "blast",
-              "label": "Explosion·爆炸",
+              "label": "范围伤害",
               "segments": [
                 {
                   "kind": "explosiveAttack",
@@ -2451,7 +2451,7 @@
           "variants": [
             {
               "id": "direct",
-              "label": "Projectile",
+              "label": "直接命中",
               "segments": [
                 {
                   "kind": "attack",
@@ -2465,7 +2465,7 @@
             },
             {
               "id": "blast",
-              "label": "Projectile·爆炸",
+              "label": "范围伤害",
               "segments": [
                 {
                   "kind": "explosiveAttack",
@@ -2820,7 +2820,7 @@
           "variants": [
             {
               "id": "direct",
-              "label": "灵化射线",
+              "label": "射线",
               "trigger": "held",
               "segments": [
                 {
@@ -2841,7 +2841,7 @@
             },
             {
               "id": "attack2",
-              "label": "Incarnon Form Charge Attack",
+              "label": "蓄力",
               "trigger": "charge",
               "segments": [
                 {
@@ -2862,7 +2862,7 @@
             },
             {
               "id": "blast",
-              "label": "灵化蓄力·爆炸",
+              "label": "范围伤害",
               "trigger": "charge",
               "segments": [
                 {
@@ -3066,7 +3066,7 @@
           "variants": [
             {
               "id": "direct",
-              "label": "Blob Embed·爆炸",
+              "label": "范围伤害（Blob Embed）",
               "segments": [
                 {
                   "kind": "explosiveAttack",
@@ -3083,7 +3083,7 @@
             },
             {
               "id": "blast",
-              "label": "Blob·爆炸",
+              "label": "范围伤害（Blob）",
               "segments": [
                 {
                   "kind": "explosiveAttack",
@@ -3112,7 +3112,7 @@
           "variants": [
             {
               "id": "direct",
-              "label": "Incarnon Form Blob Embed·爆炸",
+              "label": "范围伤害（Incarnon Form Blob Embed）",
               "segments": [
                 {
                   "kind": "explosiveAttack",
@@ -3131,7 +3131,7 @@
             },
             {
               "id": "blast",
-              "label": "Incarnon Form Blob·爆炸",
+              "label": "范围伤害（Incarnon Form Blob）",
               "segments": [
                 {
                   "kind": "explosiveAttack",
@@ -3150,7 +3150,7 @@
             },
             {
               "id": "blast2",
-              "label": "Incarnon Form Bounce·爆炸",
+              "label": "范围伤害（Incarnon Form Bounce）",
               "segments": [
                 {
                   "kind": "explosiveAttack",
@@ -3379,7 +3379,7 @@
           "variants": [
             {
               "id": "direct",
-              "label": "灵化",
+              "label": "直接命中",
               "segments": [
                 {
                   "kind": "attack",
@@ -3399,7 +3399,7 @@
             },
             {
               "id": "blast",
-              "label": "灵化·爆炸",
+              "label": "范围伤害",
               "segments": [
                 {
                   "kind": "explosiveAttack",
@@ -3750,7 +3750,7 @@
             },
             {
               "id": "blast",
-              "label": "Rocket·爆炸",
+              "label": "范围伤害（Rocket）",
               "segments": [
                 {
                   "kind": "explosiveAttack",
@@ -3764,7 +3764,7 @@
             },
             {
               "id": "blast2",
-              "label": "Cluster Bomb·爆炸",
+              "label": "范围伤害（Cluster Bomb）",
               "segments": [
                 {
                   "kind": "explosiveAttack",
@@ -3912,7 +3912,7 @@
           "variants": [
             {
               "id": "direct",
-              "label": "Direct Hit",
+              "label": "直接命中",
               "segments": [
                 {
                   "kind": "attack",
@@ -3928,7 +3928,7 @@
             },
             {
               "id": "blast",
-              "label": "Detonation·爆炸",
+              "label": "范围伤害",
               "segments": [
                 {
                   "kind": "explosiveAttack",
@@ -4209,7 +4209,7 @@
             },
             {
               "id": "blast",
-              "label": "Partial Reload·爆炸",
+              "label": "范围伤害（Partial Reload）",
               "segments": [
                 {
                   "kind": "explosiveAttack",
@@ -4223,7 +4223,7 @@
             },
             {
               "id": "blast2",
-              "label": "Reload From Empty·爆炸",
+              "label": "范围伤害（Reload From Empty）",
               "segments": [
                 {
                   "kind": "explosiveAttack",
@@ -4264,7 +4264,7 @@
           "variants": [
             {
               "id": "direct",
-              "label": "Spore",
+              "label": "直接命中",
               "segments": [
                 {
                   "kind": "attack",
@@ -4278,7 +4278,7 @@
             },
             {
               "id": "blast",
-              "label": "毒云·爆炸",
+              "label": "范围伤害",
               "segments": [
                 {
                   "kind": "explosiveAttack",
@@ -4318,7 +4318,7 @@
           "variants": [
             {
               "id": "direct",
-              "label": "直接命中",
+              "label": "Normal",
               "segments": [
                 {
                   "kind": "attack",
@@ -4348,7 +4348,7 @@
             },
             {
               "id": "blast",
-              "label": "范围伤害·爆炸",
+              "label": "范围伤害",
               "segments": [
                 {
                   "kind": "explosiveAttack",
@@ -4362,7 +4362,7 @@
             },
             {
               "id": "blast2",
-              "label": "Headshot·爆炸",
+              "label": "范围伤害（Headshot）",
               "segments": [
                 {
                   "kind": "explosiveAttack",
@@ -4379,7 +4379,7 @@
             },
             {
               "id": "blast3",
-              "label": "Homing Spore·爆炸",
+              "label": "范围伤害（Homing Spore）",
               "segments": [
                 {
                   "kind": "explosiveAttack",
@@ -4494,7 +4494,7 @@
           "variants": [
             {
               "id": "direct",
-              "label": "直接命中",
+              "label": "Normal",
               "segments": [
                 {
                   "kind": "attack",
@@ -4877,7 +4877,7 @@
           "variants": [
             {
               "id": "direct",
-              "label": "Projectile",
+              "label": "直接命中",
               "segments": [
                 {
                   "kind": "attack",
@@ -4893,7 +4893,7 @@
             },
             {
               "id": "blast",
-              "label": "Explosion·爆炸",
+              "label": "范围伤害",
               "segments": [
                 {
                   "kind": "explosiveAttack",
@@ -5502,7 +5502,7 @@
           "variants": [
             {
               "id": "direct",
-              "label": "Mid-Flight",
+              "label": "直接命中",
               "segments": [
                 {
                   "kind": "attack",
@@ -5516,7 +5516,7 @@
             },
             {
               "id": "blast",
-              "label": "Embedded·爆炸",
+              "label": "范围伤害",
               "segments": [
                 {
                   "kind": "explosiveAttack",
@@ -5818,7 +5818,7 @@
           "variants": [
             {
               "id": "direct",
-              "label": "Rocket",
+              "label": "直接命中",
               "segments": [
                 {
                   "kind": "attack",
@@ -5835,7 +5835,7 @@
             },
             {
               "id": "blast",
-              "label": "Rocket·爆炸",
+              "label": "范围伤害",
               "segments": [
                 {
                   "kind": "explosiveAttack",
@@ -6208,7 +6208,7 @@
             },
             {
               "id": "blast",
-              "label": "Uncharged·爆炸",
+              "label": "范围伤害",
               "segments": [
                 {
                   "kind": "explosiveAttack",
@@ -6458,7 +6458,7 @@
             },
             {
               "id": "blast",
-              "label": "Explosion·爆炸",
+              "label": "范围伤害",
               "segments": [
                 {
                   "kind": "explosiveAttack",
@@ -6901,7 +6901,7 @@
             },
             {
               "id": "blast",
-              "label": "Gas Cloud·爆炸",
+              "label": "范围伤害",
               "segments": [
                 {
                   "kind": "explosiveAttack",
@@ -6938,7 +6938,7 @@
           "variants": [
             {
               "id": "direct",
-              "label": "Single Rocket",
+              "label": "直接命中",
               "segments": [
                 {
                   "kind": "attack",
@@ -6952,7 +6952,7 @@
             },
             {
               "id": "blast",
-              "label": "Single Rocket·爆炸",
+              "label": "范围伤害",
               "segments": [
                 {
                   "kind": "explosiveAttack",
@@ -7406,7 +7406,7 @@
           "variants": [
             {
               "id": "direct",
-              "label": "Rocket",
+              "label": "直接命中",
               "segments": [
                 {
                   "kind": "attack",
@@ -7423,7 +7423,7 @@
             },
             {
               "id": "blast",
-              "label": "Rocket·爆炸",
+              "label": "范围伤害",
               "segments": [
                 {
                   "kind": "explosiveAttack",
@@ -7491,7 +7491,7 @@
           "variants": [
             {
               "id": "direct",
-              "label": "灵化",
+              "label": "直接命中",
               "segments": [
                 {
                   "kind": "attack",
@@ -7513,7 +7513,7 @@
             },
             {
               "id": "blast",
-              "label": "灵化·爆炸",
+              "label": "范围伤害",
               "segments": [
                 {
                   "kind": "explosiveAttack",
@@ -7564,7 +7564,7 @@
           "variants": [
             {
               "id": "direct",
-              "label": "Mid-Flight",
+              "label": "直接命中",
               "segments": [
                 {
                   "kind": "attack",
@@ -7578,7 +7578,7 @@
             },
             {
               "id": "blast",
-              "label": "Embedded·爆炸",
+              "label": "范围伤害",
               "segments": [
                 {
                   "kind": "explosiveAttack",
@@ -7615,7 +7615,7 @@
           "variants": [
             {
               "id": "direct",
-              "label": "直接命中",
+              "label": "Normal",
               "segments": [
                 {
                   "kind": "attack",
@@ -7826,7 +7826,7 @@
             },
             {
               "id": "blast",
-              "label": "范围伤害·爆炸",
+              "label": "范围伤害",
               "segments": [
                 {
                   "kind": "explosiveAttack",
@@ -7843,7 +7843,7 @@
             },
             {
               "id": "blast2",
-              "label": "Lock-On·爆炸",
+              "label": "范围伤害（Lock-On）",
               "segments": [
                 {
                   "kind": "explosiveAttack",
@@ -8029,7 +8029,7 @@
           "variants": [
             {
               "id": "direct",
-              "label": "Active Attack",
+              "label": "直接命中",
               "segments": [
                 {
                   "kind": "attack",
@@ -8049,7 +8049,7 @@
             },
             {
               "id": "blast",
-              "label": "Normal·爆炸",
+              "label": "范围伤害（Normal）",
               "segments": [
                 {
                   "kind": "explosiveAttack",
@@ -8068,7 +8068,7 @@
             },
             {
               "id": "blast2",
-              "label": "Active·爆炸",
+              "label": "范围伤害（Active）",
               "segments": [
                 {
                   "kind": "explosiveAttack",
@@ -8138,7 +8138,7 @@
           "variants": [
             {
               "id": "direct",
-              "label": "Active Attack",
+              "label": "直接命中",
               "segments": [
                 {
                   "kind": "attack",
@@ -8155,7 +8155,7 @@
             },
             {
               "id": "blast",
-              "label": "Normal·爆炸",
+              "label": "范围伤害（Normal）",
               "segments": [
                 {
                   "kind": "explosiveAttack",
@@ -8169,7 +8169,7 @@
             },
             {
               "id": "blast2",
-              "label": "Active·爆炸",
+              "label": "范围伤害（Active）",
               "segments": [
                 {
                   "kind": "explosiveAttack",
@@ -8209,7 +8209,7 @@
           "variants": [
             {
               "id": "direct",
-              "label": "Dart",
+              "label": "直接命中",
               "segments": [
                 {
                   "kind": "attack",
@@ -8224,7 +8224,7 @@
             },
             {
               "id": "blast",
-              "label": "Gas Cloud·爆炸",
+              "label": "范围伤害",
               "segments": [
                 {
                   "kind": "explosiveAttack",
@@ -8371,7 +8371,7 @@
           "variants": [
             {
               "id": "direct",
-              "label": "Auto",
+              "label": "直接命中",
               "segments": [
                 {
                   "kind": "attack",
@@ -8386,7 +8386,7 @@
             },
             {
               "id": "blast",
-              "label": "Semi·爆炸",
+              "label": "范围伤害",
               "segments": [
                 {
                   "kind": "explosiveAttack",
@@ -8507,7 +8507,7 @@
             },
             {
               "id": "blast",
-              "label": "Uncharged·爆炸",
+              "label": "范围伤害",
               "segments": [
                 {
                   "kind": "explosiveAttack",
@@ -8565,7 +8565,7 @@
             },
             {
               "id": "blast",
-              "label": "Explosion·爆炸",
+              "label": "范围伤害",
               "segments": [
                 {
                   "kind": "explosiveAttack",
@@ -8686,7 +8686,7 @@
           "variants": [
             {
               "id": "direct",
-              "label": "Mid-Flight·爆炸",
+              "label": "范围伤害（Mid-Flight）",
               "segments": [
                 {
                   "kind": "explosiveAttack",
@@ -8700,7 +8700,7 @@
             },
             {
               "id": "blast",
-              "label": "Embedded·爆炸",
+              "label": "范围伤害（Embedded）",
               "segments": [
                 {
                   "kind": "explosiveAttack",
@@ -8879,7 +8879,7 @@
           "variants": [
             {
               "id": "direct",
-              "label": "灵化",
+              "label": "直接命中",
               "segments": [
                 {
                   "kind": "attack",
@@ -8896,7 +8896,7 @@
             },
             {
               "id": "blast",
-              "label": "Auto·爆炸",
+              "label": "范围伤害",
               "segments": [
                 {
                   "kind": "explosiveAttack",
@@ -8972,7 +8972,7 @@
           "variants": [
             {
               "id": "direct",
-              "label": "灵化",
+              "label": "直接命中",
               "segments": [
                 {
                   "kind": "attack",
@@ -8992,7 +8992,7 @@
             },
             {
               "id": "blast",
-              "label": "灵化·爆炸",
+              "label": "范围伤害",
               "segments": [
                 {
                   "kind": "explosiveAttack",

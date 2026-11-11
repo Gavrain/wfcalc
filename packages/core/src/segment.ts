@@ -126,6 +126,12 @@ export function factionFor(faction: Faction, contribs: readonly Contribution[]):
 
 export interface SegmentResult {
   kind: DamageSegment['kind'] | string;
+  /** 该段自己的触发几率（0~1），逐段算 DoT 叠层时要用 */
+  procChance: number;
+  /** 该段是否射线（射线不重复乘多重），逐段算叠层时要用 */
+  beam: boolean;
+  /** 该段所属的阵营（派系第二次乘算要用） */
+  faction: Faction;
   /** L0 面板向量 */
   panel: DamageSpread;
   /** ① 玄骸并入后的面板 */
@@ -254,6 +260,10 @@ export function resolveSegment(
 
   return {
     kind: seg.kind,
+    // D-148 / 需求方 2026-11-12：逐段算 DoT 叠层需要每段自己的触发率 / 射线标记 / 派系
+    procChance: seg.procChance,
+    beam: ctx.beam,
+    faction: ctx.faction,
     panel,
     panelWithKuva,
     baseAfterBaseDamage,

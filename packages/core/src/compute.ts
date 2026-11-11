@@ -163,7 +163,11 @@ export function compute(
     }
   }
 
-  const output: OutputBreakdown = buildOutput(weapon, scopedMode, contribs, segments[0]!, ctx);
+  // ⚠ 需求方 2026-11-12：「走完元素合成啥的，到最后计算 dps 才把各自的统计口径加起来」。
+  //   以前这里只传 `segments[0]`，多段武器的第二段起**完全没进 DPS**
+  //   （巴什穆电击+火焰只算电击 44.85，实际 66.70）。现在把全部段传进去，
+  //   `buildOutput` 逐段算 DoT / 爆炸，再把各段统计口径相加。
+  const output: OutputBreakdown = buildOutput(weapon, scopedMode, contribs, segments, ctx);
 
   // ── 计算链状态树：主段（D-075），downstream 一律从这里取值 ──
   // buildWeaponState 已含元素合成（D-102），所以 perSegment 直接就是完整 computed。

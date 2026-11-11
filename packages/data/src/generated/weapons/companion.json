@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-11T16:14:29.589Z",
+  "generatedAt": "2026-11-11T16:22:55.655Z",
   "source": "WFCD/warframe-items (MIT)",
   "category": "companion",
   "count": 24,
@@ -210,7 +210,7 @@
           "variants": [
             {
               "id": "direct",
-              "label": "Projectile",
+              "label": "直接命中",
               "segments": [
                 {
                   "kind": "attack",
@@ -227,7 +227,7 @@
             },
             {
               "id": "blast",
-              "label": "范围伤害·爆炸",
+              "label": "范围伤害",
               "segments": [
                 {
                   "kind": "explosiveAttack",
@@ -611,7 +611,7 @@
           "variants": [
             {
               "id": "direct",
-              "label": "直接命中",
+              "label": "Normal",
               "segments": [
                 {
                   "kind": "attack",
@@ -921,7 +921,7 @@
             },
             {
               "id": "blast",
-              "label": "Explosion·爆炸",
+              "label": "范围伤害",
               "segments": [
                 {
                   "kind": "explosiveAttack",
@@ -1003,7 +1003,7 @@
           "variants": [
             {
               "id": "direct",
-              "label": "Impact",
+              "label": "直接命中",
               "segments": [
                 {
                   "kind": "attack",
@@ -1017,7 +1017,7 @@
             },
             {
               "id": "blast",
-              "label": "范围伤害·爆炸",
+              "label": "范围伤害",
               "segments": [
                 {
                   "kind": "explosiveAttack",

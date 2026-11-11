@@ -234,7 +234,7 @@ const matchesAny = (name: string, list: readonly RegExp[]): boolean => list.some
  */
 function groupAttackVariants(attacks: readonly WfcdAttack[]): { id: string; label: string; attacks: WfcdAttack[] }[] {
   /** 末尾的子段词：只用来给「攻击方式」起名，不参与是否分组的判断 */
-  const TAIL = /\s*(Impact|Explosion|Explode|Detonation|Radial Attack|AoE|Damage|Contact|Direct Hit)$/i;
+  const TAIL = /\s*(Impact|Explosion|Explode|Detonation|Radial Attack|AoE|Damage|Contact|Direct Hit|Attack)$/i;
 
   /** 攻击名的主干（去掉子段词），用于同判定类型内的细分与命名 */
   const stemOf = (name: string): string => {
@@ -268,25 +268,45 @@ function groupAttackVariants(attacks: readonly WfcdAttack[]): { id: string; labe
   buckets.sort((a, b) => Number(a.aoe) - Number(b.aoe));
   const used = new Set<string>();
   return buckets.map((g, i) => {
-    // 标签：wfcd 的攻击名是英文，界面要中文。常见名字给固定译名，其余保留原名
+    // 标签（需求方 2026-11-12）：
+    // > 「灵化·爆炸也太蠢了，跟普通模式一样用直接命中 范围伤害这样来区分啊」
+    // 所以不再拼「某某·爆炸」，而是和普通模式用同一套叫法：
+    //   非 AoE → 直接命中；AoE → 范围伤害。
+    // 同一侧有多种时再加原名区分（`等离子炸弹` / `集束炸弹` 都是命中段）。
     const ZH: Record<string, string> = {
-      'normal attack': '直接命中',
-      'primary': '直接命中',
-      'incarnon form': '灵化',
-      'incarnon form held': '灵化射线',
-      'incarnon form charge': '灵化蓄力',
+      'normal attack': '',
+      'primary': '',
+      'incarnon form': '',
+      'incarnon form held': '射线',
+      'incarnon form charge': '蓄力',
       'plasma bomb': '等离子炸弹',
       'cluster bombs': '集束炸弹',
       'grenade': '榴弹',
       'poison cloud': '毒云',
-      'radial attack': '范围伤害',
+      'radial attack': '',
       'alt-fire': '次要射击',
       'secondary fire': '次要射击',
+      'beam': '',
     };
     const zh = ZH[g.key.toLowerCase()] ?? g.key;
-    const label = g.aoe ? `${zh}·爆炸` : `${zh}`;
+    // 标签规则（需求方 2026-11-12：用「直接命中 / 范围伤害」区分，别拼「某某·爆炸」）：
+    //   · 爆炸段 → 「范围伤害」（多段时后面带原名，如「范围伤害（集束炸弹）」）
+    //   · 命中段 → 「直接命中」；但如果这一段换了**发射方式**（射线 / 蓄力），就用那个名字，
+    //     否则赘骨灵化里「射线」和「蓄力」都显示成「直接命中」就分不出来了
+    const MODE_OF_FIRE = /^(射线|蓄力)$/;
+    const sameSide = buckets.filter((b) => b.aoe === g.aoe);
+    let label: string;
+    if (g.aoe) {
+      label = sameSide.length <= 1 || !zh ? '范围伤害' : `范围伤害（${zh}）`;
+    } else if (MODE_OF_FIRE.test(zh)) {
+      label = zh;
+    } else if (sameSide.length <= 1 || !zh) {
+      label = '直接命中';
+    } else {
+      // 同一侧多种：用原名区分，去掉「直接命中」前缀以免太长
+      label = zh;
+    }
     // id 首选 direct / blast / attackN；重名就加序号，保证唯一
-    // （重力奇点拟成枪的灵化有两个爆炸段，都叫 blast 会撞车）
     let id = i === 0 ? 'direct' : g.aoe ? 'blast' : `attack${i + 1}`;
     if (used.has(id)) {
       let n = 2;

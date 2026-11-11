@@ -138,3 +138,30 @@ describe('按勾选的攻击方式计算（需求方 2026-11-12）', () => {
     assert.equal(sumHit(res), 50, '布尔值应视为"全选"，不能算成 0');
   });
 });
+
+describe('多段的统计口径各自算完再相加（需求方 2026-11-12）', () => {
+  it('单弹头 = 各段单弹头之和（不是只取第一段）', () => {
+    const { weapon, mode } = buildWeapon();
+    const res = compute(weapon, mode, []);
+    const sumOfSegments = res.segments.reduce((a, s) => a + s.line.average, 0);
+    assert.equal(res.output.pelletPerHit, sumOfSegments, '单弹头必须是各段之和');
+    assert.ok(res.segments.length >= 2, '这段测试需要多段');
+  });
+
+  it('爆发伤害 / 持续伤害也按各段之和算', () => {
+    const { weapon, mode } = buildWeapon();
+    const res = compute(weapon, mode, []);
+    const sumOfSegments = res.segments.reduce((a, s) => a + s.line.average, 0);
+    const ms = res.output.multishot;
+    const fr = res.output.fireRate;
+    assert.ok(Math.abs(res.output.perShot - sumOfSegments * ms) < 1e-9, '单次射击 = 各段之和 × 多重');
+    assert.ok(Math.abs(res.output.hitDps - sumOfSegments * ms * fr) < 1e-9, '爆发 = 单次射击 × 射速');
+  });
+
+  it('只勾一种时，单弹头只等于那一种（不能带上别的段）', () => {
+    const { weapon, mode } = buildWeapon();
+    const only = compute(weapon, mode, [], {}, [0]);
+    const seg0 = only.segments[0]!;
+    assert.equal(only.output.pelletPerHit, seg0.line.average);
+  });
+});
