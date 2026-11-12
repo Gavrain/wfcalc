@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-12T09:01:58.157Z",
+  "generatedAt": "2026-11-12T09:03:52.195Z",
   "source": "WFCD/warframe-items (MIT)",
   "category": "melee",
   "count": 256,
@@ -17578,10 +17578,10 @@
       "name": "Vinquibus (Melee)",
       "nameZh": "制胜者（近战）",
       "category": "melee",
-      "critChance": 0,
-      "critMultiplier": 1,
-      "statusChance": 0,
-      "fireRate": 0,
+      "critChance": 0.4,
+      "critMultiplier": 3.2,
+      "statusChance": 0.2,
+      "fireRate": 1,
       "modes": [
         {
           "id": "primary",
@@ -17635,7 +17635,9 @@
           "_manual": "export-missing",
           "_note": "WFCD 未收录该武器（多为显赫武器），面板来自官方导出，可能有误"
         }
-      ]
+      ],
+      "_manual": "bible",
+      "_note": "WFCD 未收录近战形态，官方导出缺暴击/触发/攻速（导出为 0）；按中文维基「制胜者（近战）」面板补：暴击 40%、暴伤 3.2x、触发 20%、攻速 1"
     },
     {
       "id": "TnBrokenFrameWarfanWeapon",

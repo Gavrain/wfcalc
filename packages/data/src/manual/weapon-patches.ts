@@ -107,3 +107,35 @@ export const MANUAL_WEAPON_ZH: Readonly<Record<string, { zh: string; reason: str
   PrimeSteflosShotgun: { zh: '石晶之花 Prime', reason: '官方语言包未收录，取自中文维基「石晶之花Prime」，按现有风格补空格' },
   PrimeCorufellScytheWeapon: { zh: '闪劫 Prime', reason: '官方语言包未收录，取自中文维基「闪劫Prime」，按现有风格补空格' },
 };
+
+/**
+ * 武器**面板订正表**（D-154）。
+ *
+ * 需求方 2026-11-13：
+ * > 「致胜者不是显赫，他也是双形态武器。有近战和步枪形态，面板不一样。」
+ *
+ * 制胜者（Vinquibus）是 Uriel 的标志性武器，**同时占用主武器位与近战位**，
+ * 两个形态是两把独立的武器条目：
+ *
+ * | 条目 | 形态 | 数据来源 |
+ * |---|---|---|
+ * | `TnBayonetRifleWeapon` | 步枪 | WFCD `Primary.json`（完整） |
+ * | `TnBayonetMeleeWeapon` | 近战 | **WFCD 未收录**，只能走官方导出，而导出**缺暴击/触发/攻速** |
+ *
+ * 缺的字段落成 0 / 1 的后果：近战形态**永远不暴击、从不触发异常、攻速 0**，
+ * 算出来的伤害是错的。这里按中文维基的面板补上——
+ * [制胜者](https://warframe.huijiwiki.com/p/63863)「制胜者（近战）」表：
+ * 暴击几率 40.0%、暴击伤害 3.2x、触发几率 20.0%、攻速 1 倍。
+ *
+ * ⚠ CLAUDE.md 规则 3：人工推断值必须能回答「哪来的」，所以每条都带 `reason`，
+ *   由 `packages/data-build/src/index.ts` 写进产出的 `_manual` / `_note` 字段。
+ */
+export const MANUAL_WEAPON_PANEL: Readonly<
+  Record<string, { fields: Record<string, number>; reason: string }>
+> = {
+  TnBayonetMeleeWeapon: {
+    fields: { critChance: 0.4, critMultiplier: 3.2, statusChance: 0.2, fireRate: 1 },
+    reason:
+      'WFCD 未收录近战形态，官方导出缺暴击/触发/攻速（导出为 0）；按中文维基「制胜者（近战）」面板补：暴击 40%、暴伤 3.2x、触发 20%、攻速 1',
+  },
+};

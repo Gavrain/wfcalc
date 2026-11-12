@@ -1,4 +1,4 @@
-/**
+﻿/**
  * data-build 入口。
  *
  * 用法：
@@ -22,7 +22,7 @@ import { diffWeapons, formatDiffReport, type DiffReport } from './diff.ts';
 import { applyOverrides, type AppliedOverride } from './overrides.ts';
 import { toEmitWeapon, type EmitWeapon } from './emit.ts';
 import { buildLangKeyByWeaponId, buildZhByEnglishName, resolveZhForWfcdWeapon, stripNamePrefix, type LanguageDict } from './localize.ts';
-import { MANUAL_WEAPON_ZH } from '../../data/src/manual/weapon-patches.ts';
+import { MANUAL_WEAPON_PANEL, MANUAL_WEAPON_ZH } from '../../data/src/manual/weapon-patches.ts';
 import type { AttackMode, Weapon } from '../../core/src/weapon.ts';
 
 const repoRoot = resolve(import.meta.dirname, '../../..');
@@ -336,6 +336,22 @@ async function main(): Promise<number> {
 
   // 需求方 2026-11-12：人工覆盖层 manual/overrides.ts 已删除（WFCD 已给出完整射速），
   // 这里不再有 override 应用步骤。
+  // D-154：人工**面板订正**表还在用——只针对 WFCD 未收录、且官方导出缺字段的武器
+  //        （目前是制胜者的近战形态）。值带 `_manual` / `_note` 说明来源，可追溯。
+  let panelFixed = 0;
+  for (const w of cleaned) {
+    const fix = MANUAL_WEAPON_PANEL[w.id];
+    if (!fix) continue;
+    for (const [k, v] of Object.entries(fix.fields)) {
+      (w as unknown as Record<string, number>)[k] = v;
+    }
+    (w as CleanedWfcdWeapon & { _manual?: string; _note?: string })._manual = 'bible';
+    (w as CleanedWfcdWeapon & { _manual?: string; _note?: string })._note = fix.reason;
+    panelFixed++;
+  }
+  if (panelFixed > 0) {
+    console.log(`      人工面板订正 ${panelFixed} 把（见 manual/weapon-patches.ts 的 MANUAL_WEAPON_PANEL）`);
+  }
   const applied: AppliedOverride[] = [];
 
   console.log('[4/5] 对比上一版...');
