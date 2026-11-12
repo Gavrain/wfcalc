@@ -1,4 +1,4 @@
-import { describe, it } from 'node:test';
+﻿import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   resolveFromExport,
@@ -8,6 +8,8 @@ import {
   exportSubclass,
   isTrueBow,
   normalizeKey,
+  resolveFromWfcd,
+  isDualPistolByWfcd,
 } from '../src/mods/weapon-slots.ts';
 import { lookupExaltedSlots } from '../../data/src/manual/exalted-slots.ts';
 
@@ -252,5 +254,111 @@ describe('显赫武器的人工槽位表', () => {
 
   it('未登记的武器返回 null（流水线会列入待人工确认）', () => {
     assert.equal(lookupExaltedSlots('某个不存在的武器'), null);
+  });
+});
+
+/**
+ * D-152（需求方 2026-11-13）：「全改成 WFCD 为主，除非有他确认不了的」。
+ *
+ * 槽位判定以前 100% 用官方导出的 `holsterCategory`，而官方导出比 WFCD 慢：
+ * 官方没有的武器落到兜底 `rifle`，双持 / 投掷副手又被携行方式（WIDE_RIFLE / SMG）
+ * 翻成步枪 —— 新武器吃错 Mod、次要武器里冒出一堆「步枪」。
+ */
+describe('WFCD 为主的槽位判定（D-152）', () => {
+  it('WFCD 的标准类型都能映射：弓 / 霰弹 / 狙击 / 手枪 / 双手枪 / 投掷', () => {
+    const cases: Array<[string, string]> = [
+      ['Bow', 'bow'],
+      ['Shotgun', 'shotgun'],
+      ['Sniper', 'sniper'],
+      ['Rifle', 'rifle'],
+      ['Pistol', 'pistol'],
+      ['Dual Pistols', 'pistol'],
+      ['Throwing', 'pistol'],
+      ['Melee', 'melee'],
+      ['Launcher', 'rifle'],
+    ];
+    for (const [type, want] of cases) {
+      const r = resolveFromWfcd({ id: 'x', type, productCategory: 'LongGuns' });
+      assert.equal(r?.broad, want, `${type} 应判成 ${want}`);
+      assert.equal(r?.source, 'wfcd-type');
+    }
+  });
+
+  it('WFCD 把近战的 type 错标成 Rifle 时，以「文件 / productCategory 说是近战」为准', () => {
+    // 实测这 10 把在 WFCD 里 type=Rifle，但文件是 Melee.json、productCategory=Melee
+    for (const name of ['Mk1-Bo', 'Mk1-Furax', 'Paracesis', 'Prisma Skana', 'Dual Viciss']) {
+      const r = resolveFromWfcd({ id: name, type: 'Rifle', productCategory: 'Melee', file: 'Melee' });
+      assert.equal(r?.broad, 'melee', `${name} 不能因为 type=Rifle 就变成步枪`);
+    }
+  });
+
+  it('空战按文件 / 大类判，不看 type', () => {
+    assert.equal(resolveFromWfcd({ id: 'x', type: 'Rifle', productCategory: 'SpaceGuns', file: 'Arch-Gun' })?.broad, 'archgun');
+    assert.equal(resolveFromWfcd({ id: 'x', type: 'Melee', productCategory: 'SpaceMelee', file: 'Arch-Melee' })?.broad, 'archmelee');
+  });
+
+  it('判不出来的返回 null，交给官方导出兜底（显赫武器等）', () => {
+    assert.equal(resolveFromWfcd({ id: 'x', type: 'Zaw Component' }), null);
+    assert.equal(resolveFromWfcd({ id: 'x' }), null);
+  });
+
+  it('新武器（霜冥差 / 寒怨刺 / 石晶之花 Prime / 闪劫 Prime）判定正确', () => {
+    const num = resolveFromWfcd({ id: 'DuelistBow', type: 'Bow', productCategory: 'LongGuns', file: 'Primary' });
+    assert.equal(num?.broad, 'bow');
+    // 弓是步枪大类下的，有额外专属：弓类 + 步枪类 + 主武器类
+    assert.deepEqual(compatibleModKinds({ ...num!, specific: [], unresolved: false }, true).sort(), ['bow', 'primary', 'rifle']);
+
+    const aks = resolveFromWfcd({ id: 'DuelistPistols', type: 'Dual Pistols', productCategory: 'Pistols', file: 'Secondary' });
+    assert.equal(aks?.broad, 'pistol');
+    assert.deepEqual(compatibleModKinds({ ...aks!, specific: [], unresolved: false }), ['pistol']);
+
+    const stef = resolveFromWfcd({ id: 'PrimeSteflosShotgun', type: 'Shotgun', productCategory: 'LongGuns', file: 'Primary' });
+    assert.deepEqual(compatibleModKinds({ ...stef!, specific: [], unresolved: false }).sort(), ['primary', 'shotgun']);
+
+    const cor = resolveFromWfcd({ id: 'PrimeCorufellScytheWeapon', type: 'Melee', productCategory: 'Melee', file: 'Melee' });
+    assert.equal(cor?.broad, 'melee');
+  });
+
+  it('投掷副手按手枪类 Mod 算（副手 Mod 通用）', () => {
+    const r = resolveFromWfcd({ id: 'Kunai', type: 'Throwing', productCategory: 'Pistols', file: 'Secondary' });
+    assert.deepEqual(compatibleModKinds({ ...r!, specific: [], unresolved: false }), ['pistol']);
+  });
+
+  it('弓和狙击保留自己的专属类，同时也吃步枪类（需求方：都是步枪大类下的）', () => {
+    const bow = resolveFromWfcd({ id: 'x', type: 'Bow', productCategory: 'LongGuns' })!;
+    const sniper = resolveFromWfcd({ id: 'x', type: 'Sniper', productCategory: 'LongGuns' })!;
+    assert.ok(compatibleModKinds({ ...bow, specific: [], unresolved: false }, true).includes('bow'));
+    assert.ok(compatibleModKinds({ ...bow, specific: [], unresolved: false }, true).includes('rifle'));
+    assert.ok(compatibleModKinds({ ...sniper, specific: [], unresolved: false }).includes('sniper'));
+    assert.ok(compatibleModKinds({ ...sniper, specific: [], unresolved: false }).includes('rifle'));
+  });
+});
+
+/**
+ * D-152：**双手枪 ≠ 双刀 / 双剑**（需求方 2026-11-13：「你注意区分双手枪跟双刀就行」）。
+ *
+ * 近战双持武器的 id 也带 `Dual` 前缀（`DualHeatSwords` 烈焰双剑 / `DualKamas` 双短柄战镰…），
+ * 官方 `DUAL_*` 标签更是全挂在近战上。如果只按 id 前缀判，「双枪·滑射」赋能会出现在双刀上。
+ */
+describe('双手枪与双刀必须分开（D-152）', () => {
+  it('近战带 Dual 前缀也不算是双手枪', () => {
+    for (const id of ['DualHeatSwords', 'DualKamas', 'DualCleaverWeapon', 'DualShortSword', 'DualEtherSword']) {
+      assert.equal(isDualPistolByWfcd('Melee', id, 'melee'), false, `${id} 是近战，不该算双手枪`);
+    }
+  });
+
+  it('真双手枪算双手枪', () => {
+    for (const id of ['AkLexPistols', 'AkimboBolto', 'PrimeAkBoltoWeapon', 'DualMagnus', 'TennoUzi']) {
+      assert.equal(isDualPistolByWfcd('Pistol', id, 'pistol'), true, `${id} 是双手枪`);
+    }
+  });
+
+  it('WFCD 只说 Dual Pistols 但宽类是近战时，仍不算（宽类优先）', () => {
+    assert.equal(isDualPistolByWfcd('Dual Pistols', 'DualKamas', 'melee'), false);
+  });
+
+  it('单持手枪不算', () => {
+    assert.equal(isDualPistolByWfcd('Pistol', 'HeavyPistol', 'pistol'), false, '雷克斯是单持');
+    assert.equal(isDualPistolByWfcd('Pistol', 'KuvaNukor', 'pistol'), false);
   });
 });

@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-11-11T17:49:24.367Z",
+  "generatedAt": "2026-11-12T08:54:44.058Z",
   "source": "WFCD/warframe-items (MIT)",
   "category": "melee",
-  "count": 260,
+  "count": 256,
   "note": "暴率/触发为 0~1 小数；伤害分布为绝对值；procChance 同为 0~1；kuva 表示需用户在计算器里选元素与加成（25%~60%）",
   "weapons": [
     {
@@ -3569,32 +3569,6 @@
       ]
     },
     {
-      "id": "DarkSwordDaggerHybridWeapon@dual_swords",
-      "name": "Dark Split-Sword (Dual Swords)",
-      "nameZh": "暗黑分合剑（双剑）",
-      "category": "melee",
-      "critChance": 0,
-      "critMultiplier": 2,
-      "statusChance": 0.1,
-      "fireRate": 1,
-      "modes": [],
-      "_manual": "export-missing",
-      "_note": "导出 behaviours 为空、游戏面板未收录；先建「双剑」版本占位，数值待补（需求方 2026-11-07）"
-    },
-    {
-      "id": "DarkSwordDaggerHybridWeapon@heavy_blade",
-      "name": "Dark Split-Sword (Heavy Blade)",
-      "nameZh": "暗黑分合剑（巨刃）",
-      "category": "melee",
-      "critChance": 0,
-      "critMultiplier": 2,
-      "statusChance": 0.1,
-      "fireRate": 1,
-      "modes": [],
-      "_manual": "export-missing",
-      "_note": "导出 behaviours 为空、游戏面板未收录；先建「巨刃」版本占位，数值待补（需求方 2026-11-07）"
-    },
-    {
       "id": "DaxDuviriHammerWeapon",
       "name": "Sampotes",
       "nameZh": "三宝聚",
@@ -5966,48 +5940,6 @@
           "_note": "WFCD 未收录该武器（多为显赫武器），面板来自官方导出，可能有误"
         }
       ]
-    },
-    {
-      "id": "ExaltedBow",
-      "name": "Artemis Bow",
-      "nameZh": "月神狩弓",
-      "category": "melee",
-      "critChance": 0.25,
-      "critMultiplier": 2,
-      "statusChance": 0.2,
-      "fireRate": 1,
-      "reloadTime": 0.85,
-      "modes": [
-        {
-          "id": "primary",
-          "role": "normal",
-          "trigger": "unknown",
-          "bullets": 1,
-          "multishot": 1,
-          "variants": [
-            {
-              "id": "direct",
-              "label": "直接命中",
-              "segments": [
-                {
-                  "kind": "attack",
-                  "aoe": false,
-                  "damage": {
-                    "impact": 33.6,
-                    "puncture": 192,
-                    "slash": 14.4
-                  },
-                  "procChance": 0.2
-                }
-              ]
-            }
-          ],
-          "_manual": "export-missing",
-          "_note": "WFCD 未收录该武器（多为显赫武器），面板来自官方导出，可能有误"
-        }
-      ],
-      "_manual": "bible",
-      "_note": "导出为 冲 10.5 / 穿 60 / 切 4.5（合计 75）；游戏面板 冲 33.6 / 穿 192 / 切 14.4（合计 240），比例一致"
     },
     {
       "id": "ExaltedSniper",
@@ -12134,6 +12066,7 @@
     {
       "id": "PrimeCorufellScytheWeapon",
       "name": "Corufell Prime",
+      "nameZh": "闪劫 Prime",
       "category": "melee",
       "critChance": 0.3,
       "critMultiplier": 2.5,
@@ -12446,48 +12379,6 @@
           ]
         }
       ]
-    },
-    {
-      "id": "PrimeExaltedBow",
-      "name": "Artemis Bow Prime",
-      "nameZh": "月神狩弓 Prime",
-      "category": "melee",
-      "critChance": 0.25,
-      "critMultiplier": 2,
-      "statusChance": 0.2,
-      "fireRate": 1,
-      "reloadTime": 0.85,
-      "modes": [
-        {
-          "id": "primary",
-          "role": "normal",
-          "trigger": "unknown",
-          "bullets": 1,
-          "multishot": 1,
-          "variants": [
-            {
-              "id": "direct",
-              "label": "直接命中",
-              "segments": [
-                {
-                  "kind": "attack",
-                  "aoe": false,
-                  "damage": {
-                    "impact": 33.6,
-                    "puncture": 192,
-                    "slash": 14.4
-                  },
-                  "procChance": 0.2
-                }
-              ]
-            }
-          ],
-          "_manual": "export-missing",
-          "_note": "WFCD 未收录该武器（多为显赫武器），面板来自官方导出，可能有误"
-        }
-      ],
-      "_manual": "bible",
-      "_note": "同月神狩弓：导出 75 → 游戏面板 240（冲 33.6 / 穿 192 / 切 14.4）"
     },
     {
       "id": "PrimeFlightPistols",

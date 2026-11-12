@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-08T09:10:55.052Z",
+  "generatedAt": "2026-11-12T08:54:39.166Z",
   "source": "mods/baseline.json（Mod 数值基线） + ExportUpgrades（元数据交叉校验）",
   "note": "levelValues 为 0 级到满级的逐级数值；bucket 对应 docs/乘区归属表.md 的乘区",
   "count": 478,

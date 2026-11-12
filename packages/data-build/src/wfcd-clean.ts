@@ -61,6 +61,8 @@ export interface WfcdWeapon {
   type?: string;
   /** 是否可精通；`false` 的一般是 PvP 变体或非正式武器 */
   masterable?: boolean;
+  /** D-152：来源文件（`Primary` / `Melee` …），由 `fetchAllWfcdWeapons` 填入，用于槽位判定纠错 */
+  __source?: string;
   attacks?: WfcdAttack[];
 }
 
@@ -931,6 +933,8 @@ export function toCategory(w: WfcdWeapon): Weapon['category'] {
  * | PvP 变体（`PvPVariantTipOne` …） | `masterable: false`、uniqueName 含 `PvP` | **不收** | 与人形 PvP 模式绑定，不进 PvE 计算 |
  * | 漂泊者手枪（Sirocco） | `productCategory: 'OperatorAmps'` | **不收** | 指挥官武器，沿用既定排除 |
  * | 新武器（Nunchasa / Aksondol / Steflos Prime / Corufell Prime） | `masterable: true` | **收** | 是正式武器，只是官方导出还没有 |
+ * | 重复条目（魔典 `TnDoppelgangerGrimoire`） | 与 `TnGrimoire` 同名同类别 | **不收** | D-152：WFCD 同一件武器给两条，界面会出现两个「魔典」 |
+ * | 滑板载具（`Hoverboard*`：双桅 / 双子库娃） | uniqueName 含 `Hoverboard` | **不收** | D-152（需求方 2026-11-13：「滑板去掉」）：是 K 式悬浮板部件，不是武器，却被 WFCD 放在 `Secondary.json` 里 |
  *
  * @returns 排除原因；保留则返回 null
  */
@@ -941,8 +945,20 @@ export function exclusionReason(w: WfcdWeapon): string | null {
   if ((w.tags ?? []).includes('Zaw')) return '天工造武组件';
   if (String(w.uniqueName ?? '').includes('PvP')) return 'PvP 变体';
   if (w.masterable === false) return '非可精通（PvP / 变体）';
+  // D-152（需求方 2026-11-13「滑板去掉」）：K 式滑板载具混在 Secondary.json 里，
+  // 被当成手枪收了（双桅 / 双子库娃）。它们不是武器，不参与配装与伤害计算。
+  if (/Hoverboard/i.test(String(w.uniqueName ?? ''))) return '滑板载具（不是武器）';
+  // D-152（需求方 2026-11-13：「清」）：WFCD 把魔典记了两条（TnGrimoire / TnDoppelgangerGrimoire），
+  // 保留正式的 TnGrimoire，另一条剔除，避免界面上出现两个「魔典」。
+  if (DUPLICATE_WFCD_IDS.has(toWeaponId(w))) return '与正式条目重复';
   return null;
 }
+
+/** D-152：确认属于重复的 WFCD 条目（同武器多记一条），保留的是 `正式 id` 那一侧 */
+export const DUPLICATE_WFCD_IDS: ReadonlySet<string> = new Set([
+  // 魔典：正式 id 是 TnGrimoire；TnDoppelgangerGrimoire 是同名同面板的重复条目
+  'TnDoppelgangerGrimoire',
+]);
 
 /** 武器 id：取 uniqueName 最后一段（与官方导出键一致，便于跨源对照） */
 export function toWeaponId(w: WfcdWeapon): string {

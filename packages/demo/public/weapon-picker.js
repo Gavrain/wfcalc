@@ -58,9 +58,26 @@ const MELEE_TYPE_LABEL = {
 };
 
 /**
+ * 副手（次要）武器的展示用细类（D-152，需求方 2026-11-13）。
+ *
+ * 背景：以前把双持 / 投掷副手的携带方式（官方 `WIDE_RIFLE` / `SMG`）翻成「步枪」，
+ * 次要武器列表里冒出 60 把「步枪」——需求方：「次要武器的分类显然不对」。
+ *
+ * 需求方口径：「副手 mod 也是通用的，只是投掷类有几张专属，双枪有个滑射赋能」
+ * → Mod / 赋能层面副手就是**通用手枪类**（投掷的专属由 Mod 自己的 `onlyOn` 处理，
+ *   双枪靠「双枪·」赋能），所以界面上不必按 Mod 池细分，只按**武器形态**分：
+ *
+ * | 形态 | 判据 | 界面类型名 |
+ * |---|---|---|
+ * | 单持手枪 | `broad = pistol`，非双持、非投掷 | 手枪 |
+ * | 双持手枪 | `slotEntry.isDualPistols`（数据层按 WFCD `Dual Pistols` 写入） | 双手枪 |
+ * | 投掷副手 | `slotEntry.isThrowing`（数据层按 WFCD `Throwing` 写入） | 投掷武器 |
+ */
+
+/**
  * 取一件武器的分类路径。
  * @param slotEntry `weapon-slots.json` 里该武器的记录
- * @returns `{ group, type }`，group 是 broad（rifle/shotgun/…），type 是细分（仅近战有意义）
+ * @returns `{ broad, typeKey, groupLabel, typeLabel }`
  */
 export function classifyWeapon(slotEntry) {
   const broad = (slotEntry && slotEntry.slots && slotEntry.slots.broad) || 'unknown';
@@ -69,15 +86,21 @@ export function classifyWeapon(slotEntry) {
 
   // 分类优先级（D-098）：
   //   1. 近战 → 用 `specific`（剑/锤/匕首…，官方本来就细分）
-  //   2. 其余 → 用数据层给的 `subclass`：它标出 broad 之外的真实子类，
+  //   2. 副手 → 按形态分（手枪 / 双手枪 / 投掷武器），见上面的表（D-152）
+  //   3. 其余 → 用数据层给的 `subclass`：它标出 broad 之外的真实子类，
   //      例如 rifle 里的 launcher（发射器）/ crossbow（弩）
   //      （这两个都吃步枪类 Mod，broad 仍是 rifle，只在界面上分开展示）
-  //   3. 都拿不到 → 退回 broad 本身
+  //   4. 都拿不到 → 退回 broad 本身
   let typeKey;
   if (broad === 'melee' || broad === 'archmelee') {
     // specific 缺失时**不要**退回 broad：broad 对近战就是 'melee'，
     // 但空 specific 的武器会被误显示成"手枪/步枪"这种其它大类的名字。
     typeKey = specific.length ? specific[0] : '__other_melee__';
+  } else if (broad === 'pistol') {
+    // D-152：副手不再细分到"步枪"，按形态分三种
+    if (slotEntry && slotEntry.isDualPistols) typeKey = 'dual_pistols';
+    else if (slotEntry && slotEntry.isThrowing) typeKey = 'throwing';
+    else typeKey = 'pistol';
   } else if (subclass && subclass !== broad && TYPE_LABEL[subclass]) {
     // D-099 C：弩并入弓弩（同一个类型桶）
     typeKey = subclass === 'crossbow' ? 'bow' : subclass;
@@ -89,9 +112,14 @@ export function classifyWeapon(slotEntry) {
     broad,
     typeKey,
     groupLabel: TYPE_LABEL[broad] || broad,
-    typeLabel: MELEE_TYPE_LABEL[typeKey] || TYPE_LABEL[typeKey] || typeKey,
+    typeLabel: OTHER_TYPE_LABEL[typeKey] || MELEE_TYPE_LABEL[typeKey] || TYPE_LABEL[typeKey] || typeKey,
   };
 }
+
+/** 副手展示细类 → 中文（D-152 新增投掷武器） */
+const OTHER_TYPE_LABEL = {
+  throwing: '投掷武器',
+};
 
 /**
  * 把武器列表组织成 `大类 → 类型 → 武器[]` 的两层结构，供下拉栏渲染。
@@ -238,6 +266,28 @@ export function searchWeapons(weapons, keyword) {
     const en = String(w.name || '').toLowerCase().replace(/\s+/g, '');
     return zh.includes(q) || en.includes(q);
   });
+}
+
+/**
+ * 在 `groupWeapons()` 的结果里找某把武器落在哪个大类 / 类型（D-151）。
+ *
+ * 搜索结果面板要显示「中文名 · 类型 · 大类」，并在点选后把上面的大类 / 类型 / 弹道
+ * 下拉跳到该武器所在位置（需求方 2026-11-13：搜索按全部四类搜，选哪把就跳过去）。
+ *
+ * @returns `{ groupId, groupLabel, typeKey, typeLabel }`；找不到时返回 `null`
+ */
+export function locateWeapon(groups, weaponId) {
+  if (!groups || !weaponId) return null;
+  for (const [groupId, group] of groups) {
+    for (const [typeKey, bucket] of group.types) {
+      for (const w of bucket.weapons) {
+        if (w.id === weaponId) {
+          return { groupId, groupLabel: group.label, typeKey, typeLabel: bucket.label };
+        }
+      }
+    }
+  }
+  return null;
 }
 
 /**

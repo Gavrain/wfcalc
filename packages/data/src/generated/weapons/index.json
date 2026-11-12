@@ -1,23 +1,23 @@
 {
-  "generatedAt": "2026-11-11T17:49:24.374Z",
+  "generatedAt": "2026-11-12T08:54:44.064Z",
   "source": "WFCD/warframe-items (MIT)",
   "stats": {
     "total": 668,
-    "kept": 621,
+    "kept": 620,
     "droppedNoAttack": 1,
-    "multiMode": 201,
+    "multiMode": 200,
     "beamModes": 40,
     "unknownTrigger": 238,
-    "excluded": 46
+    "excluded": 47
   },
   "categories": {
     "primary": 196,
     "secondary": 149,
-    "melee": 260,
+    "melee": 256,
     "archgun": 20,
     "archmelee": 8,
     "companion": 24,
     "unknown": 0
   },
-  "manualOverrides": 1
+  "manualOverrides": 0
 }

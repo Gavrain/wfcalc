@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-11T17:49:24.357Z",
+  "generatedAt": "2026-11-12T08:54:44.052Z",
   "source": "WFCD/warframe-items (MIT)",
   "category": "primary",
   "count": 196,
@@ -3184,6 +3184,7 @@
     {
       "id": "DuelistBow",
       "name": "Nunchasa",
+      "nameZh": "霜冥差",
       "category": "primary",
       "critChance": 0.32,
       "critMultiplier": 2.4,
@@ -8818,6 +8819,7 @@
     {
       "id": "PrimeSteflosShotgun",
       "name": "Steflos Prime",
+      "nameZh": "石晶之花 Prime",
       "category": "primary",
       "critChance": 0.18,
       "critMultiplier": 2.2,
@@ -9950,7 +9952,7 @@
       "critChance": 0.2,
       "critMultiplier": 2,
       "statusChance": 0.25,
-      "fireRate": 2,
+      "fireRate": 0,
       "magazineSize": 10,
       "reloadTime": 2,
       "modes": [
@@ -10009,10 +10011,7 @@
             "critChance": 0.25
           }
         }
-      ],
-      "_manualFields": {
-        "fireRate": "0 → 2：导出射速为 0，按蓄力 0.5s 反推为 2 发/秒（待人工核实实际蓄力时间）"
-      }
+      ]
     },
     {
       "id": "RailjackRifleGun",

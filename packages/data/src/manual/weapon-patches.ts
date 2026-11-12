@@ -80,3 +80,30 @@ export const MANUAL_VARIANTS: readonly ManualVariant[] = WEAPON_SPLITS.flatMap((
     nameZh: v.nameZh,
   })),
 );
+
+/**
+ * 武器**中文名**人工表（D-152）。
+ *
+ * 为什么需要：官方语言包比游戏慢，新武器（WFCD 已收录、官方导出还没有）查不到中文名，
+ * 界面上只能显示英文。需求方 2026-11-13 指出这四把的名字不对，要求补上中文名。
+ *
+ * 依据：warpedia 中文维基（灰机 wiki）的条目名 ——
+ *   · Nunchasa  → [霜冥差](https://warframe.huijiwiki.com/wiki/Nunchasa)
+ *     「Narin 的标志性弓箭」；
+ *   · Aksondol  → [寒怨刺](https://warframe.huijiwiki.com/wiki/Aksondol)
+ *     「Narin 的标志性双持手枪」；
+ *   · Steflos Prime → [石晶之花Prime](https://warframe.huijiwiki.com/wiki/Steflos_Prime)
+ *     「石晶之花的 Prime 版本」；
+ *   · Corufell Prime → [闪劫Prime](https://warframe.huijiwiki.com/wiki/Corufell_Prime)
+ *     「闪劫的 Prime 版本」。
+ *
+ * ⚠ 这正是 CLAUDE.md 规则 3 说的「人工推断」：**必须带 `_manual` 说明原因，能回答"哪来的"**。
+ * 命名风格按现有数据（`丧钟 Prime` 这类中间带空格），维基原文「石晶之花Prime」不带空格。
+ * 由 `packages/data-build/src/wfcd-clean.ts` 的 `MANUAL_ZH_NAME` 消费。
+ */
+export const MANUAL_WEAPON_ZH: Readonly<Record<string, { zh: string; reason: string }>> = {
+  DuelistBow: { zh: '霜冥差', reason: '官方语言包未收录（新武器），取自中文维基条目「霜冥差」' },
+  DuelistPistols: { zh: '寒怨刺', reason: '官方语言包未收录（新武器），取自中文维基条目「寒怨刺」' },
+  PrimeSteflosShotgun: { zh: '石晶之花 Prime', reason: '官方语言包未收录，取自中文维基「石晶之花Prime」，按现有风格补空格' },
+  PrimeCorufellScytheWeapon: { zh: '闪劫 Prime', reason: '官方语言包未收录，取自中文维基「闪劫Prime」，按现有风格补空格' },
+};

@@ -67,7 +67,9 @@ async function fetchOne(name: WfcdWeaponSourceName, opts: Options): Promise<Wfcd
 /**
  * 抓取全部 WFCD 武器。
  *
- * @returns 合并后的武器数组（已去重：同名保留第一次出现的）
+ * @returns 合并后的武器数组（已去重：同名保留第一次出现的）。
+ *          每条带 `__source` = 来源文件（`Primary` / `Melee` …），供 D-152 的槽位判定纠错用
+ *          （WFCD 有 10 把近战的 `type` 错标成 `Rifle`，所在文件是对的）。
  */
 export async function fetchAllWfcdWeapons(opts: Options = {}): Promise<WfcdWeapon[]> {
   const names = Object.keys(WFCD_WEAPON_SOURCES) as WfcdWeaponSourceName[];
@@ -80,7 +82,7 @@ export async function fetchAllWfcdWeapons(opts: Options = {}): Promise<WfcdWeapo
       const key = w.uniqueName ?? w.name;
       if (seen.has(key)) continue;
       seen.add(key);
-      out.push(w);
+      out.push({ ...w, __source: n });
     }
   }
   return out;

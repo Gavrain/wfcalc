@@ -222,11 +222,76 @@ export function isTrueBow(w: ExportWeapon): boolean {
 /**
  * 是不是**双持手枪**（双手枪类，能吃「双枪·」赋能）。
  *
- * 依据官方导出的 `compatibilityTags`：双手枪带 `DUAL_PISTOL`（双子葛拉卡达这类带霰弹模式的也算）。
- * 需求方 2026-07-11：副手即使是霰弹模式也只算副手，所以副手侧只区分"双持 / 非双持"。
+ * D-152（需求方 2026-11-13：「双枪有个滑射赋能」）——这个词类**两个数据源都不可靠**：
+ *
+ *   · 官方导出的 `compatibilityTags` 里没有 `DUAL_PISTOL`（实测带 DUAL 的 28 条全是近战双刀），
+ *     `holsterCategory` 对单持 / 双持手枪都是 `SMG`；
+ *   · WFCD 的 `type` 只有**部分**双枪写成 `Dual Pistols`：`Akstiletto`（史提托双枪）、
+ *     `Aksomati`（轻灵月神双枪）、`Afuris Prime`、`Akbolto Prime` 都写成 `Pistol`。
+ *
+ * 所以走「两条并集」：
+ *   1. WFCD `type === 'Dual Pistols'`；
+ *   2. 资源 id 末段带双持前缀（`Ak` / `Akimbo` / `PrimeAk…`）—— 实测覆盖所有漏标的那几把
+ *      （`TennoUzi` 是例外：它其实叫 Akstiletto，但末段不带 Ak，见 `DUAL_PISTOL_IDS`）。
+ *
+ * ⚠ **必须与「双刀 / 双剑」区分开**（需求方 2026-11-13：「你注意区分双手枪跟双刀就行」）：
+ *   近战双持武器的 id 同样带 `Dual` 前缀（`DualHeatSwords` 烈焰双剑 / `DualKamas` 双短柄战镰 /
+ *   `DualCleaverWeapon` 斩肉双刀 / `DualShortSword` 空刃双刀…，实测 10 把），
+ *   官方 `DUAL_*` 标签也全挂在这些近战上。所以这里**必须**先要求宽类是手枪，
+ *   否则「双枪·滑射」赋能会出现在双刀上。
+ *
+ * @param wfcdType  WFCD 的 `type` 字段
+ * @param id        武器 id（uniqueName 末段）
+ * @param broad     该武器的宽类（`weapon-slots.ts` 的 `SlotResolution.broad`）；非 `pistol` 一律不算
+ */
+export function isDualPistolByWfcd(wfcdType: string | undefined, id: string, broad: string): boolean {
+  // 第一道闸：只有手枪类才可能是「双手枪」。双刀 / 双剑的 id 也带 Dual，靠这一条挡掉。
+  if (broad !== 'pistol') return false;
+  if (wfcdType === 'Dual Pistols') return true;
+  if (DUAL_PISTOL_IDS.has(id)) return true;
+  // 双持前缀：AkLexPistols / AkimboBolto / PrimeAkBoltoWeapon / PrimeAFurisWeapon
+  return /^(Ak|Akimbo|PrimeAk|PrimeAFuris|Dual)/i.test(id) && !/^(Akarius|Aksh)/i.test(id);
+}
+
+/**
+ * 名字/id 不带双持前缀、但确实是双手枪的（D-152 逐个核对 WFCD + 官方导出得出）。
+ *
+ * · `TennoUzi` = Akstiletto（史提托双枪，双手）
+ * · `SapientPistol` = Akarius（阿利乌双枪）
+ * · `TnoBladedPistols` = Akjagara（觉醒双枪）
+ * · `GrineerAkimboPistol` = Twin Gremlins（双子小精灵）
+ * · `KuvaStubba` = Kuva Twin Stubbas（赤毒·双子史度巴）
+ * · `TwinGrakatas` = Twin Grakatas（双子葛拉卡达）
+ * · `DualMagnus` / `DualMagnusPrime` 已由 `Dual` 前缀覆盖
+ */
+const DUAL_PISTOL_IDS: ReadonlySet<string> = new Set([
+  'TennoUzi', 'SapientPistol', 'TnoBladedPistols', 'PrimeAkariusWeapon', 'KuvaStubba',
+  'TwinGrakatas', 'GrineerAkimboPistol', 'AkimboShotGun', 'PrimeAkimboShotGun',
+  // 以下 id 既不带 Ak 也不带 Dual，但都是双持（逐个按中文名「双枪 / 双子」核对）
+  'HarlequinPistols',   // 荒谬双枪
+  'DexFuris',           // Dex 盗贼双枪
+  'PSDualCestra',       // 保障·锡斯特双枪
+  'AHAkbolto',          // 终极·螺钉双枪
+  'InfVomitGunWep',     // 毒囊双枪
+  '1999InfSporePistolWeapon', // 终幕·孢蚀双枪
+  'WraithTwinVipers',   // 双子蝰蛇·亡魂
+  'GrnQueenGuardDualPistols', // 双子罗格
+  'GrnTwinKohmaks',     // 双子寇恩霰机枪
+  'PrismaTwinGremlinsWeapon', // 棱晶·双子小精灵
+  'CrpBriefcaseAkimboPistol', // 信条·纵横双枪
+  'PrimeSlingerPistols',      // 监察者双枪 Prime
+  'SlingerPistols',           // 监察者双枪
+]);
+
+/**
+ * 官方导出的双持标记（D-152：**已知不可靠，只当辅助**）。
+ *
+ * 实测官方 `compatibilityTags` 里的 `DUAL_*` 全部挂在近战双刀上，
+ * 双持手枪一条都没有；`holsterCategory` 对单 / 双持手枪都是 `SMG`。
+ * 保留这个函数是给"官方确实标了 DUAL_PISTOL"的少数情况兜底，主判定见 `isDualPistolByWfcd`。
  */
 export function isDualPistolWeapon(w: ExportWeapon): boolean {
-  return (w.compatibilityTags ?? []).some((t) => /DUAL/i.test(t));
+  return (w.compatibilityTags ?? []).some((t) => /DUAL_PISTOL/i.test(t));
 }
 
 /** holsterCategory → 宽类槽位（第 2 级兜底） */
@@ -364,10 +429,99 @@ export interface SlotResolution {
    */
   specific: ModSlotKind[];
   /** 判定依据：用哪一级得出的 */
-  source: 'zk-class' | 'holster' | 'stance-tags' | 'product-category' | 'manual' | 'unresolved';
-  basis: { zkClass?: string | undefined; zkSlot?: ZkSlot | undefined; holster?: string | undefined; tags: string[]; productCategory?: string | undefined };
+  source: 'zk-class' | 'holster' | 'stance-tags' | 'product-category' | 'manual' | 'unresolved' | 'wfcd-type';
+  basis: { zkClass?: string | undefined; zkSlot?: ZkSlot | undefined; holster?: string | undefined; tags: string[]; productCategory?: string | undefined; wfcdType?: string | undefined };
   /** 无法判定时为 true，流水线会列入待人工确认 */
   unresolved: boolean;
+}
+
+/**
+ * WFCD `type` → 宽类（D-152：槽位判定改为 WFCD 为主）。
+ *
+ * 需求方 2026-11-13：「全改成 WFCD 为主，除非有他确认不了的」。
+ * WFCD 给的是武器的**真实类型**（`Bow` / `Shotgun` / `Dual Pistols` …），
+ * 不像官方导出那样只有携行方式（`holsterCategory`），双持手枪不会混成步枪。
+ *
+ * 需求方补充的口径：
+ * > 「弓和狙击就是步枪大类下面的，mod方面主要霰弹使用霰弹mod，其他主要都通用主要步枪mod，
+ * >  只是弓狙击有额外的专属mod」→ 弓 / 狙击**保留自己的专属类**，
+ * >  同时**也吃步枪类 Mod**（见 `compatibleModKinds`），不是把两者合并。
+ */
+const WFCD_TYPE_TO_KIND: Readonly<Record<string, ModSlotKind>> = {
+  Rifle: 'rifle',
+  Bow: 'bow',
+  Shotgun: 'shotgun',
+  Sniper: 'sniper',
+  // 发射器吃步枪类 Mod，只是界面单独分组（同 exportSubclass 的口径）
+  Launcher: 'rifle',
+  Pistol: 'pistol',
+  'Dual Pistols': 'pistol',
+  // 投掷副手按手枪类 Mod 算（需求方 2026-11-13：副手 Mod 通用，投掷只有个别专属）
+  Throwing: 'pistol',
+  Melee: 'melee',
+  'Arch-Gun': 'archgun',
+  'Arch-Melee': 'archmelee',
+};
+
+/** 按所在文件粗判大类（WFCD 的 `type` 有已知错标时的第二票） */
+const WFCD_FILE_TO_KIND: Readonly<Record<string, ModSlotKind>> = {
+  Primary: 'rifle',
+  Secondary: 'pistol',
+  Melee: 'melee',
+  'Arch-Gun': 'archgun',
+  'Arch-Melee': 'archmelee',
+  SentinelWeapons: 'rifle',
+};
+
+export interface WfcdSlotInput {
+  /** WFCD 武器的 `type` 字段 */
+  type?: string | undefined;
+  /** 该条目所在的 WFCD 文件（`Primary` / `Melee` …），用于纠错 */
+  file?: string | undefined;
+  /** WFCD 的 `productCategory` */
+  productCategory?: string | undefined;
+  /** 武器 id（uniqueName 末段），用于挑人工/官方兜底 */
+  id: string;
+}
+
+/**
+ * 用 WFCD 数据判定槽位（D-152 的主路径）。
+ *
+ * 判据优先级：
+ *   1. **所在文件 / `productCategory` 明确说是近战** → 近战（不看 `type`）——
+ *      WFCD 有 10 把近战的 `type` 错标成 `Rifle`（Mk1-Bo、Paracesis、Prisma Skana…），
+ *      但它们的文件与 `productCategory` 都写着 Melee，以那两票为准；
+ *   2. `type` 能映射 → 直接用；
+ *   3. 都不行 → 返回 null，交给官方导出兜底（显赫武器 / 哈尔武等）。
+ *
+ * 近战的**细分**（巨镰 / 剑 / 锤…）WFCD 没有任何字段（`class` / `stance` 全空），
+ * 这里不判，由调用方用语势标签补（需求方 2026-11-13：「近战可以用官方架势兜底」）。
+ *
+ * @returns 判定结果；WFCD 判不了时返回 null
+ */
+export function resolveFromWfcd(w: WfcdSlotInput): { broad: ModSlotKind; source: 'wfcd-type'; basis: SlotResolution['basis'] } | null {
+  const basis: SlotResolution['basis'] = { tags: [], wfcdType: w.type };
+  if (w.productCategory !== undefined) basis.productCategory = w.productCategory;
+
+  const fileKind = w.file !== undefined ? WFCD_FILE_TO_KIND[w.file] : undefined;
+  const productKind = w.productCategory === 'Melee' ? 'melee'
+    : w.productCategory === 'SpaceGuns' ? 'archgun'
+      : w.productCategory === 'SpaceMelee' ? 'archmelee'
+        : undefined;
+
+  // 1. 「这是近战」的票数高于 type：WFCD 的 type 对部分近战错标成 Rifle
+  const saysMelee = productKind === 'melee' || fileKind === 'melee';
+  if (saysMelee && w.type !== 'Arch-Melee') return { broad: 'melee', source: 'wfcd-type', basis };
+
+  // 2. 空战：文件/大类说空战就按空战（`type` 字段对空战不够细）
+  if (fileKind === 'archgun' || productKind === 'archgun') return { broad: 'archgun', source: 'wfcd-type', basis };
+  if (fileKind === 'archmelee' || productKind === 'archmelee') return { broad: 'archmelee', source: 'wfcd-type', basis };
+
+  // 3. 按 type
+  const kind = w.type !== undefined ? WFCD_TYPE_TO_KIND[w.type] : undefined;
+  if (kind) return { broad: kind, source: 'wfcd-type', basis };
+
+  return null;
 }
 
 /** 由 ZK 武器库条目判定 */

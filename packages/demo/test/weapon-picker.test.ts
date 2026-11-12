@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 武器切换（D-093）的纯逻辑测试。
  *
  * 需求方 2026-11-06：
@@ -10,7 +10,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { join, normalize } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { WEAPON_GROUPS, classifyWeapon, groupWeapons, searchWeapons, FIRE_STYLE_OPTIONS, filterByStyle, weaponMatchesStyle } from '../public/weapon-picker.js';
+import { WEAPON_GROUPS, classifyWeapon, groupWeapons, searchWeapons, FIRE_STYLE_OPTIONS, filterByStyle, weaponMatchesStyle, locateWeapon } from '../public/weapon-picker.js';
 
 const ROOT = normalize(join(fileURLToPath(new URL('.', import.meta.url)), '../../..'));
 
@@ -161,6 +161,44 @@ describe('武器名称搜索', () => {
   });
 });
 
+/**
+ * D-151（需求方 2026-11-13）：搜索结果改成列在搜索框下方的面板里，
+ * 每行要标出「类型 · 大类」，点选后下拉栏跳过去 —— 靠 locateWeapon 找落点。
+ */
+describe('搜索结果定位（D-151）', () => {
+  it('主要武器定位到 primary / 步枪', async () => {
+    const { weapons, slotFile } = await loadAll();
+    const groups = groupWeapons(weapons, slotFile);
+    const loc = locateWeapon(groups, 'KuvaKarak');
+    assert.ok(loc);
+    assert.equal(loc.groupId, 'primary');
+    assert.equal(loc.typeKey, 'rifle');
+  });
+
+  it('近战武器定位到 melee + 细分类型（赤毒·希尔德 = 锤）', async () => {
+    const { weapons, slotFile } = await loadAll();
+    const groups = groupWeapons(weapons, slotFile);
+    const loc = locateWeapon(groups, 'GrnKuvaLichScytheWeapon');
+    assert.ok(loc);
+    assert.equal(loc.groupId, 'melee');
+    assert.equal(loc.typeKey, 'hammer');
+    assert.equal(loc.typeLabel, '锤');
+  });
+
+  it('全部武器都能定位到 大类/类型（搜索面板不会出现空白落点）', async () => {
+    const { weapons, slotFile } = await loadAll();
+    const groups = groupWeapons(weapons, slotFile);
+    const missing = weapons.filter((w) => !locateWeapon(groups, w.id));
+    assert.deepEqual(missing.map((w) => w.id), []);
+  });
+
+  it('查不到时返回 null，不抛错', () => {
+    assert.equal(locateWeapon(null, 'x'), null);
+    assert.equal(locateWeapon(new Map(), 'x'), null);
+    assert.equal(locateWeapon(new Map(), ''), null);
+  });
+});
+
 describe('分类函数', () => {
   it('slotEntry 缺失时不崩，归到 unknown', () => {
     const c = classifyWeapon(undefined);
@@ -212,5 +250,63 @@ describe('弹道筛选（D-099 A）', () => {
     const b = { modes: [{ trigger: 'active' }] } as never;
     assert.equal(weaponMatchesStyle(a, 'held'), true);
     assert.equal(weaponMatchesStyle(b, 'held'), false);
+  });
+});
+
+/**
+ * D-152（需求方 2026-11-13）：「次要武器的分类显然不对」。
+ *
+ * 旧实现把双持 / 投掷副手的携带方式（WIDE_RIFLE / SMG）翻成「步枪」，
+ * 次要武器列表里冒出几十把「步枪」。现在副手按形态分：手枪 / 双手枪 / 投掷武器。
+ */
+describe('次要武器分类（D-152）', () => {
+  async function loadSlots() {
+    const raw = await readFile(join(ROOT, 'packages/data/src/generated/mods/weapon-slots.json'), 'utf8');
+    return JSON.parse(raw).weapons as Record<string, any>;
+  }
+
+  it('副手不再出现「步枪」类型', async () => {
+    const slots = await loadSlots();
+    const bad: string[] = [];
+    for (const [id, e] of Object.entries(slots)) {
+      if (e.slots?.broad !== 'pistol') continue;
+      const cls = classifyWeapon(e);
+      if (cls.typeKey === 'rifle') bad.push(`${id}(${e.nameZh ?? e.name})`);
+    }
+    assert.deepEqual(bad, [], '副手武器不该被归到步枪');
+  });
+
+  it('双手枪归「双手枪」、投掷副手归「投掷武器」、其余归「手枪」', async () => {
+    const slots = await loadSlots();
+    assert.equal(classifyWeapon(slots['TennoUzi']).typeLabel, '双手枪', '史提托双枪是双手枪');
+    assert.equal(classifyWeapon(slots['Kunai']).typeLabel, '投掷武器', '苦无是投掷副手');
+    assert.equal(classifyWeapon(slots['HeavyPistol']).typeLabel, '手枪', '雷克斯是单持手枪');
+  });
+
+  it('近战双刀不会被误标成双持手枪', async () => {
+    const slots = await loadSlots();
+    const dualMelee = Object.entries(slots).filter(([, e]) => e.slots?.broad === 'melee' && e.isDualPistols);
+    assert.deepEqual(dualMelee.map(([id]) => id), [], '近战不该带 isDualPistols');
+  });
+});
+
+/**
+ * D-152：四把新武器的中文名与槽位（WFCD 收录、官方导出还没有）。
+ */
+describe('新武器：名字与分类（D-152）', () => {
+  it('中文名是维基确认的，且槽位正确', async () => {
+    const raw = await readFile(join(ROOT, 'packages/data/src/generated/mods/weapon-slots.json'), 'utf8');
+    const slots = JSON.parse(raw).weapons as Record<string, any>;
+    const want: Array<[string, string, string]> = [
+      ['DuelistBow', '霜冥差', 'bow'],
+      ['DuelistPistols', '寒怨刺', 'pistol'],
+      ['PrimeSteflosShotgun', '石晶之花 Prime', 'shotgun'],
+      ['PrimeCorufellScytheWeapon', '闪劫 Prime', 'melee'],
+    ];
+    for (const [id, zh, broad] of want) {
+      assert.ok(slots[id], `${id} 应有一条槽位记录`);
+      assert.equal(slots[id].nameZh, zh);
+      assert.equal(slots[id].slots.broad, broad);
+    }
   });
 });

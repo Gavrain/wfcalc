@@ -22,6 +22,7 @@ import { diffWeapons, formatDiffReport, type DiffReport } from './diff.ts';
 import { applyOverrides, type AppliedOverride } from './overrides.ts';
 import { toEmitWeapon, type EmitWeapon } from './emit.ts';
 import { buildLangKeyByWeaponId, buildZhByEnglishName, resolveZhForWfcdWeapon, stripNamePrefix, type LanguageDict } from './localize.ts';
+import { MANUAL_WEAPON_ZH } from '../../data/src/manual/weapon-patches.ts';
 import type { AttackMode, Weapon } from '../../core/src/weapon.ts';
 
 const repoRoot = resolve(import.meta.dirname, '../../..');
@@ -315,6 +316,17 @@ async function main(): Promise<number> {
         missing.push(w.name);
       }
     }
+    // D-152：语言包和 uniqueName 兜底都查不到的新武器，用人工名称表补
+    // （需求方 2026-11-13 确认的霜冥差 / 寒怨刺 / 石晶之花 Prime / 闪劫 Prime）
+    let manualZh = 0;
+    for (const w of cleaned) {
+      if (w.nameZh) continue;
+      const manual = MANUAL_WEAPON_ZH[w.id];
+      if (!manual) continue;
+      w.nameZh = manual.zh;
+      manualZh++;
+    }
+    if (manualZh > 0) console.log(`      人工中文名 ${manualZh} 把（见 manual/weapon-patches.ts 的 MANUAL_WEAPON_ZH）`);
     const total = cleaned.length;
     console.log(`      中文名命中 ${hit}/${total}（${((hit / total) * 100).toFixed(1)}%）`);
     if (missing.length > 0) console.log(`      未命中：${missing.join(', ')}`);

@@ -42,6 +42,7 @@
 | D-144 | 人工层 `manual/` 目录分裂：`packages/data/manual/`（顶层，D-100/101/110 时代）与 `packages/data/src/manual/`（D-140/141 时代）两处并存，需定唯一归属并合并 | **已确认（选 A）/ 已实施**：统一到 `src/manual/` | 2026-11-08 |
 | D-148 | 数据层转向 WFCD：射线判据 / 模式划分 / 触发率口径（**已全面切换**：射线只看扳机 `held`，不再有 `beam` 字段；第六轮起射线**按段**判，段上可有 `beam: false`） | **已确认 / 已实施** | 2026-11-11 |
 | D-150 | 一个射击模式 = 一种扳机：`Burst Mode` / `Semi-Auto Mode` / `Auto` / `Alt-Fire` / `Lock-on Mode` 这类扳机词、信标 / 炮台、独立弹道（鱼叉 / 长矛 / 飞掷 / 剑刃远程）、**开镜**各成一个射击模式；同一次开火的子段（霰弹弹丸+爆裂、钩铳命中附带、磁道炮吸引场）留在原模式；攻击方式与模式名一律中文 | **已确认 / 已实施** | 2026-11-12 |
+| D-152 | 武器槽位判定改为 **WFCD 为主、官方导出兜底**（D-148 只换了面板，槽位这条支线一直没换）；近战细分用官方架势兜底；弓 / 狙击保留专属类但同吃步枪类；副手不再被携行方式翻成「步枪」；四把新武器补中文名；魔典重复条目剔除 | **已确认 / 已实施** | 2026-11-13 |
 
 ## 正文
 
@@ -1738,6 +1739,104 @@ UI 显示扳机与伤害类型、哈尔武补 `_manual`、删除 `overrides.ts` 
   全量对照只影响这 1 把；多模式武器 200 → 201。
 - **验证**：单测 **498 项全绿**（新增猛毒开镜 1 项）；`demo:check`、`demo:editor-check` 全部通过。
 
+
+### D-152 槽位判定改为 WFCD 为主（状态：**已确认 / 已实施**，需求方 2026-11-13）
+
+- **日期**：2026-11-13
+- **类别**：改变数据层的判定口径（**谁吃哪套 Mod**）——不动计算内核
+
+**需求方原话**
+
+> 「为什么还在官方导出，已经全面转向WFCD了，到底是哪里还在要求优先用官方导出？」
+> 「全改成 WFCD 为主，除非有他确认不了的，向我汇报」
+> 「保留官方的弓 / 狙击，弓和狙击就是步枪大类下面的，mod方面主要霰弹使用霰弹mod，
+> 其他主要都通用主要步枪mod，只是弓狙击有额外的专属mod。近战可以用官方架势兜底……
+> B直接改，副手mod也是通用的，只是投掷类有几张专属，双枪有个滑射赋能」
+
+**查到的根因**：D-148 换源只换了**面板**，槽位判定那条支线一次都没换。
+
+| 位置 | 原来 | 问题 |
+|---|---|---|
+| `build-mods.ts` `resolveFromExport(w)` | 唯一入口 | 只看官方 `holsterCategory` / `compatibilityTags` |
+| `weapon-slots.ts` `HOLSTER_KINDS` | `WIDE_RIFLE` / `SMG` → `rifle` | 双持 / 投掷副手被判成步枪，次要武器里冒出 60 把「步枪」 |
+| 兜底分支 | 判不出 → `broad: 'rifle'` | 官方没有的新武器（霜冥差 / 寒怨刺…）吃步枪 Mod |
+
+**改法**
+
+1. `weapon-slots.ts` 新增 `resolveFromWfcd()`：按 WFCD `type` 判宽类
+   （Rifle / Bow / Shotgun / Sniper / Launcher / Pistol / Dual Pistols / Throwing / Melee / Arch-*）。
+   - **纠错**：WFCD 有 10 把近战的 `type` 错标成 `Rifle`（`Mk1-Bo` / `Paracesis` / `Prisma Skana` /
+     `Dual Viciss` / `Ekhein` / `Mk1-Furax`…）。它们的**所在文件与 `productCategory` 都写着 Melee**，
+     所以「文件 / 大类说是近战」的票数高于 `type`。
+   - 空战同样按文件 / `productCategory` 判（`type` 对空战不够细）。
+   - 判不出来返回 `null`，交给官方导出兜底（显赫武器、哈尔武）。
+2. `build-mods.ts` 判定顺序：**WFCD `type` → 官方架势标签补近战细分 → 官方导出兜底 → 人工表**。
+   - 近战细分 WFCD **完全没有字段**（`class` / `stance` 全空），按需求方口径「用官方架势兜底」。
+   - 新增「WFCD 补录」：WFCD 有、官方导出还没有的武器（4 把）以前根本没有槽位记录，
+     现在按 WFCD 条目补录。
+3. **弓 / 狙击**：保留自己的专属类（`bow` / `sniper`），**同时**吃步枪类 + 主武器类
+   —— 需求方：「弓和狙击就是步枪大类下面的……只是弓狙击有额外的专属mod」。
+   `trueBow` 不再只看官方 `holsterCategory`（新武器没有），改为「WFCD 判成 bow 且不是弩」。
+4. **副手**：不再被携行方式翻成「步枪」，Mod 池统一手枪类；界面按形态分
+   手枪 / 双手枪 / 投掷武器（`isDualPistols` / `isThrowing` 两个字段由 WFCD `type` 写入）。
+5. **中文名**：`manual/weapon-patches.ts` 新增 `MANUAL_WEAPON_ZH`
+   （霜冥差 / 寒怨刺 / 石晶之花 Prime / 闪劫 Prime，依据中文维基条目，带 `reason` 可追溯）。
+   命名风格按现有数据带空格（维基原文「石晶之花Prime」）。
+6. **去重**：`DUPLICATE_WFCD_IDS` 剔除 `TnDoppelgangerGrimoire`（与 `TnGrimoire` 同名同面板）。
+   「分离 / 分离 Prime」核查后只剩同伴类一条，已无重复。
+
+**实测变更清单**
+
+| 变化 | 把数 | 例子 |
+|---|---|---|
+| 步枪 → 手枪（投掷 / 双持副手） | 62 | 飞扬、绝望、苦无、鹰爪、雷爆信镖 |
+| 步枪 → 霰弹枪 | 6 | 石晶之花、噬菌者、横痃重炮、龙骑兵 |
+| 步枪 → 狙击枪 | 2 | 瓦德雅 Prime、巴兹火枪 |
+| 狙击枪 → 步枪 | 1 | 月面狂风 Prime（WFCD `type=Rifle`） |
+| 弓 → 步枪 | 1 | 异融西诺斯（WFCD `type=Rifle`） |
+| 新增槽位记录 | 4 | 霜冥差 / 寒怨刺 / 石晶之花 Prime / 闪劫 Prime |
+
+- 副手合计 340：单持手枪 301 / 双手枪 26→39（补全后）/ 投掷 13；**「步枪」类型归零**。
+- 槽位无法判定 **0 把**。
+
+**需求方知情的两处（已逐条确认并处理，2026-11-13 追加）**
+
+1. **双手枪识别没有可靠数据源**：官方 `compatibilityTags` 里的 `DUAL_*` 全挂在近战双刀上，
+   `holsterCategory` 对单 / 双持手枪都是 `SMG`；WFCD 的 `type` 只有一部分双枪写成
+   `Dual Pistols`（`Akstiletto` / `Aksomati` / `Afuris Prime` / `Akbolto Prime` 都写成 `Pistol`）。
+   所以 `isDualPistolByWfcd` 走「WFCD type ∪ id 双持前缀（`Ak` / `Akimbo` / `PrimeAk` / `Dual`）∪ 手工清单」。
+   手工清单 13 条全是按中文名「双枪 / 双子」逐个核对的推断值。
+   - **需求方 2026-11-13**：「你注意区分双手枪跟双刀就行，你列的这几个是对的」
+     → 清单确认无误；**双刀 / 双剑必须与双手枪分开**。
+   - **落地**：`isDualPistolByWfcd(wfcdType, id, broad)` 把「宽类必须是 `pistol`」作为**第一道闸**
+     写进函数内部（以前只在调用点挡）。实测近战里 `DualHeatSwords` / `DualKamas` / `DualCleaverWeapon` /
+     `DualShortSword` / `DualEtherSword` 等 10 把 id 都带 `Dual` 前缀，靠这一条挡掉，
+     否则「双枪·滑射」赋能会出现在双刀上。结果：39 把双手枪全部是 `pistol`，误标 0 把。
+   - 新增回归测试 4 项（近战带 Dual 不算 / 真双手枪算 / 宽类优先 / 单持不算）。
+2. **滑板载具混进了副手武器**：官方导出把 **20 个** K 式滑板部件（`Hoverboard*`）标成 `Pistols`，
+   WFCD 的 `Secondary.json` 里也有。
+   - **需求方 2026-11-13**：「滑板去掉」
+   - **落地**：`exclusionReason` 增加 `Hoverboard` 排除（武器流程），
+     `build-mods` 的官方导出循环与 WFCD 补录循环也一并跳过。`weapon-slots.json` 里滑板条目 **20 → 0**。
+
+**其他仍走官方导出的地方**（WFCD 确认不了的）
+
+- 近战细分（巨镰 / 剑 / 锤…）：WFCD 无字段，继续用官方架势标签。
+- Mod 本身的数值：仍来自 `baseline.json` + 官方 `ExportUpgrades`（D-148 既定，本轮不动）。
+
+**验证**
+
+- 新增单测：`data-build/test/weapon-slots.test.ts` 的「WFCD 为主的槽位判定（D-152）」8 项
+  （类型映射、近战错标纠错、空战、兜底、四把新武器、投掷、弓狙击同吃步枪类）；
+  `demo/test/weapon-picker.test.ts` 新增「次要武器分类（D-152）」3 项 + 「新武器：名字与分类」1 项。
+- 全量单测 **514 项全绿**；`npm run typecheck` 通过；`run-page-checks` 8 个脚本全通过。
+- 数据重建：`build:mods` 槽位无法判定 0 把；`build:data` 移除 4 把（含 `TnDoppelgangerGrimoire`）。
+
+**操作提示**：本机 GitHub 被中间人拦截（`ECONNRESET`），重跑流水线需要先把
+`.cache/wfcd-items-<版本>.tgz` 解包到 `.cache/export/wfcd-*.json`；
+本地缓存的版本（1.1276.47）比 npm 上的（1.1269）还新。
+
+---
 
 ## 已取代（只留指引）
 

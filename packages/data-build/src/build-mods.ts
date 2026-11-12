@@ -28,15 +28,19 @@ import {
   normalizeKey,
   exportSubclass,
   isTrueBow,
+  isDualPistolByWfcd,
   resolveFromExport,
+  resolveFromWfcd,
   slotsFromStanceTags,
   compatibleModKinds,
   type SlotResolution,
 } from './mods/weapon-slots.ts';
+import { fetchAllWfcdWeapons } from './wfcd-fetch.ts';
+import { DUPLICATE_WFCD_IDS } from './wfcd-clean.ts';
 import type { ExportWeapons } from './types.ts';
 import type { LanguageDict } from './localize.ts';
 import { lookupExaltedSlots } from '../../data/src/manual/exalted-slots.ts';
-import { MANUAL_VARIANTS } from '../../data/src/manual/weapon-patches.ts';
+import { MANUAL_VARIANTS, MANUAL_WEAPON_ZH } from '../../data/src/manual/weapon-patches.ts';
 
 const repoRoot = resolve(import.meta.dirname, '../../..');
 const GENERATED_DIR = join(repoRoot, 'packages/data/src/generated');
@@ -103,10 +107,64 @@ interface ModSetRaw {
 }
 
 /**
- * 武器槽位判定只用官方导出：`productCategory`（携行方式）、`holsterCategory`、`compatibilityTags`。
- * 见 `weapon-slots.ts` 的 `resolveFromExport`。
- * 官方给不出武器类的（如显赫武器）走 `manual/exalted-slots.ts` 人工层。
+ * 武器槽位判定：**WFCD 为主，官方导出兜底**（D-152，需求方 2026-11-13：
+ * 「全改成 WFCD 为主，除非有他确认不了的」）。
+ *
+ * | 顺序 | 数据源 | 判什么 |
+ * |---|---|---|
+ * | 1 | WFCD `type` + 所在文件 + `productCategory` | 宽类（步枪 / 弓 / 霰弹 / 狙击 / 手枪 / 近战 / 空战） |
+ * | 2 | 官方导出 `compatibilityTags` 的架势标签 | 近战**细分**（巨镰 / 剑 / 锤…）——WFCD 没有这个字段 |
+ * | 3 | 官方导出 `resolveFromExport` | ① 都判不出来时兜底（显赫武器、哈尔武等）；② 借它的架势标签补近战细分 |
+ * | 4 | `manual/exalted-slots.ts` | 显赫武器的人工表 |
  */
+
+/** WFCD 武器索引：id → 原始条目（判定槽位用 `type` / `productCategory` / 文件） */
+interface WfcdWeaponIndexEntry {
+  type?: string | undefined;
+  productCategory?: string | undefined;
+  /** 来自哪个 WFCD 文件（`Primary` / `Melee` …） */
+  file?: string | undefined;
+  /** WFCD 的英文显示名（补录新武器时当 name 用） */
+  name?: string | undefined;
+}
+
+/**
+ * 抓 WFCD 武器并按 id 建索引（D-152：槽位判定改成 WFCD 为主后，这里必须有 WFCD 数据）。
+ *
+ * 与武器面板流程共用同一个抓取器与同一套缓存（`.cache/export/wfcd-*.json`）。
+ * 抓不到时**不中断**：退化为全部走官方导出兜底，并在统计里说明（可追溯）。
+ */
+async function loadWfcdWeaponIndex(force: boolean): Promise<{ index: Map<string, WfcdWeaponIndexEntry>; nameById: Map<string, { name: string }>; note: string }> {
+  const index = new Map<string, WfcdWeaponIndexEntry>();
+  const nameById = new Map<string, { name: string }>();
+  try {
+    const list = await fetchAllWfcdWeapons({
+      force,
+      insecureTls: process.env.WFCD_INSECURE_TLS === '1',
+    });
+    for (const w of list) {
+      const id = String(w.uniqueName ?? '').split('/').pop() ?? '';
+      if (!id) continue;
+      index.set(id, {
+        ...(w.type !== undefined ? { type: w.type } : {}),
+        ...(w.productCategory !== undefined ? { productCategory: w.productCategory } : {}),
+        ...(w.__source !== undefined ? { file: w.__source } : {}),
+        ...(w.name !== undefined ? { name: w.name } : {}),
+      });
+      if (w.name !== undefined) nameById.set(id, { name: w.name });
+    }
+    return { index, nameById, note: `WFCD 武器 ${index.size} 条` };
+  } catch (err) {
+    const msg = (err as Error).message;
+    return { index, nameById, note: `⚠️ WFCD 武器抓取失败，槽位判定全部退回官方导出：${msg}` };
+  }
+}
+
+/** 从官方导出判定里取出**近战细分**（WFCD 没有这个字段，需求方：用官方架势兜底） */
+function meleeSpecificOf(fromExport: SlotResolution): SlotResolution['specific'] {
+  if (fromExport.broad !== 'melee') return [];
+  return fromExport.specific;
+}
 
 /** 读取并缓存 WFCD Mods.json（可选，用于交叉校验） */
 async function loadWfcd(force: boolean): Promise<{ mods: unknown[] | null; note: string }> {
@@ -338,7 +396,13 @@ async function main(): Promise<number> {
   const cleanSets = cleanModSets(modSetsRaw, zhDict, enDict, modsBySet);
   console.log(`      套装 ${cleanSets.length} 个（其中 ${cleanSets.filter((s) => s.effect.bucket).length} 个影响伤害）`);
 
-  console.log('[5/6] 解析武器 → 可装 Mod 槽位（只用官方导出判定）...');
+  console.log('[5/6] 解析武器 → 可装 Mod 槽位（D-152：WFCD 为主、官方导出兜底）...');
+  // D-152：槽位判定改成 WFCD 为主后要先拿到 WFCD 武器数据（抓不到就整体退回官方导出）
+  const wfcdWeapons = await loadWfcdWeaponIndex(args.force);
+  console.log(`      ${wfcdWeapons.note}`);
+  // ⚠ 这条要等 `problems` 建好之后再 push（它就是下面 `const problems` 那一行），
+  //   这里先记下来，等统计区一起汇总。
+  const wfcdWeaponsMissing = wfcdWeapons.index.size === 0;
 
   const weaponSlots: Record<
     string,
@@ -348,6 +412,9 @@ async function main(): Promise<number> {
       slots: SlotResolution;
       subclass?: 'launcher' | 'crossbow';
       trueBow?: boolean;
+      isDualPistols?: boolean;
+      /** D-152：投掷类副手（WFCD `type: 'Throwing'`），界面单列「投掷武器」 */
+      isThrowing?: boolean;
       modKinds: string[];
       todo?: 'melee_specific';
       /** D-141：面板尚未收录（如暗黑分合剑的巨刃 / 双剑），可选但不可算 */
@@ -358,9 +425,38 @@ async function main(): Promise<number> {
 
   for (const [key, w] of Object.entries(weapons)) {
     const id = key.split('/').pop() ?? key;
+    // D-152：确认重复的条目（魔典 TnDoppelgangerGrimoire）在武器流程里已剔除，
+    // 官方导出这边还留着，这里一并跳过，避免界面上出现两个「魔典」。
+    if (DUPLICATE_WFCD_IDS.has(id)) continue;
+    // D-152（需求方 2026-11-13「滑板去掉」）：官方导出把 20 个 K 式滑板部件标成 `Pistols`，
+    // 它们不是武器，不该进配装列表。
+    if (/Hoverboard/i.test(id)) continue;
     const enName = w.name ? (enDict[w.name] ?? '') : '';
-    let slots: SlotResolution = resolveFromExport(w);
-    // 显赫武器等导出给不出武器类的，用人工表补
+    // 官方导出的判定结果：既当兜底，也用来借它的**架势标签**补近战细分
+    const fromExport: SlotResolution = resolveFromExport(w);
+    const wfcdHit = wfcdWeapons.index.get(id) ?? null;
+    let slots: SlotResolution = fromExport;
+    // ── D-152：WFCD 为主 ──
+    if (wfcdHit) {
+      const byWfcd = resolveFromWfcd({
+        id,
+        ...(wfcdHit.type !== undefined ? { type: wfcdHit.type } : {}),
+        ...(wfcdHit.file !== undefined ? { file: wfcdHit.file } : {}),
+        ...(wfcdHit.productCategory !== undefined ? { productCategory: wfcdHit.productCategory } : {}),
+      });
+      if (byWfcd) {
+        // 近战细分 WFCD 没有字段（需求方：可用官方架势兜底）→ 从官方判定里借架势标签
+        const specific = byWfcd.broad === 'melee' ? meleeSpecificOf(fromExport) : [];
+        slots = {
+          broad: byWfcd.broad,
+          specific,
+          source: specific.length > 0 ? 'wfcd-type+stance' as SlotResolution['source'] : 'wfcd-type',
+          basis: byWfcd.basis,
+          unresolved: false,
+        };
+      }
+    }
+    // 显赫武器等两边都给不出武器类的，用人工表补
     const override = lookupExaltedSlots(enName);
     if (override) {
       slots = {
@@ -376,7 +472,18 @@ async function main(): Promise<number> {
     const zhName = w.name ? zhDict[w.name] : undefined;
     const subclass = exportSubclass({ ...w, uniqueName: key });
     // 真正的弓才吃弓箭类 Mod / 弓箭·赋能；弩按步枪算（需求方 2026-07-11 确认）
-    const trueBow = isTrueBow(w);
+    // D-152：WFCD 判定成 bow 的也算真正的弓——新武器（霜冥差）在官方导出里没有条目，
+    //        `isTrueBow` 只能看官方的 holsterCategory，会漏掉它。
+    //        ⚠ 必须排除弩（subclass === 'crossbow'）：弩的 WFCD type 也是 Bow，但不能吃弓箭类 Mod。
+    const subclassIsCrossbow = subclass === 'crossbow';
+    const trueBow = isTrueBow(w) || (slots.broad === 'bow' && !subclassIsCrossbow);
+    // D-152：WFCD `type` 明确写着 Dual Pistols 的，标出来（「双枪·滑射」赋能用它判断）。
+    // ⚠ 必须与双刀 / 双剑区分（需求方 2026-11-13 特别提醒）：它们 id 也带 `Dual` 前缀、
+    //   官方 `DUAL_*` 标签也全挂在近战上，所以 `isDualPistolByWfcd` 内部先要求 broad === 'pistol'。
+    const isDualPistols = isDualPistolByWfcd(wfcdHit?.type, id, slots.broad);
+    // D-152：投掷类副手（飞刀 / 飞镖 / 苦无 / 手雷副手），界面单独归「投掷武器」。
+    // Mod 池与普通副手一致（需求方：副手 Mod 通用，投掷只有个别专属靠 onlyOn 判）。
+    const isThrowing = slots.broad === 'pistol' && wfcdHit?.type === 'Throwing';
     weaponSlots[id] = {
       name: enName || id,
       ...(zhName ? { nameZh: zhName } : {}),
@@ -384,6 +491,8 @@ async function main(): Promise<number> {
       // 展示用细类（发射器 / 弩）：它们吃步枪类 Mod，broad 仍是 rifle，只影响界面分组
       ...(subclass ? { subclass } : {}),
       ...(trueBow ? { trueBow } : {}),
+      ...(isDualPistols ? { isDualPistols } : {}),
+      ...(isThrowing ? { isThrowing } : {}),
       modKinds: compatibleModKinds(slots, trueBow),
       // 近战缺细类：显式标记，让消费方知道"这把武器只能装通用近战 Mod"
       ...(slots.broad === 'melee' && slots.specific.length === 0 && !slots.unresolved
@@ -404,6 +513,43 @@ async function main(): Promise<number> {
       modKinds: compatibleModKinds(slots, false),
     };
   }
+
+  // D-152：WFCD 有、官方导出还没有的武器（霜冥差 / 寒怨刺 / 石晶之花 Prime / 闪劫 Prime）。
+  // 上面那个循环遍历的是**官方导出条目**，这四把不在里面，所以以前根本没有记录，
+  // 界面就判不出它们能吃哪套 Mod。这里按 WFCD 条目补录。
+  let wfcdOnly = 0;
+  for (const [id, entry] of wfcdWeapons.index) {
+    if (weaponSlots[id]) continue;
+    // D-152：官方导出里有、但已确认是重复条目的（魔典 TnDoppelgangerGrimoire），这里也跳过，
+    // 否则武器流程剔除掉的那条会被这里重新加回来。
+    if (DUPLICATE_WFCD_IDS.has(id)) continue;
+    // D-152：滑板载具（不是武器）也不补录
+    if (/Hoverboard/i.test(id)) continue;
+    const byWfcd = resolveFromWfcd({ id, ...entry });
+    if (!byWfcd) continue;
+    const slots: SlotResolution = {
+      broad: byWfcd.broad,
+      specific: [],
+      source: 'wfcd-type',
+      basis: byWfcd.basis,
+      unresolved: false,
+    };
+    // 中文名：人工名称表（语言包还没收录这些新武器）
+    const manualZh = MANUAL_WEAPON_ZH[id];
+    weaponSlots[id] = {
+      name: wfcdWeapons.nameById.get(id)?.name ?? id,
+      ...(manualZh ? { nameZh: manualZh.zh } : {}),
+      slots,
+      ...(slots.broad === 'bow' ? { trueBow: true } : {}),
+      ...(entry.type === 'Dual Pistols' ? { isDualPistols: true } : {}),
+      modKinds: compatibleModKinds(slots, slots.broad === 'bow'),
+    };
+    wfcdOnly++;
+    if (manualZh) {
+      console.log(`      WFCD 补录：${id}（${weaponSlots[id].name}）→ ${manualZh.zh}：${manualZh.reason}`);
+    }
+  }
+  if (wfcdOnly > 0) console.log(`      仅 WFCD 有、官方导出还没有的武器：${wfcdOnly} 把已补录`);
 
   console.log(`      武器 ${Object.keys(weaponSlots).length} 把`);
   console.log(`      槽位无法判定 ${unresolvedWeapons.length} 把`);
@@ -490,6 +636,8 @@ async function main(): Promise<number> {
     problems.push(`带数值的 Mod 只占 ${((withStats / weaponMods) * 100).toFixed(1)}%，低于 80%。`);
   }
   if (wfcdMismatch.length > 0) problems.push(`WFCD 交叉校验有 ${wfcdMismatch.length} 条不一致，见报告。`);
+  // D-152：WFCD 武器数据缺失时槽位判定全退回官方导出，必须让人看见
+  if (wfcdWeaponsMissing) problems.push('WFCD 武器数据缺失，槽位判定退回了官方导出（见统计）。');
 
   if (problems.length > 0) {
     console.log('\n⚠️  发现以下问题，需要确认：');

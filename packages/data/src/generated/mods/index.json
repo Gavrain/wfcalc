@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-08T09:10:55.073Z",
+  "generatedAt": "2026-11-12T08:54:39.176Z",
   "sources": [
     {
       "name": "mods/baseline.json",
@@ -33,13 +33,13 @@
     "arcanesSkipped": 6,
     "modSets": 19,
     "stances": 61,
-    "weapons": 844
+    "weapons": 827
   },
   "coverage": {
     "officialMatched": 478,
     "withStats": 478,
     "unresolvedWeapons": 0,
-    "meleeMissingSpecific": 36,
+    "meleeMissingSpecific": 37,
     "zhMissing": 0
   },
   "todo": {
@@ -83,7 +83,8 @@
       "ZanukaPetMeleeWeaponIP (Batoten)",
       "ZanukaPetMeleeWeaponIS (Lacerten)",
       "ZanukaPetMeleeWeaponPS (Akaten)",
-      "TnBayonetMeleeWeapon (Vinquibus (Melee))"
+      "TnBayonetMeleeWeapon (Vinquibus (Melee))",
+      "PrimeCorufellScytheWeapon (Corufell Prime)"
     ],
     "wfcdMismatch": [],
     "rankFixes": [

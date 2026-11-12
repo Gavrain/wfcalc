@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-11T17:49:24.363Z",
+  "generatedAt": "2026-11-12T08:54:44.056Z",
   "source": "WFCD/warframe-items (MIT)",
   "category": "secondary",
   "count": 149,
@@ -2770,6 +2770,7 @@
     {
       "id": "DuelistPistols",
       "name": "Aksondol",
+      "nameZh": "寒怨刺",
       "category": "secondary",
       "critChance": 0.24,
       "critMultiplier": 2.6,
@@ -8095,115 +8096,28 @@
               "label": "直接命中",
               "segments": [
                 {
-                  "kind": "attack",
+                  "kind": "impact",
                   "aoe": false,
                   "damage": {
-                    "electric": 100
+                    "impact": 8.4,
+                    "puncture": 3.6
                   },
-                  "procChance": 0.26
-                }
-              ],
-              "override": {
-                "critChance": 0.2,
-                "critMultiplier": 2,
-                "statusChance": 0.26
-              }
-            }
-          ],
-          "override": {
-            "critChance": 0.2,
-            "critMultiplier": 2,
-            "statusChance": 0.26
-          }
-        },
-        {
-          "id": "mode2",
-          "role": "normal",
-          "trigger": "auto",
-          "bullets": 1,
-          "multishot": 1,
-          "variants": [
-            {
-              "id": "direct",
-              "label": "直接命中",
-              "segments": [
-                {
-                  "kind": "explosiveAttack",
-                  "aoe": true,
-                  "damage": {
-                    "electric": 50
-                  },
-                  "procChance": 0.26
-                }
-              ],
-              "override": {
-                "critChance": 0.2,
-                "critMultiplier": 2,
-                "statusChance": 0.26
-              }
-            }
-          ],
-          "override": {
-            "critChance": 0.2,
-            "critMultiplier": 2,
-            "statusChance": 0.26
-          }
-        },
-        {
-          "id": "mode3",
-          "role": "normal",
-          "trigger": "auto",
-          "bullets": 1,
-          "multishot": 1,
-          "variants": [
-            {
-              "id": "direct",
-              "label": "直接命中",
-              "segments": [
+                  "procChance": 0.1
+                },
                 {
                   "kind": "attack",
                   "aoe": false,
                   "damage": {
-                    "electric": 350
+                    "impact": 17.5,
+                    "puncture": 7.5
                   },
-                  "procChance": 0.26
+                  "procChance": 0
                 }
-              ],
-              "override": {
-                "critChance": 0.2,
-                "critMultiplier": 2,
-                "statusChance": 0.26,
-                "fireRate": 1
-              }
-            },
-            {
-              "id": "blast",
-              "label": "范围伤害",
-              "segments": [
-                {
-                  "kind": "explosiveAttack",
-                  "aoe": true,
-                  "damage": {
-                    "electric": 250
-                  },
-                  "procChance": 0.26
-                }
-              ],
-              "override": {
-                "critChance": 0.2,
-                "critMultiplier": 2,
-                "statusChance": 0.26,
-                "fireRate": 1
-              }
+              ]
             }
           ],
-          "override": {
-            "critChance": 0.2,
-            "critMultiplier": 2,
-            "statusChance": 0.26,
-            "fireRate": 1
-          },
-          "_label": "Active Attack"
+          "_manual": "export-missing",
+          "_note": "WFCD 未收录该武器（多为显赫武器），面板来自官方导出，可能有误"
         }
       ]
     },
