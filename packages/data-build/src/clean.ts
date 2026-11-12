@@ -18,15 +18,7 @@ import type {
 import { hasAoeSegment } from '../../core/src/weapon.ts';
 import type { ExportAttack, ExportBehaviour, ExportProjectile, ExportWeapon, ExportWeapons } from './types.ts';
 import { incarnonInfoOf } from '../../data/src/manual/incarnon.ts';
-import { incarnonStatsOf } from '../../data/src/manual/incarnon-stats.ts';
-import {
-  MANUAL_VARIANTS,
-  REMOVED_WEAPONS,
-  WEAPON_PATCHES,
-  WEAPON_SPLITS,
-  type ManualMode,
-  type ManualVariant,
-} from '../../data/src/manual/weapon-patches.ts';
+import { MANUAL_VARIANTS, type ManualVariant } from '../../data/src/manual/weapon-patches.ts';
 
 /**
  * 投射物来源：普通发射还是蓄力发射。
@@ -756,13 +748,8 @@ export function cleanWeapons(exportWeapons: ExportWeapons): CleanResult {
       continue;
     }
 
-    // 按武器整条移除（需求方判定：技能类，不能配卡，D-141）
-    const removedWhy = REMOVED_WEAPONS[toWeaponId(key)];
-    if (removedWhy) {
-      stats.removedWeapons++;
-      warnings.push(`${key}: 已移除 —— ${removedWhy}`);
-      continue;
-    }
+    // 需求方 2026-11-12：REMOVED_WEAPONS 已删除——琉璃碎击 / 土石坍方 ×2 是战甲技能不能配卡，
+    // 而 WFCD 本来就不收录这四把，换源后天然不入库，剔除清单失去意义。
 
     const category = toCategory(w);
 
@@ -862,20 +849,14 @@ export function cleanWeapons(exportWeapons: ExportWeapons): CleanResult {
     // 灵化武器清单来自人工层 manual/incarnon.ts（官方导出没有灵化标记）。
     // 判定：武器命中清单 且 behaviour 数 = 普通模式数 + 1 → 最后一个 behaviour 是灵化形态。
     //
-    // D-110：扎里曼号系列（Laetum / Phenmor / Felarx / Praedos / Innodem）在导出里
-    // 两个 behaviour 都是普通投射，结构判据认不出来。这些人只要人工层
-    // `INCARNON_STATS` 给了远程模式，就把最后一个 behaviour 当作灵化形态的**挂点**，
-    // 真实面板一律取人工层数值（这只是一个待替换的槽位）。
+    // 需求方 2026-11-12：「incarnon-stats 删掉」——WFCD 的 `Incarnon Form` 攻击自带完整面板
+    // （伤害 / 暴击 / 触发），人工录入的灵化数值层不再需要，也不再作为判定的挂点。
     const englishName = key.split('/').pop() ?? '';
     const inc = incarnonInfoOf(englishName);
-    const manualStats = incarnonStatsOf(englishName);
     let incarnonIndex = -1;
     if (inc && modeBehaviours.length >= 2) {
       incarnonIndex = modeBehaviours.length - 1;
       warnings.push(`${key}: 识别为灵化武器（${inc.source}），最后一个 behaviour 标为灵化模式`);
-    } else if (manualStats && manualStats.modes.length > 0 && modeBehaviours.length >= 1) {
-      incarnonIndex = modeBehaviours.length - 1;
-      warnings.push(`${key}: 人工层有灵化形态数值，最后一个 behaviour 作为灵化挂点`);
     }
     modeBehaviours.forEach((b, index) => {
       // 原始 behaviour 下标（modeBehaviours 可能少几条，被吞并的仅-impact behaviour 不计入）
@@ -903,62 +884,21 @@ export function cleanWeapons(exportWeapons: ExportWeapons): CleanResult {
       // 规则：只有 chargedProjectile、没有 projectile，且同武器已有别的 behaviour 提供普通射击。
       // 这样 WFCD 那 158 把带"灵化/蓄力"命名攻击的武器都能对上，不必逐把人工确认。
       if (isIncarnonSlot || isIncarnonBehaviour(b, hasSiblingNormal)) {
-        // D-110：优先用人工层录入的灵化形态数值（INCARNON_STATS）。
-        const stats = incarnonStatsOf(key.split('/').pop());
-        if (stats && stats.modes.length > 0) {
-          let incNo = 0;
-          for (const im of stats.modes) {
-            // id 去重：第一个叫 incarnon，之后 incarnon2 / incarnon3 …
-            incNo += 1;
-            const incId = incNo === 1 ? 'incarnon' : `incarnon${incNo}`;
-            const seg: DamageSegment = {
-              kind: 'incarnon' as SegmentKind,
-              aoe: Boolean(im.aoe),
-              damage: spreadFromRatio(im.damage, im.spread),
-              procChance: im.statusChance,
-            };
-            modes.push({
-              id: incId,
-              role: 'incarnon',
-              trigger: im.trigger as TriggerKind,
-              bullets: 1,
-              multishot: im.multishot,
-              override: {
-                critChance: im.critChance,
-                critMultiplier: im.critMultiplier,
-                statusChance: im.statusChance,
-                fireRate: im.fireRate,
-              },
-              variants: toVariants([seg]),
-              _manual: 'entered',
-              ...(im.note ? { _note: im.note } : {}),
-            });
-          }
-          warnings.push(`${key}#${index}: 灵化形态数值来自人工层（${stats._source}）`);
-          return;
-        }
-
-        // 人工层还没填 → **复用基础面板**占位，并打上未核实标记（需求方 2026-11-06）。
+        // 需求方 2026-11-12：删掉 INCARNON_STATS 人工数值层，灵化面板一律取数据源本身
+        // （WFCD 的 `Incarnon Form` 攻击带完整伤害 / 暴击 / 触发）。
+        // 这里只负责把灵化 behaviour 的段取出来、打上 `role: 'incarnon'`，不用手写数值覆盖。
         const segs =
           toSegments(b, warnings, context, 'chargedProjectile', w.damagePerShot, !isMelee, impactIsReal(b, behaviourIndex)).length > 0
             ? toSegments(b, warnings, context, 'chargedProjectile', w.damagePerShot, !isMelee, impactIsReal(b, behaviourIndex))
             : toSegments(b, warnings, context, 'projectile', w.damagePerShot, !isMelee, impactIsReal(b, behaviourIndex));
         if (segs.length > 0) {
-          const meleeNote = stats?.meleeBuff
-            ? `近战灵化（不参与计算）：${stats.meleeBuff.activation}，持续 ${stats.meleeBuff.durationSeconds} 秒，` +
-              Object.entries(stats.meleeBuff.buffs).map(([k, v]) => `${k} ${v}`).join('，') +
-              (stats.meleeBuff.extra ? `；${stats.meleeBuff.extra}` : '')
-            : '';
           modes.push({
             id: 'incarnon',
             role: 'incarnon',
             ...base,
             variants: toVariants(segs),
-            // 面板是复用的基础面板，不是灵化形态的真实值 → 界面必须打标记
-            _manual: 'panel-reused',
-            _note: meleeNote || '灵化形态面板未收录，暂复用基础面板',
           });
-          warnings.push(`${key}#${index}: 灵化形态面板未收录，已复用基础面板并标记`);
+          warnings.push(`${key}#${index}: 识别为灵化模式`);
         }
         return;
       }
@@ -1053,27 +993,10 @@ export function cleanWeapons(exportWeapons: ExportWeapons): CleanResult {
     // D-142：不再静默——只要导出里**有面板数值**（说明是一把真武器），就必须把原因写进 warning；
     // 只有「无 behaviours 且面板为 0」的组件/部件（宠物头腿、增幅器组件、滑板部件）才安静跳过。
     if (modes.length === 0) {
-      // 人工订正表里有它的，后面会整组换上人工模式（或由人工层构造同名版本）——先留空壳，不算丢弃
-      const replacedByPatch = Boolean(WEAPON_PATCHES[toWeaponId(key)]?.modes);
+      // 需求方 2026-11-12：WEAPON_PATCHES（面板人工订正）已删除，
+      // 只剩「拆版本」一种人工构造——原条目丢掉，由 MANUAL_VARIANTS 复制出版本。
       const replacedByManual = MANUAL_VARIANTS.some((m) => m.exportId === toWeaponId(key));
-      if (!replacedByPatch && !replacedByManual) stats.droppedNoValidMode++;
-      if (replacedByPatch) {
-        weapons.push({
-          id: toWeaponId(key),
-          name: w.name ?? toWeaponId(key),
-          category,
-          critChance: tidy(w.criticalChance ?? 0),
-          critMultiplier: tidy(w.criticalMultiplier ?? 1),
-          statusChance: tidy(w.procChance ?? 0),
-          fireRate: tidy(w.fireRate ?? 0),
-          ...(w.magazineSize != null ? { magazineSize: tidy(w.magazineSize) } : {}),
-          ...(w.reloadTime != null ? { reloadTime: tidy(w.reloadTime) } : {}),
-          modes: [],
-          ...(w.name ? { languageKey: w.name } : {}),
-        });
-        stats.keptWeapons++;
-        continue;
-      }
+      if (!replacedByManual) stats.droppedNoValidMode++;
       if (replacedByManual) {
         // 由人工层构造了替代版本（如暗黑分合剑的巨刃 / 双剑），原条目不再入库
         warnings.push(`${key}: 原条目丢掉，改由人工层构造版本（见 manual/weapon-patches.ts）`);
@@ -1109,108 +1032,35 @@ export function cleanWeapons(exportWeapons: ExportWeapons): CleanResult {
     stats.keptWeapons++;
   }
 
-  // ── 人工订正层（D-141）：导出本身有错 / 只有空壳的武器，按游戏内白板面板改写 ──
-  // 拆版本条目（`@` 形式）不在这里处理——它们在下面由原条目 copy 出来，名称与标记在那时一并写入。
-  applyWeaponPatches(weapons, warnings, stats);
-
-  // ── 拆版本（D-141）：由原条目 copy 出人工版本，例如暗黑分合剑 → 巨刃 / 双剑 ──
+  // ── 拆版本（D-141 / D-147）：由已清洗的条目 copy 出人工版本（暗黑分合剑 → 巨刃 / 双剑）──
+  // 需求方 2026-11-12「就留拆版本这个事情」：面板（伤害段 / 暴击 / 射速 / 弹匣）全部继承原条目，
+  // 两版只有名称与架势标签不同，不再手写任何数值。
   for (const v of MANUAL_VARIANTS) {
-    const originKey = Object.keys(exportWeapons).find((k) => toWeaponId(k) === v.exportId);
-    const origin = originKey ? exportWeapons[originKey] : undefined;
-    const patch = WEAPON_PATCHES[v.id];
-    if (!origin || !patch) {
-      warnings.push(`${v.id}: 缺少原条目或订正定义，已跳过拆版本`);
+    const origin = weapons.find((w) => w.id === v.exportId);
+    if (!origin) {
+      warnings.push(`${v.id}: 找不到原条目 ${v.exportId}，已跳过拆版本`);
       continue;
     }
     if (weapons.some((w) => w.id === v.id)) {
       warnings.push(`${v.id}: 与已有武器重名，已跳过`);
       continue;
     }
-    // 面板项（暴击 / 射速 / 弹匣 / 换弹）继承原条目——需求方说「其他的照旧」；
-    // 伤害段由订正表的 `modes` 决定（空数组 = 面板待补）。
-    weapons.push({
+    const split: CleanedWeapon = {
+      ...origin,
       id: v.id,
-      name: patch.nameEn ?? v.id,
-      ...(patch.nameZh ? { nameZh: patch.nameZh } : {}),
-      category: toCategory(origin),
-      critChance: tidy(origin.criticalChance ?? 0),
-      critMultiplier: tidy(origin.criticalMultiplier ?? 1),
-      statusChance: tidy(origin.procChance ?? 0),
-      fireRate: tidy(origin.fireRate ?? 0),
-      ...(origin.magazineSize != null ? { magazineSize: tidy(origin.magazineSize) } : {}),
-      ...(origin.reloadTime != null ? { reloadTime: tidy(origin.reloadTime) } : {}),
-      modes: patch.modes ? patch.modes.map(toManualMode) : [],
+      name: v.nameEn,
+      nameZh: v.nameZh,
+      // 模式深拷贝，避免两个版本共享同一份段数组
+      modes: origin.modes.map((m) => ({ ...m, variants: m.variants.map((x) => ({ ...x, segments: [...x.segments] })) })),
       variant: 'variant',
-      // 溯源：产出里会带上 `_manual` / `_note`，界面据此打错误标记（D-101 / D-141）
-      _manual: patch._source,
-      _note: patch.note,
-    });
+    };
+    // 名称来自人工层，语言包不再参与
+    delete (split as { languageKey?: string }).languageKey;
+    weapons.push(split);
     stats.manualWeapons++;
-    warnings.push(`${v.id}: ${patch.note}`);
+    warnings.push(`${v.id}: 由 ${v.exportId} 拆出版本（${v.nameZh}）`);
   }
 
   weapons.sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
   return { weapons, stats, warnings };
-}
-
-/** 人工模式 → 产出用的 `AttackMode`（id / label 由 `label` 字段带出，见 emit） */
-function toManualMode(m: ManualMode): AttackMode {
-  const segments: DamageSegment[] = m.segments.map((s) => ({
-    kind: s.kind,
-    damage: s.damage,
-    procChance: s.procChance,
-    aoe: s.aoe,
-  }));
-  return {
-    id: m.id,
-    role: 'normal',
-    trigger: (m.trigger as TriggerKind | undefined) ?? 'unknown',
-    bullets: 1,
-    multishot: m.multishot ?? 1,
-    variants: toVariants(segments),
-    ...(m.label ? { _label: m.label } : {}),
-  };
-}
-
-/** 拆版本补丁的 key 集合（`exportId_后缀`），用于区分两次订正调用 */
-const VARIANT_PATCH_IDS = new Set(
-  WEAPON_SPLITS.flatMap((s) => s.versions.map((v) => v.id)),
-);
-
-/**
- * 应用 `manual/weapon-patches.ts` 的武器级订正（D-141）。
- *
- * 只改**面板数值与整组模式**；显示名由 localize 阶段处理，这里只登记待覆盖的名称。
- */
-function applyWeaponPatches(
-  weapons: CleanedWeapon[],
-  warnings: string[],
-  stats: CleanStats,
-): void {
-  const byId = new Map(weapons.map((w) => [w.id, w]));
-  for (const [id, patch] of Object.entries(WEAPON_PATCHES)) {
-    // 拆版本条目的名称与标记在「拆版本」循环里写入，这里跳过
-    if (VARIANT_PATCH_IDS.has(id)) continue;
-    const w = byId.get(id);
-    if (!w) {
-      warnings.push(`人工订正 ${id}: 库里没有这把武器，已跳过（检查 id 是否与导出末段一致）`);
-      continue;
-    }
-    if (patch.critChance != null) w.critChance = tidy(patch.critChance);
-    if (patch.critMultiplier != null) w.critMultiplier = tidy(patch.critMultiplier);
-    if (patch.statusChance != null) w.statusChance = tidy(patch.statusChance);
-    if (patch.fireRate != null) w.fireRate = tidy(patch.fireRate);
-    if (patch.magazineSize != null) w.magazineSize = tidy(patch.magazineSize);
-    if (patch.reloadTime != null) w.reloadTime = tidy(patch.reloadTime);
-    if (patch.modes) w.modes = patch.modes.map(toManualMode);
-    if (patch.nameZh) w.nameZh = patch.nameZh;
-    if (patch.nameEn) w.name = patch.nameEn;
-    // 名称覆盖后不再需要语言包（localize 会跳过 languageKey 缺失的条目）
-    if (patch.nameZh || patch.nameEn) delete w.languageKey;
-
-    w._manual = patch._source;
-    w._note = patch.note;
-    stats.patchedWeapons++;
-    warnings.push(`${id}: 已应用人工订正（${patch._source}）—— ${patch.note}`);
-  }
 }

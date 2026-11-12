@@ -22,7 +22,6 @@ import { diffWeapons, formatDiffReport, type DiffReport } from './diff.ts';
 import { applyOverrides, type AppliedOverride } from './overrides.ts';
 import { toEmitWeapon, type EmitWeapon } from './emit.ts';
 import { buildLangKeyByWeaponId, buildZhByEnglishName, resolveZhForWfcdWeapon, stripNamePrefix, type LanguageDict } from './localize.ts';
-import { WEAPON_OVERRIDES } from '../../data/src/manual/overrides.ts';
 import type { AttackMode, Weapon } from '../../core/src/weapon.ts';
 
 const repoRoot = resolve(import.meta.dirname, '../../..');
@@ -323,12 +322,9 @@ async function main(): Promise<number> {
     console.log(`      ⚠️ 语言包获取失败，界面将显示英文名：${(err as Error).message}`);
   }
 
-  // 应用人工覆盖层（蓄力时间反推射速等）
-  const applied: AppliedOverride[] = applyOverrides(cleaned, WEAPON_OVERRIDES);
-  if (applied.length > 0) {
-    console.log(`\n人工覆盖已应用 ${applied.length} 处：`);
-    for (const a of applied) console.log(`  ${a.weaponId}.${a.field}: ${a.from ?? '(无)'} → ${a.to}  （${a.reason}）`);
-  }
+  // 需求方 2026-11-12：人工覆盖层 manual/overrides.ts 已删除（WFCD 已给出完整射速），
+  // 这里不再有 override 应用步骤。
+  const applied: AppliedOverride[] = [];
 
   console.log('[4/5] 对比上一版...');
   const previous = loadPrevious();

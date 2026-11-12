@@ -36,7 +36,7 @@ import {
 import type { ExportWeapons } from './types.ts';
 import type { LanguageDict } from './localize.ts';
 import { lookupExaltedSlots } from '../../data/src/manual/exalted-slots.ts';
-import { MANUAL_VARIANTS, WEAPON_PATCHES } from '../../data/src/manual/weapon-patches.ts';
+import { MANUAL_VARIANTS } from '../../data/src/manual/weapon-patches.ts';
 
 const repoRoot = resolve(import.meta.dirname, '../../..');
 const GENERATED_DIR = join(repoRoot, 'packages/data/src/generated');
@@ -391,18 +391,17 @@ async function main(): Promise<number> {
         : {}),
     };
   }
-  // D-141：人工层构造的武器版本（如暗黑分合剑的巨刃 / 双剑）在导出里没有独立条目——
-  // 按人工层的架势标签补一条槽位记录，并标 `panelPending`（面板待补，界面要能选、但不能算）。
+  // D-141：人工层构造的武器版本（如暗黑分合剑的巨刃 / 双剑）。
+  // 需求方 2026-11-12：面板已全部来自 WFCD，只有名称与架势标签来自人工层；
+  // 面板不再「待补」，所以这里不再标 `panelPending`。
   for (const v of MANUAL_VARIANTS) {
     if (weaponSlots[v.id]) continue;
     const slots = slotsFromStanceTags(v.stanceTags);
-    const patch = WEAPON_PATCHES[v.id];
     weaponSlots[v.id] = {
-      name: patch?.nameEn ?? v.id,
-      ...(patch?.nameZh ? { nameZh: patch.nameZh } : {}),
+      name: v.nameEn,
+      nameZh: v.nameZh,
       slots,
       modKinds: compatibleModKinds(slots, false),
-      panelPending: true,
     };
   }
 
