@@ -1813,24 +1813,46 @@ UI 显示扳机与伤害类型、哈尔武补 `_manual`、删除 `overrides.ts` 
      `DualShortSword` / `DualEtherSword` 等 10 把 id 都带 `Dual` 前缀，靠这一条挡掉，
      否则「双枪·滑射」赋能会出现在双刀上。结果：39 把双手枪全部是 `pistol`，误标 0 把。
    - 新增回归测试 4 项（近战带 Dual 不算 / 真双手枪算 / 宽类优先 / 单持不算）。
-2. **滑板载具混进了副手武器**：官方导出把 **20 个** K 式滑板部件（`Hoverboard*`）标成 `Pistols`，
-   WFCD 的 `Secondary.json` 里也有。
+2. **滑板载具混进了副手武器**：K 式滑板部件（`Hoverboard*`）被官方导出标成 `Pistols`，混进副手。
    - **需求方 2026-11-13**：「滑板去掉」
-   - **落地**：`exclusionReason` 增加 `Hoverboard` 排除（武器流程），
-     `build-mods` 的官方导出循环与 WFCD 补录循环也一并跳过。`weapon-slots.json` 里滑板条目 **20 → 0**。
+   - **我犯的错**：查滑板时去翻了官方导出 `.cache/export/weapons.json`，没先确认 WFCD 有没有，
+     得出了错误结论。**实测 WFCD 六个武器文件里滑板 0 条**，滑板纯粹是官方导出的残留。
+   - **落地**：`exclusionReason` 增加滑板 / 抗原突变原排除（武器流程与 `build-mods` 共用同一份规则）。
 
-**其他仍走官方导出的地方**（WFCD 确认不了的）
+**收录边界最终口径（需求方 2026-11-13）**
 
-- 近战细分（巨镰 / 剑 / 锤…）：WFCD 无字段，继续用官方架势标签。
+> 「全都清掉，全面遵守看wfcd，只有确认不了武器本身数据例如近战类型的才参考」
+
+| 条目 | 是否收录 | 依据 |
+|---|---|---|
+| 天工造武部件（刀身 / 握柄 / 环，47 条） | **不收** | WFCD `type: 'Zaw Component'` / `masterable: false` |
+| 抗原 / 突变原（22 条） | **不收** | 需求方：「那些突变原啥的都是部件不是武器」 |
+| 滑板载具（20 条） | **不收** | 需求方：「滑板去掉」；WFCD 里本来也没有 |
+| PvP 变体、指挥官武器 | **不收** | D-148 既定 |
+| 魔典 `TnDoppelgangerGrimoire` | **不收** | 与 `TnGrimoire` 重复 |
+| 新武器（霜冥差 / 寒怨刺 / 石晶之花 Prime / 闪劫 Prime） | **收** | 正式武器，官方导出还没有 |
+
+- 统一实现：`wfcd-clean.ts` 的 `exclusionReason()` 一处判定，
+  `build-mods` 的官方导出循环与 WFCD 补录循环都调它，不再各自手写规则。
+- WFCD **完全没收**的条目（滑板等）按 id 特征排除（`WFCD_ABSENT_EXCLUSION`）；
+  ⚠ 该正则要求 `Tip` / `Handle` / `Balance` 后面跟数字，否则会误伤正常武器 `TipedoPrimeWeapon`（提佩多 Prime）。
+- 结果：`weapon-slots.json` **848 → 765 把**，部件残留 **0**。
+
+**仍参考官方导出的地方**（需求方指定的例外：WFCD 确认不了武器本身数据时）
+
+- 近战细分（巨镰 / 剑 / 锤…）：WFCD `class` / `stance` 全空，用官方架势标签兜底。
+- WFCD 完全没收的 **104 条**（显赫武器 4 把 + 机械宠物具名核心/配件 100 条）：
+  其中界面可见的只有 3 把（夜枭 / 肃清者 / 制胜者）。
 - Mod 本身的数值：仍来自 `baseline.json` + 官方 `ExportUpgrades`（D-148 既定，本轮不动）。
 
 **验证**
 
 - 新增单测：`data-build/test/weapon-slots.test.ts` 的「WFCD 为主的槽位判定（D-152）」8 项
-  （类型映射、近战错标纠错、空战、兜底、四把新武器、投掷、弓狙击同吃步枪类）；
+  （类型映射、近战错标纠错、空战、兜底、四把新武器、投掷、弓狙击同吃步枪类）
+  +「双手枪与双刀必须分开」4 项；
   `demo/test/weapon-picker.test.ts` 新增「次要武器分类（D-152）」3 项 + 「新武器：名字与分类」1 项。
-- 全量单测 **514 项全绿**；`npm run typecheck` 通过；`run-page-checks` 8 个脚本全通过。
-- 数据重建：`build:mods` 槽位无法判定 0 把；`build:data` 移除 4 把（含 `TnDoppelgangerGrimoire`）。
+- 全量单测 **518 项全绿**；`npm run typecheck` 通过；`run-page-checks` 8 个脚本全通过。
+- 数据重建：`build:mods` 槽位无法判定 0 把；「WFCD 里其实有的却走了官方判定」**0 条**。
 
 **操作提示**：本机 GitHub 被中间人拦截（`ECONNRESET`），重跑流水线需要先把
 `.cache/wfcd-items-<版本>.tgz` 解包到 `.cache/export/wfcd-*.json`；

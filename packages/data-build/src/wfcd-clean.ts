@@ -929,27 +929,30 @@ export function toCategory(w: WfcdWeapon): Weapon['category'] {
  *
  * | 条目 | 特征 | 处理 | 依据 |
  * |---|---|---|---|
- * | 天工造武刀身（Balla / Cyath / Dehtat…） | `type: 'Zaw Component'`、`tags` 含 `Zaw` | **不收** | 是组件不是武器；面板随握柄/环决定，本轮不做（D-148 规则 9） |
+ * | 天工造武部件（刀身 / 握柄 / 环） | `type: 'Zaw Component'`、`tags` 含 `Zaw` | **不收** | 是组件不是武器；面板随握柄/环决定（D-148 规则 9） |
+ * | 抗原 / 突变原（`Infested*Antigen*` / `Infested*Mutagen*`） | id 含 `Antigen` / `Mutagen` | **不收** | 生物样本 / 组装件，不是能开火的武器（D-152，需求方 2026-11-13「那些突变原啥的都是部件不是武器」） |
  * | PvP 变体（`PvPVariantTipOne` …） | `masterable: false`、uniqueName 含 `PvP` | **不收** | 与人形 PvP 模式绑定，不进 PvE 计算 |
- * | 漂泊者手枪（Sirocco） | `productCategory: 'OperatorAmps'` | **不收** | 指挥官武器，沿用既定排除 |
+ * | 漂泊者手枪（Sirocco）/ 赤风 | `productCategory: 'OperatorAmps'` | **不收** | 指挥官武器，沿用既定排除 |
+ * | 滑板载具（`Hoverboard*`：双桅 / 双子库娃…） | uniqueName 含 `Hoverboard` | **不收** | K 式悬浮板部件，不是武器（需求方 2026-11-13「滑板去掉」） |
  * | 新武器（Nunchasa / Aksondol / Steflos Prime / Corufell Prime） | `masterable: true` | **收** | 是正式武器，只是官方导出还没有 |
- * | 重复条目（魔典 `TnDoppelgangerGrimoire`） | 与 `TnGrimoire` 同名同类别 | **不收** | D-152：WFCD 同一件武器给两条，界面会出现两个「魔典」 |
- * | 滑板载具（`Hoverboard*`：双桅 / 双子库娃） | uniqueName 含 `Hoverboard` | **不收** | D-152（需求方 2026-11-13：「滑板去掉」）：是 K 式悬浮板部件，不是武器，却被 WFCD 放在 `Secondary.json` 里 |
+ * | 重复条目（魔典 `TnDoppelgangerGrimoire`） | 与 `TnGrimoire` 同名同类别 | **不收** | WFCD 同一件武器给两条，界面会出现两个「魔典」 |
  *
  * @returns 排除原因；保留则返回 null
  */
 export function exclusionReason(w: WfcdWeapon): string | null {
   if (w.productCategory === 'OperatorAmps') return '指挥官武器（OperatorAmps）';
   const type = String(w.type ?? '');
-  if (/Zaw Component/i.test(type)) return '天工造武刀身组件';
-  if ((w.tags ?? []).includes('Zaw')) return '天工造武组件';
+  if (/Zaw Component/i.test(type)) return '天工造武部件';
+  if ((w.tags ?? []).includes('Zaw')) return '天工造武部件';
+  // D-152（需求方 2026-11-13：「那些突变原啥的都是部件不是武器」「全都清掉」）：
+  // 抗原 / 突变原在 WFCD 里被标成 `productCategory: Pistols`，但它们没有任何伤害面板，
+  // 是生物样本 / 组装件，不是能开火的武器。
+  if (/Antigen|Mutagen/i.test(String(w.uniqueName ?? ''))) return '抗原 / 突变原（部件）';
   if (String(w.uniqueName ?? '').includes('PvP')) return 'PvP 变体';
   if (w.masterable === false) return '非可精通（PvP / 变体）';
-  // D-152（需求方 2026-11-13「滑板去掉」）：K 式滑板载具混在 Secondary.json 里，
-  // 被当成手枪收了（双桅 / 双子库娃）。它们不是武器，不参与配装与伤害计算。
+  // K 式滑板载具：不是武器，不参与配装与伤害计算。
   if (/Hoverboard/i.test(String(w.uniqueName ?? ''))) return '滑板载具（不是武器）';
-  // D-152（需求方 2026-11-13：「清」）：WFCD 把魔典记了两条（TnGrimoire / TnDoppelgangerGrimoire），
-  // 保留正式的 TnGrimoire，另一条剔除，避免界面上出现两个「魔典」。
+  // WFCD 把魔典记了两条（TnGrimoire / TnDoppelgangerGrimoire），保留正式的那条。
   if (DUPLICATE_WFCD_IDS.has(toWeaponId(w))) return '与正式条目重复';
   return null;
 }

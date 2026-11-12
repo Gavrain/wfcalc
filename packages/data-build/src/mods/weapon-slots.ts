@@ -461,6 +461,10 @@ const WFCD_TYPE_TO_KIND: Readonly<Record<string, ModSlotKind>> = {
   Melee: 'melee',
   'Arch-Gun': 'archgun',
   'Arch-Melee': 'archmelee',
+  // D-152：WFCD 用 `Companion Weapon` 标守护 / 猎犬武器。它们与角色武器共用同一套 Mod
+  // （需求方 2026-11-08 确认），具体归步枪还是手枪由 `productCategory` 再看不出来，
+  // 这里按步枪兜底——与原来官方导出分支的兜底口径一致，不改变行为。
+  'Companion Weapon': 'rifle',
 };
 
 /** 按所在文件粗判大类（WFCD 的 `type` 有已知错标时的第二票） */

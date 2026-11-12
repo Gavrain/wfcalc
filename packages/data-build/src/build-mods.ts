@@ -36,7 +36,7 @@ import {
   type SlotResolution,
 } from './mods/weapon-slots.ts';
 import { fetchAllWfcdWeapons } from './wfcd-fetch.ts';
-import { DUPLICATE_WFCD_IDS } from './wfcd-clean.ts';
+import { exclusionReason } from './wfcd-clean.ts';
 import type { ExportWeapons } from './types.ts';
 import type { LanguageDict } from './localize.ts';
 import { lookupExaltedSlots } from '../../data/src/manual/exalted-slots.ts';
@@ -126,6 +126,11 @@ interface WfcdWeaponIndexEntry {
   file?: string | undefined;
   /** WFCD 的英文显示名（补录新武器时当 name 用） */
   name?: string | undefined;
+  /**
+   * D-152：WFCD 自己的收录边界判为「不收」（天工刀身 / PvP 变体 / 指挥官武器 / 滑板 / 重复条目）。
+   * 由 `wfcd-clean.ts` 的 `exclusionReason()` 判定——**同一份规则**，这里不另写一套。
+   */
+  excluded?: string | undefined;
 }
 
 /**
@@ -145,11 +150,14 @@ async function loadWfcdWeaponIndex(force: boolean): Promise<{ index: Map<string,
     for (const w of list) {
       const id = String(w.uniqueName ?? '').split('/').pop() ?? '';
       if (!id) continue;
+      // 复用武器流程的收录边界：天工刀身 / 守护武器 / 滑板 / PvP / 重复条目都在这里判出来
+      const excluded = exclusionReason(w) ?? undefined;
       index.set(id, {
         ...(w.type !== undefined ? { type: w.type } : {}),
         ...(w.productCategory !== undefined ? { productCategory: w.productCategory } : {}),
         ...(w.__source !== undefined ? { file: w.__source } : {}),
         ...(w.name !== undefined ? { name: w.name } : {}),
+        ...(excluded !== undefined ? { excluded } : {}),
       });
       if (w.name !== undefined) nameById.set(id, { name: w.name });
     }
@@ -165,6 +173,20 @@ function meleeSpecificOf(fromExport: SlotResolution): SlotResolution['specific']
   if (fromExport.broad !== 'melee') return [];
   return fromExport.specific;
 }
+
+/**
+ * D-152：**WFCD 完全没收**的条目按 id 特征排除（需求方 2026-11-13：「全都清掉」）。
+ *
+ * WFCD 的 `exclusionReason()` 能覆盖它收录过的条目；滑板、部分天工造武部件、抗原/突变原
+ * 只在官方导出里出现（WFCD 实测 0 条），只能按 id 命名认出来。
+ *
+ * | 特征 | 是什么 | 依据 |
+ * |---|---|---|
+ * | `Hoverboard` | K 式悬浮板部件（双桅 / 双子库娃…） | 滑板，不是武器 |
+ * | `Antigen` / `Mutagen` | 感染体抗原 / 突变原 | 生物样本，不是武器 |
+ * | `Tip` / `Handle` / `Balance` 等天工造武部件 id | 刀身 / 握柄 / 环 | 组装件，不是武器 |
+ */
+const WFCD_ABSENT_EXCLUSION = /Hoverboard|Antigen|Mutagen|^(Tip|Handle|Balance|InfestedTip|InfestedHandle|PvPVariantTip)\d/i;
 
 /** 读取并缓存 WFCD Mods.json（可选，用于交叉校验） */
 async function loadWfcd(force: boolean): Promise<{ mods: unknown[] | null; note: string }> {
@@ -425,16 +447,19 @@ async function main(): Promise<number> {
 
   for (const [key, w] of Object.entries(weapons)) {
     const id = key.split('/').pop() ?? key;
-    // D-152：确认重复的条目（魔典 TnDoppelgangerGrimoire）在武器流程里已剔除，
-    // 官方导出这边还留着，这里一并跳过，避免界面上出现两个「魔典」。
-    if (DUPLICATE_WFCD_IDS.has(id)) continue;
-    // D-152（需求方 2026-11-13「滑板去掉」）：官方导出把 20 个 K 式滑板部件标成 `Pistols`，
-    // 它们不是武器，不该进配装列表。
-    if (/Hoverboard/i.test(id)) continue;
+    // ── D-152：收录边界以 WFCD 为准 ──
+    // 这个循环遍历的是**官方导出**，会把 WFCD 早已剔除的条目带回来：
+    // 天工造武部件、抗原/突变原、守护武器、滑板载具、PvP 变体、重复条目（魔典）。
+    // 需求方 2026-11-13：「全都清掉，全面遵守看wfcd，只有确认不了武器本身数据例如近战类型的才参考」
+    // → 统一用 WFCD 的 `exclusionReason()` 判，不在这里各自手写规则。
+    const wfcdHit = wfcdWeapons.index.get(id) ?? null;
+    if (wfcdHit?.excluded !== undefined) continue;
+    // WFCD **完全没有收录**的条目，先按 WFCD 的同一套特征判（滑板 / 部件类都不该进配装）。
+    // 这些条目在 WFCD 里查不到，但特征（id 命名）照样能认出来。
+    if (!wfcdHit && WFCD_ABSENT_EXCLUSION.test(id)) continue;
     const enName = w.name ? (enDict[w.name] ?? '') : '';
     // 官方导出的判定结果：既当兜底，也用来借它的**架势标签**补近战细分
     const fromExport: SlotResolution = resolveFromExport(w);
-    const wfcdHit = wfcdWeapons.index.get(id) ?? null;
     let slots: SlotResolution = fromExport;
     // ── D-152：WFCD 为主 ──
     if (wfcdHit) {
@@ -520,11 +545,9 @@ async function main(): Promise<number> {
   let wfcdOnly = 0;
   for (const [id, entry] of wfcdWeapons.index) {
     if (weaponSlots[id]) continue;
-    // D-152：官方导出里有、但已确认是重复条目的（魔典 TnDoppelgangerGrimoire），这里也跳过，
-    // 否则武器流程剔除掉的那条会被这里重新加回来。
-    if (DUPLICATE_WFCD_IDS.has(id)) continue;
-    // D-152：滑板载具（不是武器）也不补录
-    if (/Hoverboard/i.test(id)) continue;
+    // D-152：WFCD 自己判为「不收」的（天工刀身 / 滑板 / 重复条目 / 指挥官武器…），不补录。
+    // 用的是 `wfcd-clean.ts` 的同一份规则，不另写一套。
+    if (entry.excluded !== undefined) continue;
     const byWfcd = resolveFromWfcd({ id, ...entry });
     if (!byWfcd) continue;
     const slots: SlotResolution = {

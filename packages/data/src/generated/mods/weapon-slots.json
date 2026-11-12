@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-11-12T08:54:39.171Z",
+  "generatedAt": "2026-11-12T09:01:11.717Z",
   "note": "modKinds = 该武器能装备的 Mod 槽位种类（对应 mods.json 的 slotKind）",
-  "count": 827,
+  "count": 765,
   "weapons": {
     "VTDetron": {
       "name": "Mara Detron",
@@ -7320,24 +7320,6 @@
         "heavy_blade"
       ]
     },
-    "DrifterPistolPlayerWeapon": {
-      "name": "Sirocco",
-      "nameZh": "赤风",
-      "slots": {
-        "broad": "pistol",
-        "specific": [],
-        "source": "wfcd-type",
-        "basis": {
-          "tags": [],
-          "wfcdType": "Pistol",
-          "productCategory": "OperatorAmps"
-        },
-        "unresolved": false
-      },
-      "modKinds": [
-        "pistol"
-      ]
-    },
     "DrifterTazerPlayerWep": {
       "name": "Rumblejack",
       "nameZh": "电匕怪杰",
@@ -11670,15 +11652,11 @@
       "slots": {
         "broad": "rifle",
         "specific": [],
-        "source": "holster",
+        "source": "wfcd-type",
         "basis": {
-          "tags": [
-            "BEAM",
-            "ASSAULT_AMMO",
-            "SENTINEL_WEAPON"
-          ],
-          "productCategory": "SentinelWeapons",
-          "holster": "RIFLE"
+          "tags": [],
+          "wfcdType": "Companion Weapon",
+          "productCategory": "SentinelWeapons"
         },
         "unresolved": false
       },
@@ -11693,15 +11671,11 @@
       "slots": {
         "broad": "rifle",
         "specific": [],
-        "source": "holster",
+        "source": "wfcd-type",
         "basis": {
-          "tags": [
-            "BEAM",
-            "ASSAULT_AMMO",
-            "SENTINEL_WEAPON"
-          ],
-          "productCategory": "SentinelWeapons",
-          "holster": "RIFLE"
+          "tags": [],
+          "wfcdType": "Companion Weapon",
+          "productCategory": "SentinelWeapons"
         },
         "unresolved": false
       },
@@ -11714,20 +11688,18 @@
       "name": "Sweeper",
       "nameZh": "扫除者",
       "slots": {
-        "broad": "shotgun",
+        "broad": "rifle",
         "specific": [],
-        "source": "holster",
+        "source": "wfcd-type",
         "basis": {
-          "tags": [
-            "SENTINEL_WEAPON"
-          ],
-          "productCategory": "SentinelWeapons",
-          "holster": "SHOTGUN"
+          "tags": [],
+          "wfcdType": "Companion Weapon",
+          "productCategory": "SentinelWeapons"
         },
         "unresolved": false
       },
       "modKinds": [
-        "shotgun",
+        "rifle",
         "primary"
       ]
     },
@@ -11739,11 +11711,9 @@
         "specific": [],
         "source": "manual",
         "basis": {
-          "tags": [
-            "SENTINEL_WEAPON"
-          ],
-          "productCategory": "SentinelWeapons",
-          "holster": "MELEE"
+          "tags": [],
+          "wfcdType": "Companion Weapon",
+          "productCategory": "SentinelWeapons"
         },
         "unresolved": false
       },
@@ -11756,21 +11726,17 @@
       "name": "Vulklok",
       "nameZh": "金工火枪",
       "slots": {
-        "broad": "sniper",
+        "broad": "rifle",
         "specific": [],
-        "source": "holster",
+        "source": "wfcd-type",
         "basis": {
-          "tags": [
-            "PROJECTILE",
-            "SENTINEL_WEAPON"
-          ],
-          "productCategory": "SentinelWeapons",
-          "holster": "SNIPER"
+          "tags": [],
+          "wfcdType": "Companion Weapon",
+          "productCategory": "SentinelWeapons"
         },
         "unresolved": false
       },
       "modKinds": [
-        "sniper",
         "rifle",
         "primary"
       ]
@@ -11781,15 +11747,11 @@
       "slots": {
         "broad": "rifle",
         "specific": [],
-        "source": "holster",
+        "source": "wfcd-type",
         "basis": {
-          "tags": [
-            "ASSAULT_AMMO",
-            "PROJECTILE",
-            "SENTINEL_WEAPON"
-          ],
-          "productCategory": "SentinelWeapons",
-          "holster": "RIFLE"
+          "tags": [],
+          "wfcdType": "Companion Weapon",
+          "productCategory": "SentinelWeapons"
         },
         "unresolved": false
       },
@@ -11803,39 +11765,37 @@
       "name": "Prisma Burst Laser",
       "nameZh": "棱晶 激光点发",
       "slots": {
-        "broad": "pistol",
+        "broad": "rifle",
         "specific": [],
-        "source": "manual",
+        "source": "wfcd-type",
         "basis": {
-          "tags": [
-            "SENTINEL_WEAPON"
-          ],
+          "tags": [],
+          "wfcdType": "Companion Weapon",
           "productCategory": "SentinelWeapons"
         },
         "unresolved": false
       },
       "modKinds": [
-        "pistol"
+        "rifle",
+        "primary"
       ]
     },
     "PrimeSentShotgun": {
       "name": "Sweeper Prime",
       "nameZh": "扫除者 Prime",
       "slots": {
-        "broad": "shotgun",
+        "broad": "rifle",
         "specific": [],
-        "source": "holster",
+        "source": "wfcd-type",
         "basis": {
-          "tags": [
-            "SENTINEL_WEAPON"
-          ],
-          "productCategory": "SentinelWeapons",
-          "holster": "SHOTGUN"
+          "tags": [],
+          "wfcdType": "Companion Weapon",
+          "productCategory": "SentinelWeapons"
         },
         "unresolved": false
       },
       "modKinds": [
-        "shotgun",
+        "rifle",
         "primary"
       ]
     },
@@ -11845,15 +11805,11 @@
       "slots": {
         "broad": "rifle",
         "specific": [],
-        "source": "holster",
+        "source": "wfcd-type",
         "basis": {
-          "tags": [
-            "ASSAULT_AMMO",
-            "PROJECTILE",
-            "SENTINEL_WEAPON"
-          ],
-          "productCategory": "SentinelWeapons",
-          "holster": "RIFLE"
+          "tags": [],
+          "wfcdType": "Companion Weapon",
+          "productCategory": "SentinelWeapons"
         },
         "unresolved": false
       },
@@ -11868,14 +11824,11 @@
       "slots": {
         "broad": "rifle",
         "specific": [],
-        "source": "holster",
+        "source": "wfcd-type",
         "basis": {
-          "tags": [
-            "ASSAULT_AMMO",
-            "SENTINEL_WEAPON"
-          ],
-          "productCategory": "SentinelWeapons",
-          "holster": "RIFLE"
+          "tags": [],
+          "wfcdType": "Companion Weapon",
+          "productCategory": "SentinelWeapons"
         },
         "unresolved": false
       },
@@ -11888,19 +11841,19 @@
       "name": "Burst Laser Prime",
       "nameZh": "激光点发 Prime",
       "slots": {
-        "broad": "pistol",
+        "broad": "rifle",
         "specific": [],
-        "source": "manual",
+        "source": "wfcd-type",
         "basis": {
-          "tags": [
-            "SENTINEL_WEAPON"
-          ],
+          "tags": [],
+          "wfcdType": "Companion Weapon",
           "productCategory": "SentinelWeapons"
         },
         "unresolved": false
       },
       "modKinds": [
-        "pistol"
+        "rifle",
+        "primary"
       ]
     },
     "LaserRifle": {
@@ -11909,15 +11862,11 @@
       "slots": {
         "broad": "rifle",
         "specific": [],
-        "source": "holster",
+        "source": "wfcd-type",
         "basis": {
-          "tags": [
-            "ASSAULT_AMMO",
-            "PROJECTILE",
-            "SENTINEL_WEAPON"
-          ],
-          "productCategory": "SentinelWeapons",
-          "holster": "RIFLE"
+          "tags": [],
+          "wfcdType": "Companion Weapon",
+          "productCategory": "SentinelWeapons"
         },
         "unresolved": false
       },
@@ -11932,15 +11881,11 @@
       "slots": {
         "broad": "rifle",
         "specific": [],
-        "source": "holster",
+        "source": "wfcd-type",
         "basis": {
-          "tags": [
-            "ASSAULT_AMMO",
-            "BEAM",
-            "SENTINEL_WEAPON"
-          ],
-          "productCategory": "SentinelWeapons",
-          "holster": "RIFLE"
+          "tags": [],
+          "wfcdType": "Companion Weapon",
+          "productCategory": "SentinelWeapons"
         },
         "unresolved": false
       },
@@ -11955,14 +11900,11 @@
       "slots": {
         "broad": "rifle",
         "specific": [],
-        "source": "holster",
+        "source": "wfcd-type",
         "basis": {
-          "tags": [
-            "ASSAULT_AMMO",
-            "SENTINEL_WEAPON"
-          ],
-          "productCategory": "SentinelWeapons",
-          "holster": "RIFLE"
+          "tags": [],
+          "wfcdType": "Companion Weapon",
+          "productCategory": "SentinelWeapons"
         },
         "unresolved": false
       },
@@ -11975,19 +11917,19 @@
       "name": "Burst Laser",
       "nameZh": "激光点发",
       "slots": {
-        "broad": "pistol",
+        "broad": "rifle",
         "specific": [],
-        "source": "manual",
+        "source": "wfcd-type",
         "basis": {
-          "tags": [
-            "SENTINEL_WEAPON"
-          ],
+          "tags": [],
+          "wfcdType": "Companion Weapon",
           "productCategory": "SentinelWeapons"
         },
         "unresolved": false
       },
       "modKinds": [
-        "pistol"
+        "rifle",
+        "primary"
       ]
     },
     "PrimeHeliosGlaiveWeapon": {
@@ -11998,11 +11940,9 @@
         "specific": [],
         "source": "manual",
         "basis": {
-          "tags": [
-            "SENTINEL_WEAPON"
-          ],
-          "productCategory": "SentinelWeapons",
-          "holster": "MELEE"
+          "tags": [],
+          "wfcdType": "Companion Weapon",
+          "productCategory": "SentinelWeapons"
         },
         "unresolved": false
       },
@@ -12017,16 +11957,11 @@
       "slots": {
         "broad": "rifle",
         "specific": [],
-        "source": "holster",
+        "source": "wfcd-type",
         "basis": {
-          "tags": [
-            "ASSAULT_AMMO",
-            "AOE",
-            "SINGLESHOT",
-            "SENTINEL_WEAPON"
-          ],
-          "productCategory": "SentinelWeapons",
-          "holster": "RIFLE"
+          "tags": [],
+          "wfcdType": "Companion Weapon",
+          "productCategory": "SentinelWeapons"
         },
         "unresolved": false
       },
@@ -12041,15 +11976,11 @@
       "slots": {
         "broad": "rifle",
         "specific": [],
-        "source": "holster",
+        "source": "wfcd-type",
         "basis": {
-          "tags": [
-            "BEAM",
-            "ASSAULT_AMMO",
-            "SENTINEL_WEAPON"
-          ],
-          "productCategory": "SentinelWeapons",
-          "holster": "RIFLE"
+          "tags": [],
+          "wfcdType": "Companion Weapon",
+          "productCategory": "SentinelWeapons"
         },
         "unresolved": false
       },
@@ -12064,16 +11995,11 @@
       "slots": {
         "broad": "rifle",
         "specific": [],
-        "source": "holster",
+        "source": "wfcd-type",
         "basis": {
-          "tags": [
-            "PROJECTILE",
-            "SNIPER_AMMO",
-            "AOE",
-            "SENTINEL_WEAPON"
-          ],
-          "productCategory": "SentinelWeapons",
-          "holster": "RIFLE"
+          "tags": [],
+          "wfcdType": "Companion Weapon",
+          "productCategory": "SentinelWeapons"
         },
         "unresolved": false
       },
@@ -12088,15 +12014,11 @@
       "slots": {
         "broad": "rifle",
         "specific": [],
-        "source": "holster",
+        "source": "wfcd-type",
         "basis": {
-          "tags": [
-            "PROJECTILE",
-            "ASSAULT_AMMO",
-            "SENTINEL_WEAPON"
-          ],
-          "productCategory": "SentinelWeapons",
-          "holster": "RIFLE"
+          "tags": [],
+          "wfcdType": "Companion Weapon",
+          "productCategory": "SentinelWeapons"
         },
         "unresolved": false
       },
@@ -12111,15 +12033,11 @@
       "slots": {
         "broad": "rifle",
         "specific": [],
-        "source": "holster",
+        "source": "wfcd-type",
         "basis": {
-          "tags": [
-            "PROJECTILE",
-            "AOE",
-            "SENTINEL_WEAPON"
-          ],
-          "productCategory": "SentinelWeapons",
-          "holster": "RIFLE"
+          "tags": [],
+          "wfcdType": "Companion Weapon",
+          "productCategory": "SentinelWeapons"
         },
         "unresolved": false
       },
@@ -12926,278 +12844,6 @@
       ],
       "todo": "melee_specific"
     },
-    "InfestedCritterAntigenA": {
-      "name": "VIROX ANTIGEN",
-      "nameZh": "韦罗斯抗原",
-      "slots": {
-        "broad": "pistol",
-        "specific": [],
-        "source": "product-category",
-        "basis": {
-          "tags": [],
-          "productCategory": "Pistols"
-        },
-        "unresolved": false
-      },
-      "modKinds": [
-        "pistol"
-      ]
-    },
-    "InfestedCritterAntigenB": {
-      "name": "DESUS ANTIGEN",
-      "nameZh": "迪瑟斯抗原",
-      "slots": {
-        "broad": "pistol",
-        "specific": [],
-        "source": "product-category",
-        "basis": {
-          "tags": [],
-          "productCategory": "Pistols"
-        },
-        "unresolved": false
-      },
-      "modKinds": [
-        "pistol"
-      ]
-    },
-    "InfestedCritterAntigenC": {
-      "name": "PLAGEN ANTIGEN",
-      "nameZh": "佩莱臻抗原",
-      "slots": {
-        "broad": "pistol",
-        "specific": [],
-        "source": "product-category",
-        "basis": {
-          "tags": [],
-          "productCategory": "Pistols"
-        },
-        "unresolved": false
-      },
-      "modKinds": [
-        "pistol"
-      ]
-    },
-    "InfestedCritterAntigenD": {
-      "name": "POXI ANTIGEN",
-      "nameZh": "波希抗原",
-      "slots": {
-        "broad": "pistol",
-        "specific": [],
-        "source": "product-category",
-        "basis": {
-          "tags": [],
-          "productCategory": "Pistols"
-        },
-        "unresolved": false
-      },
-      "modKinds": [
-        "pistol"
-      ]
-    },
-    "InfestedCritterMutagenA": {
-      "name": "ADRA MUTAGEN",
-      "nameZh": "阿德拉突变原",
-      "slots": {
-        "broad": "pistol",
-        "specific": [],
-        "source": "product-category",
-        "basis": {
-          "tags": [],
-          "productCategory": "Pistols"
-        },
-        "unresolved": false
-      },
-      "modKinds": [
-        "pistol"
-      ]
-    },
-    "InfestedCritterMutagenB": {
-      "name": "ELSA MUTAGEN",
-      "nameZh": "艾尔莎突变原",
-      "slots": {
-        "broad": "pistol",
-        "specific": [],
-        "source": "product-category",
-        "basis": {
-          "tags": [],
-          "productCategory": "Pistols"
-        },
-        "unresolved": false
-      },
-      "modKinds": [
-        "pistol"
-      ]
-    },
-    "InfestedCritterMutagenC": {
-      "name": "ZARIM MUTAGEN",
-      "nameZh": "萨里姆突变原",
-      "slots": {
-        "broad": "pistol",
-        "specific": [],
-        "source": "product-category",
-        "basis": {
-          "tags": [],
-          "productCategory": "Pistols"
-        },
-        "unresolved": false
-      },
-      "modKinds": [
-        "pistol"
-      ]
-    },
-    "InfestedCritterMutagenD": {
-      "name": "PHIJAR MUTAGEN",
-      "nameZh": "菲加突变原",
-      "slots": {
-        "broad": "pistol",
-        "specific": [],
-        "source": "product-category",
-        "basis": {
-          "tags": [],
-          "productCategory": "Pistols"
-        },
-        "unresolved": false
-      },
-      "modKinds": [
-        "pistol"
-      ]
-    },
-    "InfestedPredatorAntigenA": {
-      "name": "ELASMUN ANTIGEN",
-      "nameZh": "伊拉森抗原",
-      "slots": {
-        "broad": "pistol",
-        "specific": [],
-        "source": "product-category",
-        "basis": {
-          "tags": [],
-          "productCategory": "Pistols"
-        },
-        "unresolved": false
-      },
-      "modKinds": [
-        "pistol"
-      ]
-    },
-    "InfestedPredatorAntigenB": {
-      "name": "IRANON ANTIGEN",
-      "nameZh": "伊拉农抗原",
-      "slots": {
-        "broad": "pistol",
-        "specific": [],
-        "source": "product-category",
-        "basis": {
-          "tags": [],
-          "productCategory": "Pistols"
-        },
-        "unresolved": false
-      },
-      "modKinds": [
-        "pistol"
-      ]
-    },
-    "InfestedPredatorAntigenC": {
-      "name": "IBEXAN ANTIGEN",
-      "nameZh": "艾比森抗原",
-      "slots": {
-        "broad": "pistol",
-        "specific": [],
-        "source": "product-category",
-        "basis": {
-          "tags": [],
-          "productCategory": "Pistols"
-        },
-        "unresolved": false
-      },
-      "modKinds": [
-        "pistol"
-      ]
-    },
-    "InfestedPredatorAntigenD": {
-      "name": "TETHRON ANTIGEN",
-      "nameZh": "泰赛隆抗原",
-      "slots": {
-        "broad": "pistol",
-        "specific": [],
-        "source": "product-category",
-        "basis": {
-          "tags": [],
-          "productCategory": "Pistols"
-        },
-        "unresolved": false
-      },
-      "modKinds": [
-        "pistol"
-      ]
-    },
-    "InfestedPredatorMutagenA": {
-      "name": "LEPTOSAM MUTAGEN",
-      "nameZh": "勒普多萨姆突变原",
-      "slots": {
-        "broad": "pistol",
-        "specific": [],
-        "source": "product-category",
-        "basis": {
-          "tags": [],
-          "productCategory": "Pistols"
-        },
-        "unresolved": false
-      },
-      "modKinds": [
-        "pistol"
-      ]
-    },
-    "InfestedPredatorMutagenB": {
-      "name": "CHITEN MUTAGEN",
-      "nameZh": "奇顿突变原",
-      "slots": {
-        "broad": "pistol",
-        "specific": [],
-        "source": "product-category",
-        "basis": {
-          "tags": [],
-          "productCategory": "Pistols"
-        },
-        "unresolved": false
-      },
-      "modKinds": [
-        "pistol"
-      ]
-    },
-    "InfestedPredatorMutagenC": {
-      "name": "ARIOLI MUTAGEN",
-      "nameZh": "阿里奥利突变原",
-      "slots": {
-        "broad": "pistol",
-        "specific": [],
-        "source": "product-category",
-        "basis": {
-          "tags": [],
-          "productCategory": "Pistols"
-        },
-        "unresolved": false
-      },
-      "modKinds": [
-        "pistol"
-      ]
-    },
-    "InfestedPredatorMutagenD": {
-      "name": "MONACHOD MUTAGEN",
-      "nameZh": "蒙纳卓突变原",
-      "slots": {
-        "broad": "pistol",
-        "specific": [],
-        "source": "product-category",
-        "basis": {
-          "tags": [],
-          "productCategory": "Pistols"
-        },
-        "unresolved": false
-      },
-      "modKinds": [
-        "pistol"
-      ]
-    },
     "MeleeMoaPetEngine": {
       "name": "Lehan Core",
       "nameZh": "厉悍核心",
@@ -13763,64 +13409,58 @@
       "name": "Batoten",
       "nameZh": "巴托腾",
       "slots": {
-        "broad": "melee",
+        "broad": "rifle",
         "specific": [],
-        "source": "manual",
+        "source": "wfcd-type",
         "basis": {
-          "tags": [
-            "HOUND_WEAPON"
-          ],
-          "productCategory": "SentinelWeapons",
-          "holster": "MELEE"
+          "tags": [],
+          "wfcdType": "Companion Weapon",
+          "productCategory": "SentinelWeapons"
         },
         "unresolved": false
       },
       "modKinds": [
-        "melee"
-      ],
-      "todo": "melee_specific"
+        "rifle",
+        "primary"
+      ]
     },
     "ZanukaPetMeleeWeaponIS": {
       "name": "Lacerten",
       "nameZh": "莱斯腾",
       "slots": {
-        "broad": "melee",
+        "broad": "rifle",
         "specific": [],
-        "source": "manual",
+        "source": "wfcd-type",
         "basis": {
-          "tags": [
-            "HOUND_WEAPON"
-          ],
-          "productCategory": "SentinelWeapons",
-          "holster": "MELEE"
+          "tags": [],
+          "wfcdType": "Companion Weapon",
+          "productCategory": "SentinelWeapons"
         },
         "unresolved": false
       },
       "modKinds": [
-        "melee"
-      ],
-      "todo": "melee_specific"
+        "rifle",
+        "primary"
+      ]
     },
     "ZanukaPetMeleeWeaponPS": {
       "name": "Akaten",
       "nameZh": "阿卡腾",
       "slots": {
-        "broad": "melee",
+        "broad": "rifle",
         "specific": [],
-        "source": "manual",
+        "source": "wfcd-type",
         "basis": {
-          "tags": [
-            "HOUND_WEAPON"
-          ],
-          "productCategory": "SentinelWeapons",
-          "holster": "MELEE"
+          "tags": [],
+          "wfcdType": "Companion Weapon",
+          "productCategory": "SentinelWeapons"
         },
         "unresolved": false
       },
       "modKinds": [
-        "melee"
-      ],
-      "todo": "melee_specific"
+        "rifle",
+        "primary"
+      ]
     },
     "WoundedInfestedCritterCommonRewardItem": {
       "name": "Sly Vulpaphyla",
@@ -14204,771 +13844,6 @@
     "InfModularSecondaryHandlePart": {
       "name": "Ulnaris",
       "nameZh": "尺骨",
-      "slots": {
-        "broad": "pistol",
-        "specific": [],
-        "source": "product-category",
-        "basis": {
-          "tags": [],
-          "productCategory": "Pistols"
-        },
-        "unresolved": false
-      },
-      "modKinds": [
-        "pistol"
-      ]
-    },
-    "BalanceDamageI": {
-      "name": "Ruhang",
-      "nameZh": "如杭",
-      "slots": {
-        "broad": "pistol",
-        "specific": [],
-        "source": "product-category",
-        "basis": {
-          "tags": [],
-          "productCategory": "Pistols"
-        },
-        "unresolved": false
-      },
-      "modKinds": [
-        "pistol"
-      ]
-    },
-    "BalanceDamageICritI": {
-      "name": "Vargeet Ruhang",
-      "nameZh": "瓦吉特 如杭",
-      "slots": {
-        "broad": "pistol",
-        "specific": [],
-        "source": "product-category",
-        "basis": {
-          "tags": [],
-          "productCategory": "Pistols"
-        },
-        "unresolved": false
-      },
-      "modKinds": [
-        "pistol"
-      ]
-    },
-    "BalanceDamageICritII": {
-      "name": "Vargeet II Ruhang",
-      "nameZh": "瓦吉特 II 如杭",
-      "slots": {
-        "broad": "pistol",
-        "specific": [],
-        "source": "product-category",
-        "basis": {
-          "tags": [],
-          "productCategory": "Pistols"
-        },
-        "unresolved": false
-      },
-      "modKinds": [
-        "pistol"
-      ]
-    },
-    "BalanceDamageII": {
-      "name": "Ruhang II",
-      "nameZh": "如杭 II",
-      "slots": {
-        "broad": "pistol",
-        "specific": [],
-        "source": "product-category",
-        "basis": {
-          "tags": [],
-          "productCategory": "Pistols"
-        },
-        "unresolved": false
-      },
-      "modKinds": [
-        "pistol"
-      ]
-    },
-    "BalanceDamageIICritI": {
-      "name": "Vargeet Ruhang II",
-      "nameZh": "瓦吉特 如杭 II",
-      "slots": {
-        "broad": "pistol",
-        "specific": [],
-        "source": "product-category",
-        "basis": {
-          "tags": [],
-          "productCategory": "Pistols"
-        },
-        "unresolved": false
-      },
-      "modKinds": [
-        "pistol"
-      ]
-    },
-    "BalanceDamageIIStatusI": {
-      "name": "Ekwana Ruhang II",
-      "nameZh": "伊克瓦纳 如杭 II",
-      "slots": {
-        "broad": "pistol",
-        "specific": [],
-        "source": "product-category",
-        "basis": {
-          "tags": [],
-          "productCategory": "Pistols"
-        },
-        "unresolved": false
-      },
-      "modKinds": [
-        "pistol"
-      ]
-    },
-    "BalanceDamageIStatusI": {
-      "name": "Ekwana Ruhang",
-      "nameZh": "伊克瓦纳 如杭",
-      "slots": {
-        "broad": "pistol",
-        "specific": [],
-        "source": "product-category",
-        "basis": {
-          "tags": [],
-          "productCategory": "Pistols"
-        },
-        "unresolved": false
-      },
-      "modKinds": [
-        "pistol"
-      ]
-    },
-    "BalanceDamageIStatusII": {
-      "name": "Ekwana II Ruhang",
-      "nameZh": "伊克瓦纳 II 如杭",
-      "slots": {
-        "broad": "pistol",
-        "specific": [],
-        "source": "product-category",
-        "basis": {
-          "tags": [],
-          "productCategory": "Pistols"
-        },
-        "unresolved": false
-      },
-      "modKinds": [
-        "pistol"
-      ]
-    },
-    "BalanceSpeedI": {
-      "name": "Jai",
-      "nameZh": "翟",
-      "slots": {
-        "broad": "pistol",
-        "specific": [],
-        "source": "product-category",
-        "basis": {
-          "tags": [],
-          "productCategory": "Pistols"
-        },
-        "unresolved": false
-      },
-      "modKinds": [
-        "pistol"
-      ]
-    },
-    "BalanceSpeedICritI": {
-      "name": "Vargeet Jai",
-      "nameZh": "瓦吉特 翟",
-      "slots": {
-        "broad": "pistol",
-        "specific": [],
-        "source": "product-category",
-        "basis": {
-          "tags": [],
-          "productCategory": "Pistols"
-        },
-        "unresolved": false
-      },
-      "modKinds": [
-        "pistol"
-      ]
-    },
-    "BalanceSpeedICritII": {
-      "name": "Vargeet II Jai",
-      "nameZh": "瓦吉特 II 翟",
-      "slots": {
-        "broad": "pistol",
-        "specific": [],
-        "source": "product-category",
-        "basis": {
-          "tags": [],
-          "productCategory": "Pistols"
-        },
-        "unresolved": false
-      },
-      "modKinds": [
-        "pistol"
-      ]
-    },
-    "BalanceSpeedII": {
-      "name": "Jai II",
-      "nameZh": "翟 II",
-      "slots": {
-        "broad": "pistol",
-        "specific": [],
-        "source": "product-category",
-        "basis": {
-          "tags": [],
-          "productCategory": "Pistols"
-        },
-        "unresolved": false
-      },
-      "modKinds": [
-        "pistol"
-      ]
-    },
-    "BalanceSpeedIICritI": {
-      "name": "Vargeet Jai II",
-      "nameZh": "瓦吉特 翟 II",
-      "slots": {
-        "broad": "pistol",
-        "specific": [],
-        "source": "product-category",
-        "basis": {
-          "tags": [],
-          "productCategory": "Pistols"
-        },
-        "unresolved": false
-      },
-      "modKinds": [
-        "pistol"
-      ]
-    },
-    "BalanceSpeedIIStatusI": {
-      "name": "Ekwana Jai II",
-      "nameZh": "伊克瓦纳 翟 II",
-      "slots": {
-        "broad": "pistol",
-        "specific": [],
-        "source": "product-category",
-        "basis": {
-          "tags": [],
-          "productCategory": "Pistols"
-        },
-        "unresolved": false
-      },
-      "modKinds": [
-        "pistol"
-      ]
-    },
-    "BalanceSpeedIStatusI": {
-      "name": "Ekwana Jai",
-      "nameZh": "伊克瓦纳 翟",
-      "slots": {
-        "broad": "pistol",
-        "specific": [],
-        "source": "product-category",
-        "basis": {
-          "tags": [],
-          "productCategory": "Pistols"
-        },
-        "unresolved": false
-      },
-      "modKinds": [
-        "pistol"
-      ]
-    },
-    "BalanceSpeedIStatusII": {
-      "name": "Ekwana II Jai",
-      "nameZh": "伊克瓦纳 II 翟",
-      "slots": {
-        "broad": "pistol",
-        "specific": [],
-        "source": "product-category",
-        "basis": {
-          "tags": [],
-          "productCategory": "Pistols"
-        },
-        "unresolved": false
-      },
-      "modKinds": [
-        "pistol"
-      ]
-    },
-    "HandleFive": {
-      "name": "Jayap",
-      "nameZh": "查亚普",
-      "slots": {
-        "broad": "pistol",
-        "specific": [],
-        "source": "product-category",
-        "basis": {
-          "tags": [],
-          "productCategory": "Pistols"
-        },
-        "unresolved": false
-      },
-      "modKinds": [
-        "pistol"
-      ]
-    },
-    "HandleFour": {
-      "name": "Seekalla",
-      "nameZh": "斯卡拉",
-      "slots": {
-        "broad": "pistol",
-        "specific": [],
-        "source": "product-category",
-        "basis": {
-          "tags": [],
-          "productCategory": "Pistols"
-        },
-        "unresolved": false
-      },
-      "modKinds": [
-        "pistol"
-      ]
-    },
-    "HandleOne": {
-      "name": "Peye",
-      "nameZh": "佩耶",
-      "slots": {
-        "broad": "pistol",
-        "specific": [],
-        "source": "product-category",
-        "basis": {
-          "tags": [],
-          "productCategory": "Pistols"
-        },
-        "unresolved": false
-      },
-      "modKinds": [
-        "pistol"
-      ]
-    },
-    "HandleSix": {
-      "name": "Kroostra",
-      "nameZh": "克鲁斯查",
-      "slots": {
-        "broad": "pistol",
-        "specific": [],
-        "source": "product-category",
-        "basis": {
-          "tags": [],
-          "productCategory": "Pistols"
-        },
-        "unresolved": false
-      },
-      "modKinds": [
-        "pistol"
-      ]
-    },
-    "HandleThree": {
-      "name": "Kwath",
-      "nameZh": "库阿斯",
-      "slots": {
-        "broad": "pistol",
-        "specific": [],
-        "source": "product-category",
-        "basis": {
-          "tags": [],
-          "productCategory": "Pistols"
-        },
-        "unresolved": false
-      },
-      "modKinds": [
-        "pistol"
-      ]
-    },
-    "HandleTwo": {
-      "name": "Laka",
-      "nameZh": "拉卡",
-      "slots": {
-        "broad": "pistol",
-        "specific": [],
-        "source": "product-category",
-        "basis": {
-          "tags": [],
-          "productCategory": "Pistols"
-        },
-        "unresolved": false
-      },
-      "modKinds": [
-        "pistol"
-      ]
-    },
-    "PvPVariantTipFive": {
-      "name": "Dehtat",
-      "nameZh": "德塔特",
-      "slots": {
-        "broad": "pistol",
-        "specific": [],
-        "source": "product-category",
-        "basis": {
-          "tags": [],
-          "productCategory": "Pistols"
-        },
-        "unresolved": false
-      },
-      "modKinds": [
-        "pistol"
-      ]
-    },
-    "PvPVariantTipFour": {
-      "name": "Cyath",
-      "nameZh": "西亚什",
-      "slots": {
-        "broad": "pistol",
-        "specific": [],
-        "source": "product-category",
-        "basis": {
-          "tags": [],
-          "productCategory": "Pistols"
-        },
-        "unresolved": false
-      },
-      "modKinds": [
-        "pistol"
-      ]
-    },
-    "PvPVariantTipOne": {
-      "name": "Balla",
-      "nameZh": "宝拉",
-      "slots": {
-        "broad": "pistol",
-        "specific": [],
-        "source": "product-category",
-        "basis": {
-          "tags": [],
-          "productCategory": "Pistols"
-        },
-        "unresolved": false
-      },
-      "modKinds": [
-        "pistol"
-      ]
-    },
-    "PvPVariantTipSix": {
-      "name": "Kronsh",
-      "nameZh": "客隆什",
-      "slots": {
-        "broad": "pistol",
-        "specific": [],
-        "source": "product-category",
-        "basis": {
-          "tags": [],
-          "productCategory": "Pistols"
-        },
-        "unresolved": false
-      },
-      "modKinds": [
-        "pistol"
-      ]
-    },
-    "PvPVariantTipThree": {
-      "name": "Mewan",
-      "nameZh": "密丸",
-      "slots": {
-        "broad": "pistol",
-        "specific": [],
-        "source": "product-category",
-        "basis": {
-          "tags": [],
-          "productCategory": "Pistols"
-        },
-        "unresolved": false
-      },
-      "modKinds": [
-        "pistol"
-      ]
-    },
-    "PvPVariantTipTwo": {
-      "name": "Ooltha",
-      "nameZh": "乌尔萨",
-      "slots": {
-        "broad": "pistol",
-        "specific": [],
-        "source": "product-category",
-        "basis": {
-          "tags": [],
-          "productCategory": "Pistols"
-        },
-        "unresolved": false
-      },
-      "modKinds": [
-        "pistol"
-      ]
-    },
-    "TipFive": {
-      "name": "Dehtat",
-      "nameZh": "德塔特",
-      "slots": {
-        "broad": "pistol",
-        "specific": [],
-        "source": "product-category",
-        "basis": {
-          "tags": [],
-          "productCategory": "Pistols"
-        },
-        "unresolved": false
-      },
-      "modKinds": [
-        "pistol"
-      ]
-    },
-    "TipFour": {
-      "name": "Cyath",
-      "nameZh": "西亚什",
-      "slots": {
-        "broad": "pistol",
-        "specific": [],
-        "source": "product-category",
-        "basis": {
-          "tags": [],
-          "productCategory": "Pistols"
-        },
-        "unresolved": false
-      },
-      "modKinds": [
-        "pistol"
-      ]
-    },
-    "TipOne": {
-      "name": "Balla",
-      "nameZh": "宝拉",
-      "slots": {
-        "broad": "pistol",
-        "specific": [],
-        "source": "product-category",
-        "basis": {
-          "tags": [],
-          "productCategory": "Pistols"
-        },
-        "unresolved": false
-      },
-      "modKinds": [
-        "pistol"
-      ]
-    },
-    "TipSix": {
-      "name": "Kronsh",
-      "nameZh": "客隆什",
-      "slots": {
-        "broad": "pistol",
-        "specific": [],
-        "source": "product-category",
-        "basis": {
-          "tags": [],
-          "productCategory": "Pistols"
-        },
-        "unresolved": false
-      },
-      "modKinds": [
-        "pistol"
-      ]
-    },
-    "TipThree": {
-      "name": "Mewan",
-      "nameZh": "密丸",
-      "slots": {
-        "broad": "pistol",
-        "specific": [],
-        "source": "product-category",
-        "basis": {
-          "tags": [],
-          "productCategory": "Pistols"
-        },
-        "unresolved": false
-      },
-      "modKinds": [
-        "pistol"
-      ]
-    },
-    "TipTwo": {
-      "name": "Ooltha",
-      "nameZh": "乌尔萨",
-      "slots": {
-        "broad": "pistol",
-        "specific": [],
-        "source": "product-category",
-        "basis": {
-          "tags": [],
-          "productCategory": "Pistols"
-        },
-        "unresolved": false
-      },
-      "modKinds": [
-        "pistol"
-      ]
-    },
-    "HandleNine": {
-      "name": "Korb",
-      "nameZh": "科布",
-      "slots": {
-        "broad": "pistol",
-        "specific": [],
-        "source": "product-category",
-        "basis": {
-          "tags": [],
-          "productCategory": "Pistols"
-        },
-        "unresolved": false
-      },
-      "modKinds": [
-        "pistol"
-      ]
-    },
-    "HandleTen": {
-      "name": "Shtung",
-      "nameZh": "石当",
-      "slots": {
-        "broad": "pistol",
-        "specific": [],
-        "source": "product-category",
-        "basis": {
-          "tags": [],
-          "productCategory": "Pistols"
-        },
-        "unresolved": false
-      },
-      "modKinds": [
-        "pistol"
-      ]
-    },
-    "TipEleven": {
-      "name": "Dokrahm",
-      "nameZh": "多克拉姆",
-      "slots": {
-        "broad": "pistol",
-        "specific": [],
-        "source": "product-category",
-        "basis": {
-          "tags": [],
-          "productCategory": "Pistols"
-        },
-        "unresolved": false
-      },
-      "modKinds": [
-        "pistol"
-      ]
-    },
-    "TipNine": {
-      "name": "Sepfahn",
-      "nameZh": "瑟普梵",
-      "slots": {
-        "broad": "pistol",
-        "specific": [],
-        "source": "product-category",
-        "basis": {
-          "tags": [],
-          "productCategory": "Pistols"
-        },
-        "unresolved": false
-      },
-      "modKinds": [
-        "pistol"
-      ]
-    },
-    "TipTen": {
-      "name": "Rabvee",
-      "nameZh": "拉比威",
-      "slots": {
-        "broad": "pistol",
-        "specific": [],
-        "source": "product-category",
-        "basis": {
-          "tags": [],
-          "productCategory": "Pistols"
-        },
-        "unresolved": false
-      },
-      "modKinds": [
-        "pistol"
-      ]
-    },
-    "InfestedHandleOne": {
-      "name": "Plague Akwin",
-      "nameZh": "瘟疫 艾克文",
-      "slots": {
-        "broad": "pistol",
-        "specific": [],
-        "source": "product-category",
-        "basis": {
-          "tags": [],
-          "productCategory": "Pistols"
-        },
-        "unresolved": false
-      },
-      "modKinds": [
-        "pistol"
-      ]
-    },
-    "InfestedHandleTwo": {
-      "name": "Plague Bokwin",
-      "nameZh": "瘟疫 柏克文",
-      "slots": {
-        "broad": "pistol",
-        "specific": [],
-        "source": "product-category",
-        "basis": {
-          "tags": [],
-          "productCategory": "Pistols"
-        },
-        "unresolved": false
-      },
-      "modKinds": [
-        "pistol"
-      ]
-    },
-    "InfestedTipOne": {
-      "name": "Plague Kripath",
-      "nameZh": "瘟疫 克里帕丝",
-      "slots": {
-        "broad": "pistol",
-        "specific": [],
-        "source": "product-category",
-        "basis": {
-          "tags": [],
-          "productCategory": "Pistols"
-        },
-        "unresolved": false
-      },
-      "modKinds": [
-        "pistol"
-      ]
-    },
-    "InfestedTipTwo": {
-      "name": "Plague Keewar",
-      "nameZh": "瘟疫 奇沃",
-      "slots": {
-        "broad": "pistol",
-        "specific": [],
-        "source": "product-category",
-        "basis": {
-          "tags": [],
-          "productCategory": "Pistols"
-        },
-        "unresolved": false
-      },
-      "modKinds": [
-        "pistol"
-      ]
-    },
-    "PvPVariantInfestedTipOne": {
-      "name": "Plague Kripath",
-      "nameZh": "瘟疫 克里帕丝",
-      "slots": {
-        "broad": "pistol",
-        "specific": [],
-        "source": "product-category",
-        "basis": {
-          "tags": [],
-          "productCategory": "Pistols"
-        },
-        "unresolved": false
-      },
-      "modKinds": [
-        "pistol"
-      ]
-    },
-    "PvPVariantInfestedTipTwo": {
-      "name": "Plague Keewar",
-      "nameZh": "瘟疫 奇沃",
       "slots": {
         "broad": "pistol",
         "specific": [],

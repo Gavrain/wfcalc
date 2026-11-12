@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-12T08:54:39.176Z",
+  "generatedAt": "2026-11-12T09:01:11.723Z",
   "sources": [
     {
       "name": "mods/baseline.json",
@@ -33,13 +33,13 @@
     "arcanesSkipped": 6,
     "modSets": 19,
     "stances": 61,
-    "weapons": 827
+    "weapons": 765
   },
   "coverage": {
     "officialMatched": 478,
     "withStats": 478,
     "unresolvedWeapons": 0,
-    "meleeMissingSpecific": 37,
+    "meleeMissingSpecific": 34,
     "zhMissing": 0
   },
   "todo": {
@@ -80,9 +80,6 @@
       "BerserkerMeleePrime (Valkyr Prime Talons)",
       "BerserkerMelee (Valkyr Talons)",
       "NechroTechSwordWeapon (Ironbride)",
-      "ZanukaPetMeleeWeaponIP (Batoten)",
-      "ZanukaPetMeleeWeaponIS (Lacerten)",
-      "ZanukaPetMeleeWeaponPS (Akaten)",
       "TnBayonetMeleeWeapon (Vinquibus (Melee))",
       "PrimeCorufellScytheWeapon (Corufell Prime)"
     ],
