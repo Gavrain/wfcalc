@@ -1,4 +1,4 @@
-/* wfcalc demo 样式 —— 目标是可读、信息密度高，不追求视觉效果 */
+﻿/* wfcalc demo 样式 —— 目标是可读、信息密度高，不追求视觉效果 */
 :root {
   --bg: #14171c;
   --panel: #1c2027;
@@ -36,17 +36,47 @@ body {
 .logo { font-weight: 700; color: var(--accent); font-size: 16px; }
 .tagline { color: var(--muted); font-size: 12px; }
 .weapon-picker { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-.weapon-picker select,
-.weapon-picker input {
+.weapon-picker select {
   background: #1c2027; color: var(--fg);
   border: 1px solid #2f3742; border-radius: 4px;
   font-size: 12px; padding: 3px 6px; max-width: 200px;
 }
 .weapon-picker select:disabled { opacity: 0.45; cursor: not-allowed; }
 .weapon-picker option:disabled { color: #666; }
-.weapon-picker input { max-width: 160px; }
-.weapon-picker input::placeholder { color: #5b6472; }
 .weapon-picker option { color: var(--fg); }
+
+/* 搜索框 + 结果面板（D-151）：面板浮在搜索框**下方**，不推挤正文、不动下拉框。 */
+.search-box { position: relative; display: inline-flex; }
+.search-box input {
+  background: #1c2027; color: var(--fg);
+  border: 1px solid #2f3742; border-radius: 4px;
+  font-size: 12px; padding: 3px 6px; max-width: 160px; width: 160px;
+}
+.search-box input::placeholder { color: #5b6472; }
+.search-box input:focus { outline: none; border-color: var(--accent); }
+.search-panel {
+  position: absolute; left: 0; top: calc(100% + 4px);
+  z-index: 30; min-width: 260px; max-width: 360px; max-height: 340px; overflow-y: auto;
+  background: var(--panel); border: 1px solid #2f3742; border-radius: 6px;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.45);
+  padding: 4px 0;
+}
+.search-panel[hidden] { display: none; }
+.search-summary {
+  padding: 3px 10px 5px; font-size: 11px; color: var(--muted);
+  border-bottom: 1px solid var(--line); margin-bottom: 3px;
+}
+.search-item {
+  display: block; width: 100%; text-align: left; cursor: pointer;
+  background: transparent; border: none; color: var(--fg);
+  font: inherit; font-size: 12px; line-height: 22px; padding: 0 10px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.search-item:hover,
+.search-item.active { background: #262c35; }
+.search-item .search-item-name { color: var(--fg); }
+.search-item .search-item-meta { color: var(--muted); font-size: 11px; margin-left: 6px; }
+.search-empty { padding: 4px 10px; font-size: 12px; color: var(--muted); }
 .weapon-title { font-size: 16px; font-weight: 600; }
 .weapon-meta { color: var(--muted); font-size: 12px; }
 

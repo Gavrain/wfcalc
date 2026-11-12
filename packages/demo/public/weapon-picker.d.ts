@@ -43,3 +43,15 @@ export declare const FIRE_STYLE_OPTIONS: FireStyleOption[];
 export declare function weaponMatchesStyle(weapon: { modes?: { trigger?: string }[] }, styleId: string): boolean;
 export declare function filterByStyle(weapons: PickedWeapon[], styleId: string): PickedWeapon[];
 export declare function searchWeapons(weapons: PickedWeapon[], keyword: unknown): PickedWeapon[];
+
+/** 某把武器在类型树里的落点（D-151：搜索结果面板的副标注 + 点选后下拉跳转共用） */
+export interface WeaponLocation {
+  groupId: string;
+  groupLabel: string;
+  typeKey: string;
+  typeLabel: string;
+}
+export declare function locateWeapon(
+  groups: Map<string, WeaponGroupBucket> | null | undefined,
+  weaponId: string | null | undefined,
+): WeaponLocation | null;

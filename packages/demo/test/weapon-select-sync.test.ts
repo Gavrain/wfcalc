@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 武器选单的选中一致性（D-097，需求方 2026-11-06）。
  *
  * 反馈：
@@ -87,16 +87,31 @@ describe('搜索结果里的当前武器', () => {
 });
 
 describe('DOM：选单重建后选中值必须等于当前武器', () => {
-  it('renderWeaponOptions / renderSearchResults 都会调用 syncWeaponSelect', async () => {
+  it('重建选单的地方都会调用 syncWeaponSelect（D-097 不变量）', async () => {
     const src = await readFile(join(ROOT, 'packages/demo/public/app.js'), 'utf8');
-    // 三个重建点：类型切换、搜索结果、switchWeapon 的同武器短路
+    // 重建点：renderWeaponOptions 末尾 + switchWeapon 的同武器短路 + 它自身的定义/其它调用
     const syncCount = (src.match(/syncWeaponSelect\(\)/g) ?? []).length;
-    assert.ok(syncCount >= 4, `syncWeaponSelect 调用次数应 ≥4，实际 ${syncCount}`);
+    assert.ok(syncCount >= 3, `syncWeaponSelect 调用次数应 ≥3，实际 ${syncCount}`);
     // 同武器分支不能再直接 return
     assert.ok(
       /if \(store\.data && store\.data\.weapon && store\.data\.weapon\.id === weaponId\) \{\s*\n\s*syncWeaponSelect\(\);/.test(src),
       '同武器时应同步选单而不是直接 return',
     );
+  });
+
+  /**
+   * D-151（需求方 2026-11-13）：「应该是搜索框下面列出结果，就像搜索引擎那样。
+   * 现在变成输入以后筛选了，这不对。」
+   * → 搜索**不再动下拉框**，所以 renderSearchResults 里不该出现 rebuild 下拉的调用；
+   *   选单与真实武器的一致性改由「点选结果 → switchWeapon → syncWeaponSelect」保证。
+   */
+  it('搜索结果只画面板，不再重建/同步下拉框', async () => {
+    const src = await readFile(join(ROOT, 'packages/demo/public/app.js'), 'utf8');
+    const body = /function renderSearchResults\([\s\S]*?\n\}\n/.exec(src)?.[0] ?? '';
+    assert.ok(body, '应有 renderSearchResults');
+    assert.ok(!/syncWeaponSelect\(\)/.test(body), 'renderSearchResults 不应再同步武器下拉');
+    assert.ok(!/\$\(['"]#weapon-select['"]\)/.test(body), 'renderSearchResults 不应再改写武器下拉');
+    assert.ok(/weapon-search-panel/.test(body), '结果应画进搜索框下方的面板');
   });
 
   it('syncWeaponSelect 会把当前武器补进选单并选中', async () => {

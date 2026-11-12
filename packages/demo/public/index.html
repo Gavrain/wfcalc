@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="zh-CN">
   <head>
     <meta charset="utf-8" />
@@ -18,7 +18,12 @@
         <select id="weapon-type" title="类型"></select>
         <select id="weapon-style" title="弹道"></select>
         <select id="weapon-select" title="武器"></select>
-        <input id="weapon-search" type="search" placeholder="搜索武器名称" />
+        <!-- D-151：搜索框 + 它下面**浮出**的结果面板（像搜索引擎的联想列表）。
+             面板不并进下拉框、不推挤正文，所以挂在一个定位容器里。 -->
+        <span class="search-box">
+          <input id="weapon-search" type="search" placeholder="搜索武器名称" autocomplete="off" />
+          <div id="weapon-search-panel" class="search-panel" hidden></div>
+        </span>
       </div>
       <div id="weapon-title" class="weapon-title">加载中…</div>
       <div id="weapon-meta" class="weapon-meta"></div>

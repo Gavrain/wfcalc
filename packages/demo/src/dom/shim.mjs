@@ -172,6 +172,9 @@ export async function buildRegistry(readText, htmlPath) {
 
 /** 造一个喂给 app.js 的 `document` */
 export function makeDocument(registry) {
+  // `document.addEventListener('mousedown', …)` 这类全局监听：app.js 用它做"点面板外收起"，
+  // 真实浏览器一定有；shim 里挂在一个 Node 上，由 `fireDocument()` 触发。
+  const events = new Node('document');
   return {
     createElement: (t) => new Node(t),
     createElementNS: (_ns, t) => new Node(t),
@@ -179,6 +182,10 @@ export function makeDocument(registry) {
     querySelector: (s) => registry[s] ?? null,
     querySelectorAll: () => [],
     getElementById: (id) => registry['#' + id] ?? null,
+    addEventListener: (t, fn) => events.addEventListener(t, fn),
+    removeEventListener: (t, fn) => events.removeEventListener(t, fn),
+    /** 触发一次 document 级事件（参数同 `Node.fire`） */
+    fireDocument: (t, ev = {}) => events.fire(t, ev),
     body: new Node('body'),
     head: new Node('head'),
     documentElement: new Node('html'),

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 配装页面（D-105）：本文件只留「界面怎么画」。
  *
  * ```
@@ -18,7 +18,7 @@
  * 所以这里只用**命名导入**，不要写 `const { a } = ns` 这种解构。
  */
 import { critAverage, critTiers, DOT_TYPES, isKuvaFamily, METRIC_OPTIONS, totalProcChance } from '../../core/src/index.ts';
-import { WEAPON_GROUPS, groupWeapons, searchWeapons, FIRE_STYLE_OPTIONS, filterByStyle, weaponLabel, weaponGroupId } from './weapon-picker.js';
+import { WEAPON_GROUPS, groupWeapons, searchWeapons, FIRE_STYLE_OPTIONS, filterByStyle, weaponLabel, weaponGroupId, locateWeapon, weaponMatchesStyle } from './weapon-picker.js';
 import { OVERRIDE_WEAPON_FIELDS as OVERRIDE_FIELDS, mergeWeaponOverride as applyWeaponOverride } from './weapon-override.js';
 import { arcaneDisplayStats, arcaneToContributions, isConditionOverloadMod, modStackFactor } from '../../data/src/adapter.ts';
 import {
@@ -1971,10 +1971,169 @@ function renderWeaponPicker() {
   ssel.onchange = function () { renderWeaponOptions($('#weapon-group').value, $('#weapon-type').value); };
 
   renderTypeOptions('primary');
+  wireWeaponSearch();
+}
 
-  $('#weapon-search').addEventListener('input', function (e) {
-    renderSearchResults(e.target.value);
+/**
+ * 搜索框（D-151）：**全部四类**一起搜，结果浮在搜索框下方，像搜索引擎那样列出来。
+ *
+ * 需求方 2026-11-13：
+ * > 「ui搜索结果改一下，应该是搜索框下面列出结果，就像搜索引擎那样。
+ * >  现在变成输入以后筛选了，这不对。」→ 选 A：搜全部四类，结果面板每行标明
+ * >  「中文名 · 类型 · 大类」，点哪把就把上面的大类/类型/弹道下拉跳过去。
+ *
+ * 关键：**打字时一个字都不动下拉框**——那是"当前武器"的选择器，内容一变，
+ * 选中的枪就跟着丢（旧实现把命中项塞进下拉框，才显得像"筛选"）。
+ */
+function wireWeaponSearch() {
+  const input = $('#weapon-search');
+  const panel = $('#weapon-search-panel');
+  if (!input || !panel) return;
+
+  input.addEventListener('input', function () { renderSearchResults(input.value); });
+  input.addEventListener('focus', function () {
+    if (String(input.value || '').trim()) renderSearchResults(input.value);
   });
+  input.addEventListener('keydown', function (e) {
+    const key = e.key;
+    if (key === 'Escape') { closeSearchPanel(); return; }
+    if (key === 'ArrowDown' || key === 'ArrowUp') {
+      if (!hitsShown) return;
+      if (typeof e.preventDefault === 'function') e.preventDefault();
+      moveSearchActive(key === 'ArrowDown' ? 1 : -1);
+      return;
+    }
+    if (key === 'Enter') {
+      const hit = searchHits[searchActiveIndex];
+      if (hit) pickSearchResult(hit.id);
+    }
+  });
+  // 点面板以外的地方收起（面板内的点击由结果行自己处理）
+  document.addEventListener('mousedown', function (e) {
+    if (!isSearchPanelOpen()) return;
+    const t = e && e.target;
+    if (t === input || (panel.contains && panel.contains(t))) return;
+    closeSearchPanel();
+  });
+}
+
+/** 上一次渲染的命中项（键盘上下移动用） */
+let searchHits = [];
+/** 键盘高亮的行号（-1 = 没有高亮） */
+let searchActiveIndex = -1;
+/** 面板当前是否开着 */
+let hitsShown = false;
+
+function isSearchPanelOpen() {
+  const panel = $('#weapon-search-panel');
+  return Boolean(panel) && panel.hidden !== true;
+}
+
+function closeSearchPanel() {
+  const panel = $('#weapon-search-panel');
+  if (!panel) return;
+  panel.hidden = true;
+  hitsShown = false;
+  searchActiveIndex = -1;
+}
+
+/**
+ * 按关键字重画结果面板（**只动画板，不碰下拉框**）。
+ * 关键字为空或没有命中时收起面板。
+ */
+function renderSearchResults(keyword) {
+  const panel = $('#weapon-search-panel');
+  if (!panel) return;
+  const hits = searchWeapons(store.dataAll.weapons, keyword);
+  if (!String(keyword || '').trim() || !hits.length) {
+    closeSearchPanel();
+    panel.innerHTML = '';
+    searchHits = [];
+    return;
+  }
+
+  searchHits = hits;
+  searchActiveIndex = -1;
+  panel.innerHTML = '';
+
+  // 汇总：「主 3 · 次 1 · 近战 2」——一眼看到命中的都在哪些大类
+  const counts = new Map();
+  const rows = [];
+  for (const g of WEAPON_GROUPS) {
+    const list = hits.filter(function (w) { return weaponGroupId(w) === g.id; });
+    if (list.length) counts.set(g.id, list.length);
+    rows.push.apply(rows, list);
+  }
+  const parts = [];
+  for (const [gid, n] of counts) {
+    const g = WEAPON_GROUPS.find(function (x) { return x.id === gid; });
+    parts.push((g ? g.label : gid) + ' ' + n);
+  }
+  panel.append(el('div', 'search-summary', '共 ' + hits.length + ' 项 · ' + parts.join(' · ')));
+
+  // 最多列 20 条（再多也没人翻），超出时末尾注明
+  const LIMIT = 20;
+  const shownRows = rows.slice(0, LIMIT);
+  for (let i = 0; i < shownRows.length; i++) {
+    const w = shownRows[i];
+    const btn = el('button', 'search-item');
+    btn.type = 'button';
+    btn.dataset.weaponId = w.id;
+    btn.title = weaponLabel(w) + '（' + String(w.name || '') + '）';
+    btn.append(el('span', 'search-item-name', weaponLabel(w)));
+    btn.append(el('span', 'search-item-meta', searchMetaOf(w)));
+    btn.addEventListener('click', (function (id) {
+      return function () { pickSearchResult(id); };
+    })(w.id));
+    // 鼠标移上去 = 键盘高亮跟着走，两种操作不打架
+    btn.addEventListener('mouseenter', (function (k) {
+      return function () { setSearchActive(k); };
+    })(i));
+    panel.append(btn);
+  }
+  if (rows.length > LIMIT) {
+    panel.append(el('div', 'search-empty', '… 还有 ' + (rows.length - LIMIT) + ' 个，请多输几个字'));
+  }
+  panel.hidden = false;
+  hitsShown = true;
+}
+
+/** 结果行的副标注：类型 · 大类 */
+function searchMetaOf(w) {
+  const loc = locateWeapon(store.dataAll.groups, w.id);
+  if (!loc) return '';
+  return loc.typeLabel + ' · ' + loc.groupLabel;
+}
+
+function setSearchActive(i) {
+  const panel = $('#weapon-search-panel');
+  if (!panel) return;
+  const items = panel.children.filter(function (c) { return c.className === 'search-item'; });
+  for (let k = 0; k < items.length; k++) items[k].classList.toggle('active', k === i);
+  searchActiveIndex = i;
+}
+
+function moveSearchActive(delta) {
+  const n = Math.min(searchHits.length, 20);
+  if (!n) return;
+  let next = searchActiveIndex + delta;
+  if (next < 0) next = n - 1;
+  if (next >= n) next = 0;
+  setSearchActive(next);
+}
+
+/**
+ * 点选一条搜索结果：清空搜索框、收起面板、切枪。
+ * 下拉框在 `switchWeapon` 里跟着跳到那把枪所在的分类（D-119 的既有行为）。
+ */
+function pickSearchResult(weaponId) {
+  const input = $('#weapon-search');
+  if (input) input.value = '';
+  searchHits = [];
+  closeSearchPanel();
+  const panel = $('#weapon-search-panel');
+  if (panel) panel.innerHTML = '';
+  switchWeapon(weaponId).catch(function (e) { console.error('[switchWeapon]', e); });
 }
 
 /** 按大类渲染"类型"下拉栏 */
@@ -2033,39 +2192,7 @@ function renderWeaponOptions(groupId, typeKey) {
   syncWeaponSelect();
 }
 
-/** 名称搜索结果（替换"类型 + 武器"两个下拉栏的内容） */
-function renderSearchResults(keyword) {
-  const tsel = $('#weapon-type');
-  const wsel = $('#weapon-select');
-  const hits = searchWeapons(store.dataAll.weapons, keyword);
-  if (!String(keyword || '').trim()) {
-    // 清空搜索 → 回到分类浏览
-    renderTypeOptions($('#weapon-group').value);
-    return;
-  }
-  // 搜索时把类型栏改成"搜索结果"，武器栏列出命中项
-  tsel.innerHTML = '';
-  const o = el('option', '', '搜索结果（' + hits.length + '）');
-  o.value = '__search__';
-  tsel.append(o);
-  tsel.onchange = null;
-
-  wsel.innerHTML = '';
-  const shown = hits.slice(0, 200);
-  for (const w of shown) {
-    const opt = el('option', '', weaponLabel(w));
-    opt.value = w.id;
-    wsel.append(opt);
-  }
-  wsel.onchange = function () { switchWeapon(wsel.value); };
-  // 搜索结果里不含当前武器时，syncWeaponSelect 会补一项"（当前）"
-  syncWeaponSelect();
-  if (hits.length > shown.length) {
-    const more = el('option', '', '… 还有 ' + (hits.length - shown.length) + ' 个，请细化搜索');
-    more.disabled = true;
-    wsel.append(more);
-  }
-}
+/** 名称搜索结果（D-151：实现在 `wireWeaponSearch` 附近，画到搜索框下方的面板里） */
 
 /**
  * 切换到另一把武器。
@@ -2099,6 +2226,16 @@ async function switchWeapon(weaponId) {
   const groupSel = $('#weapon-group');
   const groupOf = weaponGroupId(weapon);
   if (groupSel && groupOf) groupSel.value = groupOf;
+  // D-151：搜索能跨大类直接选枪，所以「类型」栏必须跟着换到新武器所在类型
+  // （以前只 renderWeaponOptions 当前类型，跨大类时类型栏会停在一个不属于该大类的类型上）。
+  // 用 locateWeapon 而不是看 weaponGroupId：显赫刀剑这类"文件类别与槽位类别不一致"的武器，
+  // 在类型树里的落点是 `groupWeapons` 判出来的，不是 category。
+  const typeSel = $('#weapon-type');
+  const loc = store.dataAll && locateWeapon(store.dataAll.groups, weaponId);
+  if (typeSel && loc && loc.groupId === (groupSel ? groupSel.value : loc.groupId)) typeSel.value = loc.typeKey;
+  // 弹道栏若正筛着别的扳机，从搜索结果跳过来的这把会不在列表里 → 回到"全部弹道"
+  const styleSel = $('#weapon-style');
+  if (styleSel && styleSel.value !== 'all' && !weaponMatchesStyle(weapon, styleSel.value)) styleSel.value = 'all';
   renderWeaponOptions($('#weapon-group').value, $('#weapon-type').value);
   renderAll();
   // D-122：编辑器里属于上一把枪的草稿与"已保存到 …"提示都要清掉，

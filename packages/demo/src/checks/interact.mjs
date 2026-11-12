@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 页面交互冒烟（原 `dom-interact.mjs`，D-103 用公共 shim 重写入口）。
  *
  *   node packages/demo/src/checks/interact.mjs
@@ -270,21 +270,88 @@ const appSrc = await readFile(join(ROOT, 'packages/demo/public/app.js'), 'utf8')
   check('重复选中当前武器不出错', wsel.value === steady);
 
   const search = registry['#weapon-search'];
+  const panel = registry['#weapon-search-panel'];
   check('有搜索框', Boolean(search));
-  if (search) {
+  check('有搜索结果显示面板', Boolean(panel));
+  if (search && panel) {
+    // D-151（需求方 2026-11-13）：「应该是搜索框下面列出结果，就像搜索引擎那样。
+    // 现在变成输入以后筛选了，这不对。」→ 打字只画面板，下拉框一个字都不动。
     const curId = wsel.value;
+    const curGroup = gsel.value;
+    const curType = tsel.value;
+    const curChildren = wsel.children.length;
     search.value = '血肢';
     search.fire('input');
     await new Promise((r) => setTimeout(r, 200));
-    const opts = Array.from(wsel.children).map((o) => o.value);
-    check('搜索结果里含血肢', opts.some((v) => /Hema/i.test(v)));
-    check('搜索时补了"当前武器"项', opts.includes(curId));
+    const items = panel.children.filter((c) => c.className === 'search-item');
+    check('搜索后面板打开', panel.hidden !== true);
+    check('搜索后面板列出结果', items.length > 0, items.map((c) => c.className).join(','));
+    check('结果面板含血肢', items.some((c) => /Hema|血肢/i.test(JSON.stringify(c.dataset) + c.textContent)));
+    check('结果行标了 类型 · 大类', items.some((c) => /·/.test(c.textContent)));
+    check('搜索时下拉框一个选项都没变', wsel.children.length === curChildren);
     check('搜索时选中值仍是当前武器', wsel.value === curId);
+    check('搜索时大类/类型下拉不动', gsel.value === curGroup && tsel.value === curType);
+    check('结果面板在浏览器里挂载在搜索框的容器内',
+      /class="search-box"[\s\S]{0,200}id="weapon-search-panel"/.test(html));
+
+    // 点一条结果 → 切枪、清空搜索框、收起面板
+    const pick = items.find((c) => /Hema|血肢/i.test(JSON.stringify(c.dataset) + c.textContent));
+    if (pick) {
+      pick.fire('click');
+      await new Promise((r) => setTimeout(r, 400));
+      check('点选结果后切到该武器', String(store.store.data && store.store.data.weapon && store.store.data.weapon.id) === pick.dataset.weaponId);
+      check('点选后搜索框清空', search.value === '');
+      check('点选后面板收起', panel.hidden === true);
+      check('点选后武器下拉选中该项', wsel.value === pick.dataset.weaponId);
+    }
+
+    // 搜不到 → 收起
+    search.value = 'zzzz不存在zzzz';
+    search.fire('input');
+    await new Promise((r) => setTimeout(r, 100));
+    check('搜不到时面板收起', panel.hidden === true);
 
     search.value = '';
     search.fire('input');
     await new Promise((r) => setTimeout(r, 200));
-    check('清空搜索后选中值仍是当前武器', wsel.value === curId);
+    check('清空搜索后面板收起', panel.hidden === true);
+  }
+}
+
+// ── 44b. 搜索跨大类（D-151）──
+//
+// 需求方选了方案 A：搜全部四类；点哪把，大类/类型下拉跟过去。
+// 用「血肢」→ 选中「终幕·血肢(CodaHema)」验证不了跨类，所以这里搜「希尔德」：
+// 它是近战（primary 分类下的下拉栏里搜不到），能把"跨大类跳转"整条路径走一遍。
+{
+  const gsel = registry['#weapon-group'];
+  const tsel = registry['#weapon-type'];
+  const wsel = registry['#weapon-select'];
+  const search = registry['#weapon-search'];
+  const panel = registry['#weapon-search-panel'];
+  if (search && panel && gsel) {
+    gsel.value = 'primary';
+    tsel.fire('change');
+    await new Promise((r) => setTimeout(r, 200));
+    search.value = '赤毒·希尔德';
+    search.fire('input');
+    await new Promise((r) => setTimeout(r, 200));
+    const items = panel.children.filter((c) => c.className === 'search-item');
+    check('在主要分类下能搜出近战武器', items.length > 0, items.map((c) => c.textContent).join(' / '));
+    const pick = items.find((c) => c.dataset.weaponId === 'GrnKuvaLichScytheWeapon');
+    check('搜索结果里能找到赤毒·希尔德', Boolean(pick));
+    if (pick) {
+      pick.fire('click');
+      await new Promise((r) => setTimeout(r, 400));
+      check('跨大类点选后切到该武器', String(store.store.data && store.store.data.weapon && store.store.data.weapon.id) === pick.dataset.weaponId);
+      check('跨大类点选后大类下拉跟过去', gsel.value === 'melee');
+      check('跨大类点选后武器下拉选中该项', wsel.value === pick.dataset.weaponId);
+      // 赤毒·希尔德属于 近战 → 锤（`weapon-slots.json` 的 specific = hammer，巨镰才是 heavy_scythe）
+      check('跨大类点选后类型下拉跟到该武器所在类型', tsel.value === 'hammer');
+    }
+    search.value = '';
+    search.fire('input');
+    await new Promise((r) => setTimeout(r, 100));
   }
 }
 
