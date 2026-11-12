@@ -200,17 +200,17 @@ describe('弹道筛选（D-099 A）', () => {
     }
   });
 
-  it('多模式武器只要任一模式匹配就算', async () => {
+  it('只看主模式：次要模式是半自动，不算进半自动组', () => {
     const w = { modes: [{ trigger: 'auto' }, { trigger: 'semi' }] } as never;
     assert.equal(weaponMatchesStyle(w, 'auto'), true);
-    assert.equal(weaponMatchesStyle(w, 'semi'), true);
+    assert.equal(weaponMatchesStyle(w, 'semi'), false);
     assert.equal(weaponMatchesStyle(w, 'charge'), false);
   });
 
-  it('持续/光束 同时收 active', () => {
+  it('active 不算射线（潘塔 / 奇点枪归发射器）', () => {
     const a = { modes: [{ trigger: 'held' }] } as never;
     const b = { modes: [{ trigger: 'active' }] } as never;
     assert.equal(weaponMatchesStyle(a, 'held'), true);
-    assert.equal(weaponMatchesStyle(b, 'held'), true);
+    assert.equal(weaponMatchesStyle(b, 'held'), false);
   });
 });

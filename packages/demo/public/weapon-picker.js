@@ -186,14 +186,15 @@ export function weaponGroupId(weapon) {
 /**
  * 弹道（发射方式）分类（D-099 A）。
  *
- * **第二层筛选器**，不进入"类型"树——类型仍是官方 zkClass 的划分。
- * 依据 `modes[].trigger`：
+ * **第二层筛选器**，不进入"类型"树——类型仍是 broad + 细类的划分。
+ * 依据**主模式**的 `modes[0].trigger`：
  *
  * ```
- * 子弹（semi/auto/burst） / 蓄力（charge） / 光束（held） / 其它（active/unknown）
+ * 子弹（semi/auto/burst） / 蓄力（charge） / 光束（held） / 引爆（active，归发射器）
  * ```
  *
- * 一把武器有多种模式时，只要**任一模式**匹配就算（例如 auto+semi 既属全自动也属半自动）。
+ * 需求方 2026-11-12 改了两处：只算主模式（不再"任一模式匹配就算"）、
+ * `active` 不算射线（潘塔 / 奇点枪这类归到「主武器 → 发射器」）。
  */
 export const FIRE_STYLE_OPTIONS = [
   { id: 'all', label: '全部弹道' },
@@ -204,15 +205,23 @@ export const FIRE_STYLE_OPTIONS = [
   { id: 'held', label: '持续/光束' },
 ];
 
-/** 该武器是否属于指定弹道（任一模式匹配即可） */
+/**
+ * 该武器是否属于指定弹道。
+ *
+ * 需求方 2026-11-12：
+ * > 「潘塔从哪儿看都没射线标签啊」→ 潘塔/奇点枪的扳机是 `active`（引爆式），
+ *   旧代码把 `active` 和 `held` 一起算作"持续/光束"，它们才出现在射线组里。
+ * > 「active 不需要单独一类，他们就放到发射器里面去。」
+ *   → `active` 不再算射线；这些武器本身带发射器细类，归到「主武器 → 发射器」。
+ * > 「模式参考只算主模式。」
+ *   → 只看**第一个模式**（主模式）的扳机：绘墨（主 held + 次 semi）只算射线，
+ *     巴什穆（主 auto + 次 held）只算全自动，不再按"任一模式"重复入组。
+ */
 export function weaponMatchesStyle(weapon, styleId) {
   if (!styleId || styleId === 'all') return true;
-  const modes = weapon.modes || [];
-  if (!modes.length) return false;
-  return modes.some((m) => {
-    if (styleId === 'held') return m.trigger === 'held' || m.trigger === 'active';
-    return m.trigger === styleId;
-  });
+  const main = (weapon.modes || [])[0];
+  if (!main) return false;
+  return main.trigger === styleId;
 }
 
 /** 按弹道筛选武器列表 */

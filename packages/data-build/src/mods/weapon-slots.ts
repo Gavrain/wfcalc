@@ -155,10 +155,10 @@ const SUBCLASS_BY_TYPE: Record<string, 'launcher' | 'crossbow'> = {
 const LAUNCHER_NAME = /launcher|grenade|rocket|torid/i;
 /** 弩的**型号名**（阿提卡 / 诸葛连弩 / 噬蛇弩 / 弩炮），按字母词边界匹配（"Zhuge Prime" 也算） */
 const CROSSBOW_MODEL = /(?<![a-z])(attica|zhuge|nagantaka|ballistica)(?![a-z])/i;
-/** 名字里不带信号、但以爆炸弹药为主的主武器（沙皇 / 赤毒·沙皇 / 赤毒·布拉玛） */
-const EXPLOSIVE_NAME = /zarr|bramma/i;
+/** 名字里不带信号、但以爆炸弹药为主的主武器（沙皇 / 赤毒·沙皇 / 赤毒·布拉玛 / 潘塔系列） */
+const EXPLOSIVE_NAME = /zarr|bramma|penta|carminepenta/i; // 潘塔三把：潘塔 / 保障·潘塔(PSPenta) / 嫣红·潘塔(CarminePenta)
 /** 没写英文名时，用内部 id 兜底识别这几把 */
-const EXPLOSIVE_ID = /GrnCannonWeapon|KuvaZarr|GrnBowWeapon|BioWeapon/i;
+const EXPLOSIVE_ID = /GrnCannonWeapon|KuvaZarr|GrnBowWeapon|BioWeapon|Penta/i; // id 兜底：PSPenta/CarminePenta/GrenadeLauncher
 
 /**
  * 是否带**弩**信号（只看显示名、资源末段、标签）。
