@@ -245,3 +245,61 @@ test('灵化仍然只有一个模式：赘骨的射线 + 蓄力是两种攻击�
   assert.ok(labels.includes('射线'), `灵化下应有「射线」：${labels.join('/')}`);
   assert.ok(labels.includes('蓄力'), `灵化下应有「蓄力」：${labels.join('/')}`);
 });
+
+// ── D-155：近战的攻击种类各成一个射击模式（需求方 2026-11-13）──
+//
+// 「把近战武器的普攻、震地、重型震地拆成三个模式，这不是一个攻击内的不同段。」
+
+/** 一把最小的近战武器（WFCD 近战的 `attacks[]` 与枪械同形） */
+const meleeWeapon = (name: string, attacks: WfcdAttack[]): WfcdWeapon =>
+  weapon({ name, productCategory: 'Melee', attacks });
+
+test('近战：普攻 / 震地 / 重型震地是三个模式，且各带自己的面板', () => {
+  const modes = modesOf(
+    meleeWeapon('Spinnerex', [
+      { name: 'Normal Attack', shot_type: 'Hit-Scan', damage: { toxin: 168 }, status_chance: 40 },
+      { name: 'Slam Attack', shot_type: 'AoE', damage: { toxin: 168 }, status_chance: 10 },
+      { name: 'Heavy Slam Attack', shot_type: 'AoE', damage: { toxin: 504 }, status_chance: 10 },
+    ]),
+  );
+  assert.equal(modes.length, 3, `应为 3 个模式，实际 ${modes.length} 个：${modes.map((m) => m.id).join('/')}`);
+  assert.deepEqual(
+    modes.map((m) => (m as { _label?: string })._label),
+    ['普攻', '震地攻击', '重型震地攻击'],
+  );
+  // 震地与重型震地的数值不同，拆开后各自看得见
+  assert.deepEqual(modes[1]!.variants[0]!.segments[0]!.damage, { toxin: 168 });
+  assert.deepEqual(modes[2]!.variants[0]!.segments[0]!.damage, { toxin: 504 });
+});
+
+test('近战：枪刃的「枪击」也单开一个模式（走近战 Mod，只是面板不同）', () => {
+  // 需求方：「枪击也独立出来好了，因为枪刃另外包括闪劫都有近战射击模式，
+  //          虽然叫射击但也使用的是近战 mod 赋能，只是面板不一样。」
+  const modes = modesOf(
+    meleeWeapon('Redeemer Prime', [
+      { name: 'Normal Attack', shot_type: 'Hit-Scan', damage: { slash: 126 }, status_chance: 22 },
+      { name: 'Ranged Attack', shot_type: 'Hit-Scan', damage: { blast: 30 }, status_chance: 6.6 },
+      { name: 'Slam Attack', shot_type: 'AoE', damage: { impact: 360 }, status_chance: 10 },
+      { name: 'Heavy Slam Attack', shot_type: 'AoE', damage: { blast: 540 }, status_chance: 10 },
+    ]),
+  );
+  assert.equal(modes.length, 4, `枪刃应为 4 个模式，实际 ${modes.length} 个`);
+  assert.equal((modes[1] as { _label?: string })._label, '枪击');
+});
+
+test('近战：只有重击系模式带 _heavy 标记（内核「重击时暴击率 ×2」靠它）', () => {
+  // 需求方：「近战的固定暴击率词条例如斩铁或者裂罅mod上都会带有重击时*2，对重击和重型震地生效。」
+  const modes = modesOf(
+    meleeWeapon('Spinnerex', [
+      { name: 'Normal Attack', shot_type: 'Hit-Scan', damage: { toxin: 168 } },
+      { name: 'Slam Attack', shot_type: 'AoE', damage: { toxin: 168 } },
+      { name: 'Heavy Slam Attack', shot_type: 'AoE', damage: { toxin: 504 } },
+    ]),
+  );
+  assert.deepEqual(
+    modes.map((m) => Boolean((m as { _heavy?: boolean })._heavy)),
+    [false, false, true],
+    '只有重型震地算重击系，普通震地不算',
+  );
+});
+

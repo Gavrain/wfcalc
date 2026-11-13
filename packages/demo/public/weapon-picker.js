@@ -26,6 +26,15 @@ export const WEAPON_GROUPS = [
   { id: 'archwing', label: '空战', files: ['archgun', 'archmelee'], enabled: true },
 ];
 
+/**
+ * 守护 / 同伴武器（`generated/weapons/companion.json`，需求方 2026-11-12）**不单列大类**，
+ * 按 `weapon-slots.json` 的槽位宽类并入现有大类：
+ *   · 步枪 / 霰弹枪 → 「主要」  · 近战 → 「近战」
+ * 也就是说它们的**选单落点由槽位宽类决定**，不看文件 category（文件里它们都是 `companion`）。
+ * 注意：同伴武器一律不可装赋能（见 `app-data.js` 的 `arcaneCategoriesFor`）。
+ */
+const COMPANION_CATEGORY = 'companion';
+
 /** `broad` + `specific` → 中文类型名 */
 const TYPE_LABEL = {
   rifle: '步枪',
@@ -133,17 +142,22 @@ export function groupWeapons(weapons, slotFile) {
   for (const g of WEAPON_GROUPS) out.set(g.id, { ...g, types: new Map() });
 
   for (const w of weapons) {
-    const groupId = groupOfCategory(w.category);
-    const group = out.get(groupId);
-    if (!group) continue;
     const entry = slotFile.weapons[w.id];
     const cls = classifyWeapon(entry);
+    // 武器落在哪个大类：
+    //   · 普通武器 → 按 generated 文件 category；
+    //   · 守护 / 同伴武器 → 按**槽位宽类**（需求方 2026-11-12：不单列大类，并入主要 / 近战）。
+    const isCompanion = w.category === COMPANION_CATEGORY;
+    const groupId = isCompanion ? broadToGroup(cls.broad) : groupOfCategory(w.category);
+    const group = out.get(groupId);
+    if (!group) continue;
     // ⚠ 战甲技能武器（显赫刀剑、和平缔造者、Dex 妖精…）在 weapon-slots.json 里
     //   记的是武器类 broad（pistol/rifle），但**武器所在的 generated 文件**才是
     //   本项目认定的类别。这里若 broad 与文件类别冲突，按"其它近战/其它"处理，
     //   避免近战列表里冒出"手枪""步枪"这类错误标签。
+    //   守护 / 同伴武器走的是槽位宽类，不存在这层冲突，不参与。
     const slotBroadGroup = broadToGroup(cls.broad);
-    if (slotBroadGroup !== groupId) {
+    if (!isCompanion && slotBroadGroup !== groupId) {
       cls.typeKey = groupId === 'melee' || groupId === 'archwing' ? '__other_melee__' : '__other__';
       cls.typeLabel = TYPE_LABEL[cls.typeKey] || group.label;
     }
@@ -203,14 +217,33 @@ function groupOfCategory(category) {
  * 武器大类 id（D-093 / D-119 / D-134）。
  * `archgun` / `archmelee` 都归到 `archwing`；认不出时退回 `primary`。
  * app.js 换枪后用它把「大类」下拉停在当前武器所在的类别。
+ *
+ * @param weapon 武器记录
+ * @param slotEntry 可选：`weapon-slots.json` 里该武器的记录。**守护 / 同伴武器必须传**——
+ *        它们在 generated 里都是 `category = companion`，真正的大类看槽位宽类
+ *        （需求方 2026-11-12：并入主要 / 近战，不单列大类）。不传时按"近战 / 其余归主要"兜底。
  */
-export function weaponGroupId(weapon) {
+export function weaponGroupId(weapon, slotEntry) {
   const cat = weapon && weapon.category;
+  if (cat === COMPANION_CATEGORY) {
+    const broad = slotEntry && slotEntry.slots && slotEntry.slots.broad;
+    return broadToGroup(broad) === 'melee' || broad === 'archmelee' ? 'melee' : 'primary';
+  }
   if (cat === 'archgun' || cat === 'archmelee') return 'archwing';
   return cat || 'primary';
 }
-
 /** 按名称搜索（中英文都匹配，大小写/空格不敏感） */
+/**
+ * 守护 / 同伴武器的弹道（需求方 2026-11-12 的界面决定）。
+ *
+ * 它们在 `weapon.json` 里的扳机有两类：
+ *   · 真枪（冰凇 / 死亡机枪 / 急冻喷枪…）：导出本来就给了 `held` / `auto` / `semi` / `burst`，照用；
+ *   · 近战（分离 / 巴托腾 / 莱斯腾 / 阿卡腾）：导出**没有扳机**，数据里是 `unknown`，
+ *     按「全部弹道」以外的任何一项筛都会被筛掉。需求方不要给它们加「近战」弹道选项，
+ *     于是这里只是让它们**至少能被筛出来**：扳机未知时按"近战"这一档归类匹配（不影响选项本身）。
+ */
+const COMPANION_PSEUDO_TRIGGER = { melee: 'melee' };
+
 /**
  * 弹道（发射方式）分类（D-099 A）。
  *
@@ -249,7 +282,12 @@ export function weaponMatchesStyle(weapon, styleId) {
   if (!styleId || styleId === 'all') return true;
   const main = (weapon.modes || [])[0];
   if (!main) return false;
-  return main.trigger === styleId;
+  const trigger = main.trigger;
+  // 守护近战（分离 / 巴托腾 / 莱斯腾 / 阿卡腾）没有扳机 → 只按"近战"这一档归类，见上面的说明
+  if (trigger === 'unknown' && weapon.category === COMPANION_CATEGORY) {
+    return COMPANION_PSEUDO_TRIGGER.melee === styleId;
+  }
+  return trigger === styleId;
 }
 
 /** 按弹道筛选武器列表 */

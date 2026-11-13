@@ -51,7 +51,10 @@ describe('DoT 基础值取全类型之和（§6.2）', () => {
     assert.ok(gasTick.tick > 0, `毒气每跳应 > 0，实际 ${gasTick.tick}`);
     // ① 基础值 = 全类型之和（**剔除元素 Mod 加量**后只剩面板的冲击 100）
     near(gasTick.baseValue, 100);
-    // D-107：毒气不吃火焰%——火/毒 Mod 的加量既不在基础值里，也不额外给毒气加成
+    // D-166（需求方 2026-11-12，**取代 D-107 Q6**）：毒气吃「毒气 %」、不吃火 % / 毒 %。
+    //   火 / 毒的元素 % 在合成阶段已经结算完，不会再去放大毒气 DoT；
+    //   这里没给毒气 %，所以元素项为 0，每跳 = 基础触发值 50。
+    near(gasTick.elementPct, 0);
     near(gasTick.tick, 100 * 0.5);
   });
 
@@ -71,9 +74,15 @@ describe('DoT 基础值取全类型之和（§6.2）', () => {
     near(heatTick.baseValue, 200);
     // ② × 火系数 0.5 = 100
     near(heatTick.baseTick, 200 * 0.5);
-    // D-107：元素 % **不进基础值**——`tickBase` 剔掉了火 Mod 的 180，只剩冲击 200。
-    //   这里 elementPct 只是展示字段；每跳值只由 baseValue × 系数 组成。
-    near(heatTick.tick, heatTick.baseTick);
+    // ③ 每跳 = ② × (1 + 该类型元素%) —— 口径 B（D-166，需求方 2026-11-12）：
+    //   「B，dotbase就是不含元素mod乘区的全部之和」。
+    //   元素 % **不进基础值**（`baseValue` 仍是 200），但会在 ③ **按该类型单独乘一次**，
+    //   所以火 DoT 每跳 = 100 × (1 + 90%) = 190。
+    //
+    //   以前这里断言 `tick === baseTick`（D-107 旧口径：元素 % 完全不作用于 DoT），
+    //   D-166 改口径后该断言过期，2026-11-12 按新口径修正。
+    near(heatTick.elementPct, 0.9);
+    near(heatTick.tick, heatTick.baseTick * (1 + 0.9));
   });
 
   it('每种 DoT 类型的基础值相同（都是全类型之和），只有系数与元素%不同', () => {

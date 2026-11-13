@@ -1,4 +1,4 @@
-﻿/**
+/**
  * data-build 入口。
  *
  * 用法：
@@ -15,15 +15,16 @@ import { mkdirSync, writeFileSync, existsSync, readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { fetchSource, FetchError } from './fetch.ts';
 import { cleanWeapons, EXCLUDED_CATEGORIES, type CleanedWeapon } from './clean.ts';
-import { cleanWfcdWeapons, type CleanedWfcdWeapon, type WfcdCleanResult } from './wfcd-clean.ts';
+import { cleanWfcdWeapons, DUPLICATE_WFCD_IDS, type CleanedWfcdWeapon, type WfcdCleanResult } from './wfcd-clean.ts';
+import { DT_KEY_MAP } from '../../core/src/damage-types.ts';
 import { fetchAllWfcdWeapons, WfcdFetchError } from './wfcd-fetch.ts';
 import { fillFromOfficialExport } from './wfcd-fallback.ts';
 import { diffWeapons, formatDiffReport, type DiffReport } from './diff.ts';
 import { applyOverrides, type AppliedOverride } from './overrides.ts';
 import { toEmitWeapon, type EmitWeapon } from './emit.ts';
 import { buildLangKeyByWeaponId, buildZhByEnglishName, resolveZhForWfcdWeapon, stripNamePrefix, type LanguageDict } from './localize.ts';
-import { MANUAL_WEAPON_PANEL, MANUAL_WEAPON_ZH } from '../../data/src/manual/weapon-patches.ts';
-import type { AttackMode, Weapon } from '../../core/src/weapon.ts';
+import { MANUAL_WEAPON_PANEL, MANUAL_WEAPON_ZH, WEAPON_OVERLAYS } from '../../data/src/manual/weapon-patches.ts';
+import type { AttackMode, DamageSegment, PanelOverride, TriggerKind, Weapon } from '../../core/src/weapon.ts';
 
 const repoRoot = resolve(import.meta.dirname, '../../..');
 const GENERATED_DIR = join(repoRoot, 'packages/data/src/generated');
@@ -244,6 +245,46 @@ async function main(): Promise<number> {
   });
   console.log(`      WFCD 条目：${wfcdRaw.length}`);
 
+  /**
+   * 需求方 2026-11-13：先把官方导出拿到手，给 WFCD 条目挂上 `__exportDamage`，
+   * 供「WFCD 攻击伤害为空时回退」用（哈尔武 Haalvu 就是这种情况：
+   * WFCD 的 `attacks[].damage` 是 `{}`，官方导出有 `DT_SENTIENT 33`）。
+   *
+   * ⚠ 必须在 `cleanWfcdWeapons()` **之前**挂，清洗阶段才有值可回退。
+   */
+  const officialRaw = await fetchSource<Record<string, unknown>>('weapons', { force: args.force });
+  {
+    let attached = 0;
+    for (const w of wfcdRaw) {
+      const ov = (officialRaw as Record<string, { damagePerShot?: number[]; behaviours?: unknown[] }>)[w.uniqueName];
+      if (ov?.damagePerShot && ov.damagePerShot.length > 0) {
+        w.__exportDamage = ov.damagePerShot;
+        attached++;
+      }
+      // 需求方 2026-11-13：逐 behaviour 的伤害（哈尔武：普攻 33 / 副射击爆发 34）。
+      // 按 WFCD 攻击顺序一一对应——两边的攻击数组本来就是同一个顺序。
+      // ⚠ 这里必须转成**内核 DamageType**（`DT_SENTIENT` → `tau`），
+      //   否则 `DT_SENTIENT` 这个原始键会一路带到产出里，内核不认。
+      if (Array.isArray(ov?.behaviours) && ov.behaviours.length > 0) {
+        const per = ov.behaviours.map((b) => {
+          const beh = b as Record<string, Record<string, unknown> | undefined>;
+          const hit = beh['impact'];
+          if (!hit || typeof hit !== 'object') return undefined;
+          const out: Record<string, number> = {};
+          for (const [k, v] of Object.entries(hit)) {
+            if (!k.startsWith('DT_') || typeof v !== 'number' || v === 0) continue;
+            const t = DT_KEY_MAP[k];
+            if (!t) continue;
+            out[t] = (out[t] ?? 0) + v;
+          }
+          return Object.keys(out).length > 0 ? out : undefined;
+        });
+        if (per.some(Boolean)) w.__exportBehaviourDamage = per as never;
+      }
+    }
+    console.log(`      官方 damagePerShot 挂载：${attached} 把（WFCD 伤害为空时回退用）`);
+  }
+
   console.log('[2/5] 清洗...');
   const clean = cleanWfcdWeapons(wfcdRaw);
   const statsLine = formatWfcdStats(clean.stats);
@@ -254,9 +295,12 @@ async function main(): Promise<number> {
   let cleaned: CleanedWfcdWeapon[] = clean.weapons;
   let statsLineForReport = statsLine;
   {
-    const officialRaw = await fetchSource<Record<string, unknown>>('weapons', { force: args.force });
     const officialClean = cleanWeapons(officialRaw as never);
-    const { weapons, filled } = fillFromOfficialExport(clean.weapons, officialClean.weapons as CleanedWeapon[]);
+    const { weapons, filled } = fillFromOfficialExport(
+      clean.weapons,
+      officialClean.weapons as CleanedWeapon[],
+      DUPLICATE_WFCD_IDS,
+    );
     cleaned = weapons as CleanedWfcdWeapon[];
     // 兜底武器的 name 还是语言键，这里先记下来，等语言包加载后再解析
     fallbackLangKeys = new Map(
@@ -351,6 +395,46 @@ async function main(): Promise<number> {
   }
   if (panelFixed > 0) {
     console.log(`      人工面板订正 ${panelFixed} 把（见 manual/weapon-patches.ts 的 MANUAL_WEAPON_PANEL）`);
+  }
+
+  // D-155：制胜者按「一把步枪 + 一把近战」拆成两条（需求方 2026-11-13）。
+  // 近战形态 WFCD 没收、官方导出又没有攻击名，震地 / 重型震地 / 枪击只能按中文维基手写，
+  // 所以这里整条替换：原条目丢掉，换成人工层构造的两条，并标 `_manual: bible` 说明来源。
+  let overlaid = 0;
+  for (const ov of WEAPON_OVERLAYS) {
+    const idx = cleaned.findIndex((w) => w.id === ov.id);
+    const collapsed: CleanedWfcdWeapon = {
+      ...(idx >= 0 ? cleaned[idx]! : ({ id: ov.id } as CleanedWfcdWeapon)),
+      id: ov.id,
+      name: ov.nameEn,
+      nameZh: ov.nameZh,
+      category: ov.category,
+      ...ov.fields,
+      modes: ov.modes.map((m) => ({
+        id: m.id,
+        role: 'normal' as const,
+        trigger: m.trigger as TriggerKind,
+        bullets: 1,
+        multishot: 1,
+        variants: m.variants.map((v) => ({
+          id: v.id,
+          label: v.label,
+          segments: v.segments as unknown as DamageSegment[],
+        })),
+        ...(m.override ? { override: m.override as unknown as PanelOverride } : {}),
+        ...(m.label ? { _label: m.label } : {}),
+        ...(m.heavy ? { _heavy: true } : {}),
+      })),
+      _manual: 'bible',
+      _note: ov.reason,
+    } as CleanedWfcdWeapon;
+    delete (collapsed as { languageKey?: string }).languageKey;
+    if (idx >= 0) cleaned[idx] = collapsed;
+    else cleaned.push(collapsed);
+    overlaid++;
+  }
+  if (overlaid > 0) {
+    console.log(`      人工构造武器 ${overlaid} 条（见 manual/weapon-patches.ts 的 WEAPON_OVERLAYS）`);
   }
   const applied: AppliedOverride[] = [];
 

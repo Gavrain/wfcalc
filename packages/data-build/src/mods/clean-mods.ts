@@ -24,6 +24,14 @@ export interface ModStatValue {
   /** 0 级 → 满级 的逐级数值 */
   levelValues: number[];
   note?: string;
+  /**
+   * 这条加成在**重击系**攻击上额外 ×2（D-155）。
+   *
+   * 来源是 Mod 描述自己的括号：`+X% Critical Chance (x2 for Heavy Attacks)`——
+   * 斩铁 / 镀层斩铁 / 牺牲斩铁原文都带这句（裂罅暴击词条同理）。
+   * 由 `cleanMod` 按描述文本自动判定，不另开人工表。
+   */
+  heavyX2?: boolean;
 }
 
 /** 条件 / 触发效果（来自基线的 bg 字段） */
@@ -61,6 +69,8 @@ export interface CleanMod {
     type: string;
     compatName?: string;
     descriptionKey?: string;
+    /** 官方「可装劣化槽」标记（需求方 2026-11-13：劣化槽资格以它为准） */
+    isUtility?: boolean;
   };
   stats: ModStatValue[];
   conditions: ModCondition[];
@@ -79,6 +89,14 @@ export interface CleanMod {
   descriptionEn: string;
   /** 原表里的人工备注 */
   noteZh?: string;
+  /**
+   * 能否装进**劣化槽**（需求方 2026-11-13：以官方 `isUtility` 为准）。
+   *
+   * 以前的判定是「词条都不影响伤害就算功能卡」，于是烈焰风暴（+爆炸范围）、
+   * 合金钻头（+穿透）、剑风（+近战范围）这类被误判成可进劣化槽。
+   * 现在直接读官方字段；官方没标的（678 条武器 Mod）一律**不可进**。
+   */
+  exilus?: boolean;
 }
 
 const RARITY: Record<string, CleanMod['rarity']> = { c: 'common', r: 'uncommon', n: 'rare', l: 'legendary' };
@@ -114,6 +132,21 @@ function coStacks(raw: ModRecord): number {
   const hits = (raw.bg ?? []).filter((b) => b.g === 'condition_overload' && typeof b.st === 'number' && b.st > 0);
   return hits.length ? Math.max(...hits.map((h) => h.st as number)) : 1;
 }
+
+/**
+ * D-155：「固定暴击率」词条在重击时 ×2。
+ *
+ * 需求方 2026-11-13：
+ * > 「近战的固定暴击率词条例如斩铁或者裂罅mod上都会带有重击时*2，对重击和重型震地生效。」
+ *
+ * 判据直接取描述原文 `(x2 for Heavy Attacks)`——WFCD 的 Mod 描述就写着这句，
+ * 不额外维护 Mod 清单（斩铁 / 镀层斩铁 / 牺牲斩铁 / Amalgam Ripkas 斩铁都命中）。
+ * 裂罅没有描述文本，由下面的 `RIVEN_HEAVY_X2` 兜底。
+ */
+const HEAVY_X2_MARKER = /\(x2 for Heavy Attacks\)/i;
+
+/** 裂罅：暴击词条同样带「重击时 ×2」，但裂罅没有描述文本，单独兜底（D-155 需求方确认） */
+const RIVEN_HEAVY_X2 = /^riven_/i;
 
 /** bg → ModCondition */
 function toCondition(bg: ModBuff): ModCondition {
@@ -175,6 +208,10 @@ export function cleanMod(raw: ModRecord, official?: CleanMod['official']): Clean
       levelValues: values,
     };
     if (map.note !== undefined) base.note = map.note;
+    // D-155：只有「暴击率」这一条会被重击 ×2；同卡上的其它属性（暴伤 / 派系伤害）不乘
+    if (map.stat === 'critChance' && (HEAVY_X2_MARKER.test(raw.de ?? '') || RIVEN_HEAVY_X2.test(raw.i))) {
+      base.heavyX2 = true;
+    }
     stats.push(base);
   }
 
@@ -203,6 +240,10 @@ export function cleanMod(raw: ModRecord, official?: CleanMod['official']): Clean
   if (raw.st !== undefined) mod.set = raw.st;
   if (raw.sg !== undefined) mod.syndicate = raw.sg;
   if (raw.dz !== undefined) mod.noteZh = raw.dz;
+  // 需求方 2026-11-13：劣化槽资格以官方 `isUtility` 字段为准。
+  // 官方只给 195 条标了 true、678 条武器 Mod **没有这个字段**（既不是 true 也不是 false）
+  // → 没标的就当「不可进」。换弹类的口径见 build-mods.ts 的 `EXILUS_OVERRIDE`。
+  if (official?.isUtility === true) mod.exilus = true;
 
   const result: CleanModResult = { mod, unknownKeys };
   if (rankFix !== undefined) result.rankFix = rankFix;

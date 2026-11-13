@@ -10,7 +10,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { join, normalize } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { arcaneToContributions, type ArcaneRecord } from '../src/adapter.ts';
+import { arcaneToContributions, DEFAULT_BURST_STACKS, setBurstStacks, type ArcaneRecord } from '../src/adapter.ts';
 
 const ROOT = normalize(join(fileURLToPath(new URL('.', import.meta.url)), '../../..'));
 const arcanes = JSON.parse(await readFile(join(ROOT, 'packages/data/src/generated/mods/arcanes.json'), 'utf8'))
@@ -109,11 +109,28 @@ describe('类镀层：次要·冷颤只认冰冻层数（D-086）', () => {
 });
 
 describe('D-138：次要赋能加成逐条核对', () => {
-  it('次要·爆发：暴率 +20 和暴伤 +20 两条都有（以前只有暴伤）', () => {
+  /**
+   * 需求方 2026-11-13：次要·爆发按**爆发层数**算（默认 12 层，最高 13 层）。
+   *
+   * 数据值是「每层消耗的连击倍率 +20% 暴率 / +20% 暴伤」，
+   * 所以满层 = 20% × 12 = **240%**；以前只给了单层值 20%。
+   */
+  it('次要·爆发：暴率与暴伤各 +240%（每层 20% × 默认 12 层）', () => {
     const c = byStat('MultishotForCombo');
-    assert.equal(c.critChance, 20);
-    assert.equal(c.critMultiplier, 20);
+    assert.equal(c.critChance, 240);
+    assert.equal(c.critMultiplier, 240);
     assert.equal(Object.keys(c).length, 2);
+  });
+
+  it('次要·爆发的层数可调，上限 13 层', () => {
+    setBurstStacks(13);
+    try {
+      const c = byStat('MultishotForCombo');
+      assert.equal(c.critChance, 260);
+      assert.equal(c.critMultiplier, 260);
+    } finally {
+      setBurstStacks(DEFAULT_BURST_STACKS);
+    }
   });
 
   it('次要·死首：基伤 +360% 且弱点伤害 +30%（与主要·死首同口径，30% 不随层数叠）', () => {

@@ -13,7 +13,15 @@ import { SLOT_COUNT, store } from './app-store.js';
 
 /** 各类别武器文件 + 槽位 / Mod / 赋能文件（相对 demo 站点根目录） */
 const GENERATED = '/packages/data/src/generated';
-const WEAPON_FILES = ['primary', 'secondary', 'melee', 'archgun', 'archmelee'];
+/**
+ * 武器数据文件。
+ *
+ * ⚠ `companion`（守护 / 猎犬武器）**必须在内**（需求方 2026-11-12）：
+ *   以前少了这个文件，冰凇等 24 把同伴武器从没被加载，搜索与下拉都找不到它们。
+ *   它们的槽位 / 可装 Mod 由 `weapon-slots.json` 给出（扫除者 = 霰弹、分离与猎犬三爪 = 近战、
+ *   其余枪械 = 步枪），在选单里按槽位大类并入「主要」或「近战」，不单列大类。
+ */
+const WEAPON_FILES = ['primary', 'secondary', 'melee', 'archgun', 'archmelee', 'companion'];
 
 const getJSON = (url) => fetch(url).then((r) => r.json());
 
@@ -84,6 +92,7 @@ export function buildWeaponData(weaponId, options = {}) {
   // D-119：赋能按**武器大类**过滤，不再按 Mod 槽种类（slotKind）。
   // D-138：大类细化为「主要 / 弓箭· / 霰弹· / 次要 / 双枪·」——
   //   弓额外拿 弓箭·、主手霰弹枪额外拿 霰弹·，副手霰弹只走次要。
+  // 需求方 2026-11-12：守护 / 同伴武器**一律不可装赋能**（分离 / 分离 Prime 虽算近战也不行）。
   all.arcaneFile.arcanes.forEach(function (a) {
     arcaneByKey.set(a.key, a);
     if (isArcaneUsableOn(a, weapon, entry)) primaryArcanes.push(a);
@@ -99,7 +108,7 @@ export function buildWeaponData(weaponId, options = {}) {
   return {
     baseWeapon: weapon,
     weapon: weapon,
-    /** `weapon-slots.json` 里本武器的记录（D-138：赋能可用性要看 `trueBow` / `subclass` 细类） */
+    /** `weapon-slots.json` 里本武器的记录（赋能可用性看 `category` / `trueBow` / `subclass` / `isDualPistols`） */
     slotEntry: entry,
     isKuva: isKuvaFamily(weapon.id, weapon.variantType, weapon.name),
     availableMods: availableMods,
@@ -116,6 +125,8 @@ export function clearLoadout() {
   for (let i = 0; i < SLOT_COUNT; i++) store.modSlots[i] = null;
   store.exilusModId = null;
   store.arcaneKey = null;
+  // 裂罅（D-162）：每把武器一张裂罅，换枪时清掉上一把的
+  store.riven = null;
 }
 
 /**
@@ -132,11 +143,13 @@ export function clearLoadout() {
  * | 近战 / Zaw | melee（近战· + 神威·） |
  * | 组合枪（Kitgun） | kitgun（和平· + 残差·） |
  * | 空战武器 | 无（数据缺口） |
+ * | **守护 / 同伴武器**（`category = companion`） | **无** —— 一律不可装赋能（需求方 2026-11-12） |
  *
  * 需求方原话：「主手霰弹能装主手赋能和霰弹专属赋能，副手霰弹只算副手，
  * 跟霰弹赋能无关」「（弓）弓箭· + 主要· + 分形·」。
  * 需求方 2026-07-11 补充：「弩不能装弓箭类mod和赋能」；
  * 「霰弹枪仅限主手，副手就算是霰弹模式也算副手，因为他们的可安装 mod 和赋能没区别」。
+ * 需求方 2026-11-12：「守护武器的赋能槽禁用掉」——分离 / 分离 Prime 虽是近战也不吃赋能。
  *
  * @param weapon `generated/weapons/*.json` 里的武器记录
  * @param slotEntry `weapon-slots.json` 里该武器的记录（取 `trueBow` / `subclass` / `slots.broad`）
@@ -150,6 +163,8 @@ export function arcaneCategoriesFor(weapon, slotEntry) {
   // 可装 Mod 与赋能都由 broad 决定（霰弹枪 = slots.broad 'shotgun'），不看副手的霰弹模式。
   const isShotgun = broad === 'shotgun';
   const cat = weapon && weapon.category;
+  // 需求方 2026-11-12：守护 / 同伴武器没有赋能槽，**先拦**，后面的按形状分支都不该作用到它们
+  if (cat === 'companion') return [];
   if (cat === 'primary') {
     if (trueBow) return ['bow', 'primary'];
     if (isShotgun) return ['shotgun', 'primary'];
@@ -199,36 +214,17 @@ export function isArcaneUsableOn(arcane, weapon, slotEntry) {
 }
 
 /**
- * 劣势槽只接受"不影响伤害"的功能类 Mod。
+ * 劣势槽（劣化槽）只接受官方标为 `isUtility` 的 Mod。
  *
- * ⚠ 数据里 `reloadSpeed`（装填速度）与 `magazine`（弹匣容量）被标成 `functional/utility`，
- *   但两者都**直接影响「持续伤害」口径**：
- *   ```
- *   持续伤害 = 单次射击 × 弹匣 ÷ (弹匣 ÷ 射速 + 装填时间)
- *   装填时间 = 面板装填 ÷ (1 + Σ装填速度%)
- *   ```
- *   所以它们属于**影响伤害**的词条，不能当纯功能卡塞进劣化槽（D-037）。
- *   同理 `fireRate` / `multishot` / `statusChance` 等一律按"影响伤害"处理。
+ * 需求方 2026-11-13：「以 WFCD 的这个字段为准，但是弹药我记得也是劣化，弹匣不是」
+ * —— 判定**直接读数据层的 `exilus` 标记**（由官方 `isUtility` 字段生成，
+ * 见 `build-mods.ts` 的 `EXILUS_OVERRIDE`：换弹类按需求方口径也准进）。
+ *
+ * 以前是按「词条都不影响伤害就算功能卡」推断，结果烈焰风暴（+爆炸范围）、
+ * 合金钻头（+穿透）、剑风（+近战范围）这类也被误判成可进劣化槽。
  */
-export const DAMAGE_AFFECTING_STATS = new Set([
-  'baseDamage', 'multishot', 'fireRate', 'statusChance', 'statusDamage', 'statusDuration',
-  'critChance', 'critMultiplier', 'weakpointCritChance', 'weakpointDamage',
-  'reloadSpeed', 'magazine', 'slashOnCrit', 'impactToSlash',
-]);
-
 export function isExilusMod(mod) {
-  const stats = mod.stats;
-  if (!stats.length) return false;
-  for (let i = 0; i < stats.length; i++) {
-    const s = stats[i];
-    // ① 有进伤害乘区的词条
-    if (s.bucket && s.bucket !== 'utility') return false;
-    // ② 虽然是 utility，但影响伤害（装填 / 弹匣等，D-037）
-    if (DAMAGE_AFFECTING_STATS.has(s.stat)) return false;
-    if (s.stat.indexOf('elemental:') === 0 || s.stat.indexOf('physical:') === 0) return false;
-    if (s.key === 'co') return false;
-  }
-  return true;
+  return mod.exilus === true;
 }
 
 /**

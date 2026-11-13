@@ -29,18 +29,21 @@ export { ROOT, PUBLIC };
  *
  * D-105：页面拆成 app-store / app-data / app-compute / ui-editor 四个 ES 模块，
  * 它们会被内联进同一段脚本，所以这里也一并加载，供 import 替换使用。
+ * D-162：新增 app-riven（裂罅状态与贡献）与 manual/riven（裂罅词条表）。
  */
 export async function loadModules() {
   const { transpile } = await import(pathToFileURL(join(ROOT, 'packages/demo/src/transpile.mjs')).href);
   const core = await stripTemp(ROOT, 'packages/core/src/index.ts', transpile);
   const adapter = await stripTemp(ROOT, 'packages/data/src/adapter.ts', transpile);
+  const rivenData = await stripTemp(ROOT, 'packages/data/src/manual/riven.ts', transpile);
   const picker = await import(pathToFileURL(join(PUBLIC, 'weapon-picker.js')).href);
   const override = await import(pathToFileURL(join(PUBLIC, 'weapon-override.js')).href);
   const store = await import(pathToFileURL(join(PUBLIC, 'app-store.js')).href);
   const data = await import(pathToFileURL(join(PUBLIC, 'app-data.js')).href);
   const compute = await import(pathToFileURL(join(PUBLIC, 'app-compute.js')).href);
+  const riven = await import(pathToFileURL(join(PUBLIC, 'app-riven.js')).href);
   const editor = await import(pathToFileURL(join(PUBLIC, 'ui-editor.js')).href);
-  return { core, adapter, picker, override, store, data, compute, editor, transpile };
+  return { core, adapter, rivenData, picker, override, store, data, compute, riven, editor, transpile };
 }
 
 /**
@@ -53,11 +56,13 @@ export function inlineImports(src, ns) {
   const NS_BY_SPEC = [
     [/core\/src\/index\.ts$/, 'ns.core'],
     [/data\/src\/adapter\.ts$/, 'ns.adapter'],
+    [/data\/src\/manual\/riven\.ts$/, 'ns.rivenData'],
     [/weapon-picker\.js$/, 'ns.picker'],
     [/\/weapon-override\.js$/, 'ns.override'],
     [/\/app-store\.js$/, 'ns.store'],
     [/\/app-data\.js$/, 'ns.data'],
     [/\/app-compute\.js$/, 'ns.compute'],
+    [/\/app-riven\.js$/, 'ns.riven'],
     [/\/ui-editor\.js$/, 'ns.editor'],
   ];
 
@@ -128,8 +133,14 @@ export async function loadPage(opts = {}) {
   let src = inlineImports(await readFile(join(PUBLIC, 'app.js'), 'utf8'), {
     core: modules.core,
     adapter: modules.adapter,
+    rivenData: modules.rivenData,
     picker: modules.picker,
     override: modules.override,
+    store: modules.store,
+    data: modules.data,
+    compute: modules.compute,
+    riven: modules.riven,
+    editor: modules.editor,
   });
   // 把私有的 `async function boot()` 暴露成返回值，供 invokeBoot() 二次启动
   src += '\n;return { boot: boot };\n';

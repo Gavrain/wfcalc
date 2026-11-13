@@ -51,14 +51,14 @@ function switchMetric(labelPart) {
 {
   openModDetail();
   const before = snapshot();
-  const btn = switchMetric('爆发伤害');
-  check('找得到「爆发伤害」基准按钮', Boolean(btn));
+  const btn = switchMetric('连发秒伤');
+  check('找得到「连发秒伤」基准按钮', Boolean(btn));
   await settle();
-  // 基准口径只改**高亮行**：拆解里逐口径列表不变，但高亮要跟着换到「爆发伤害」那一行。
+  // 基准口径只改**高亮行**：拆解里逐口径列表不变，但高亮要跟着换到「连发秒伤」那一行。
   // （`el('tr')` 的 className 被后续 add 覆盖，这里改为查 detail 里任一子节点的文字/浅层内容。）
   const changed = snapshot() !== before;
-  check('改基准口径后拆解高亮切到「爆发伤害」',
-    changed || detailText().includes('爆发伤害'),
+  check('改基准口径后拆解高亮切到「连发秒伤」',
+    changed || detailText().includes('连发秒伤'),
     `changed=${changed}`);
   switchMetric('单次射击');
   await settle();

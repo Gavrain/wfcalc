@@ -1,11 +1,17 @@
 /**
- * 六秒异常状态总伤（§0.2 / §6.3）——**逐秒模拟曲线**。
+ * 异常总伤（§0.2 / §6.3）——**逐秒模拟曲线**（D-057 / D-058 / D-059 / D-171）。
  *
  * ```
  * 前提：持续射击中，从 t=0 开始按射速与触发期望逐秒叠层
  * 口径：第 t 秒的伤害 = 该秒在场层数 × 每层伤害
- * 六秒总伤 = Σ_{t=1..6} 该秒伤害
+ * N 秒总伤 = Σ_{t=1..N} 该秒伤害
  * ```
+ *
+ * **D-171（需求方 2026-11-13）**：窗口从写死的 6 秒改成可选的 N 秒（1~6），
+ * 算法本身不变，`window` 参数一直就在那里，只是以前调用点写死成 6。
+ *
+ * ⚠ 文件名仍是 `six-second.ts`（历史名）：函数体对任意 N 都成立，
+ *   改文件名会让 `main.ts` 的 re-export 与所有旧导入路径一起失效，收益不抵成本。
  */
 import type { DoTType } from './dot.ts';
 import type { DamageSpread } from './damage-types.ts';
@@ -46,21 +52,26 @@ export function hasDotElement(spread: DamageSpread, t: DoTType): boolean {
 }
 
 /**
- * 六秒异常状态总伤（§0.2 / §6.3）——**逐秒模拟曲线**。
+ * N 秒异常总伤（§0.2 / §6.3）——**逐秒模拟曲线**。
  *
  * **火焰（§6.3「新出现的火焰异常状态会刷新已有的火焰异常状态持续时间
  * 并叠加灼烧的伤害量，即后续命中的基础值加入到火焰 DoT 的计算」）**：
  * - 火焰**每秒跳一次**，所以按**整数秒**把该秒内新叠的基础值加进去；
  * - 层数是**累加量**而不是"多重叠加"：第 t 秒的每跳 =
  *   `单层伤害 × 该秒结束时累计的层数`；
- * - 刷新持续时间 → 火焰在 6 秒窗口内不会自然结束（只要还在开火）。
+ * - 刷新持续时间 → 火焰在 N 秒窗口内不会自然结束（只要还在开火）。
  *
- * **装填空窗（D-058）**：如果 6 秒内打不满（弹匣 ÷ 射速 < 6），
+ * **装填空窗（D-058）**：如果 N 秒内打不满（弹匣 ÷ 射速 < N），
  * 每个循环要空出对应的**装填时间**，期间**不叠层**、DoT 也不跳。
+ *
+ * **D-059 的第 0 拍**：电击 / 毒气在 0 秒立即跳一拍，这一拍额外计入窗口之外
+ * （窗口内共 N+1 拍）。`window ≥ 1` 时它就存在，窗口多短都不变。
+ * 它用的层数是**单发期望层数**（已含多重、与射速无关），不是"每秒叠层"——
+ * 这是 D-059 已确认的口径，D-171 没有改它。
  *
  * @param stacksPerSecond 每秒叠层（已含触发率 × 元素占比 × 多重 × 射速）
  * @param perStackPerSecond 单层每秒伤害（= `tick.tick`）
- * @param window 窗口长度（秒，默认 6）
+ * @param window 窗口长度（秒，默认 6；D-171 起由界面选择，取值 1~6）
  * @param firing 每秒的开火占比（0~1，由弹匣/射速/装填推出），默认全程开火。
  *   兼容旧的布尔签名：`true` 视为 1、`false` 视为 0（见下方 `frac` 归一化）。
  * @param stacksPerShot 单发期望层数（D-059：电击/毒气第 0 拍用它）
@@ -82,8 +93,8 @@ export function dotSixSecondCurve(
   let total = 0;
 
   // ── D-059：电击 / 毒气在 0 秒立即跳一拍，层数取"首发" ──
-  // 这一拍额外计入六秒之外（故窗口内共 7 拍）。
-  if (IMMEDIATE_TICK.has(t) && stacksPerShot > 0) {
+  // 这一拍额外计入 N 秒之外（故窗口内共 N+1 拍）。
+  if (IMMEDIATE_TICK.has(t) && stacksPerShot > 0 && window > 0) {
     const firstTick = cap === null ? stacksPerShot : Math.min(stacksPerShot, cap);
     total += perStackPerSecond * firstTick;
     // 这一层已经跳过了，进入 t=1 时不要重复计入 → 记为已存在
@@ -114,6 +125,32 @@ export function dotSixSecondCurve(
     }
   }
   return total;
+}
+
+/**
+ * 窗口内**叠上去的期望层数**（D-171 用它算主目标的爆炸总伤）。
+ *
+ * ```
+ * 窗口内叠上的层数 = Σ_{t=1..N} 每秒叠层 × 第 t 秒开火占比
+ * ```
+ *
+ * 只有**开火时**才叠层，装填期间不叠（D-058）；与 DoT 曲线用的是同一条开火时间线。
+ *
+ * ⚠ **不受层数上限约束**：这是"叠上去多少"，封顶是各类异常自己的规则
+ *   （毒气 10 层封顶在 {@link dotSixSecondCurve} 里处理；爆炸主目标**没有**上限概念）。
+ */
+export function stacksInWindow(
+  stacksPerSecond: number,
+  window: number,
+  firing?: (second: number) => boolean | number,
+): number {
+  let sum = 0;
+  for (let sec = 1; sec <= window; sec++) {
+    const raw = firing ? (firing as (s: number) => boolean | number)(sec) : true;
+    const frac = raw === true ? 1 : raw === false ? 0 : Math.max(0, Math.min(1, Number(raw) || 0));
+    sum += stacksPerSecond * frac;
+  }
+  return sum;
 }
 
 /**

@@ -462,10 +462,71 @@ const WFCD_TYPE_TO_KIND: Readonly<Record<string, ModSlotKind>> = {
   'Arch-Gun': 'archgun',
   'Arch-Melee': 'archmelee',
   // D-152：WFCD 用 `Companion Weapon` 标守护 / 猎犬武器。它们与角色武器共用同一套 Mod
-  // （需求方 2026-11-08 确认），具体归步枪还是手枪由 `productCategory` 再看不出来，
-  // 这里按步枪兜底——与原来官方导出分支的兜底口径一致，不改变行为。
-  'Companion Weapon': 'rifle',
+  // （需求方 2026-11-08 确认），但**不是一律步枪**（需求方 2026-11-12 复核）：
+  //   · 扫除者 / 扫除者 Prime 是霰弹枪（面板冲击 29.75 / 穿刺 1.75 / 切割 3.5、弹片 ×6）→ 霰弹类；
+  //   · 分离 / 分离 Prime 与猎犬近战三把（巴托腾 / 莱斯腾 / 阿卡腾）→ 近战（见 `COMPANION_MELEE_IDS`）。
+  // 这里先不给值，交给下面的 `resolveCompanionKind` 按 id 判，判不出来的再按步枪兜底。
 };
+
+/**
+ * 守护 / 猎犬武器的 Mod 槽归类（需求方 2026-11-12 确认）。
+ *
+ * WFCD 把它们统一标成 `Companion Weapon`，没有 `holsterCategory`，所以 `type` 这一票
+ * 对它们不成立，只能按 id / 名称判。判据见每条后面的出处：
+ *
+ * | 类 | 武器 | 依据 |
+ * |---|---|---|
+ * | 霰弹枪 | 扫除者 / 扫除者 Prime（`SentShotgun` / `PrimeSentShotgun`） | 面板弹片 ×6、冲击 29.75 / 42 = 70.8%，游戏里吃霰弹枪 Mod |
+ * | 手枪 | 激光点发 / 棱晶 激光点发 / 激光点发 Prime（`*BurstLaserPistol`） | 需求方 2026-11-12：「激光点发就是手枪」 |
+ * | 狙击枪 | 金工火枪（`SentElecRailgun`） | 需求方 2026-11-12：「金工火枪是狙击」 |
+ * | 近战 | 分离 / 分离 Prime（`SentGlaiveWeapon` / `PrimeHeliosGlaiveWeapon`） | 需求方 2026-11-12：「分离属于战刃」→ 近战宽类 + `glaive` 细类（见 `COMPANION_MELEE_SPECIFIC`） |
+ * | 近战 | 巴托腾 / 莱斯腾 / 阿卡腾（`ZanukaPetMeleeWeapon*`） | 猎犬近战爪，需求方确认「归到近战类，可以装近战 Mod」 |
+ * | 步枪 | 其余守护 / 恐鸟枪械（冰凇、死亡机枪、急冻喷枪…） | 默认；急冻喷枪（Cryotra）按导出数据是半自动「直击冲击 10 + 冰场冰冻 20」，不是射线 |
+ */
+const COMPANION_SHOTGUN_IDS: ReadonlySet<string> = new Set(['SentShotgun', 'PrimeSentShotgun']);
+const COMPANION_PISTOL_IDS: ReadonlySet<string> = new Set(['BurstLaserPistol', 'PrismaBurstLaserPistol', 'PrimeBurstLaserPistol']);
+const COMPANION_SNIPER_IDS: ReadonlySet<string> = new Set(['SentElecRailgun']);
+const COMPANION_MELEE_IDS: ReadonlySet<string> = new Set([
+  'SentGlaiveWeapon',
+  'PrimeHeliosGlaiveWeapon',
+  'ZanukaPetMeleeWeaponIP',
+  'ZanukaPetMeleeWeaponIS',
+  'ZanukaPetMeleeWeaponPS',
+]);
+/**
+ * 同伴近战的**细类**（WFCD 没有这个字段，只能人工给）。
+ * 需求方 2026-11-12：「分离属于战刃」→ 分离 / 分离 Prime 是 `glaive`，
+ * 于是近战列表里从「其它近战」变成「战刃」，也能吃到战刃专属 Mod。
+ * 猎犬三爪没有对应架势，保持空细类（只吃通用近战 Mod）。
+ */
+const COMPANION_MELEE_SPECIFIC: Readonly<Record<string, ModSlotKind>> = {
+  SentGlaiveWeapon: 'glaive',
+  PrimeHeliosGlaiveWeapon: 'glaive',
+};
+
+/**
+ * 同伴近战的**细类**（没有就返回空数组）。
+ *
+ * 只给"形态明确"的：分离 / 分离 Prime = 战刃（需求方 2026-11-12：「分离属于战刃」）。
+ * 猎犬三爪没有对应架势，留空 = 只吃通用近战 Mod。
+ */
+export function companionMeleeSpecificOf(id: string): ModSlotKind[] {
+  const k = COMPANION_MELEE_SPECIFIC[id];
+  return k === undefined ? [] : [k];
+}
+
+function resolveCompanionKind(id: string, name?: string): ModSlotKind {
+  if (COMPANION_SHOTGUN_IDS.has(id)) return 'shotgun';
+  if (COMPANION_PISTOL_IDS.has(id)) return 'pistol';
+  if (COMPANION_SNIPER_IDS.has(id)) return 'sniper';
+  if (COMPANION_MELEE_IDS.has(id)) return 'melee';
+  // 兜底按 id / 英文名认：未来新出的守护霰弹 / 近战爪不必再改表
+  if (/shotgun|sweeper/i.test(id) || (name !== undefined && /shotgun|sweeper/i.test(name))) return 'shotgun';
+  if (/glaive|zanukapetmelee/i.test(id)) return 'melee';
+  // 激光点发这类带 Pistol 的守护枪（id 里就写着）
+  if (/pistol/i.test(id) || (name !== undefined && /pistol/i.test(name))) return 'pistol';
+  return 'rifle';
+}
 
 /** 按所在文件粗判大类（WFCD 的 `type` 有已知错标时的第二票） */
 const WFCD_FILE_TO_KIND: Readonly<Record<string, ModSlotKind>> = {
@@ -474,7 +535,7 @@ const WFCD_FILE_TO_KIND: Readonly<Record<string, ModSlotKind>> = {
   Melee: 'melee',
   'Arch-Gun': 'archgun',
   'Arch-Melee': 'archmelee',
-  SentinelWeapons: 'rifle',
+  // 守护文件里是步枪 / 霰弹 / 近战混装，不能按文件整类判，交给 `resolveCompanionKind`
 };
 
 export interface WfcdSlotInput {
@@ -484,6 +545,8 @@ export interface WfcdSlotInput {
   file?: string | undefined;
   /** WFCD 的 `productCategory` */
   productCategory?: string | undefined;
+  /** 英文名：守护 / 猎犬武器只能按 id + 名字判槽（见 `resolveCompanionKind`） */
+  name?: string | undefined;
   /** 武器 id（uniqueName 末段），用于挑人工/官方兜底 */
   id: string;
 }
@@ -511,7 +574,8 @@ export function resolveFromWfcd(w: WfcdSlotInput): { broad: ModSlotKind; source:
   const productKind = w.productCategory === 'Melee' ? 'melee'
     : w.productCategory === 'SpaceGuns' ? 'archgun'
       : w.productCategory === 'SpaceMelee' ? 'archmelee'
-        : undefined;
+        : w.productCategory === 'SentinelWeapons' ? 'sentinel'
+          : undefined;
 
   // 1. 「这是近战」的票数高于 type：WFCD 的 type 对部分近战错标成 Rifle
   const saysMelee = productKind === 'melee' || fileKind === 'melee';
@@ -521,7 +585,12 @@ export function resolveFromWfcd(w: WfcdSlotInput): { broad: ModSlotKind; source:
   if (fileKind === 'archgun' || productKind === 'archgun') return { broad: 'archgun', source: 'wfcd-type', basis };
   if (fileKind === 'archmelee' || productKind === 'archmelee') return { broad: 'archmelee', source: 'wfcd-type', basis };
 
-  // 3. 按 type
+  // 3. 守护 / 猎犬武器：`type` 恒为 `Companion Weapon`，按 id + 名字判（需求方 2026-11-12）
+  if (productKind === 'sentinel' || w.type === 'Companion Weapon') {
+    return { broad: resolveCompanionKind(w.id, w.name), source: 'wfcd-type', basis };
+  }
+
+  // 4. 按 type
   const kind = w.type !== undefined ? WFCD_TYPE_TO_KIND[w.type] : undefined;
   if (kind) return { broad: kind, source: 'wfcd-type', basis };
 

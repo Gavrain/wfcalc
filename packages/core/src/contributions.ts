@@ -17,7 +17,19 @@ import type { DamageType } from './damage-types.ts';
  * 放在本文件而非 `main.ts`：`ContribStat` 的 `faction:<Faction>` 分支要引用它，
  * 而 `main.ts` 已 import 本文件——写在 main.ts 里会形成类型层的环依赖。
  */
-export type Faction = 'grineer' | 'corpus' | 'infested' | 'orokin' | 'murmur' | 'none';
+export type Faction =
+  | 'grineer'
+  | 'corpus'
+  | 'infested'
+  | 'orokin'
+  | 'murmur'
+  /**
+   * 1999 版本的两个势力（D-163，需求方 2026-11-12：「内核要补上这两个派系。
+   * 对应的派系歧视mod是存在的」）。派系歧视类 Mod 与裂罅的派系词条都按这两个键走。
+   */
+  | 'techrot'
+  | 'scaldra'
+  | 'none';
 
 /**
  * 可被加成的属性。
@@ -46,6 +58,41 @@ export type ContribStat =
   /** 弹药效率（D-084）：**不**直接乘伤害，只通过 `effectiveAmmo` 换算成等效弹匣/最大弹药 */
   | 'ammoEfficiency'
   | 'headshotDamage'
+  /**
+   * 处决伤害（需求方 2026-11-13）：**独立乘区**，乘区内相加、再与前面所有乘区相乘。
+   * 只有画龙点睛 / 猎人骨锯会贡献；不判断攻击类型（「跟普通攻击区分不开」）。
+   */
+  | 'finisherDamage'
+  /**
+   * 震地伤害（需求方 2026-11-13）：**独立乘区**，只对「震地 / 重型震地」生效
+   * （模式带 `_slam` 标记才乘）。
+   */
+  | 'slamDamage'
+  /**
+   * **打身体时的伤害减少**（需求方 2026-11-13，细心瞄准的 `-45% Bodyshot Damage`）。
+   *
+   * 原话：「-45% 身体伤害就是减少未开启爆头配置的情况下，伤害总降」——
+   * 所以它**只在「关闭爆头」时**生效（打身体），开启爆头时整条不生效。
+   * 数值是负的百分比（-45 = 打身体时总伤害 ×(1−0.45)）。
+   */
+  | 'bodyshotDamage'
+  /**
+   * **近战·刃影**（D-189，需求方 2026-11-13）：基础暴击命中时追加一次攻击的概率。
+   *
+   * ```
+   * 触发条件 = 主命中「正好是一级暴击」（k = 1）；二级及以上不触发
+   * 追加那一下 = 按同一暴击率独立再判（未暴击 / 一级 / 二级都可能）
+   * ```
+   * 需求方原话：「一级暴击才触发，二级暴击时刃影可是不触发的」。
+   *
+   * 数值口径：百分比（满级 100），`amount / 100` 就是 `w`。
+   * 落到哪两个量（需求方 2026-11-13 定）：
+   *   · **命中平均** ×(1 + w·P1)                    —— 多打一下，直伤就多
+   *   · **异常叠层期望** ×(1 + w·P1)                —— 追加是独立攻击，自己也触发异常
+   *   · DoT / 爆炸的**每跳基础值不放大**（原话：「不放大 dot 基础值，只放大叠层」）
+   * 实现见 `crit.ts` 的 `bladeShadowMultiplier`，接入点在 `segment.ts` 与 `output.ts`。
+   */
+  | 'bladeShadow'
   | 'weakpointCritChance'
   | 'weakpointDamage'
   | 'targetSlot'
@@ -80,6 +127,29 @@ export interface Contribution {
    * **所有射速来源（正的和负的）都不生效**，射速恒为基础射速。
    */
   locksFireRate?: boolean;
+  /**
+   * 锁定多重射击（需求方 2026-11-13）。
+   *
+   * 敏锐主武 / 敏锐手枪的原文是 `Multishot cannot be modified`——与半自动炮轰系列的
+   * `Fire Rate cannot be modified` 同构：挂上这个标记后，**所有多重来源
+   * （正的负的都算）都不生效**，多重恒为面板值。
+   *
+   * ⚠ 与 `locksFireRate` 不同，多重是在**贡献层面**过滤的（`multishot()` 直接读贡献表，
+   * 不走输入层的乘区快照），所以数据层给多重加成挂上这个标记即生效，见 `adapter.ts`。
+   */
+  locksMultishot?: boolean;
+  /**
+   * 这条加成在**重击系**攻击上额外 ×2（D-155）。
+   *
+   * 来源是 Mod 描述里的 `(x2 for Heavy Attacks)`：斩铁 / 镀层斩铁 / 牺牲斩铁 /
+   * Amalgam Ripkas 斩铁，以及裂罅的暴击词条。需求方 2026-11-13：
+   * > 「近战的固定暴击率词条例如斩铁或者裂罅mod上都会带有重击时*2，
+   * >   对重击和重型震地生效。」
+   *
+   * 只挂在 `critChance` 上（同张卡上的暴伤 / 派系伤害不乘）。
+   * 内核在暴击阶段按「重击模式 → 这部分贡献 ×2」重算暴率，见 `crit.ts`。
+   */
+  heavyX2?: boolean;
 }
 
 export interface ContributionFilter {

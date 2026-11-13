@@ -1,4 +1,4 @@
-﻿/**
+/**
  * 配装页面（D-105）：本文件只留「界面怎么画」。
  *
  * ```
@@ -17,17 +17,30 @@
  * ⚠ 写法约束：`packages/demo/src/server.mjs` 用"剥类型"的方式在浏览器里直接跑 `.ts` 源码，
  * 所以这里只用**命名导入**，不要写 `const { a } = ns` 这种解构。
  */
-import { critAverage, critTiers, DOT_TYPES, isKuvaFamily, METRIC_OPTIONS, totalProcChance } from '../../core/src/index.ts';
+/** 连击倍率上限（需求方 2026-11-13：带凯旋之爪满层为 13x） */
+const MAX_COMBO_MULTIPLIER = 13;
+import { bladeShadowGain, critAverage, critTiers, DEFAULT_DOT_WINDOW_SECONDS, DOT_TYPES, DOT_WINDOW_MAX_SECONDS, DOT_WINDOW_MIN_SECONDS, firstTierCritChance, isKuvaFamily, METRIC_OPTIONS, metricOptionsFor, NON_DAMAGE_STATUS_TYPES, totalProcChance } from '../../core/src/index.ts';
 import { WEAPON_GROUPS, groupWeapons, searchWeapons, FIRE_STYLE_OPTIONS, filterByStyle, weaponLabel, weaponGroupId, locateWeapon, weaponMatchesStyle } from './weapon-picker.js';
 import { OVERRIDE_WEAPON_FIELDS as OVERRIDE_FIELDS, mergeWeaponOverride as applyWeaponOverride } from './weapon-override.js';
-import { arcaneDisplayStats, arcaneToContributions, isConditionOverloadMod, modStackFactor } from '../../data/src/adapter.ts';
+import { arcaneDisplayStats, arcaneToContributions, DEFAULT_BURST_STACKS, isConditionOverloadMod, MAX_BURST_STACKS, modStackFactor, modToContributions } from '../../data/src/adapter.ts';
 import {
-  ELEMENT_COLOR, ELEMENT_LABEL, EXILUS_INDEX, FACTION_OPTIONS, KUVA_ELEMENTS, MAX_SLOTS, SLOT_COUNT,
-  bucketLabel, fmt, fmtPct, setData, setDataAll, spreadTotalOf, store,
+  ELEMENT_COLOR, ELEMENT_LABEL, EXILUS_INDEX, FACTION_OPTIONS, KUVA_ELEMENTS, MAX_SLOTS, RIVEN_SLOT_ID, SLOT_COUNT,
+  bucketLabel, fmt, fmtPct, getSavedLoadout, lastUiState, lastWeaponId, makeLoadoutEntry, saveLoadout,
+  setData, setDataAll, spreadTotalOf, store,
 } from './app-store.js';
 import { buildWeaponData, isArcaneUsableOn, isExilusMod, isModAllowedOnWeapon, loadAllWeapons, modName } from './app-data.js';
 import {
-  coDefaults, coInfo, coModGain, currentContributions, effectiveModeFor, freezeInfo, gainOf, metricValueOf, runCompute,
+  formatRivenRange, formatRivenValue, isRivenInstalled, placeRivenEntry,
+  rivenComboNow, rivenDefOf, rivenFilledCount, rivenInstalledSlot, rivenRawRange, rivenScopeOf,
+  rivenSlotKind, rivenTableNow, rivenValueFor, setRivenCombo, setRivenEntry, setRivenEntryValue,
+} from './app-riven.js';
+import {
+  RIVEN_COMBOS, RIVEN_SCOPE_LABEL,
+} from '../../data/src/manual/riven.ts';
+import {
+  coDefaults, coInfo, coModGain, currentContributions, dotMetricRoleOf, effectiveModeFor,
+  freezeInfo, gainOf, INFINITE_GAIN, isDotMetric, isTotalLikeMetric, metricValueOf, ratioGainOf, runCompute,
+  rivenCandidateGain, rivenEntryGain, rivenGain,
 } from './app-compute.js';
 import * as editor from './ui-editor.js';
 
@@ -67,6 +80,7 @@ const STAT_LABEL = {
   ammoEfficiency: '弹药效率',
   ammoMax: '弹药上限',
   baseDamage: '伤害',
+  bladeShadow: '刃影追加攻击',
   critChance: '暴击几率',
   critMultiplier: '暴击伤害',
   explosionRadius: '爆炸范围',
@@ -121,16 +135,41 @@ function el(tag, cls, text) {
   return n;
 }
 
+/** `weapon-slots.json` 里某把武器的记录（守护 / 同伴武器的分类与赋能判定都要它） */
+function slotOf(weaponId) {
+  const all = store.dataAll;
+  return (all && all.slotFile && all.slotFile.weapons[weaponId]) || undefined;
+}
+
+/**
+ * 当前这把武器能不能装赋能（需求方 2026-11-12：「守护武器的赋能槽禁用掉」）。
+ *
+ * 守护 / 同伴武器一律不行——分离 / 分离 Prime 虽是近战、能吃近战 Mod，也不吃赋能。
+ * 判定放在取数层（`arcaneCategoriesFor` 对 `companion` 直接返回空），这里只读结果；
+ * 其余武器沿用 D-119 的老口径：没有可用赋能就当作没有赋能槽（空战武器就属于这种）。
+ */
+function arcanesDisabled() {
+  const d = store.data;
+  if (!d || !d.weapon) return false;
+  return !(d.primaryArcanes && d.primaryArcanes.length);
+}
+
 /** 百分比格式：带符号、一位小数 */
 function fmtGain(g) {
   if (g === null || g === undefined) return '';
+  // 无穷大（这张卡让该指标从无到有，D-171）
+  if (!Number.isFinite(g)) return '∞';
   const pct = g * 100;
   const sign = pct > 0.05 ? '+' : pct < -0.05 ? '' : '±';
   return sign + pct.toFixed(1) + '%';
 }
 
 /**
- * 一张卡上的「贡献」标签（只有百分比，不加任何说明文字）。
+ * 一张卡上的「贡献」标签。
+ *
+ * 在 DoT 相关口径（异常加权单层秒伤 / 六秒异常总伤）下，数值后面跟一个 `to dot` 小字，
+ * 说明这是「对异常伤害」的口径（D-171）；`∞` 表示这张卡让该异常从无到有。
+ *
  * @param gain 提升比例；null = 无贡献（不显示）
  */
 function gainBadge(gain) {
@@ -138,7 +177,69 @@ function gainBadge(gain) {
   const cls = gain > 0.0005 ? 'up' : gain < -0.0005 ? 'down' : 'flat';
   const wrap = el('div', 'slot-gain');
   wrap.append(el('span', 'slot-gain-val ' + cls, fmtGain(gain)));
+  if (isDotMetric()) wrap.append(el('span', 'gain-to-dot', 'to dot'));
+  // D-175：N 秒总伤下的增幅是「续航 / 异常」加权拼出来的，标个小字说明来源
+  else if (isTotalLikeMetric()) wrap.append(el('span', 'gain-to-dot', 'to total'));
   return wrap;
+}
+
+/** 当前指标是不是「N 秒异常总伤」（D-176 的拆法只在这一个口径生效） */
+function isDotWindowMetric() {
+  return state.metric === 'dot6s';
+}
+
+/**
+ * 备选卡在「N 秒总伤」下的增幅（D-177）。
+ *
+ * ```
+ * 总伤增幅 = "装上这张卡后的总伤" ÷ "不装它的总伤" − 1
+ * ```
+ *
+ * 但"不装它"这一侧，**元素没形成 DoT 的元素卡**（病毒火里的冰 / 毒）在 **DoT 部分**
+ * 只去掉触发率词条（相当于分母是"…60 冰冻"），直伤部分照常整张拿掉。
+ * 所以这里构造一个"分母配装"：直伤取「不带这张卡」、DoT 取「带元素但不带触发率」。
+ *
+ * @param base     当前贡献
+ * @param next     装上这张卡之后的贡献
+ * @param own      这张卡自己的贡献
+ * @param baseRes  当前配装的计算结果
+ */
+function candidateWindowGain(base, next, own, baseRes) {
+  const curRes = baseRes ?? runCompute(base);
+  const aftRes = runCompute(next);
+  const steady = state.metric === 'steadyDps';
+  // 分母：直击 = 不带这张卡；DoT 部分 = 不带这张卡（元素没形成 DoT 的元素卡改成"只带元素"）
+  let denomBase = lineValue(curRes, 'sustainedDps');
+  let denomDot = steady ? lineValue(curRes, 'steadyDps') - denomBase : lineValue(curRes, 'dot6s');
+  if (isDotWindowMetricDetailRoleIsSplit(own, next)) {
+    const keepElement = base.concat(own.filter(function (c) { return c.stat !== 'statusChance'; }));
+    const ke = runCompute(keepElement);
+    denomDot = steady ? lineValue(ke, 'steadyDps') - denomBase : lineValue(ke, 'dot6s');
+  }
+  const window = steady ? 0 : (store.ui.dotWindowSeconds ?? 0);
+  const denom = steady ? denomBase + denomDot : denomBase * window + denomDot;
+  const after = steady ? lineValue(aftRes, 'steadyDps') : lineValue(aftRes, 'sustainedDps') * window + lineValue(aftRes, 'dot6s');
+  if (!(denom > 0)) return null;
+  return ratioGainOf(denom, after);
+}
+
+/** 这张卡是不是"元素没形成 DoT、但带触发率"的元素卡（D-177 的分母构造要用）。
+ * ⚠ 固定按「N 秒异常总伤」口径判断，不受当前指标影响。 */
+function isDotWindowMetricDetailRoleIsSplit(own, next) {
+  const saved = state.metric;
+  state.metric = 'dot6s';
+  try {
+    return dotMetricRoleOf(own, next).kind === 'split';
+  } finally {
+    state.metric = saved;
+  }
+}
+
+/** 某次结果的某口径值（找不到返回 0） */
+function lineValue(res, id) {
+  const lines = res.output.lines;
+  for (let i = 0; i < lines.length; i++) if (lines[i].id === id) return lines[i].value;
+  return 0;
 }
 
 /** 当前选中攻击模式（D-042：多面板武器由右上角的模式按钮切换） */
@@ -216,6 +317,22 @@ function effectiveMode() {
 // 顶部
 // ─────────────────────────────────────────────────────────────
 
+/**
+ * 浏览器标签页标题（D-170，需求方 2026-11-12）。
+ *
+ * 需求方原话：「然后标题也改一下，他现在始终是赤毒卡拉克」——
+ * 标签页以前在 `index.html` 里写死 `wfcalc · 赤毒·卡拉克`，换到别的枪也不变。
+ * 现在跟着**当前武器**走：`wfcalc · 艾弗旺-5 木星（LasGooAKPlayerWeapon）`。
+ *
+ * 兜底：数据还没加载 / 没有当前武器时保留 `index.html` 里的占位标题，不要停在上把枪的名字。
+ */
+function renderPageTitle() {
+  const w = store.data && store.data.weapon;
+  if (!w) return;
+  const nameZh = w.nameZh || w.name;
+  document.title = 'wfcalc · ' + nameZh + (w.name && w.name !== nameZh ? '（' + w.name + '）' : '');
+}
+
 function renderHeader() {
   const w = store.data.weapon;
   // D-148 / 需求方 2026-11-12：换源到 WFCD 后，原先「灵化面板复用 / 扳机未识别」这类
@@ -223,6 +340,8 @@ function renderHeader() {
   const titleEl = $('#weapon-title');
   titleEl.textContent = (w.nameZh || w.name) + '（' + w.name + '）';
   titleEl.title = '';
+  // D-170：标签页标题也跟着当前武器走
+  renderPageTitle();
   $('#weapon-meta').textContent =
     (currentMode()._label ? currentMode()._label + ' · ' : '') +
     currentMode().id + ' · ' + currentMode().role + ' · ' + currentMode().trigger +
@@ -592,6 +711,48 @@ function colTemplate(cols) {
   return parts.join(' ');
 }
 
+/** 「N 秒」窗口的候选秒数（D-171：需求方 2026-11-13「6 后面就不要了」） */
+const WINDOW_SECONDS = [1, 2, 3, 4, 5, 6];
+
+/**
+ * 秒数下拉框（D-171）：画在**增幅基准那一排**（`#dot-window-picker`）。
+ *
+ * 需求方 2026-11-13：
+ * > 「你怎么放到左边去了啊，肯定是放到增幅基准那边啊。」
+ *
+ * 所以它和「增幅基准」的按钮组并排；改它 → 重算整页 →
+ * 左栏「N 秒异常总伤 / N 秒总伤」两行的名字与数值、以及增幅基准里那两项的名字一起刷新。
+ */
+function renderDotWindowPicker() {
+  const box = $('#dot-window-picker');
+  if (!box) return;
+  box.innerHTML = '';
+  const sel = el('select', 'dot-window-select');
+  sel.title = '异常总伤统计几秒';
+  for (const n of WINDOW_SECONDS) {
+    const o = el('option', '', n + ' 秒');
+    o.value = String(n);
+    sel.append(o);
+  }
+  sel.value = String(state.dotWindowSeconds);
+  sel.addEventListener('change', function (e) {
+    state.dotWindowSeconds = Number(e.target.value) || DEFAULT_DOT_WINDOW_SECONDS;
+    renderAll();
+  });
+  box.append(sel);
+}
+
+/**
+ * 输出口径列表（左栏「伤害」）。
+ *
+ * **D-171（需求方 2026-11-13）**：
+ * > 「六秒异常总伤，改成 n 秒异常总伤，然后右侧加一个选择秒数的。
+ * >   然后加一个 n 秒总伤，这个总伤是续航秒伤 × n + n 秒异常总伤。」
+ * > 「你怎么放到左边去了啊，肯定是放到增幅基准那边啊。」
+ *
+ * 所以：左栏这两行**只显示名字与数值**，名字随秒数变；
+ * 秒数下拉框在**增幅基准那一排**（见 `renderDotWindowPicker`）。
+ */
 function renderOutputs(res) {
   // 左栏只读展示每种口径的数值与单位；单选框移到 Mod 槽位上方
   const box = $('#output-list');
@@ -610,8 +771,7 @@ function renderOutputs(res) {
 
   // 异常状态明细（含爆炸）
   //
-  // **需求方 2026-11-12**：
-  // > 「把异常状态 爆炸那边的灰色小字注释去掉」
+  // **需求方 2026-11-12**：  // > 「把异常状态 爆炸那边的灰色小字注释去掉」
   // > 「由于现在有多个段了，这里也应该分段显示，他们触发的 dot 伤害会根据段的命中伤不一样」
   //
   // 所以：不再给爆炸挂一行灰色说明；每种攻击方式各一块，各段显示自己的异常状态
@@ -625,6 +785,31 @@ function renderOutputs(res) {
  * 异常状态明细：**按攻击方式分段显示**（需求方 2026-11-12）。
  *
  * 每段有自己的命中分布 → 触发池与每跳伤害都不同，所以不能合并成一个数。
+ *
+ * **需求方 2026-11-12（续）**：
+ * > 「把非伤害性异常也加上去，标上 xx 层/秒就行，不需要后面那个伤害。」
+ * > 「复合元素在前，然后冰，然后冲击穿刺。」
+ * > 「折叠起来以后只是内部项隐藏，标题还是要展示出来，不然没地方展开了。」
+ * > 「折叠状态能保存到浏览器储存里面吗，可以就存。」
+ *
+ * 所以每段分两组：**会掉血的**（DoT 五种，带 /层/秒 伤害）和
+ * **不掉血的**（只有 xx 层/秒）。两组的标题都可点折叠，状态存 `localStorage`。
+ */
+/**
+ * 异常状态明细：**按攻击方式分段显示**（需求方 2026-11-12）。
+ *
+ * 每段有自己的命中分布 → 触发池与每跳伤害都不同，所以不能合并成一个数。
+ *
+ * **需求方 2026-11-12（续）**：
+ * > 「把非伤害性异常也加上去，标上 xx 层/秒就行，不需要后面那个伤害。」
+ * > 「用会掉血的和不会掉血的也太土了吧，叫伤害型异常和非伤害型异常啊。」
+ * > 「没有对应类型的时候就隐藏。」
+ * > 「外面的异常状态我觉得可以去掉，不要这一层，就里面两层单独折叠就好了。」
+ *
+ * 所以每个攻击方式下只有**两组**，各自可折叠，**没有外层"异常状态"标题**：
+ *   · 伤害型异常：DoT 五种 + 爆炸，带 /层/秒 伤害；
+ *   · 非伤害型异常：只有 xx 层/秒。
+ * 某一组没有任何类型时**整组不画**（标题也不画）。
  */
 function renderDotDetail(res) {
   const dotBox = $('#dot-detail');
@@ -645,12 +830,14 @@ function renderDotDetail(res) {
     }
   }
 
-  let any = false;
+  // 先把每段的两组行都算出来，再按组包进可折叠的块
+  const blocks = [];
   for (let vi = 0; vi < variants.length; vi++) {
     const v = variants[vi];
     const segCount = (v.segments || []).length;
     const from = starts[vi];
-    const rows = [];
+    const dmgRows = [];
+    const nonDmgRows = [];
     for (let k = from; k < from + segCount; k++) {
       const d = segDetails[k];
       if (!d) continue;
@@ -659,31 +846,144 @@ function renderDotDetail(res) {
         const per = d.dotPerType[t] || 0;
         const stacks = d.stacksPerType[t] || 0;
         if (per <= 0 && stacks <= 0) continue;
-        rows.push({ type: t, per, stacks, unit: ' /层/秒' });
+        dmgRows.push({ type: t, per, stacks, unit: ' /层/秒' });
       }
       // 爆炸单独算（D-031）：它是独立机制，perStack 是「每层结算伤害」，不是每秒
       const b = d.blast;
       if (b && b.stacksPerSecond > 0) {
-        rows.push({ type: 'blast', per: b.perStack, stacks: b.stacksPerSecond, unit: ' /层' });
+        dmgRows.push({ type: 'blast', per: b.perStack, stacks: b.stacksPerSecond, unit: ' /层' });
+      }
+      // 非伤害型异常：只标层/秒，没有后面的伤害数
+      const nd = d.nonDamageStacks || {};
+      for (let i = 0; i < NON_DAMAGE_STATUS_TYPES.length; i++) {
+        const t = NON_DAMAGE_STATUS_TYPES[i];
+        const stacks = nd[t] || 0;
+        if (stacks <= 0) continue;
+        nonDmgRows.push({ type: t, stacks });
       }
     }
-    if (rows.length === 0) continue;
-    any = true;
+    // 两组都空就不画这一段
+    if (dmgRows.length === 0 && nonDmgRows.length === 0) continue;
+
     // 分段标题：只有一种攻击方式时不显示（免得啰嗦）
-    if (variants.length > 1) {
-      dotBox.append(el('div', 'dot-seg-title', v.label || '伤害'));
+    const segLabel = variants.length > 1 ? (v.label || '伤害') : null;
+    blocks.push({ segLabel, dmgRows, nonDmgRows });
+  }
+
+  if (blocks.length === 0) {
+    dotBox.append(el('div', 'muted', '无伤害型异常'));
+    return;
+  }
+
+  const multiSeg = blocks.some(function (b) { return b.segLabel; });
+  for (const blk of blocks) {
+    if (blk.segLabel) dotBox.append(el('div', 'dot-seg-title', blk.segLabel));
+
+    // 伤害型异常：默认展开；没有就不画
+    if (blk.dmgRows.length > 0) {
+      dotBox.append(collapsibleBlock('dot-dmg', '伤害型异常', blk.dmgRows.length, function (body) {
+        for (const r of blk.dmgRows) body.append(dotRow(r, true));
+      }, multiSeg ? blk.segLabel : null));
     }
-    for (const r of rows) {
-      const row = el('div', 'dot-row');
-      const dot = el('span', 'dt-dot');
-      dot.style.background = ELEMENT_COLOR[r.type] || '#888';
-      row.append(dot, el('span', 'dot-name', ELEMENT_LABEL[r.type]),
-        el('span', 'dot-stacks', r.stacks.toFixed(2) + ' 层/秒'),
-        el('span', 'dot-val', fmt(r.per) + r.unit));
-      dotBox.append(row);
+
+    // 非伤害型异常：默认收起；没有就不画（需求方 2026-11-12：「没有对应类型的时候就隐藏」）
+    if (blk.nonDmgRows.length > 0) {
+      dotBox.append(collapsibleBlock('dot-nondmg', '非伤害型异常', blk.nonDmgRows.length, function (body) {
+        for (const r of blk.nonDmgRows) body.append(dotRow(r, false));
+      }, multiSeg ? blk.segLabel : null));
     }
   }
-  if (!any) dotBox.append(el('div', 'muted', '无持续伤害'));
+}
+
+/** 一行异常状态：色点 + 名称 + 层/秒 +（伤害型才有）伤害数 */
+function dotRow(r, withValue) {
+  const row = el('div', 'dot-row');
+  const dot = el('span', 'dt-dot');
+  dot.style.background = ELEMENT_COLOR[r.type] || '#888';
+  row.append(dot, el('span', 'dot-name', ELEMENT_LABEL[r.type] || r.type),
+    el('span', 'dot-stacks', r.stacks.toFixed(2) + ' 层/秒'));
+  // 需求方 2026-11-12：非伤害型异常「不需要后面那个伤害」
+  if (withValue) row.append(el('span', 'dot-val', fmt(r.per) + r.unit));
+  return row;
+}
+
+// ─────────────────────────────────────────────────────────────
+// 折叠块（需求方 2026-11-12：「折叠起来以后只是内部项隐藏，标题还是要展示出来」）
+// ─────────────────────────────────────────────────────────────
+
+const COLLAPSE_STORE_KEY = 'wfcalc.collapse.v1';
+
+/**
+ * 折叠状态（`localStorage`）。
+ *
+ * 需求方 2026-11-12：「折叠状态能保存到浏览器储存里面吗，可以就存」。
+ * 只存「哪个块展开 / 收起」，与武器、配装无关，所以换枪也保持。
+ * 读失败（隐私模式 / 存储被禁）时退回默认值，不影响页面。
+ *
+ * ⚠ 老版本存的 `dot-detail`（外层"异常状态"那一层）已随外层标题一起去掉，
+ * 这里不再读它——旧存档里多出来的键会被忽略。
+ */
+function readCollapse() {
+  const def = { 'dot-dmg': true, 'dot-nondmg': false };
+  try {
+    const raw = window.localStorage.getItem(COLLAPSE_STORE_KEY);
+    if (!raw) return def;
+    const saved = JSON.parse(raw);
+    for (const k of Object.keys(def)) {
+      if (typeof saved[k] === 'boolean') def[k] = saved[k];
+    }
+    return def;
+  } catch (e) {
+    return def;
+  }
+}
+
+function writeCollapse(state) {
+  try {
+    window.localStorage.setItem(COLLAPSE_STORE_KEY, JSON.stringify(state));
+  } catch (e) {
+    /* 存储不可用时就不存，页面照常工作 */
+  }
+}
+
+/** 切换一个块的展开状态并持久化 */
+function toggleCollapse(key) {
+  const state = readCollapse();
+  state[key] = !state[key];
+  writeCollapse(state);
+}
+
+/**
+ * 可折叠块：**标题永远显示**，收起只隐藏内部项。
+ *
+ * @param key      折叠状态的键（存 `localStorage`）
+ * @param title    标题文字
+ * @param count    内部项数量（显示在标题右边）
+ * @param fill     (bodyEl) => void，往内部容器里填内容
+ * @param suffix   可选后缀（多段武器时带上段名，免得三段的重名块分不清）
+ */
+function collapsibleBlock(key, title, count, fill, suffix) {
+  const wrap = el('div', 'collapse-block');
+  const open = readCollapse()[key] !== false;
+  if (!open) wrap.classList.add('collapsed');
+
+  const head = el('button', 'collapse-head');
+  head.type = 'button';
+  const caret = el('span', 'collapse-caret', open ? '▾' : '▸');
+  head.append(caret);
+  head.append(el('span', 'collapse-title', suffix ? (suffix + ' · ' + title) : title));
+  head.append(el('span', 'collapse-count', count > 0 ? String(count) : '无'));
+  head.addEventListener('click', function () {
+    toggleCollapse(key);
+    // 只切本块的显示，不重算整页（避免重算时滚动位置跳动）
+    const collapsed = wrap.classList.toggle('collapsed');
+    caret.textContent = collapsed ? '▸' : '▾';
+  });
+
+  const body = el('div', 'collapse-body');
+  fill(body);
+  wrap.append(head, body);
+  return wrap;
 }
 
 /**
@@ -728,6 +1028,19 @@ function renderCritTiers(res) {
   avg.append(el('span', 'c-base', ''));
   avg.append(el('span', 'c-after', '×' + critAverage(1, seg.critChance, seg.critDamage).toFixed(3)));
   box.append(avg);
+
+  // D-189：装了刃影时补一行拆解，方便直接核对「增益 = w × 一级暴击概率」
+  const bladeW = currentContributions().reduce(function (a, c) {
+    return a + (c.stat === 'bladeShadow' ? c.amount : 0);
+  }, 0) / 100;
+  if (bladeW > 0) {
+    const gain = bladeShadowGain(seg.critChance, bladeW);
+    const row = el('div', 'panel-row');
+    row.append(el('span', 'c-name', '其中刃影'));
+    row.append(el('span', 'c-base', '一级 ' + (firstTierCritChance(seg.critChance) * 100).toFixed(2) + '%'));
+    row.append(el('span', 'c-after', '+' + (gain * 100).toFixed(2) + '%'));
+    box.append(row);
+  }
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -785,7 +1098,8 @@ function makeDraggable(card, payload) {
     const p = store.dragPayload;
     store.dragPayload = null;
     // D-040：没能放进配置区 → 视为卸下（拖出配置区 / 拖到备选区 都算）
-    if (p && !dropHappened && p.from !== 'list' && p.from !== 'slot-picker') {
+    // 裂罅：从待选区（'riven-list'）拖出来的不卸下；从裂罅词条槽（'riven-slot'）拖出去 = 卸下
+    if (p && !dropHappened && p.from !== 'list' && p.from !== 'slot-picker' && p.from !== 'riven-list') {
       removeByPayload(p);
     }
     dropHappened = false;
@@ -794,6 +1108,19 @@ function makeDraggable(card, payload) {
 
 /** 按拖动载荷卸下对应内容 */
 function removeByPayload(p) {
+  // 裂罅里的词条（拖出裂罅区 = 卸下，回到待选区）
+  if (p.kind === 'rivenEntry') {
+    placeRivenEntry(p.index, '');
+    renderAll();
+    return;
+  }
+  if (p.kind === 'riven') {
+    // 裂罅（D-162）：只是从槽位卸下，裂罅本身和它的词条仍然留在下方裂罅区
+    const i = rivenInstalledSlot();
+    if (i >= 0) modSlots[i] = null;
+    renderAll();
+    return;
+  }
   if (p.kind === 'mod') {
     // 劣化槽里的卡载荷带 `exilus: true`，但 `makeDraggable` 里写的是 `from: 'exilus'`（两种写法都认）
     if (p.from === 'exilus' || p.exilus) { store.exilusModId = null; renderAll(); return; }
@@ -803,27 +1130,222 @@ function removeByPayload(p) {
   if (p.kind === 'arcane') { store.arcaneKey = null; renderAll(); }
 }
 
+/**
+ * 卡面上的词条小标签。
+ *
+ * 需求方 2026-11-13：**弹匣容量 / 换弹速度也要显示**——它们影响「续航秒伤」，不是功能卡，
+ * 以前因为 `bucket === 'utility'` 被整行跳过，于是「装了野火只看得到 +60% 火焰」，
+ * 看起来像只算了一条。
+ */
 function statChips(mod) {
   // D-116：无限叠层类（弹能过继等）的值按「每层 × 满层」显示，与内核取的值一致
   const stacks = modStackFactor(mod.id);
   const wrap = el('div', 'slot-stats');
   for (let i = 0; i < mod.stats.length; i++) {
     const s = mod.stats[i];
-    if (!s.bucket || s.bucket === 'utility') continue;
+    if (!s.bucket) continue;
     const max = s.levelValues[s.levelValues.length - 1] * stacks;
     wrap.append(el('span', 'slot-stat', statLabel(s.stat) + ' ' + (max > 0 ? '+' : '') + max));
   }
+  // 需求方 2026-11-13：锁射速 / 锁多重写进卡面（原文就是这两句）
+  for (const note of modLockNotes(mod)) wrap.append(el('span', 'slot-stat slot-lock', note));
   return wrap;
+}
+
+/**
+ * 卡面上的「限制」说明（需求方 2026-11-13：「多重无法修改\射速无法修改。这样才叫简洁！」）。
+ *
+ * | Mod | 卡面文字 |
+ * |---|---|
+ * | 半自动炮轰系列（Semi-*-Cannonade） | 射速无法修改 |
+ * | 敏锐主武 / 敏锐手枪 | 多重无法修改 |
+ */
+function modLockNotes(mod) {
+  if (!mod) return [];
+  if (mod.id === 'semi_pistol_cannonade' || mod.id === 'semi_rifle_cannonade' || mod.id === 'semi_shotgun_cannonade') return ['射速无法修改'];
+  if (mod.id === 'primary_acuity' || mod.id === 'pistol_acuity') return ['多重无法修改'];
+  return [];
 }
 
 /**
  * 卸下所有 Mod（含劣化槽）。赋能不受影响。
  * 供「一键卸下」按钮与拖拽离开配置区共用。
+ *
+ * D-157：卸下的结果会在下一次 `renderAll` 时写进配卡存档——刷新后就是空配卡。
  */
 function unequipAllMods() {
   for (let i = 0; i < SLOT_COUNT; i++) modSlots[i] = null;
   store.exilusModId = null;
   renderAll();
+}
+
+// ─────────────────────────────────────────────────────────────
+// 配卡存档（D-157，需求方 2026-11-12）
+//
+// 「刷新页面要能恢复到刚才的配卡」。按武器分开存，换枪时各恢复各的；
+// 没存过的枪照旧清空。读写细节在 `app-store.js`，这里只负责
+//   ① 把界面状态整理成存档形状（`captureLoadout`）；
+//   ② 存档 → 界面，并**核对每一项在当前武器上是否还存在**（`restoreLoadout`）。
+// ─────────────────────────────────────────────────────────────
+
+/**
+ * 把当前界面状态整理成存档形状。
+ *
+ * 只收**跟配卡有关**的东西：8 个槽、劣化槽、赋能槽、模式索引、攻击方式勾选，
+ * 以及配置区（派系 / 爆头 / 玄骸 / 镀层 / 冷颤）。「镀层：假设装备推演」这种纯界面开关也不存，
+ * 刷新后用品默认值更省心。
+ */
+function captureLoadout() {
+  const entry = makeLoadoutEntry(modSlots, store.exilusModId, store.arcaneKey);
+  // 裂罅（D-162）：槽位用占位 id，真实词条单独存一份
+  entry.riven = store.riven
+    ? { combo: store.riven.combo, entries: store.riven.entries.map(function (e) { return e && e.key ? { key: e.key, value: e.value } : null; }) }
+    : null;
+  entry.ui = {
+    modeIndex: state.modeIndex,
+    // `null` = 全选（D-148），要原样存下来，不能当成"空"
+    selectedVariants: Array.isArray(state.selectedVariants) ? state.selectedVariants.slice() : null,
+    faction: state.faction,
+    headshot: Boolean(state.headshot),
+    headshotMult: state.headshotMult,
+    kuvaType: state.kuvaType,
+    kuvaRatio: state.kuvaRatio,
+    coStatusTypes: state.coStatusTypes,
+    coStacks: state.coStacks,
+    coFreezeStacks: state.coFreezeStacks,
+    // 需求方 2026-11-13：连击倍率 / 次要·爆发层数（跟这套配装一起存）
+    comboMultiplier: state.comboMultiplier,
+    burstStacks: state.burstStacks,
+    // D-171：异常总伤的窗口秒数（跟这套配装一起存，刷新后还是你选的秒数）
+    dotWindowSeconds: state.dotWindowSeconds,
+  };
+  return entry;
+}
+
+/** 把当前配卡写进存档（解析错误 / 存储不可用时静默失败） */
+function persistLoadout() {
+  const w = store.data && store.data.weapon;
+  if (!w || !w.id) return;
+  try {
+    const entry = captureLoadout();
+    saveLoadout(w.id, entry, entry.ui);
+  } catch (e) {
+    /* 存档坏不了页面 */
+  }
+}
+
+/**
+ * 把一把存的配卡应用到当前武器上。
+ *
+ * ⚠ 存档是**旧数据**：数据更新后某张卡可能已经不存在、赋能换了 key、
+ * 模式数量变了。所以每一项都要先在该武器当前的可选集合里查一遍，查不到就跳过（留空）。
+ *
+ * @param saved  `{ slots, exilus, arcane, ui }`；为 null 表示这把枪没有存档 → 清空
+ */
+function restoreLoadout(saved) {
+  const data = store.data;
+  const w = data && data.weapon;
+  // ── 槽位 ──
+  const empty = makeLoadoutEntry([], null, null);
+  const src = saved || empty;
+  for (let i = 0; i < SLOT_COUNT; i++) {
+    const id = src.slots[i];
+    // 裂罅占位 id（D-162）：保留，真实数据在下一段恢复
+    if (id === RIVEN_SLOT_ID) { modSlots[i] = id; continue; }
+    modSlots[i] = id && data && data.modById.get(id) ? id : null;
+  }
+  // 劣化槽只认本武器能装的劣化 Mod。
+  //
+  // 需求方 2026-11-13：劣化槽资格改成官方 `isUtility` 口径后，旧存档里可能有卡不再符合
+  // （例如烈焰风暴 +爆炸范围）——**直接卸下，不出提示**。
+  store.exilusModId = src.exilus && data && data.modById.get(src.exilus) && isExilusMod(data.modById.get(src.exilus))
+    ? src.exilus
+    : null;
+  // 赋能槽只认本武器大类的赋能；守护 / 同伴武器一律不认（需求方 2026-11-12）
+  store.arcaneKey = !arcanesDisabled() && src.arcane && data && data.arcaneByKey && data.arcaneByKey.get(src.arcane) ? src.arcane : null;
+
+  // ── 模式与攻击方式 ──
+  const ui = (saved && saved.ui) || {};
+  const modes = (w && w.modes) || [];
+  const idx = Number(ui.modeIndex);
+  state.modeIndex = Number.isInteger(idx) && idx >= 0 && idx < modes.length ? idx : 0;
+  const sel = Array.isArray(ui.selectedVariants) ? ui.selectedVariants.filter(function (v) {
+    return Number.isInteger(v) && v >= 0;
+  }) : null;
+  state.selectedVariants = sel && sel.length ? sel : null;
+
+  // ── 配置区（D-157：只恢复跟"算出来的数"有关的项）──
+  const factionOk = FACTION_OPTIONS.some(function (o) { return o[0] === ui.faction; });
+  if (factionOk) state.faction = ui.faction;
+  if (typeof ui.headshot === 'boolean') state.headshot = ui.headshot;
+  if ([1, 2, 3].indexOf(Number(ui.headshotMult)) >= 0) state.headshotMult = Number(ui.headshotMult);
+  if (KUVA_ELEMENTS.indexOf(ui.kuvaType) >= 0) state.kuvaType = ui.kuvaType;
+  if (Number.isFinite(Number(ui.kuvaRatio))) {
+    // 玄骸滑条有上下限（25%~60%），越界的存档值夹回去
+    state.kuvaRatio = Math.min(0.6, Math.max(0.25, Number(ui.kuvaRatio)));
+  }
+  if (Number.isFinite(Number(ui.coStatusTypes))) state.coStatusTypes = Math.max(0, Math.floor(Number(ui.coStatusTypes)));
+  if (Number.isFinite(Number(ui.coStacks))) state.coStacks = Math.max(0, Math.floor(Number(ui.coStacks)));
+  if (Number.isFinite(Number(ui.coFreezeStacks))) state.coFreezeStacks = Math.max(0, Math.floor(Number(ui.coFreezeStacks)));
+  // 需求方 2026-11-13：连击倍率 1~13，爆发层数 1~13（越界夹回去，缺省回默认值）
+  if (Number.isFinite(Number(ui.comboMultiplier))) {
+    state.comboMultiplier = Math.min(MAX_COMBO_MULTIPLIER, Math.max(1, Math.round(Number(ui.comboMultiplier))));
+  } else {
+    state.comboMultiplier = 12;
+  }
+  if (Number.isFinite(Number(ui.burstStacks))) {
+    state.burstStacks = Math.min(MAX_BURST_STACKS, Math.max(1, Math.round(Number(ui.burstStacks))));
+  } else {
+    state.burstStacks = DEFAULT_BURST_STACKS;
+  }
+  // D-171：窗口秒数只认 1~6。
+  //
+  // ⚠ 修过的 bug（需求方 2026-11-13：「换武器时没有触发读取这个秒数？我换来换去都是 1 秒」）：
+  //   以前这里写的是「旧存档没有这个字段就保持默认 6 秒」——**保持**等于**沿用上一把枪的值**，
+  //   于是从 A 枪（比如 4 秒）换到从没存过秒数的 B 枪，B 枪会跟着显示 4 秒，
+  //   下一次存档还把 4 写进 B 枪的档案，越滚越乱。
+  //   现在：**每次恢复都先回到默认 6 秒**，存档里有合法值才覆盖。
+  state.dotWindowSeconds = DEFAULT_DOT_WINDOW_SECONDS;
+  const win = Math.round(Number(ui.dotWindowSeconds));
+  if (Number.isFinite(win) && win >= DOT_WINDOW_MIN_SECONDS && win <= DOT_WINDOW_MAX_SECONDS) {
+    state.dotWindowSeconds = win;
+  }
+
+  // ── 裂罅（D-162）──
+  // 存档里带 riven 就恢复它；词条按当前武器的词条表核对，对不上的丢掉。
+  // 槽位里的裂罅占位 id 若同时存在但没有 riven 数据，就把占位也清掉（避免空壳）。
+  store.riven = restoreRiven(saved && saved.riven);
+  if (!store.riven) {
+    const i = rivenInstalledSlot();
+    if (i >= 0) modSlots[i] = null;
+  }
+
+  return Boolean(saved);
+}
+
+/**
+ * 从存档恢复一张裂罅（D-162）。
+ *
+ * 存档是旧数据：词条表可能已经变了（例如只做步枪 → 以后补别的类），
+ * 所以逐条核对「这个 key 在**当前武器这一类**的词条表里还存不存在」，查不到就丢弃该条。
+ */
+function restoreRiven(saved) {
+  if (!saved || typeof saved !== 'object') return null;
+  const table = rivenTableNow();
+  if (!table) return null; // 这类武器还没有裂罅数据
+  const comboIds = RIVEN_COMBOS.map(function (c) { return c.id; });
+  const combo = comboIds.indexOf(saved.combo) >= 0 ? saved.combo : '2pos';
+  const entries = [];
+  if (Array.isArray(saved.entries)) {
+    for (const e of saved.entries) {
+      if (!e || typeof e.key !== 'string' || !e.key) { entries.push(null); continue; }
+      const def = rivenDefOf(table, e.key);
+      if (!def) { entries.push(null); continue; }
+      const v = Number(e.value);
+      entries.push({ key: e.key, value: Number.isFinite(v) && v >= 0 ? v : 0 });
+    }
+  }
+  return { combo, entries };
 }
 
 /**
@@ -854,7 +1376,10 @@ function coSlotGain(mod) {
 }
 
 /**
- * 普通 Mod 槽：放 Mod，或作为已有 Mod 的换位/插入目标
+ * 普通 Mod 槽：放 Mod，或作为已有 Mod 的换位/插入目标。
+ *
+ * 槽里也可能是**裂罅**（D-162）：槽里存占位 id {@link RIVEN_SLOT_ID}，
+ * 显示成紫色卡，整张卡只显示一条「整卡收益」，词条小标签也走裂罅的紫色样式。
  */
 function modSlotCard(index) {
   const card = el('div', 'slot');
@@ -862,9 +1387,25 @@ function modSlotCard(index) {
   const body = el('div', 'slot-body');
   const id = modSlots[index];
 
-  if (id) {
+  if (id === RIVEN_SLOT_ID) {
+    // ── 裂罅卡（D-162）──
+    card.className += ' riven';
+    const rivenChips = rivenSlotChips();
+    body.append(el('div', 'slot-name', '裂罅 Mod'));
+    if (rivenChips.length) {
+      const wrap = el('div', 'slot-stats');
+      for (const c of rivenChips) wrap.append(c);
+      body.append(wrap);
+    }
+    const g = gainBadge(rivenGain());
+    if (g) body.append(g);
+    // 拖出槽位 = 卸下（D-040）；下方裂罅区那张也随之可以再拖上去
+    makeDraggable(card, { kind: 'riven', from: 'slot', index: index });
+  } else if (id) {
     const mod = store.data.modById.get(id);
     body.append(el('div', 'slot-name', modName(mod)));
+    // 需求方 2026-11-13：「劣化 mod 有单独的 tag」——可进劣化槽的卡在普通槽里也标出来
+    if (mod && mod.exilus === true) body.append(el('span', 'tag', '劣化'));
     body.append(statChips(mod));
     // 需求方 2026-11-06：显示这张卡相对「不上它」时当前指标的提升
     // D-117：镀层类卡单独处理——拿掉它连「异况数 × 层数」一起没了，
@@ -880,6 +1421,24 @@ function modSlotCard(index) {
 
   makeDropTarget(card, function (p) { return slotAcceptsMod(p, index); }, function (p) { dropOnSlot(p, index); });
   return card;
+}
+
+/** 裂罅卡上的词条小标签（紫色样式，与普通 Mod 的 `slot-stat` 区分） */
+function rivenSlotChips() {
+  const out = [];
+  const table = rivenTableNow();
+  const r = store.riven;
+  if (!table || !r) return out;
+  const combo = rivenComboNow();
+  for (let i = 0; i < r.entries.length; i++) {
+    const e = r.entries[i];
+    if (!e || !e.key) continue;
+    const def = rivenDefOf(table, e.key);
+    if (!def) continue;
+    const kind = i < combo.pos ? 'pos' : 'neg';
+    out.push(el('span', 'slot-stat riven-stat', def.label + ' ' + formatRivenValue(def, kind, rivenValueFor(def, kind, e.value))));
+  }
+  return out;
 }
 
 /** 劣化槽：只接受功能类 Mod（D-127：与普通 Mod 槽同尺寸，槽名写在卡片右上角） */
@@ -934,6 +1493,16 @@ function arcaneSlotCard() {
   card.append(el('span', 'slot-chip', '赋能'));
   const body = el('div', 'slot-body');
 
+  // 需求方 2026-11-12：「守护武器的赋能槽禁用掉」→ 槽留着占位，灰掉、不收拖拽、不给装
+  // ⚠ 判定必须在上面的空卡判断**之前**：空卡会走 `return card`，
+  //   把禁用分支放到后面就永远走不到（页面 shim 没有 CSS，`className` 要直接写）。
+  if (arcanesDisabled()) {
+    card.className += ' disabled';
+    body.append(el('div', 'slot-empty', '不可装赋能'));
+    card.append(body);
+    return card;
+  }
+
   if (store.arcaneKey) {
     const arc = store.data.arcaneByKey.get(store.arcaneKey);
     body.append(el('div', 'slot-name', arc.name.zh || arc.name.en));
@@ -978,6 +1547,8 @@ function arcaneSlotCard() {
  */
 function arcaneSlotAccepts(payload, targetPayload) {
   if (!payload || payload.kind !== 'arcane') return false;
+  // 需求方 2026-11-12：守护 / 同伴武器没有赋能槽，不许放
+  if (arcanesDisabled()) return false;
   const arc = store.data && store.data.arcaneByKey.get(payload.key);
   // D-138：判定统一走 `isArcaneUsableOn`（主手霰弹 / 弓额外可装专属赋能，副手霰弹只走次要）
   if (arc && !isArcaneUsableOn(arc, store.data.weapon, store.data.slotEntry)) return false;
@@ -992,6 +1563,10 @@ function arcaneSlotAccepts(payload, targetPayload) {
 function dropOnArcane(payload) {
   const arc = store.data.arcaneByKey.get(payload.key);
   if (!arc) return;
+  if (arcanesDisabled()) {
+    flash('守护 / 同伴武器不能装赋能');
+    return;
+  }
   // 本武器能装的赋能（D-138，与 `.slot-wrap` 的禁止符号判定同一套规则）
   if (!isArcaneUsableOn(arc, store.data.weapon, store.data.slotEntry)) {
     flash('这个赋能不能装在本武器上');
@@ -1022,6 +1597,14 @@ const ARCANE_CATEGORY_LABEL = {
  * 功能类（劣化）Mod 永远只能进劣化槽，普通槽对它一律不接受。
  */
 function slotAcceptsMod(payload, targetIndex) {
+  // 裂罅（D-162）：已经装进某个槽时，**不允许再从下方拖上去**——它是同一个实体，
+  // 再拖一次没有意义（需求方：「下面拖上去以后下方的实体就不允许拖动上去了」）。
+  // 允许在槽位之间挪动（从槽 A 拖到槽 B），等价于换位置。
+  if (payload.kind === 'riven') {
+    if (payload.from === 'slot') return payload.index !== targetIndex;
+    // from 'riven'（下方裂罅区拖来的）：已经装了就不收
+    return !isRivenInstalled();
+  }
   // 赋能不能进 Mod 槽
   if (payload.kind !== 'mod') return false;
   // 功能类只能进劣化槽（D-034）
@@ -1040,6 +1623,28 @@ function slotAcceptsMod(payload, targetIndex) {
  * ```
  */
 function dropOnSlot(payload, targetIndex) {
+  // ── 裂罅（D-162）──
+  if (payload.kind === 'riven') {
+    if (payload.from === 'slot') {
+      if (payload.index === targetIndex) return;
+      swapSlots(payload.index, targetIndex);
+      renderAll();
+      return;
+    }
+    // 从下方裂罅区拖上去：已经装了就不收（同一个实体）
+    if (isRivenInstalled()) {
+      flash('裂罅只能装一张：先把槽位里那张卸下');
+      return;
+    }
+    if (!store.riven) {
+      flash('先在下方裂罅区拼一条词条');
+      return;
+    }
+    insertAt(RIVEN_SLOT_ID, targetIndex);
+    renderAll();
+    return;
+  }
+
   const mod = store.data.modById.get(payload.id);
   if (!mod) return;
   // D-091：武器不满足装备条件
@@ -1052,6 +1657,7 @@ function dropOnSlot(payload, targetIndex) {
     return;
   }
 
+  // 槽里原来是裂罅：被普通 Mod 顶掉 = 裂罅卸下（它回到下方裂罅区，仍可再拖上去）
   if (payload.from === 'slot' && typeof payload.index === 'number') {
     if (payload.index === targetIndex) return; // 拖回原位：不动
     swapSlots(payload.index, targetIndex);
@@ -1218,17 +1824,20 @@ function matchesFilter(mod, filter) {
 }
 
 /**
- * 模拟"把这张 Mod 装上去"后能得到的贡献，用于计算备选区的增幅。
+ * 模拟"把这张 Mod 装上去"后能得到的贡献，用于计算备选区的增幅（D-169）。
  *
- * 规则：
- *   · 功能类 → 放进劣化槽（劣化槽空着就直接放；已占用则返回 null，表示装不上）；
- *   · 普通类 → 塞进**第一个空槽**（不动已装备的 Mod，避免把已有收益算成负数）；
- *     8 槽全满则返回 null。
- * 返回 null 表示"这张卡当前装不上"，界面显示为「—」而不是负数。
+ * 规则（需求方 2026-11-12 选 2A）：
+ *   · 功能类 → 放进劣化槽（劣化槽空着就直接放；已占用则返回 null，表示装不上——劣化槽确实只有一格）；
+ *   · 普通类 → **临时占一个额外槽位**（`SLOT_COUNT`），不动用户的 8 个槽，
+ *     所以**8 槽全满也照样能算增幅**（以前满槽直接返回 null，界面显示「—」）。
+ *
+ * 放到额外槽位还带来一个正确性上的好处：元素合成按槽位号从小到大配对，
+ * 额外槽位排在所有已有槽之后，新卡**不会抢走已有卡的配对对象**，
+ * 算出来的就是"多这张卡会怎样"，与用户实际装上它的效果一致。
  */
 function simulateEquip(mod, exilus) {
   if (exilus) {
-    if (store.exilusModId) return null; // 劣化槽已占用
+    if (store.exilusModId) return null; // 劣化槽已占用（只有一格，确实装不上）
     const saved = store.exilusModId;
     store.exilusModId = mod.id;
     const c = currentContributions();
@@ -1236,16 +1845,12 @@ function simulateEquip(mod, exilus) {
     return c;
   }
 
-  let free = -1;
-  for (let i = 0; i < SLOT_COUNT; i++) {
-    if (!modSlots[i]) { free = i; break; }
-  }
-  if (free < 0) return null; // 8 槽全满，装不上
-
-  const saved = modSlots[free];
-  modSlots[free] = mod.id;
+  // 临时占一个额外槽位：`currentContributions()` 只遍历 0..SLOT_COUNT-1，
+  // 所以这里临时把数组拉长一格再还原。
+  const saved = modSlots[SLOT_COUNT];
+  modSlots[SLOT_COUNT] = mod.id;
   const c = currentContributions();
-  modSlots[free] = saved;
+  if (saved === undefined) modSlots.length = SLOT_COUNT; else modSlots[SLOT_COUNT] = saved;
   return c;
 }
 
@@ -1272,14 +1877,37 @@ function renderCandidates(res) {
     if (state.search && name.toLowerCase().indexOf(state.search.toLowerCase()) < 0) continue;
 
     const exilus = isExilusMod(mod);
-    // 模拟"装备这张 Mod"：优先空位、没有空位就**替换收益最差的那张**（D-115 之后满槽也能换）。
-    // 不能直接替换已装备的 Mod —— 那样会把原有收益一起算掉，出现大把负数。
+    // 模拟"装备这张 Mod"（D-169，需求方 2026-11-12 选 2A）：
+    // 普通卡**临时占一个额外槽位**，不动用户的 8 个槽，所以满槽也能算出增幅；
+    // 额外槽位排在所有已有槽之后，不会抢走已有卡的元素配对对象。
+    // D-117：镀层类卡的收益要吃「异况数 × 层数」，走 `coModGain`（配置区不再显示推演小字）
+    // 模拟"装备这张 Mod"（D-169，需求方 2026-11-12 选 2A）：
+    // 普通卡**临时占一个额外槽位**，不动用户的 8 个槽，所以满槽也能算出增幅；
+    // 额外槽位排在所有已有槽之后，不会抢走已有卡的元素配对对象。
     // D-117：镀层类卡的收益要吃「异况数 × 层数」，走 `coModGain`（配置区不再显示推演小字）
     const coGain = coModGain(mod);
     const nextContribs = coGain === null ? simulateEquip(mod, exilus) : null;
     let gain = coGain;
-    if (nextContribs && baseValue !== 0) {
-      gain = metricValueOf(runCompute(nextContribs)) / baseValue - 1;
+    if (nextContribs) {
+      // D-171：DoT 口径下的规则要用「**装上之后**」的配装判断
+      //（待选卡还没进配装，用当前配装算合成看不到它的元素）
+      const own = modToContributions(mod, mod.maxRank, SLOT_COUNT);
+      if (isTotalLikeMetric()) {
+        // D-177 / D-180：总量类口径（N 秒总伤 / 稳态秒伤）
+        gain = candidateWindowGain(base, nextContribs, own, res);
+      } else {
+        const after = metricValueOf(runCompute(nextContribs));
+        if (isDotWindowMetric() && after > 0 && isDotWindowMetricDetailRoleIsSplit(own, nextContribs)) {
+          // D-176：N 秒异常总伤下，元素没形成 DoT 的元素卡只算触发率那部分
+          gain = dotGainForCandidate(own, nextContribs, res);
+        } else if (baseValue > 0) {
+          // 其余口径如实算：包括「加电把火 DoT 打散」这种 −100%
+          gain = after / baseValue - 1;
+        } else {
+          // 当前为 0、装上后 > 0 → 这张卡让该指标从无到有，增幅 +∞
+          gain = after > 0 ? INFINITE_GAIN : 0;
+        }
+      }
     }
     rows.push({ mod: mod, gain: gain, exilus: exilus });
   }
@@ -1306,7 +1934,8 @@ function candidateCard(row) {
 
   const top = el('div', 'cand-top');
   top.append(el('span', 'cand-name', modName(mod)));
-  if (row.exilus) top.append(el('span', 'tag', '功能'));
+  // 需求方 2026-11-13：「劣化 mod 有单独的 tag」——可进劣化槽的卡单独标出来
+  if (mod.exilus === true) top.append(el('span', 'tag', '劣化'));
   card.append(top);
 
   const statText = [];
@@ -1316,16 +1945,513 @@ function candidateCard(row) {
     const max = s.levelValues[s.levelValues.length - 1] * modStackFactor(mod.id);
     statText.push(statLabel(s.stat) + ' ' + (max > 0 ? '+' : '') + max);
   }
+  for (const note of modLockNotes(mod)) statText.push(note);
   card.append(el('div', 'cand-stats', statText.join(' · ') || '无伤害加成'));
 
   const gainEl = el('div', 'cand-gain');
-  const cls = row.gain === null ? '' : row.gain >= 0.00005 ? 'pos' : row.gain <= -0.00005 ? 'neg' : '';
   gainEl.append(el('span', 'gain-label', '增幅'));
-  gainEl.append(el('span', 'gain-val ' + cls, fmtPct(row.gain)));
+  const cls = row.gain === null ? '' : !Number.isFinite(row.gain) ? 'pos' : row.gain >= 0.00005 ? 'pos' : row.gain <= -0.00005 ? 'neg' : '';
+  gainEl.append(el('span', 'gain-val ' + cls, fmtGain(row.gain) || '—'));
+  // DoT 口径下的 `to dot` 小字（D-171）；N 秒总伤下是加权拼出来的，标 `to total`（D-175）
+  if (isDotMetric() && row.gain !== null) gainEl.append(el('span', 'gain-to-dot', 'to dot'));
+  else if (isTotalLikeMetric() && row.gain !== null) gainEl.append(el('span', 'gain-to-dot', 'to total'));
   card.append(gainEl);
 
   card.addEventListener('click', function () { selectDetail({ kind: 'mod', id: mod.id, exilus: row.exilus }); });
   return card;
+}
+
+// ─────────────────────────────────────────────────────────────
+// 裂罅 Mod 区（D-162，需求方 2026-11-12）
+//
+// 放在「备选 Mod」上方、可折叠：上方切四种组合，左边拼这张裂罅的词条，
+// 右边是待选词条（按当前 min/平均/max 口径算出的数值区间 + 单条收益）。
+// 整张裂罅是**一个实体**：装进槽位后这里继续编辑，两边同步。
+// ─────────────────────────────────────────────────────────────
+
+/** 组合按钮（上方一排单选） */
+function renderRivenCombos() {
+  const box = $('#riven-combo');
+  if (!box) return;
+  box.innerHTML = '';
+  box.className = 'filter-group';
+  const cur = store.riven ? store.riven.combo : '2pos';
+  for (const c of RIVEN_COMBOS) {
+    const btn = el('button', 'filter-btn' + (cur === c.id ? ' active' : ''), c.label);
+    btn.type = 'button';
+    btn.title = c.pos + ' 条正面' + (c.neg ? ' + 1 条负面' : '，无负面');
+    btn.addEventListener('click', function () {
+      setRivenCombo(c.id);
+      renderAll();
+    });
+    box.append(btn);
+  }
+}
+
+/**
+ * 属性基准（最低 / 平均 / 最高）。
+ *
+ * ⚠ **只影响右栏待选区**（需求方 2026-11-12）：
+ *   切换它**不会**改动已经选进裂罅的词条数值——那是用户调好的实际数值，
+ *   切换基准只是换个视角看待选区里还没选的那些词条。
+ *   已选词条的数值只能通过它自己的滑杆 / 输入框改。
+ */
+function renderRivenValueModes() {
+  const box = $('#riven-value-mode');
+  if (!box) return;
+  box.innerHTML = '';
+  box.className = 'filter-group';
+  const cur = state.rivenValueMode;
+  for (const [id, label] of [['min', '最低'], ['avg', '平均'], ['max', '最高']]) {
+    const btn = el('button', 'filter-btn' + (cur === id ? ' active' : ''), label);
+    btn.type = 'button';
+    btn.addEventListener('click', function () {
+      state.rivenValueMode = id;
+      // 只重画右栏待选区（含排序与增幅），**不动**已选词条的数值
+      const table = rivenTableNow();
+      if (table) {
+        renderRivenValueModes();
+        renderRivenCandidates(table);
+      }
+    });
+    box.append(btn);
+  }
+}
+
+/**
+ * 裂罅数值输入框的显示文本：派系词条是 1.xx 倍率（两位小数），其它是百分比（一位小数）。
+ */
+function fmtRivenInput(isFaction, displayValue) {
+  return isFaction ? displayValue.toFixed(2) : displayValue.toFixed(1);
+}
+
+/**
+ * 左栏：这张裂罅的词条槽。
+ *
+ * 正面槽在前（2 或 3 个），有负面时最后多一个负面槽。
+ * 每个槽：词条下拉 + 数值滑杆 + 数字输入 + 取值范围 + 这一条的收益。
+ *
+ * 最上面还有一张**整张裂罅的预览卡**：显示这张裂罅的增幅、已装状态，并且可以拖到 Mod 槽装备
+ * （需求方：装上去以后下方这张就不允许再拖上去了；界面文案统一用「增幅」，不用「整卡 / 本条」）。
+ */
+function renderRivenCompose(table) {
+  const box = $('#riven-compose');
+  if (!box) return;
+  box.innerHTML = '';
+  const combo = rivenComboNow();
+  const slots = combo.pos + combo.neg;
+
+  // ── 整张裂罅的预览卡 ──
+  {
+    const installed = isRivenInstalled();
+    const card = el('div', 'riven-slot' + (installed ? ' installed' : ''));
+    const head = el('div', 'riven-slot-head');
+    head.append(el('span', 'riven-slot-tag', '裂罅'));
+    head.append(el('span', 'riven-rarity', combo.label + ' · ' + rivenFilledCount() + '/' + slots + ' 条'));
+    card.append(head);
+    const g = rivenGain();
+    if (g !== null) {
+      const info = el('div', 'riven-slot-row');
+      info.append(el('span', 'riven-stat-gain ' + (g >= 0 ? 'pos' : 'neg'), '增幅 ' + fmtGain(g)));
+      // N 秒总伤下，裂罅卡上的增幅同样是加权拼出来的（D-175）
+      if (isTotalLikeMetric()) info.append(el('span', 'gain-to-dot', 'to total'));
+      card.append(info);
+    }
+    // 已经装进槽位时，这张不能再拖（同一个实体）；没装时可以拖到 Mod 槽
+    if (!installed && rivenFilledCount() > 0) {
+      makeDraggable(card, { kind: 'riven', from: 'riven' });
+      card.classList.add('draggable');
+    }
+    box.append(card);
+  }
+
+  for (let i = 0; i < slots; i++) {
+    const kind = i < combo.pos ? 'pos' : 'neg';
+    const cur = store.riven && store.riven.entries[i] ? store.riven.entries[i] : null;
+    const def = cur && cur.key ? rivenDefOf(table, cur.key) : null;
+
+    const card = el('div', 'riven-slot ' + kind + (def ? '' : ' empty'));
+    const head = el('div', 'riven-slot-head');
+    head.append(el('span', 'riven-slot-tag', kind === 'pos' ? '+' + (i + 1) : '−'));
+    // 槽 1 的名称只做展示，**不再提供下拉选择**（需求方 2026-11-12：
+    // 「从下拉框选的裂罅词条只能选择最大最小值，干脆去掉这个选择方式算了，只能拖拽」）。
+    // 词条只能从右侧待选区拖进来。
+    head.append(el('span', 'riven-slot-name', def ? def.label : '（未选）'));
+    card.append(head);
+    // ⚠ 拖拽手柄只挂在**这一行**：整张卡片可拖会让滑杆 / 输入框拖不动
+    //   （需求方：「词条拖拽优于横杆拖拽了，导致很难调整。换一下」）。
+    bindRivenSlotDrag(card, i, def, kind, head);
+
+    if (def) {
+      const row = el('div', 'riven-slot-row');
+      // 派系词条显示的是 1.xx 倍率，滑杆 / 输入框也按显示口径走，存盘时再换算回百分比。
+      // 滑杆范围 = 这条词条**理论上能洗出的范围**（min ~ max），与页面一致。
+      const isFaction = def.kind === 'faction';
+      const rawRange = rivenRawRange(def, kind);
+      const dispOf = function (raw) { return isFaction ? (kind === 'pos' ? 1 + raw / 100 : 1 - raw / 100) : raw; };
+      const rawOf = function (disp) { return isFaction ? Math.abs((disp - 1) * 100) : Math.abs(disp); };
+      const lo = dispOf(rawRange.min);
+      const hi = dispOf(rawRange.max);
+      const loD = Math.min(lo, hi);
+      const hiD = Math.max(lo, hi);
+      const curD = rivenValueFor(def, kind, cur.value);
+
+      const range = el('input');
+      range.type = 'range';
+      range.min = String(loD);
+      range.max = String(hiD);
+      range.step = '0.1';
+      range.value = String(Math.min(hiD, Math.max(loD, curD)));
+
+      const num = el('input');
+      num.type = 'number';
+      num.step = '0.1';
+      num.min = '0';
+      num.value = fmtRivenInput(isFaction, curD);
+
+      // ⚠ 拖动过程中**不重绘**：重绘会把正在拖的滑杆节点换掉，导致拖不动。
+      //   `input`（拖动中）只把数写进状态、并同步旁边的数字框；
+      //   `change`（松开鼠标）才整页重算。
+      (function (index, toRaw, slider, numBox, isFac) {
+        slider.addEventListener('input', function (e) {
+          const v = Number(e.target.value);
+          setRivenEntryValue(index, toRaw(v));
+          numBox.value = fmtRivenInput(isFac, v);
+        });
+        slider.addEventListener('change', function () { renderAll(); });
+      })(i, rawOf, range, num, isFaction);
+      row.append(range);
+
+      // 输入框：回车 / 失焦（change）才重算，避免每敲一个字都重绘
+      (function (index, toRaw) {
+        num.addEventListener('change', function (e) {
+          const v = Number(e.target.value);
+          if (!Number.isFinite(v)) return;
+          setRivenEntryValue(index, toRaw(v));
+          renderAll();
+        });
+      })(i, rawOf);
+      row.append(num);
+      card.append(row);
+
+      const info = el('div', 'riven-slot-row');
+      info.append(el('span', 'riven-range', '范围 ' + formatRivenRange(def, kind)));
+      // 单条增幅：把这一条的实际值单独当作一张卡的贡献去比较
+      const g = rivenEntryGain(i);
+      if (g !== null) {
+        info.append(el('span', 'riven-stat-gain ' + (g >= 0 ? 'pos' : 'neg'), '增幅 ' + fmtGain(g)));
+        // N 秒总伤下是「续航 / 异常」加权拼出来的（D-175）
+        if (isTotalLikeMetric()) info.append(el('span', 'gain-to-dot', 'to total'));
+      }
+      card.append(info);
+    } else {
+      card.append(el('div', 'riven-slot-hint', '从右侧选取词条'));
+    }
+    box.append(card);
+  }
+}
+
+/**
+ * 给左栏**一个词条槽**加上拖拽 / 放置能力（与 Mod 槽同一套交互）。
+ *
+ * ⚠ **拖拽手柄是槽顶那一行**（`head`），不是整张卡片：
+ *   整卡可拖会把滑杆 / 输入框的鼠标操作一起吞掉，导致滑杆拖不动
+ *   （需求方：「词条拖拽优于横杆拖拽了，导致很难调整。换一下」）。
+ *   放置目标（`drop`）仍然挂整张卡片，拖到卡片哪个位置都能放。
+ *
+ * | 操作 | 结果 |
+ * |---|---|
+ * | 从右栏待选区拖一条词条进来 | 放进这个槽；槽里原有的词条退回待选区 |
+ * | 从别的词条槽拖进来 | 两个词条**互换位置** |
+ * | 从槽顶那一行把词条拖出到右栏 / 拖出裂罅区 | 卸下（回到待选区） |
+ * | 拖到不放（被拒） | 不动 |
+ */
+function bindRivenSlotDrag(card, index, def, kind, head) {
+  // ── 拖出源：只有装了词条的槽才能拖，手柄是顶部那一行 ──
+  const handle = head || card;
+  if (def) {
+    makeDraggable(handle, { kind: 'rivenEntry', index: index, from: 'riven-slot' });
+    handle.classList.add('draggable');
+  }
+
+  // ── 放置目标：整张卡片 ──
+  card.addEventListener('dragover', function (e) {
+    const p = store.dragPayload;
+    if (!rivenSlotAccepts(p, kind)) {
+      card.classList.remove('drop-target');
+      return;
+    }
+    e.preventDefault();
+    if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
+    card.classList.add('drop-target');
+  });
+  card.addEventListener('dragleave', function () { card.classList.remove('drop-target'); });
+  card.addEventListener('drop', function (e) {
+    const p = store.dragPayload;
+    if (!rivenSlotAccepts(p, kind)) return;
+    e.preventDefault();
+    card.classList.remove('drop-target');
+    dropHappened = true; // 成功放进裂罅，dragend 时不要当成「拖出去卸下」
+    if (p.kind === 'rivenEntry') {
+      placeRivenEntry(index, rivenEntryKeyAt(p.index), p.index);
+    } else if (p.kind === 'rivenStat') {
+      placeRivenEntry(index, p.key);
+    }
+    store.dragPayload = null;
+    renderAll();
+  });
+}
+
+/** 某个词条槽当前的词条 key（没有返回空串） */
+function rivenEntryKeyAt(index) {
+  const e = store.riven && store.riven.entries[index];
+  return e && e.key ? e.key : '';
+}
+
+/** 这个词条槽能不能接受这次拖拽 */
+function rivenSlotAccepts(payload, kind) {
+  if (!payload) return false;
+  if (payload.kind === 'rivenStat') return payload.statKind === kind;
+  if (payload.kind === 'rivenEntry') {
+    // 词条槽之间互换：正负必须同类
+    return rivenSlotKind(payload.index) === kind;
+  }
+  return false;
+}
+
+/**
+ * 右栏：待选词条（当前组合、当前属性基准下的数值 + 增幅）。
+ *
+ * 交互与 Mod 备选区一致：**拖拽**。
+ *   · 拖到左栏某个词条槽 = 放进那个槽（槽里原有的词条退回待选区）；
+ *   · 拖到左栏空白处 = 放进第一个同类空槽。
+ * 已经选进左栏的词条仍然显示（灰掉），但它就是「已装备」，不能再拖。
+ * 同时保留点击作为「放进第一个同类空槽」的快捷方式。
+ */
+function renderRivenCandidates(table) {
+  const box = $('#riven-candidates');
+  if (!box) return;
+  box.innerHTML = '';
+  const combo = rivenComboNow();
+  const used = new Set();
+  if (store.riven) for (const e of store.riven.entries) if (e && e.key) used.add(e.key);
+  const raw = (state.rivenSearch || '').trim().toLowerCase();
+  // 「-」/「−」开头 = 只搜负面词条（需求方 2026-11-13：输入 - 搜不到负面）
+  const negOnly = /^[-−]/.test(raw);
+  const q = negOnly ? raw.slice(1).trim() : raw;
+
+  const rows = [];
+  // 正面、负面各列一遍（负面只在有负面槽时出现）
+  const pools = [{ kind: 'pos', list: table.positive }];
+  if (combo.neg) pools.push({ kind: 'neg', list: table.negative });
+
+  for (const p of pools) {
+    if (negOnly && p.kind !== 'neg') continue;
+    for (const d of p.list) {
+      // ⚠ 裂罅词条表里元素 / 物理行的 labelEn 可能缺失（模板里只写了中文），
+      //   以前直接 .toLowerCase() 会抛错让整个搜索失效 —— 这里容错成空串。
+      const zh = String(d.label || '').toLowerCase();
+      const en = String(d.labelEn || '').toLowerCase();
+      if (q && zh.indexOf(q) < 0 && en.indexOf(q) < 0) continue;
+      rows.push({ kind: p.kind, def: d });
+    }
+  }
+
+  if (!rows.length) {
+    box.append(el('div', 'riven-empty', '没有匹配的词条'));
+    return;
+  }
+
+  // 排序前的准备：增幅只算一次（要跑计算，别在比较函数里反复调用）
+  const sort = state.rivenSort || 'default';
+  for (const row of rows) {
+    row.gain = rivenCandidateGain(row.def, row.kind);
+    row.value = rivenValueFor(row.def, row.kind);
+  }
+  sortRivenRows(rows, sort);
+
+  for (const row of rows) {
+    const isUsed = used.has(row.def.key);
+    const node = el('div', 'riven-row' + (isUsed ? ' used' : ''));
+    node.append(el('span', 'riven-row-name', (row.kind === 'neg' ? '− ' : '') + row.def.label));
+    // 数值列显示**当前属性基准**（最低/平均/最高）下的值，悬停时给出完整范围
+    const shown = formatRivenValue(row.def, row.kind, row.value);
+    const valEl = el('span', 'riven-row-val', shown);
+    valEl.title = '范围 ' + formatRivenRange(row.def, row.kind);
+    node.append(valEl);
+    // 已选中的词条：`rivenCandidateGain` 内部会直接返回左栏那一条的增幅（D-173），
+    // 两处永远是同一个数
+    const gainCell = el('span', 'riven-row-gain ' + (row.gain === null ? '' : !Number.isFinite(row.gain) ? 'pos' : row.gain >= 0 ? 'pos' : 'neg'),
+      row.gain === null ? '—' : fmtGain(row.gain));
+    // N 秒总伤下，待选区这些数也是加权拼出来的（D-175）
+    if (isTotalLikeMetric() && row.gain !== null) gainCell.title = 'to total';
+    node.append(gainCell);
+
+    if (!isUsed) {
+      // 拖拽载荷：kind 'rivenStat'，带词条 key 与它属于正面还是负面
+      makeDraggable(node, { kind: 'rivenStat', key: row.def.key, statKind: row.kind, from: 'riven-list' });
+      node.classList.add('draggable');
+      (function (def, kind) {
+        node.addEventListener('click', function () {
+          if (store.dragPayload && store.dragPayload.kind === 'rivenStat') return; // 拖拽刚结束，不算点击
+          const target = rivenFirstFreeSlot(kind);
+          if (target < 0) {
+            flash((kind === 'pos' ? '正面' : '负面') + '词条已经选满');
+            return;
+          }
+          setRivenEntry(target, def.key);
+          renderAll();
+        });
+      })(row.def, row.kind);
+    }
+    box.append(node);
+  }
+}
+
+/** 第一个同类空槽位下标（正面只看正面槽，负面只看负面槽）；没有返回 -1 */
+function rivenFirstFreeSlot(kind) {
+  const combo = rivenComboNow();
+  const slots = combo.pos + combo.neg;
+  for (let i = 0; i < slots; i++) {
+    const isThisKind = i < combo.pos ? kind === 'pos' : kind === 'neg';
+    if (!isThisKind) continue;
+    const e = store.riven && store.riven.entries[i];
+    if (!e || !e.key) return i;
+  }
+  return -1;
+}
+
+/**
+ * 待选词条的排序方式（D-168，需求方 2026-11-12）。
+ *
+ * 需求方：「属性基准筛选那边加上可以按收益排序、默认排序。或者还有什么排序你帮我想一下。」
+ * 后续：「数值 和 最高值这两个排序没用，去掉。」
+ *
+ * | 值 | 名称 | 用途 |
+ * |---|---|---|
+ * | `default` | 默认 | 词条表原顺序（普通 → 物理 → 元素 → 派系），最稳定 |
+ * | `gain`    | 增幅 | **最常用**：这条装进去涨得最多 |
+ * | `gainAsc` | 增幅↑ | 反过来看：哪些词条增幅最低甚至为负 |
+ * | `name`    | 名称 | 按中文名排，知道名字时直接找 |
+ */
+const RIVEN_SORT_OPTIONS = [
+  ['default', '默认'],
+  ['gain', '增幅'],
+  ['gainAsc', '增幅↑'],
+  ['negFirst', '负面优先'],
+  ['name', '名称'],
+];
+
+/** 按指定方式排序（原地） */
+function sortRivenRows(rows, sort) {
+  const byName = function (a, b) { return a.def.label.localeCompare(b.def.label, 'zh-CN'); };
+  // 增幅为 null（算不出来，例如当前指标为 0）的一律排最后，不参与比较
+  const num = function (v) { return v === null || v === undefined || !Number.isFinite(v) ? -Infinity : v; };
+  switch (sort) {
+    case 'gain':
+      rows.sort(function (a, b) { return num(b.gain) - num(a.gain) || byName(a, b); });
+      break;
+    case 'gainAsc':
+      rows.sort(function (a, b) { return num(a.gain) - num(b.gain) || byName(a, b); });
+      break;
+    case 'negFirst':
+      // 负面优先（需求方 2026-11-13）：先列全部负面词条，负面内部按增幅从高到低，正面跟在后面
+      rows.sort(function (a, b) {
+        const ra = a.kind === 'neg' ? 0 : 1;
+        const rb = b.kind === 'neg' ? 0 : 1;
+        if (ra !== rb) return ra - rb;
+        return num(b.gain) - num(a.gain) || byName(a, b);
+      });
+      break;
+    case 'name':
+      rows.sort(byName);
+      break;
+    default:
+      // 默认：保持词条表原顺序（rows 的构造顺序）
+      break;
+  }
+}
+
+/** 排序按钮组（单选，当前项高亮） */
+function renderRivenSortButtons() {
+  const box = $('#riven-sort');
+  if (!box) return;
+  box.innerHTML = '';
+  box.className = 'filter-group';
+  const cur = state.rivenSort || 'default';
+  for (const [id, label] of RIVEN_SORT_OPTIONS) {
+    const btn = el('button', 'filter-btn' + (cur === id ? ' active' : ''), label);
+    btn.type = 'button';
+    btn.addEventListener('click', function () {
+      state.rivenSort = id;
+      const table = rivenTableNow();
+      if (table) {
+        renderRivenSortButtons();
+        renderRivenCandidates(table);
+      }
+    });
+    box.append(btn);
+  }
+}
+
+/** 裂罅区顶部的摘要（收起时也能看到"现在是什么组合、几条词条"） */
+function renderRivenSummary() {
+  const box = $('#riven-summary');
+  if (!box) return;
+  const scope = rivenScopeOf();
+  const table = rivenTableNow();
+  const scopeLabel = scope ? RIVEN_SCOPE_LABEL[scope] : '—';
+  if (!table) {
+    box.textContent = '（' + scopeLabel + ' · 该类裂罅数据待补）';
+    return;
+  }
+  if (!store.riven) {
+    box.textContent = '（' + scopeLabel + ' · 未创建）';
+    return;
+  }
+  const combo = rivenComboNow();
+  const filled = rivenFilledCount();
+  const total = combo.pos + combo.neg;
+  box.textContent = '（' + scopeLabel + ' · ' + combo.label + ' · ' + filled + '/' + total + ' 条' + (isRivenInstalled() ? ' · 已装备' : '') + '）';
+}
+
+/** 裂罅区整块 */
+function renderRiven() {
+  const area = $('#riven-area');
+  if (!area) return;
+  const table = rivenTableNow();
+  const body = $('#riven-body');
+  const toggle = $('#riven-toggle');
+  if (!body) return;
+
+  renderRivenSummary();
+  if (toggle) toggle.classList.toggle('open', Boolean(state.rivenOpen));
+  body.hidden = !state.rivenOpen;
+  // 折叠提示随状态切换：收起时「点击展开」，展开时「点击折叠」
+  const hint = $('#riven-hint');
+  if (hint) hint.textContent = state.rivenOpen ? '点击折叠' : '点击展开';
+
+  // 这类武器没有裂罅数据（目前只有步枪有）：展开也只看得到一句提示
+  if (!table) {
+    if (state.rivenOpen) {
+      for (const sel of ['#riven-compose', '#riven-candidates', '#riven-combo', '#riven-value-mode']) {
+        const b = $(sel);
+        if (b) b.innerHTML = '';
+      }
+      const box = $('#riven-compose');
+      if (box) box.append(el('div', 'riven-slot-hint', '该武器类型的裂罅数据还没整理，暂时不能配裂罅。'));
+    }
+    return;
+  }
+
+  if (!state.rivenOpen) return;
+  renderRivenCombos();
+  renderRivenValueModes();
+  renderRivenSortButtons();
+  renderRivenCompose(table);
+  renderRivenCandidates(table);
+  const searchBox = $('#riven-search');
+  if (searchBox && document.activeElement !== searchBox) searchBox.value = state.rivenSearch;
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -1418,8 +2544,15 @@ function paintDetail(box, row) {
       const max = s.levelValues[s.levelValues.length - 1];
       ul.append(el('li', '', statLabel(s.stat) + '：' + (max > 0 ? '+' : '') + max));
     }
+    // 需求方 2026-11-13：锁射速 / 锁多重的限制写进详情（原文就这两句）
+    for (const note of modLockNotes(mod)) ul.append(el('li', 'muted', note));
   }
   box.append(ul);
+  // 需求方 2026-11-13：没有伤害词条的赋能**写明原因**，不留空白让人猜
+  if (isArcane) {
+    const reason = arcaneZeroReason(arc);
+    if (reason) box.append(el('div', 'detail-note', '不参与伤害计算：' + reason));
+  }
 
   // ── 当前 / 装备后 ──
   const curContribs = currentContributions();
@@ -1533,11 +2666,15 @@ function paintDetail(box, row) {
 
 function renderControls() {
   // 增幅基准：与备选 Mod 的筛选按钮组同一样式（D-042）
+  //
+  // D-171：两个窗口口径（N 秒异常总伤 / N 秒总伤）的名字要跟着**同一个秒数**走，
+  //   否则会出现「基准写着 6 秒、实际按 3 秒算」的错位。
+  const metricOptions = metricOptionsFor(state.dotWindowSeconds);
   const mbox = $('#metric-options');
   mbox.innerHTML = '';
   mbox.className = 'filter-group';
-  for (let i = 0; i < METRIC_OPTIONS.length; i++) {
-    const opt = METRIC_OPTIONS[i];
+  for (let i = 0; i < metricOptions.length; i++) {
+    const opt = metricOptions[i];
     const btn = el('button', 'filter-btn' + (state.metric === opt.id ? ' active' : ''), opt.label);
     btn.type = 'button';
     btn.title = opt.description;
@@ -1549,9 +2686,22 @@ function renderControls() {
     })(opt.id);
     mbox.append(btn);
   }
+  // D-171：秒数选择器也挂在「增幅基准」这一排上（需求方 2026-11-13）
+  renderDotWindowPicker();
 
   $('#faction-select').value = state.faction;
   $('#kuva-element').value = state.kuvaType;
+  // D-157：换枪会恢复每把枪自己的配置，控件必须跟着回填（否则界面上还是上一把的值）
+  const ratio = $('#kuva-ratio');
+  if (ratio) {
+    ratio.value = String(Math.round(state.kuvaRatio * 100));
+    const ratioVal = $('#kuva-ratio-val');
+    if (ratioVal) ratioVal.textContent = Math.round(state.kuvaRatio * 100) + '%';
+  }
+  const hsToggle = $('#headshot-toggle');
+  if (hsToggle) hsToggle.checked = Boolean(state.headshot);
+  const hsMult = $('#headshot-mult');
+  if (hsMult) hsMult.value = String(state.headshotMult);
   renderFilterButtons();
   renderCoControls();
 }
@@ -1579,10 +2729,12 @@ function renderCoControls() {
   const fc = freezeInfo();
   // 需求方 2026-11-06：这个框**始终显示**，不随是否装了镀层类 Mod 隐藏
   //   （没装时下面的数值全为 0，计算层也不加成；理由见 decisions.md D-114）
+  //
+  // 需求方 2026-11-12：「镀层加成要变成配置的次级」——它是**配置区里的第二行**，
+  // 不再是一个独立标题块：小标签「镀层」+ 两个控件跟派系、爆头排在同一组里。
+  const row = el('span', 'co-row');
 
-  box.append(el('div', 'section-title', '镀层加成'));
-
-  const row = el('div', 'controls-row');
+  row.append(el('span', 'section-title', '镀层'));
 
   {
     // 敌人身上的**异况层数**（需求方 2026-11-06：配置里加一个框，默认 0）
@@ -1595,7 +2747,7 @@ function renderCoControls() {
     nInput.max = '999';
     nInput.step = '1';
     nInput.value = String(state.coStatusTypes);
-    nInput.style.width = '64px';
+    nInput.style.width = '56px';
     nInput.addEventListener('input', function (e) {
       const v = Number(e.target.value);
       state.coStatusTypes = Number.isFinite(v) && v > 0 ? Math.floor(v) : 0;
@@ -1649,9 +2801,60 @@ function renderCoControls() {
   // 数值本身仍然可复算：每层 % × 异况数 × 层数，见《乘区归属表》与 D-112。
   if (fc.active) {
     const n = FROZEN_FULL_STACKS;
-    box.append(el('div', 'muted', fc.sources.join('、') + '：每层 ' + fc.perStack + '% × ' + n + ' 层冰冻（固定满层）= ' + (fc.perStack * n) + '%（只吃直接非灵化伤害）'));
+    row.append(el('span', 'muted', fc.sources.join('、') + '：每层 ' + fc.perStack + '% × ' + n + ' 层冰冻（固定满层）= ' + (fc.perStack * n) + '%（只吃直接非灵化伤害）'));
+  }
+
+  // ── 连击倍率 / 爆发层数（需求方 2026-11-13）──
+  //
+  // · 近战武器：**始终**显示「连击倍率」框，默认 12x（带凯旋之爪满层 13x）。
+  //   急进猛突 / 创口溃烂按它放大（每层 X% × 连击倍率）。
+  // · 装上次要·爆发时才显示「爆发层数」框，默认 12 层，最高 13 层。
+  const weapon = store.data && store.data.weapon;
+  const isMelee = Boolean(weapon && weapon.category === 'melee');
+  if (isMelee || burstEquipped()) {
+    const row2 = el('span', 'co-row');
+    if (isMelee) {
+      const label = el('label', '', '连击倍率');
+      label.title = '急进猛突 / 创口溃烂为「每层连击倍率 +X%」，按此值放大；凯旋之爪满层为 13x';
+      const sel = el('select');
+      for (let i = 1; i <= MAX_COMBO_MULTIPLIER; i++) {
+        const o = el('option', '', i + 'x');
+        o.value = String(i);
+        sel.append(o);
+      }
+      sel.value = String(Math.min(Math.max(1, Math.round(state.comboMultiplier)), MAX_COMBO_MULTIPLIER));
+      sel.addEventListener('change', function (e) { state.comboMultiplier = Number(e.target.value); renderAll(); });
+      label.append(sel);
+      row2.append(label);
+    }
+    if (burstEquipped()) {
+      const label = el('label', '', '爆发层数');
+      label.title = '次要·爆发：消耗的连击倍率层数，每层 +20% 暴率 / +20% 暴伤';
+      const sel = el('select');
+      for (let i = 1; i <= MAX_BURST_STACKS; i++) {
+        const o = el('option', '', i + ' 层');
+        o.value = String(i);
+        sel.append(o);
+      }
+      sel.value = String(Math.min(Math.max(1, Math.round(state.burstStacks)), MAX_BURST_STACKS));
+      sel.addEventListener('change', function (e) { state.burstStacks = Number(e.target.value); renderAll(); });
+      label.append(sel);
+      row2.append(label);
+    }
+    box.append(row2);
   }
 }
+
+/** 当前是否装备了次要·爆发（`MultishotForCombo`）—— 决定是否显示「爆发层数」框 */
+function burstEquipped() {
+  return store.arcaneKey === 'MultishotForCombo';
+}
+
+/**
+ * 「异常状态」外层标题与折叠开关已去掉（需求方 2026-11-12：
+ * 「外面的异常状态我觉得可以去掉，不要这一层，就里面两层单独折叠就好了」）。
+ * 现在只有「伤害型异常 / 非伤害型异常」两个可折叠块，见 `renderDotDetail`。
+ */
 
 function wireControls() {
   $('#faction-select').addEventListener('change', function (e) { state.faction = e.target.value; renderAll(); });
@@ -1710,6 +2913,80 @@ function wireControls() {
       flash('已卸下全部 Mod');
     });
   }
+
+  // ── 裂罅区（D-162）──
+  // 折叠条：点标题或按回车展开/收起
+  const rivenToggle = $('#riven-toggle');
+  if (rivenToggle) {
+    const toggleRiven = function () { state.rivenOpen = !state.rivenOpen; renderAll(); };
+    rivenToggle.addEventListener('click', toggleRiven);
+    rivenToggle.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleRiven(); }
+    });
+  }
+  // 搜索框：只重建待选区，不丢焦点
+  const rivenSearch = $('#riven-search');
+  if (rivenSearch) {
+    rivenSearch.addEventListener('input', function (e) {
+      state.rivenSearch = e.target.value;
+      const table = rivenTableNow();
+      if (table) renderRivenCandidates(table);
+    });
+  }
+  // 清空词条（保留组合，只清掉已选）
+  const rivenClear = $('#riven-clear');
+  if (rivenClear) {
+    rivenClear.addEventListener('click', function () {
+      if (!store.riven) return;
+      store.riven.entries = [];
+      renderAll();
+    });
+  }
+
+  // ── 裂罅词条的拖拽容器（D-165）──
+  // 右栏整块待选区 = 「拖回来卸下」；左栏整块组合区 = 「拖进来放进第一个同类空槽」。
+  const rivenCandBox = $('#riven-candidates');
+  if (rivenCandBox) {
+    rivenCandBox.addEventListener('dragover', function (e) {
+      if (!store.dragPayload || store.dragPayload.from === 'riven-list') return;
+      e.preventDefault();
+      rivenCandBox.classList.add('drop-target');
+    });
+    rivenCandBox.addEventListener('dragleave', function () { rivenCandBox.classList.remove('drop-target'); });
+    rivenCandBox.addEventListener('drop', function (e) {
+      e.preventDefault();
+      rivenCandBox.classList.remove('drop-target');
+      if (!store.dragPayload) return;
+      dropHappened = true; // 已在 drop 里处理，dragend 不要重复卸下
+      removeByPayload(store.dragPayload);
+      store.dragPayload = null;
+    });
+  }
+  const rivenComposeBox = $('#riven-compose');
+  if (rivenComposeBox) {
+    rivenComposeBox.addEventListener('dragover', function (e) {
+      const p = store.dragPayload;
+      if (!p || p.kind !== 'rivenStat') return;
+      e.preventDefault();
+      rivenComposeBox.classList.add('drop-target');
+    });
+    rivenComposeBox.addEventListener('dragleave', function () { rivenComposeBox.classList.remove('drop-target'); });
+    rivenComposeBox.addEventListener('drop', function (e) {
+      const p = store.dragPayload;
+      if (!p || p.kind !== 'rivenStat') return;
+      e.preventDefault();
+      rivenComposeBox.classList.remove('drop-target');
+      dropHappened = true;
+      const target = rivenFirstFreeSlot(p.statKind);
+      if (target < 0) {
+        flash((p.statKind === 'pos' ? '正面' : '负面') + '词条已经选满');
+      } else {
+        placeRivenEntry(target, p.key);
+      }
+      store.dragPayload = null;
+      renderAll();
+    });
+  }
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -1735,12 +3012,16 @@ function renderAll() {
   renderSlots();
   renderControls();
   renderCandidates(res);
+  renderRiven();
   renderArcaneList();
   // 不再显示"可装 N 张"（信息噪音），保留元素留空
   $('#slot-info').textContent = '';
   // D-128：拆解挂在渲染**末尾**重算——任何让输出变化的状态（异况/叠层/玄骸/基准/换卡/换枪）
   //        走完 renderAll 后，右边拆解都跟着刷新。以前它只在"点击"时算一次，之后全是旧数。
   renderDetail();
+  // D-157：所有改动（装卡 / 卸卡 / 换枪 / 调配置）都会走到这里，所以存档统一挂在这——
+  // 放最后，保证存的是**这一轮渲染完**的真实状态。
+  persistLoadout();
 }
 
 
@@ -1760,6 +3041,8 @@ function renderPendingPanel() {
   const name = (w.nameZh || w.name) + '（' + w.name + '）';
   titleEl.textContent = name;
   titleEl.title = w._note || '面板未收录';
+  // D-170：面板待补的武器同样要把标签页标题换成它自己的名字
+  renderPageTitle();
   const metaEl = $('#weapon-meta');
   if (metaEl) metaEl.textContent = '面板待补 · 暂不可计算';
   const switchBox = $('#mode-switch');
@@ -1778,7 +3061,7 @@ function renderPendingPanel() {
   tipInto('#damage-table');
   tipInto('#output-list');
   // 配装区清空（不渲染可装 Mod，避免"能拖却没数"）
-  for (const sel of ['#slot-grid', '#arcane-slots', '#side-slots', '#candidate-list', '#arcane-list', '#co-controls', '#dot-detail', '#splash-damage', '#crit-tiers']) {
+  for (const sel of ['#slot-grid', '#arcane-slots', '#side-slots', '#candidate-list', '#arcane-list', '#co-controls', '#dot-detail', '#splash-damage', '#crit-tiers', '#riven-compose', '#riven-candidates', '#riven-combo', '#riven-value-mode']) {
     const box = $(sel);
     if (box) box.innerHTML = '';
   }
@@ -1802,6 +3085,14 @@ function renderPendingPanel() {
 function renderArcaneList() {
   const box = $('#arcane-list');
   box.innerHTML = '';
+  // 需求方 2026-11-12：「守护武器的赋能槽禁用掉」→ 这把枪没有赋能槽时，赋能用不上，
+  // 右侧「赋能」整块（含列表）一起收起，不留一个能拖但拖不进去的空列表。
+  const area = $('#arcane-area');
+  if (area) area.hidden = arcanesDisabled();
+  if (arcanesDisabled()) {
+    $('#arcane-count').textContent = '';
+    return;
+  }
   const list = store.data.primaryArcanes;
   const rows = [];
   for (let i = 0; i < list.length; i++) {
@@ -1860,7 +3151,53 @@ function arcaneStatChips(arc) {
     const st = stats[i];
     out.push(el('span', 'slot-stat', statLabel(st.stat) + ' +' + (Math.round(st.amount * 100) / 100) + '%'));
   }
+  // 需求方 2026-11-13：叠加类赋能不再只显示「每层值」——
+  // 卡面上写满层值，数值与计算一致（霜冻 / 毒侵 / 电压 / 耀炎）。
+  const stacks = arcaneStackLabel(arc);
+  if (stacks) out.push(el('span', 'slot-stat slot-stack', stacks));
   return out;
+}
+
+/**
+ * 赋能**为什么没有伤害词条**（需求方 2026-11-13：「0 收益的必须写明原因」）。
+ *
+ * 只写一句话，依据是 `adapter.ts` 的 `ARCANE_STAT_OVERRIDES` 里那张"明确不生效"表。
+ */
+function arcaneZeroReason(arc) {
+  const REASONS = {
+    SecondaryOnStatusProcBonusDamage: '触发异常时额外造成 750 点伤害，是附加伤害，不是武器加成',
+    ConvergeRadialAttackOnAim: '需要知道爆炸半径才能算，目前不实现',
+    PrimaryPlatedRound: '按弹匣长度换算的加成，待确认',
+    SplitStatusProcsOnStackedStatusHit: '「追加基本异常」的概率，不是触发几率',
+    PrimaryJamEnemyWeaponsOnMagneticProc: '干扰半径（米），不是触发几率',
+    SecondaryColdOnPuncture: '施加冰冻层数，不是触发几率',
+    SecondaryOnRollCritChanceOnHeadshot: '+300% 暴率仅对弱点命中生效',
+    ExtraProcOnProc: '二次触发的概率，不是触发几率',
+    PrimaryEnergyRegenOnImpactProc: '能量回复，不影响武器伤害',
+    StatusTriggerRadialDamage: '需求方定为无效果',
+    GroundSlamPull: '拉拽敌人到近战范围，是控制效果',
+    MeleeArcaneProjectileOnJump: '产生额外投射物，未建模',
+    MeleeArcaneShockwaveOnJump: '产生额外冲击波，未建模',
+    SeekerProjOnHeadshotKill: '产生额外飞射物，未建模',
+    BurningCystOnKill: '触发物伤害，不是武器加成',
+    IceMistOnKill: '触发物伤害，不是武器加成',
+    LightningStrikeOnKill: '触发物伤害，不是武器加成',
+    ToxicBloodOnKill: '触发物伤害，不是武器加成',
+  };
+  return REASONS[arc.key] || '';
+}
+
+/**
+ * 叠加类赋能的「满层」说明（需求方 2026-11-13：「叠加类赋能不再只显示单层，要显示满层」）。
+ *
+ * 这些赋能的**数值已经是满层值**（每层值 × 层数，见 `arcaneStackCount`），
+ * 只是卡面上以前看起来像单层值，所以补一句"满层"的来源说明。
+ */
+function arcaneStackLabel(arc) {
+  const STACKED = { PrimaryCritDmgAndMultishotOnColdProc: 40, PrimaryHeadshotCritMultOnHeadshot: 40, SecondaryReloadSpeedAndMultishotOnElectricProc: 40, SecondaryDamageOnHeatProc: 40 };
+  const n = STACKED[arc.key];
+  if (!n) return '';
+  return '满层 ' + n + ' 层';
 }
 
 /**
@@ -1870,7 +3207,7 @@ function arcaneStatChips(arc) {
  * ⚠ D-126（需求方 2026-11-06 纠正）：**只算当前选中的口径**，不敏感就是 +0.00%。
  *   上一轮（D-124）曾在增幅为 0 时改用"最敏感口径"的数显示，那是错的——
  *   那个数不属于当前口径（默认「单次射击」下准星的弹药效率本来就不该有收益），
- *   卡上显示它等于凭空多报收益。要看弹药效率的效果：把基准切到「持续伤害」，
+ *   卡上显示它等于凭空多报收益。要看弹药效率的效果：把基准切到「续航秒伤」，
  *   或点开拆解（那里逐口径列出）。
  */
 function arcanePreviewGain(arc) {
@@ -1893,11 +3230,22 @@ async function boot() {
   // 取数细节在 app-data.js 的 loadAllWeapons()
   setDataAll(await loadAllWeapons(groupWeapons));
 
-  renderWeaponPicker();
-  // 默认武器 = 主要 → 步枪的第一把；模式取其第一个攻击模式（需求方 2026-11-06）
-  const firstId = defaultWeaponId();
+  // D-157（需求方 2026-11-12）：刷新页面要回到**上次的那把枪和那套配卡**。
+  //   · 存档里有上次的武器、而且它现在还在数据里 → 打开它；
+  //   · 否则（没存档 / 那把枪被删了）→ 用默认的"主要 → 步枪第一把"。
+  const savedId = lastWeaponId();
+  const resumeId = savedId && store.dataAll && store.dataAll.weaponById.get(savedId) ? savedId : null;
+  const firstId = resumeId || defaultWeaponId();
   const firstW = store.dataAll && store.dataAll.weaponById.get(firstId);
   await loadWeapon(firstId, firstDisplayMode(firstW));
+  // 恢复配卡；`getSavedLoadout` 为 null 时 `restoreLoadout` 只做"清空 + 默认"
+  restoreLoadout(getSavedLoadout(firstId));
+
+  // D-169（需求方 2026-11-12）：选单必须**在武器装好之后再画**。
+  //   以前这里排在 `loadWeapon` 之前，画的时候还没有"当前武器"可比：
+  //   大类被写死"主要"、类型栏落在第一个类型、武器栏跟着选第一个——
+  //   于是刷新后明明算的是上次那把枪，三个下拉却显示重置后的默认值。
+  renderWeaponPicker();
 
   // 下拉：派系 / 玄骸元素 / 筛选
   const fsel = $('#faction-select');
@@ -1913,11 +3261,16 @@ async function boot() {
     ksel.append(o);
   }
 
+  // D-157：控件回填**恢复后的**值（否则存档里的派系 / 玄骸元素在界面上看不到）
+  fsel.value = state.faction;
+  ksel.value = state.kuvaType;
   $('#kuva-ratio').value = String(Math.round(state.kuvaRatio * 100));
   $('#kuva-ratio-val').textContent = Math.round(state.kuvaRatio * 100) + '%';
   $('#headshot-mult').value = String(state.headshotMult);
+  $('#headshot-toggle').checked = Boolean(state.headshot);
 
   wireControls();
+  // 外层「异常状态」折叠开关已去掉（D-156 修订，需求方 2026-11-12）：只有内部两个块各自折叠
   editor.setEditorDeps({ flash, renderAll });
   editor.wireEditor();
   renderAll();
@@ -1956,8 +3309,10 @@ function renderWeaponPicker() {
     o.disabled = !g.enabled;
     gsel.append(o);
   }
-  // 默认停在"主要"
-  gsel.value = 'primary';
+  // 默认停在大类：**当前武器所在的大类**（D-169），没有当前武器才回到"主要"。
+  // 以前写死 'primary'，刷新到一把近战时大类栏还停在"主要"，
+  // 类型栏就被画成主要下的第一个类型，三个下拉与真实武器全对不上。
+  gsel.value = currentWeaponGroupId() || 'primary';
   gsel.addEventListener('change', function () { renderTypeOptions(gsel.value); });
   // 弹道筛选（D-099 A）：第二层筛选器，不改变类型树
   const ssel = $('#weapon-style');
@@ -1970,8 +3325,22 @@ function renderWeaponPicker() {
   ssel.value = 'all';
   ssel.onchange = function () { renderWeaponOptions($('#weapon-group').value, $('#weapon-type').value); };
 
-  renderTypeOptions('primary');
+  // 类型栏按上面选中的大类画（它自己会停在当前武器所属的类型，D-097），武器栏再同步到当前武器
+  renderTypeOptions(gsel.value);
   wireWeaponSearch();
+}
+
+/**
+ * 当前武器落在选单的哪个大类（D-169）。
+ *
+ * 判据与 `switchWeapon()` 里回写大类用的是同一个（`weaponGroupId`），
+ * 保证"启动时预选的大类"和"换枪后回写的大类"永远一致。
+ * 没有当前武器 / 找不到归属 → null（调用方回退到"主要"）。
+ */
+function currentWeaponGroupId() {
+  const weapon = store.dataAll && store.data && store.data.weapon;
+  if (!weapon) return null;
+  return weaponGroupId(weapon, store.data && store.data.slotEntry) || null;
 }
 
 /**
@@ -2060,7 +3429,8 @@ function renderSearchResults(keyword) {
   const counts = new Map();
   const rows = [];
   for (const g of WEAPON_GROUPS) {
-    const list = hits.filter(function (w) { return weaponGroupId(w) === g.id; });
+    // 守护 / 同伴武器的大类看槽位宽类，必须把 weapon-slots 记录一起传（需求方 2026-11-12）
+    const list = hits.filter(function (w) { return weaponGroupId(w, slotOf(w.id)) === g.id; });
     if (list.length) counts.set(g.id, list.length);
     rows.push.apply(rows, list);
   }
@@ -2211,7 +3581,11 @@ async function switchWeapon(weaponId) {
     return;
   }
 
-  // 清空配置：换枪后原来的 Mod 可能已不适用
+  // D-157：换枪**前**先把当前这把枪的配卡存好（否则刚装好的卡会随换枪丢掉）
+  persistLoadout();
+
+  // 清空配置：换枪后原来的 Mod 可能已不适用。
+  // D-157 之后紧跟着 `restoreLoadout`：这把枪以前存过就把它的配卡放回来，没存过就保持清空。
   for (let i = 0; i < SLOT_COUNT; i++) modSlots[i] = null;
   store.exilusModId = null;
   store.arcaneKey = null;
@@ -2221,10 +3595,12 @@ async function switchWeapon(weaponId) {
   detailTarget = null;
 
   await loadWeapon(weaponId);
+  // D-157：换到这把枪 → 换到**它自己的**配卡；从没存过就是空配卡
+  restoreLoadout(getSavedLoadout(weaponId));
   // D-119：四个大类都开放了，换枪后让"大类"下拉停在**当前武器所在的大类**
   // （例如从选单直接切到一把近战，大类不应还停在"主要"）
   const groupSel = $('#weapon-group');
-  const groupOf = weaponGroupId(weapon);
+  const groupOf = currentWeaponGroupId();
   if (groupSel && groupOf) groupSel.value = groupOf;
   // D-151：搜索能跨大类直接选枪，所以「类型」栏必须跟着换到新武器所在类型
   // （以前只 renderWeaponOptions 当前类型，跨大类时类型栏会停在一个不属于该大类的类型上）。
@@ -2305,3 +3681,8 @@ boot().catch(function (err) {
   console.error(err);
   document.body.innerHTML = '<pre style="color:#e06060;padding:24px">' + (err.stack || err) + '</pre>';
 });
+
+// 校对脚本（`packages/demo/src/checks/*.mjs`）通过它切枪：页面里没有"换武器"的 DOM 控件可以点，
+// 而 `switchWeapon` 是模块私有函数。只暴露这一个写入口，不改变页面行为。
+window.__wfcalcSwitchWeapon = switchWeapon;
+

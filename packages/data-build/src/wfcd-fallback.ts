@@ -42,12 +42,18 @@ function markFallback(w: CleanedWeapon): FilledWeapon {
 export function fillFromOfficialExport(
   wfcd: readonly Weapon[],
   official: readonly CleanedWeapon[],
+  /** 明确剔除的 id（这些**不**从官方导出补回来，例如魔典的重复条目） */
+  excludedIds: ReadonlySet<string> = new Set(),
 ): { weapons: FilledWeapon[]; filled: string[] } {
   const have = new Set(wfcd.map((w) => w.id));
   const filled: string[] = [];
   const extra: FilledWeapon[] = [];
 
   for (const w of official) {
+    // 需求方 2026-11-13：被 WFCD 规则剔除的条目**不能**从官方导出补回来——
+    // 否则「WFCD 说重复 → 剔除 → 官方导出没有它 → 当成 WFCD 未收录 → 补回来」，
+    // 等于剔除规则失效。魔典的 TnDoppelgangerGrimoire 就是这么漏进来的。
+    if (excludedIds.has(w.id)) continue;
     if (have.has(w.id)) continue;
     filled.push(w.id);
     extra.push(markFallback(w));

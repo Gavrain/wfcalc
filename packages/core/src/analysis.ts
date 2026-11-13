@@ -6,7 +6,7 @@
  *
  * 关键口径（`docs/decisions.md` D-021）：
  *   · **按槽位模拟**：假设把它放进某个槽位，再按结算链重算；
- *   · **比较口径可切换**：以 `OutputId` 指定（单弹头 / 单次射击 / 每秒命中 / DoT 每秒…），
+ *   · **比较口径可切换**：以 `OutputId` 指定（单弹头 / 单次射击 / 连发秒伤 / 续航秒伤 / 异常加权单层秒伤 / N 秒异常总伤 / N 秒总伤），
  *     UI 用单选按钮切换，默认「单次射击」；
  *   · 已有 Mod 从槽位中被替换时，**先移除被替换那张**再计算。
  */
@@ -14,6 +14,8 @@ import type { Contribution } from './contributions.ts';
 import { compute, OUTPUT_IDS } from './main.ts';
 import type { ComputeResult, CtxOptions, OutputId, OutputLine } from './main.ts';
 import type { AttackMode, Weapon } from './weapon.ts';
+import { windowLabel } from './output.ts';
+import { DEFAULT_DOT_WINDOW_SECONDS } from './ctx.ts';
 
 export interface MetricOption {
   id: OutputId;
@@ -25,11 +27,32 @@ export interface MetricOption {
 export const METRIC_OPTIONS: readonly MetricOption[] = [
   { id: 'pelletPerHit', label: '单弹头', description: '不乘多重，含暴击期望' },
   { id: 'perShot', label: '单次射击', description: '单弹头 × 多重' },
-  { id: 'hitDps', label: '爆发伤害', description: '持续开火、不含装填' },
-  { id: 'sustainedDps', label: '持续伤害', description: '含装填' },
-  { id: 'dotPerSecond', label: 'DoT 加权每层秒伤', description: '单层 DoT 每秒伤害 × 触发占比（爆炸不计入）' },
-  { id: 'dot6s', label: '六秒异常状态总伤', description: '逐秒累加；毒气封顶 10 层、火焰递增；含爆炸' },
+  { id: 'hitDps', label: '连发秒伤', description: '持续开火、不含装填' },
+  { id: 'sustainedDps', label: '续航秒伤', description: '含装填' },
+  { id: 'dotPerSecond', label: '异常加权单层秒伤', description: '单层 DoT 每秒伤害 × 触发占比（爆炸不计入）' },
+  { id: 'dot6s', label: '6秒异常总伤', description: '逐秒累加；毒气封顶 10 层、火焰递增；含爆炸' },
+  { id: 'totalInWindow', label: '6秒总伤', description: '窗口内直击（开火时长 × 连发秒伤）+ 6秒异常总伤' },
+  { id: 'steadyDps', label: '稳态秒伤', description: '长期平均：续航秒伤 + 各异常按一个循环内能叠的层数折算' },
 ];
+
+/**
+ * 按窗口秒数生成增幅基准选项（D-171）。
+ *
+ * 需求方 2026-11-13：秒数选择在左栏那一行上，所以**增幅基准里的两个窗口口径
+ * 也要跟着同一个秒数走**——否则会出现「基准写着六秒、实际按 3 秒算」的错位。
+ */
+export function metricOptionsFor(windowSeconds: number = DEFAULT_DOT_WINDOW_SECONDS): MetricOption[] {
+  const win = windowLabel(windowSeconds);
+  return METRIC_OPTIONS.map((o) => {
+    if (o.id === 'dot6s') {
+      return { id: o.id, label: `${win}异常总伤`, description: `逐秒累加（毒气封顶 10 层、火焰递增）；含爆炸${win}对主目标的合计` };
+    }
+    if (o.id === 'totalInWindow') {
+      return { id: o.id, label: `${win}总伤`, description: `窗口内直击（开火时长 × 连发秒伤）+ ${win}异常总伤` };
+    }
+    return o;
+  });
+}
 
 export const DEFAULT_METRIC: OutputId = 'perShot';
 

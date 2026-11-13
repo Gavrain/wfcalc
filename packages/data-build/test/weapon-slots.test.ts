@@ -1,4 +1,4 @@
-﻿import { describe, it } from 'node:test';
+import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   resolveFromExport,
@@ -10,6 +10,7 @@ import {
   normalizeKey,
   resolveFromWfcd,
   isDualPistolByWfcd,
+  companionMeleeSpecificOf,
 } from '../src/mods/weapon-slots.ts';
 import { lookupExaltedSlots } from '../../data/src/manual/exalted-slots.ts';
 
@@ -300,6 +301,61 @@ describe('WFCD 为主的槽位判定（D-152）', () => {
   it('判不出来的返回 null，交给官方导出兜底（显赫武器等）', () => {
     assert.equal(resolveFromWfcd({ id: 'x', type: 'Zaw Component' }), null);
     assert.equal(resolveFromWfcd({ id: 'x' }), null);
+  });
+
+  /**
+   * 需求方 2026-11-12：守护 / 同伴武器**不是一律步枪**。
+   * WFCD 把它们统一标成 `Companion Weapon`，只能按 id / 名字判。
+   */
+  it('守护武器按形态归槽：扫除者 → 霰弹，分离 / 猎犬近战 → 近战，其余枪械 → 步枪', () => {
+    const slot = (id: string, name?: string) =>
+      resolveFromWfcd({ id, type: 'Companion Weapon', productCategory: 'SentinelWeapons', file: 'SentinelWeapons', ...(name ? { name } : {}) });
+
+    assert.equal(slot('SentShotgun', 'Sweeper')?.broad, 'shotgun');
+    assert.equal(slot('PrimeSentShotgun', 'Sweeper Prime')?.broad, 'shotgun');
+    assert.deepEqual(compatibleModKinds({ ...slot('SentShotgun')!, specific: [], unresolved: false }), ['shotgun', 'primary']);
+
+    // 分离 / 分离 Prime 与猎犬近战三把
+    for (const id of ['SentGlaiveWeapon', 'PrimeHeliosGlaiveWeapon', 'ZanukaPetMeleeWeaponIP', 'ZanukaPetMeleeWeaponIS', 'ZanukaPetMeleeWeaponPS']) {
+      const r = slot(id);
+      assert.equal(r?.broad, 'melee', id);
+      assert.deepEqual(compatibleModKinds({ ...r!, specific: [], unresolved: false }), ['melee'], id);
+    }
+
+    // 枪械：冰凇 / 死亡机枪 / 急冻喷枪等都是步枪（急冻喷枪是半自动榴弹 + 冰场，不是射线）
+    for (const id of ['SentinelFreezeRayRifle', 'SentinelFreezeRayPrimeRifle', 'DethMachineRifle', 'CryoxionWeapon', 'HextraWeapon', 'ThermocorMoaWeapon']) {
+      assert.equal(slot(id)?.broad, 'rifle', id);
+    }
+  });
+
+  /**
+   * 需求方 2026-11-12 追加确认三处：
+   *   · 「激光点发就是手枪」  → 激光点发 / 棱晶 / Prime 三把归手枪；
+   *   · 「金工火枪是狙击」    → `SentElecRailgun` 归狙击，同时吃步枪类；
+   *   · 「分离属于战刃」      → 分离 / 分离 Prime 近战细类 = glaive，吃战刃专属 Mod。
+   */
+  it('激光点发 → 手枪，金工火枪 → 狙击，分离 → 战刃（需求方 2026-11-12）', () => {
+    const slot = (id: string) =>
+      resolveFromWfcd({ id, type: 'Companion Weapon', productCategory: 'SentinelWeapons', file: 'SentinelWeapons' });
+
+    for (const id of ['BurstLaserPistol', 'PrismaBurstLaserPistol', 'PrimeBurstLaserPistol']) {
+      const r = slot(id);
+      assert.equal(r?.broad, 'pistol', id);
+      assert.deepEqual(compatibleModKinds({ ...r!, specific: [], unresolved: false }), ['pistol'], id);
+    }
+
+    const sniper = slot('SentElecRailgun');
+    assert.equal(sniper?.broad, 'sniper');
+    // 狙击与弓一样：「自己的专属类 + 步枪类 + 主武器类」
+    assert.deepEqual(compatibleModKinds({ ...sniper!, specific: [], unresolved: false }).sort(), ['primary', 'rifle', 'sniper']);
+
+    assert.deepEqual(companionMeleeSpecificOf('SentGlaiveWeapon'), ['glaive']);
+    assert.deepEqual(companionMeleeSpecificOf('PrimeHeliosGlaiveWeapon'), ['glaive']);
+    assert.deepEqual(companionMeleeSpecificOf('ZanukaPetMeleeWeaponIP'), []);
+    // 战刃细类 → 可装战刃专属 Mod
+    const glaive = { ...slot('SentGlaiveWeapon')!, specific: companionMeleeSpecificOf('SentGlaiveWeapon'), unresolved: false };
+    assert.ok(compatibleModKinds(glaive).includes('glaive'));
+    assert.equal(canEquipMod(glaive, 'glaive'), true);
   });
 
   it('新武器（霜冥差 / 寒怨刺 / 石晶之花 Prime / 闪劫 Prime）判定正确', () => {

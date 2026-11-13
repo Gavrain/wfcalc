@@ -58,12 +58,20 @@ export interface DamageSegment {
   /**
    * 该段是不是射线（需求方 2026-11-12：**射线按段判**）。
    *
-   * 不写 = 跟随所在模式的扳机（`mode.trigger === 'held'`）。
-   * 写 `false` = 明确不是射线——即使模式的扳机是 `held`。
-   * 典型是量子切割器：模式扳机 `Held`，但方块弹 / 引爆那几段是投射物，不是激光。
-   * 数据层按 `shot_type === 'Hit-Scan'` 判（见 `wfcd-clean.ts`）。
+   * 不写 = 跟随所在**攻击方式**的扳机（`ModeVariant.trigger`），再回退到模式扳机
+   * （`mode.trigger === 'held'`）——见 D-160。
+   * 写 `true` = 明确是射线：灵化模式里 WFCD 不给 `Held`，靠人工表点名（托里德 / 野猪 / 盗贼）。
+   *
+   * ⚠ 数据层**只写正面标记**，不写 `false`；`false` 仅由内核在计算时推导（见 `SegmentResult.beam`）。
    */
   beam?: boolean;
+  /**
+   * 该段所属攻击方式的扳机（D-160，只在段上出现时不覆盖 `beam`）。
+   *
+   * 由 `compute()` 从 `ModeVariant.trigger` 带入，用于"同一模式内两种扳机并存"的场合：
+   * 赘骨灵化的射线变体是 `held`、蓄力变体是 `charge`，段跟着各自变体走。
+   */
+  trigger?: TriggerKind;
 }
 
 /** 面板覆盖（变体级 / 模式级共用同一套字段） */
@@ -179,6 +187,22 @@ export interface AttackMode {
   _note?: string;
   /** 模式展示名（D-141）：有值时界面优先用它，例如重力奇点的「球体融合 / 球体爆炸」 */
   _label?: string;
+  /**
+   * 该模式是不是**重击系**（D-155）：重型震地 / 重击 / 重击回旋刃。
+   *
+   * 近战的「固定暴击率」词条（斩铁 / 镀层斩铁 / 牺牲斩铁 / 裂罅）描述里带
+   * 「Critical Chance (x2 for Heavy Attacks)」——这些词条提供的暴击率，
+   * 在重击系攻击上要**额外 ×2**（需求方 2026-11-13）。
+   * 内核在暴击阶段读它，见 `crit.ts` 的 `heavyCritBonus`。
+   */
+  _heavy?: boolean;
+  /**
+   * 该模式是不是**震地系**（需求方 2026-11-13）：只有「震地 / 重型震地」为 true。
+   *
+   * 震地伤害 +X%（震波 `msd`）进**独立的震地伤害乘区**，只对这两个模式生效。
+   * 数据层由 `wfcd-clean.ts` 的 `SLAM_MELEE_NAMES` 打标，见 `emit.ts` 的 `_slam`。
+   */
+  _slam?: boolean;
 }
 
 /**

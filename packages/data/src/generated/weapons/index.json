@@ -1,18 +1,18 @@
 {
-  "generatedAt": "2026-11-12T09:03:52.204Z",
+  "generatedAt": "2026-11-13T13:45:23.360Z",
   "source": "WFCD/warframe-items (MIT)",
   "stats": {
     "total": 668,
-    "kept": 620,
-    "droppedNoAttack": 1,
-    "multiMode": 200,
+    "kept": 621,
+    "droppedNoAttack": 0,
+    "multiMode": 405,
     "beamModes": 40,
     "unknownTrigger": 238,
     "excluded": 47
   },
   "categories": {
     "primary": 196,
-    "secondary": 149,
+    "secondary": 148,
     "melee": 256,
     "archgun": 20,
     "archmelee": 8,

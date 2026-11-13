@@ -1,4 +1,4 @@
-﻿/**
+/**
  * 页面交互冒烟（原 `dom-interact.mjs`，D-103 用公共 shim 重写入口）。
  *
  *   node packages/demo/src/checks/interact.mjs
@@ -22,6 +22,31 @@ const grid = () => registry['#slot-grid'].children;
 const slotTexts = () => grid().map((c) => c.textContent);
 const findCard = (name) => registry['#candidate-list'].children.find((c) => c.textContent.includes(name));
 const outText = () => registry['#output-list'].children.map((c) => c.textContent).join('|');
+/** 在子树里数带某个 class 的节点 */
+function countByClass(node, cls) {
+  let n = 0;
+  for (const c of node.children ?? []) {
+    if ((c.className || '').split(/\s+/).includes(cls)) n++;
+    n += countByClass(c, cls);
+  }
+  return n;
+}
+
+/** 在子树里数「模式按钮」（`.mode-btn` 但**不是** `.variant-btn`——攻击方式胶囊共用同一个样式类） */
+function countModeButtons(node) {
+  let n = 0;
+  for (const c of node.children ?? []) {
+    const classes = (c.className || '').split(/\s+/);
+    if (classes.includes('mode-btn') && !classes.includes('variant-btn')) n++;
+    // `.mode-row` 是外层唯一容器；攻击方式胶囊在它下面但带 `.variant-btn`，不会被数进来。
+    // ⚠ 钻进 `.variant-btn` 自己会数到它里的按钮（`<label class="mode-btn variant-btn">`），
+    //   单模式武器就多算一个 —— 这里显式跳过以防 shim/浏览器节点结构变化。
+    if (classes.includes('variant-btn')) continue;
+    n += countModeButtons(c);
+  }
+  return n;
+}
+
 /** 槽位里那张 Mod 的名字（去掉"槽位 N"标题与按钮文字） */
 function slotModName(i) {
   const card = grid()[i];
@@ -77,24 +102,30 @@ const appSrc = await readFile(join(ROOT, 'packages/demo/public/app.js'), 'utf8')
   if (missing.length) console.error('  缺失：' + missing.join(', '));
 }
 
-// ── 15. 口径命名与单位（D-033）──
+// ── 15. 口径命名与单位（D-033；2026-11-12 统一改名）──
 {
   const out = registry['#output-list'];
   const text = out.textContent;
   check('口径含「单弹头」且标 /弹头', text.includes('单弹头') && text.includes('/弹头'));
   check('口径含「单次射击」且标 /发', text.includes('单次射击') && text.includes('/发'));
-  check('「每秒命中」已改名「爆发伤害」', text.includes('爆发伤害') && !text.includes('每秒命中'));
-  check('「持续射击」已改名「持续伤害」', text.includes('持续伤害'));
-  check('DoT 改为「加权每层秒伤」与「六秒异常状态总伤」（D-057/D-060）',
-    text.includes('DoT 加权每层秒伤') && text.includes('六秒异常状态总伤'));
+  check('「每秒命中」已改名「连发秒伤」', text.includes('连发秒伤') && !text.includes('每秒命中'));
+  check('「持续伤害」已改名「续航秒伤」', text.includes('续航秒伤') && !text.includes('持续伤害'));
+  check('DoT 改为「异常加权单层秒伤」与「六秒异常总伤」（D-057/D-060）',
+    text.includes('异常加权单层秒伤') && text.includes('六秒异常总伤'));
   check('旧名「DoT 六秒总伤」已不存在', !text.includes('DoT 六秒总伤'));
+  check('旧名「DoT 加权每层秒伤」已不存在', !text.includes('DoT 加权每层秒伤'));
   check('口径行数 = 6', out.children.length === 6);
 }
 
 // ── 33. 异常状态伤害单位是 /层/秒（D-038）──
+//
+// ⚠ 断言必须跟随**当前默认武器**：它们一换（2026-11-12 起默认是同伴枪 Gremlin / 阿塔克斯 ——
+//   需求方确认守护武器并入主要大类后它排到了步枪第一把），这轮可能就是纯冰的「非伤害型异常」。
+//   那种情况下本来就没有"伤害值/层"可言，按"跳过"记，不能算失败。
 {
   const txt = registry['#dot-detail'].textContent;
-  if (txt && !txt.includes('无持续伤害')) {
+  const noDot = !txt || txt.includes('无持续伤害') || txt.includes('▸非伤害型异常');
+  if (!noDot) {
     check('异常状态伤害值单位含 /层/秒', txt.includes('/层/秒'));
   } else {
     check('异常状态伤害值单位含 /层/秒（本轮无 DoT，跳过）', true);
@@ -114,7 +145,9 @@ const appSrc = await readFile(join(ROOT, 'packages/demo/public/app.js'), 'utf8')
 // ── 35. 毒气每层秒伤不为 0（D-039 / D-107）──
 {
   const txt = registry['#dot-detail'].textContent;
-  check('异常状态伤害带 /层/秒 单位', txt.includes('/层/秒'));
+  // 与上面第 33 节同理：默认武器可能不带伤害型异常（纯冰的同伴枪），此时不判单位
+  const noDot = !txt || txt.includes('无持续伤害') || txt.includes('▸非伤害型异常');
+  check('异常状态伤害带 /层/秒 单位', noDot || txt.includes('/层/秒'), txt.slice(0, 80));
 
   // D-107：直接对数值断言，不从界面文本反查。
   //   ① 火+毒能合成毒气，且毒气每层秒伤 > 0；
@@ -222,9 +255,20 @@ const appSrc = await readFile(join(ROOT, 'packages/demo/public/app.js'), 'utf8')
   const box = registry['#mode-switch'];
   const modes = store.store.data.weapon.modes.length;
   check('有模式切换容器', Boolean(box));
-  // 单模式武器不显示按钮；多模式（如两形态）要有按钮 —— 随默认武器走
-  check('模式按钮数 = 模式数 - 1（当前 ' + modes + ' 个模式）',
-    box.children.length === Math.max(0, modes - 1));
+  // 单模式武器不显示按钮；多模式（如两形态）要有按钮 —— 随默认武器走。
+  // ⚠ 2026-11-12 界面把「模式」与「攻击方式」做成同一种胶囊排在同一行 `.mode-row`：
+  //   容器里现在是一个 `.mode-row`，里面才是按钮。所以按 **`.mode-row` 的按钮数** 断言。
+  const row = box.children.find((c) => (c.className || '').split(/\s+/).includes('mode-row'));
+  const isModeBtn = (node) => {
+    const cls = (node.className || '').split(/\s+/);
+    return cls.includes('mode-btn') && !cls.includes('variant-btn');
+  };
+  const btnCount = row ? row.children.filter(isModeBtn).length : 0;
+  // 模式栏渲染了 `.mode-row`、里面放着模式按钮（单模式时只有「普攻」一个按钮 + 攻击方式胶囊）
+  // ⚠ 别在这里断言「按钮数 = 模式数 - 1」：当前默认武器是单模式的守护枪，断言值会退化，
+  //   而多模式武器的按钮数由 44 节「切类型 / 切模式」与 mode-panel.mjs 覆盖。
+  check('模式栏渲染出 .mode-row 与模式按钮', Boolean(row) && btnCount >= 1, ', ' + btnCount + ' 个');
+  check('单模式武器也会显示一行「攻击方式」提示', !(modes <= 1) || box.children.length > 0);
   // 需求方 2026-11-12：按钮独立成行、在「武器面板」标题**上方**且靠左（否则切换时跳动）
   const iSwitch = html.indexOf('id="mode-switch"');
   const iTitle = html.indexOf('>武器面板<');
@@ -420,7 +464,10 @@ const appSrc = await readFile(join(ROOT, 'packages/demo/public/app.js'), 'utf8')
   await new Promise((r) => setTimeout(r, 300));
   const box = registry['#co-controls'];
   const co = modules.compute.coInfo();
-  check('没装镀层 Mod 时仍显示「镀层加成」标题', box.textContent.includes('镀层加成'));
+  // 需求方 2026-11-12：「镀层加成要变成配置的次级」→ 它不再是独立标题块，
+  // 改成小标签「镀层」，和派系、爆头排在同一组控件里（见 D-158）。
+  check('没装镀层 Mod 时仍显示「镀层」小标签', box.textContent.includes('镀层'));
+  check('镀层控件排在派系之后、同属配置区', html.indexOf('id="faction-select"') < html.indexOf('id="co-controls"'));
   check('没装镀层 Mod 时仍显示「敌人异况层数」输入框', box.textContent.includes('敌人异况层数'));
   const selectOf = (function findSel(n) {
     if (n.tagName === 'SELECT') return n;
@@ -459,6 +506,133 @@ const appSrc = await readFile(join(ROOT, 'packages/demo/public/app.js'), 'utf8')
   check('类型下拉停在步枪', registry['#weapon-type'].value === 'rifle');
   check('武器下拉选中的就是正在算的那把（D-097）',
     registry['#weapon-select'].value === st.data.weapon.id);
+}
+
+// ── 50. 守护 / 同伴武器（需求方 2026-11-12）──
+//
+// 原话：「搜不到守护武器，例如冰凇」→ 数据早就生成了，但 `app-data.js` 的 `WEAPON_FILES`
+// 没加载 `companion.json`，24 把同伴武器从没进过界面。口径（需求方确认）：
+//   · **不单列大类**，按槽位宽类并入「主要」（步枪 / 霰弹）与「近战」；
+//   · 扫除者两把是霰弹枪、分离与猎犬三爪是近战、其余枪械是步枪；
+//   · 守护 / 同伴武器**一律不可装赋能**（分离虽是近战也不行）。
+{
+  await invokeBoot();
+  await new Promise((r) => setTimeout(r, 300));
+  const st = store.store;
+  const gsel = registry['#weapon-group'];
+  const tsel = registry['#weapon-type'];
+  const wsel = registry['#weapon-select'];
+  const search = registry['#weapon-search'];
+  const panel = registry['#weapon-search-panel'];
+
+  // ① 数据已经加载
+  for (const id of ['SentinelFreezeRayRifle', 'SentinelFreezeRayPrimeRifle', 'SentShotgun', 'SentGlaiveWeapon']) {
+    check('同伴武器已加载：' + id, Boolean(st.dataAll.weaponById.get(id)));
+  }
+
+  // ② 搜索能搜到并切过去（用户报的原始问题）
+  if (search && panel) {
+    const hitsAt = async (kw) => {
+      search.value = kw;
+      search.fire('input');
+      await new Promise((r) => setTimeout(r, 200));
+      return panel.children.filter((c) => c.className === 'search-item');
+    };
+    const hits = await hitsAt('冰凇');
+    check('搜「冰凇」有结果', hits.length > 0, hits.map((c) => c.textContent).join(' / '));
+    check('搜「冰凇」结果是冰凇 / 冰凇 Prime',
+      hits.every((c) => /^SentinelFreezeRay(Prime)?Rifle$/.test(c.dataset.weaponId)) && hits.length === 2,
+      hits.map((c) => c.dataset.weaponId).join(','));
+    check('结果行标注「步枪 · 主要」',
+      hits.some((c) => c.textContent.includes('步枪') && c.textContent.includes('主要')));
+
+    const pick = hits.find((c) => c.dataset.weaponId === 'SentinelFreezeRayRifle');
+    if (pick) {
+      pick.fire('click');
+      await new Promise((r) => setTimeout(r, 400));
+      check('点选冰凇后切到该武器', st.data && st.data.weapon.id === 'SentinelFreezeRayRifle');
+      check('点选冰凇后大类落在「主要」', gsel.value === 'primary');
+      check('点选冰凇后类型落在步枪', tsel.value === 'rifle');
+      check('点选冰凇后武器下拉选中它', wsel.value === 'SentinelFreezeRayRifle');
+      check('冰凇能装步枪 Mod（有备选卡）', registry['#candidate-list'].children.length > 0);
+      check('冰凇的赋能槽置灰', arcanesDisabledNow());
+      check('冰凇的右侧赋能区收起', registry['#arcane-area'].hidden === true);
+      check('冰凇状态里没有可用赋能',
+        Array.isArray(st.data.primaryArcanes) && st.data.primaryArcanes.length === 0);
+    }
+
+    // ③ 霰弹：扫除者进「主要 → 霰弹枪」
+    const shotgun = await hitsAt('扫除者');
+    check('搜「扫除者」有结果', shotgun.length > 0);
+    check('扫除者标注「霰弹枪 · 主要」', shotgun.some((c) => c.textContent.includes('霰弹枪')));
+    search.value = '';
+    search.fire('input');
+    await new Promise((r) => setTimeout(r, 100));
+  }
+
+  // ④ 近战：分离 / 猎犬三爪在「近战」大类里能找到
+  gsel.value = 'melee';
+  tsel.fire('change');
+  await new Promise((r) => setTimeout(r, 200));
+  const meleeIds = [];
+  for (const bucket of st.dataAll.groups.get('melee').types.values()) {
+    for (const w of bucket.weapons) meleeIds.push(w.id);
+  }
+  for (const id of ['SentGlaiveWeapon', 'PrimeHeliosGlaiveWeapon', 'ZanukaPetMeleeWeaponIP', 'ZanukaPetMeleeWeaponIS', 'ZanukaPetMeleeWeaponPS']) {
+    check('近战大类里有 ' + id, meleeIds.includes(id));
+  }
+
+  // ⑤ 分离 = 近战，可装近战 Mod，但赋能同样禁用
+  //    换枪走**搜索 + 点选**这条真实路径（app.js 的 `switchWeapon` 是模块私有函数，外部拿不到）
+  if (search && panel) {
+    search.value = '分离';
+    search.fire('input');
+    await new Promise((r) => setTimeout(r, 200));
+    const diss = panel.children.filter((c) => c.className === 'search-item');
+    check('搜「分离」有结果', diss.length > 0, diss.map((c) => c.textContent).join(' / '));
+    check('「分离」结果里有分离 / 分离 Prime',
+      diss.some((c) => c.dataset.weaponId === 'SentGlaiveWeapon') && diss.some((c) => c.dataset.weaponId === 'PrimeHeliosGlaiveWeapon'));
+    const pickDiss = diss.find((c) => c.dataset.weaponId === 'SentGlaiveWeapon');
+    if (pickDiss) {
+      pickDiss.fire('click');
+      await new Promise((r) => setTimeout(r, 400));
+      check('切到分离', st.data && st.data.weapon.id === 'SentGlaiveWeapon');
+      check('分离的大类落在「近战」', gsel.value === 'melee');
+      check('分离可装近战 Mod', (st.data.availableMods || []).some((m) => m.slotKind === 'melee'));
+      check('分离的赋能槽同样置灰', arcanesDisabledNow());
+      check('分离没有可用赋能', (st.data.primaryArcanes || []).length === 0);
+    }
+
+    // ⑥ 普通武器不受影响：切回一把步枪，赋能区恢复
+    //    ⚠ 必须用**非玄骸**的枪：默认的 Gremlin 是玄骸系，会被玄骸元素解算拦一把，
+    //      换枪后的赋能区刷新就没机会跑（这不是本功能的问题）。
+    search.value = '布莱顿';
+    search.fire('input');
+    await new Promise((r) => setTimeout(r, 200));
+    const normal = panel.children.filter((c) => c.className === 'search-item');
+    const pickNormal = normal.find((c) => c.dataset.weaponId === 'Rifle');
+    check('搜「布莱顿」能搜到 Braton', Boolean(pickNormal));
+    if (pickNormal) {
+      pickNormal.fire('click');
+      await new Promise((r) => setTimeout(r, 400));
+    }
+    search.value = '';
+    search.fire('input');
+    await new Promise((r) => setTimeout(r, 100));
+  }
+  check('切回布拉通后当前武器是 Braton', st.data && st.data.weapon.id === 'Rifle');
+  check('切回普通步枪后赋能槽没有置灰', !arcanesDisabledNow());
+  check('切回普通步枪后赋能区重新显示', registry['#arcane-area'].hidden !== true);
+  check('普通步枪有可用赋能', (st.data.primaryArcanes || []).length > 0);
+}
+
+/** 当前武器是否处于"不可装赋能"状态（读渲染结果，不是读实现） */
+function arcanesDisabledNow() {
+  const card = registry['#arcane-slots'].children[0];
+  if (!card) return false;
+  const body = card.children.find((c) => (c.className || '').includes('slot-body'));
+  const txt = body ? body.textContent : card.textContent;
+  return (card.className || '').includes('disabled') || txt.includes('不可装赋能');
 }
 
 rec.finish();

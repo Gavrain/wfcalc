@@ -23,9 +23,15 @@ export const DAMAGE_TYPES = [
   'viral',
   // 特殊
   'void',
-  // 第 14 种：Tau（官方导出键 DT_SENTIENT）。
-  // 不提供任何伤害类型倍率；其异常状态是"触发几率易受性"，
-  // 见 status-resistance.ts 的 tauStatusChanceMultiplier。
+  // 第 14 种：Tau。
+  //
+  // 官方导出的键名是 **`DT_SENTIENT`**（游戏内部按 S 系命名），游戏内显示为「Tau」——
+  // 需求方 2026-11-13：「游戏内是 tau 类型伤害，但是我们都知道他跟 s 系有关」。
+  //
+  // ⚠ **Tau 伤害 ≠ 对 Sentient 派系的加成**：它对任何派系都没有伤害倍率
+  //   （见下方 `NO_DAMAGE_MULTIPLIER_TYPES`），只通过「触发几率易受性」影响输出，
+  //   见 `status-effects.ts` 的 `tauStatusChanceMultiplier`。
+  //   键名用 `tau` 而不是 `sentient`，就是为了避免和「派系歧视 / Sentient 切口」混淆。
   'tau',
 ];
 
@@ -43,6 +49,10 @@ export const BASE_ELEMENTAL_TYPES: readonly DamageType[] = ['heat', 'cold', 'ele
 /**
  * 不提供任何伤害类型倍率的类型（不对任何派系增伤/减伤）。
  * 它们只可能通过异常状态机制影响最终伤害。
+ *
+ * - `void`（虚空）：需求方 2026-11-13 确认「目前只有指挥官武器能造成这个伤害类型，
+ *   跟武器还没关联上」——名称留在表里备用，但武器配装用不到。
+ * - `tau`：游戏内名为 Tau（官方导出键 `DT_SENTIENT`），只影响触发几率易受性。
  */
 export const NO_DAMAGE_MULTIPLIER_TYPES: readonly DamageType[] = ['void', 'tau'];
 

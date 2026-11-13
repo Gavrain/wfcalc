@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-12T09:01:11.711Z",
+  "generatedAt": "2026-11-13T11:24:37.278Z",
   "source": "mods/baseline.json（Mod 数值基线） + ExportUpgrades（元数据交叉校验）",
   "note": "levelValues 为 0 级到满级的逐级数值；bucket 对应 docs/乘区归属表.md 的乘区",
   "count": 478,
@@ -178,18 +178,18 @@
       "polarity": "d",
       "stats": [
         {
-          "key": "range",
+          "key": "rangePct",
           "stat": "meleeRange",
           "bucket": "utility",
-          "unit": "flat",
+          "unit": "percent",
           "kind": "functional",
           "levelValues": [
             0,
-            0.0667,
-            0.1333,
-            0.2
+            6.6667,
+            13.3333,
+            20
           ],
-          "note": "单位：米"
+          "note": "攻击范围 +X%（百分比，不是米）"
         }
       ],
       "conditions": [],
@@ -202,7 +202,8 @@
         "fusionLimit": 3,
         "type": "ARCH-GUN",
         "compatName": "Archgun"
-      }
+      },
+      "noteZh": "需求方 2026-11-13：原文「+X% Range」，是攻击范围百分比，不是固定米数"
     },
     {
       "id": "charged_bullets",
@@ -1831,8 +1832,10 @@
         "baseDrain": 2,
         "fusionLimit": 5,
         "type": "PRIMARY",
-        "compatName": "Assault Rifle"
-      }
+        "compatName": "Assault Rifle",
+        "isUtility": true
+      },
+      "exilus": true
     },
     {
       "id": "gun_glide",
@@ -1884,8 +1887,10 @@
         "baseDrain": 6,
         "fusionLimit": 3,
         "type": "PRIMARY",
-        "compatName": "Assault Rifle"
-      }
+        "compatName": "Assault Rifle",
+        "isUtility": true
+      },
+      "exilus": true
     },
     {
       "id": "overview",
@@ -1925,8 +1930,10 @@
         "baseDrain": 2,
         "fusionLimit": 5,
         "type": "PRIMARY",
-        "compatName": "Assault Rifle"
-      }
+        "compatName": "Assault Rifle",
+        "isUtility": true
+      },
+      "exilus": true
     },
     {
       "id": "primed_rifle_ammo_mutation",
@@ -1972,12 +1979,14 @@
         "baseDrain": 0,
         "fusionLimit": 10,
         "type": "PRIMARY",
-        "compatName": "Assault Rifle"
+        "compatName": "Assault Rifle",
+        "isUtility": true
       },
       "exclusiveGroup": "rifle_ammo_mutation",
       "conflictsWith": [
         "rifle_ammo_mutation"
-      ]
+      ],
+      "exilus": true
     },
     {
       "id": "rifle_ammo_mutation",
@@ -2018,12 +2027,14 @@
         "baseDrain": 2,
         "fusionLimit": 5,
         "type": "PRIMARY",
-        "compatName": "Assault Rifle"
+        "compatName": "Assault Rifle",
+        "isUtility": true
       },
       "exclusiveGroup": "rifle_ammo_mutation",
       "conflictsWith": [
         "primed_rifle_ammo_mutation"
-      ]
+      ],
+      "exilus": true
     },
     {
       "id": "spring_loaded_chamber",
@@ -2113,8 +2124,10 @@
         "baseDrain": 6,
         "fusionLimit": 3,
         "type": "PRIMARY",
-        "compatName": "Assault Rifle"
-      }
+        "compatName": "Assault Rifle",
+        "isUtility": true
+      },
+      "exilus": true
     },
     {
       "id": "tainted_mag",
@@ -2435,9 +2448,9 @@
         {
           "key": "secSC",
           "stat": "statusChance",
-          "bucket": "statusChance",
+          "bucket": null,
           "unit": "percent",
-          "kind": "special",
+          "kind": "skip",
           "levelValues": [
             0,
             24,
@@ -2446,14 +2459,14 @@
             96,
             120
           ],
-          "note": "作用于配对的副武器"
+          "note": "给副武器的触发，主武器上无收益"
         },
         {
           "key": "secCC",
           "stat": "critChance",
-          "bucket": "critChance",
+          "bucket": null,
           "unit": "percent",
-          "kind": "special",
+          "kind": "skip",
           "levelValues": [
             0,
             24,
@@ -2462,7 +2475,7 @@
             96,
             120
           ],
-          "note": "作用于配对的副武器"
+          "note": "给副武器的暴率，主武器上无收益"
         }
       ],
       "conditions": [],
@@ -2760,8 +2773,10 @@
         "baseDrain": 4,
         "fusionLimit": 5,
         "type": "MELEE",
-        "compatName": "Thrown Melee"
-      }
+        "compatName": "Thrown Melee",
+        "isUtility": true
+      },
+      "exilus": true
     },
     {
       "id": "amalgam_organ_shatter",
@@ -2935,10 +2950,10 @@
       "stats": [
         {
           "key": "br",
-          "stat": "critChance",
+          "stat": "critChancePerCombo",
           "bucket": "critChance",
           "unit": "percent",
-          "kind": "conditional",
+          "kind": "normal",
           "levelValues": [
             0,
             4,
@@ -2952,7 +2967,7 @@
             36,
             40
           ],
-          "note": "暴率 × 连击倍率（急进猛突）"
+          "note": "暴率 × 连击倍率（急进猛突），按配置的连击倍率放大"
         }
       ],
       "conditions": [],
@@ -3231,13 +3246,15 @@
         "baseDrain": 4,
         "fusionLimit": 3,
         "type": "MELEE",
-        "compatName": "Melee"
+        "compatName": "Melee",
+        "isUtility": true
       },
       "exclusiveGroup": "tennokai",
       "excludedFrom": [
         "power_weapon_lite",
         "no_heavy_attack"
-      ]
+      ],
+      "exilus": true
     },
     {
       "id": "corrupt_charge",
@@ -3330,13 +3347,15 @@
         "baseDrain": 4,
         "fusionLimit": 3,
         "type": "MELEE",
-        "compatName": "Melee"
+        "compatName": "Melee",
+        "isUtility": true
       },
       "exclusiveGroup": "tennokai",
       "excludedFrom": [
         "power_weapon_lite",
         "no_heavy_attack"
-      ]
+      ],
+      "exilus": true
     },
     {
       "id": "dispatch_overdrive",
@@ -3377,14 +3396,16 @@
         "baseDrain": 4,
         "fusionLimit": 5,
         "type": "MELEE",
-        "compatName": "Melee"
+        "compatName": "Melee",
+        "isUtility": true
       },
       "excludedFrom": [
         "sentinel_weapon",
         "hound_weapon",
         "power_weapon_lite",
         "no_heavy_attack"
-      ]
+      ],
+      "exilus": true
     },
     {
       "id": "dreamers_wrath",
@@ -3437,13 +3458,15 @@
         "baseDrain": 6,
         "fusionLimit": 3,
         "type": "MELEE",
-        "compatName": "Melee"
+        "compatName": "Melee",
+        "isUtility": true
       },
       "exclusiveGroup": "tennokai",
       "excludedFrom": [
         "power_weapon_lite",
         "no_heavy_attack"
-      ]
+      ],
+      "exilus": true
     },
     {
       "id": "drifting_contact",
@@ -3598,14 +3621,14 @@
           "stat": "baseDamage",
           "bucket": null,
           "unit": "percent",
-          "kind": "special",
+          "kind": "skip",
           "levelValues": [
             0,
             66.6667,
             133.3333,
             200
           ],
-          "note": "消耗能量转化为额外伤害"
+          "note": "需求方定为无效果（耗能转化）"
         }
       ],
       "conditions": [],
@@ -3687,7 +3710,7 @@
             40,
             60
           ],
-          "note": "仅处决攻击"
+          "note": "处决伤害：进**独立的处决伤害乘区**（需求方 2026-11-13），不做攻击类型判定"
         }
       ],
       "conditions": [],
@@ -3848,8 +3871,10 @@
         "baseDrain": 4,
         "fusionLimit": 3,
         "type": "MELEE",
-        "compatName": "Melee"
-      }
+        "compatName": "Melee",
+        "isUtility": true
+      },
+      "exilus": true
     },
     {
       "id": "fury",
@@ -4081,7 +4106,8 @@
             88,
             99,
             110
-          ]
+          ],
+          "heavyX2": true
         },
         {
           "key": "cd",
@@ -4292,8 +4318,10 @@
         "baseDrain": 6,
         "fusionLimit": 5,
         "type": "MELEE",
-        "compatName": "Melee"
-      }
+        "compatName": "Melee",
+        "isUtility": true
+      },
+      "exilus": true
     },
     {
       "id": "healing_return",
@@ -4313,7 +4341,7 @@
           "stat": "healthPerHit",
           "bucket": null,
           "unit": "flat",
-          "kind": "special",
+          "kind": "skip",
           "levelValues": [
             0,
             1.1,
@@ -4327,7 +4355,7 @@
             9.9,
             11
           ],
-          "note": "每个异常状态回血"
+          "note": "每异常回血：不影响伤害，需求方定为无效果"
         }
       ],
       "conditions": [],
@@ -4609,14 +4637,14 @@
           "stat": "lifeSteal",
           "bucket": null,
           "unit": "percent",
-          "kind": "special",
+          "kind": "skip",
           "levelValues": [
             0,
             6.6667,
             13.3333,
             20
           ],
-          "note": "生命吸取"
+          "note": "生命偷取：不影响伤害，需求方定为无效果"
         }
       ],
       "conditions": [],
@@ -4711,7 +4739,7 @@
             120,
             150
           ],
-          "note": "滑砍时生效"
+          "note": "滑砍时生效（需求方 2026-11-13：当成百分比暴击）"
         }
       ],
       "conditions": [],
@@ -4765,13 +4793,15 @@
         "baseDrain": 4,
         "fusionLimit": 5,
         "type": "MELEE",
-        "compatName": "Melee"
+        "compatName": "Melee",
+        "isUtility": true
       },
       "exclusiveGroup": "tennokai",
       "excludedFrom": [
         "power_weapon_lite",
         "no_heavy_attack"
-      ]
+      ],
+      "exilus": true
     },
     {
       "id": "melee_elementalist",
@@ -4909,13 +4939,15 @@
         "fusionLimit": 0,
         "type": "MELEE",
         "compatName": "Melee",
-        "description": "/Lotus/Language/Mods/TennokaiBaseModDesc"
+        "description": "/Lotus/Language/Mods/TennokaiBaseModDesc",
+        "isUtility": true
       },
       "exclusiveGroup": "tennokai",
       "excludedFrom": [
         "power_weapon_lite",
         "no_heavy_attack"
-      ]
+      ],
+      "exilus": true
     },
     {
       "id": "molten_impact",
@@ -5077,13 +5109,15 @@
         "baseDrain": 4,
         "fusionLimit": 3,
         "type": "MELEE",
-        "compatName": "Melee"
+        "compatName": "Melee",
+        "isUtility": true
       },
       "exclusiveGroup": "tennokai",
       "excludedFrom": [
         "power_weapon_lite",
         "no_heavy_attack"
-      ]
+      ],
+      "exilus": true
     },
     {
       "id": "organ_shatter",
@@ -5166,11 +5200,13 @@
         "baseDrain": 2,
         "fusionLimit": 5,
         "type": "MELEE",
-        "compatName": "Melee"
+        "compatName": "Melee",
+        "isUtility": true
       },
       "excludedFrom": [
         "power_weapon_lite"
-      ]
+      ],
+      "exilus": true
     },
     {
       "id": "pressure_point",
@@ -6086,7 +6122,8 @@
             176,
             198,
             220
-          ]
+          ],
+          "heavyX2": true
         },
         {
           "key": "fac",
@@ -6207,7 +6244,7 @@
             133.3333,
             200
           ],
-          "note": "仅震地攻击"
+          "note": "震地伤害：进**独立的震地伤害乘区**，只对震地 / 重型震地生效（需求方 2026-11-13）"
         }
       ],
       "conditions": [],
@@ -6828,7 +6865,8 @@
             72,
             96,
             120
-          ]
+          ],
+          "heavyX2": true
         }
       ],
       "conditions": [],
@@ -6881,13 +6919,15 @@
         "baseDrain": 6,
         "fusionLimit": 3,
         "type": "MELEE",
-        "compatName": "Melee"
+        "compatName": "Melee",
+        "isUtility": true
       },
       "exclusiveGroup": "tennokai",
       "excludedFrom": [
         "power_weapon_lite",
         "no_heavy_attack"
-      ]
+      ],
+      "exilus": true
     },
     {
       "id": "vicious_frost",
@@ -7112,10 +7152,10 @@
       "stats": [
         {
           "key": "scc",
-          "stat": "statusChance",
+          "stat": "statusChancePerCombo",
           "bucket": "statusChance",
           "unit": "percent",
-          "kind": "conditional",
+          "kind": "normal",
           "levelValues": [
             0,
             8,
@@ -7124,7 +7164,7 @@
             32,
             40
           ],
-          "note": "触发率 × 连击倍率（创口溃烂）"
+          "note": "触发率 × 连击倍率（创口溃烂），按配置的连击倍率放大"
         }
       ],
       "conditions": [],
@@ -7969,12 +8009,14 @@
         "baseDrain": 6,
         "fusionLimit": 3,
         "type": "SECONDARY",
-        "compatName": "Pistol"
+        "compatName": "Pistol",
+        "isUtility": true
       },
       "excludedFrom": [
         "aoe",
         "power_weapon"
-      ]
+      ],
+      "exilus": true
     },
     {
       "id": "embedded_catalyzer",
@@ -8140,9 +8182,9 @@
       "polarity": "r",
       "stats": [
         {
-          "key": "weak",
-          "stat": "weakpointDamage",
-          "bucket": null,
+          "key": "secDmg",
+          "stat": "baseDamage",
+          "bucket": "baseDamage",
           "unit": "percent",
           "kind": "conditional",
           "levelValues": [
@@ -8153,7 +8195,7 @@
             480,
             600
           ],
-          "note": "对弱点伤害，按第 3.2 节爆头倍率结算，不进总和"
+          "note": "副武器伤害（本条为席尔火枪专属，按满层当基伤）"
         }
       ],
       "conditions": [],
@@ -8171,7 +8213,8 @@
       "onlyOn": [
         "zylok",
         "zylok_prime"
-      ]
+      ],
+      "noteZh": "需求方 2026-11-13：原文「Headshots on Eximus enemies increase Secondary Damage by +600% for 10 secs.」，是给副武器的伤害加成，不是弱点伤害；席尔火枪专属，按满层计"
     },
     {
       "id": "expel_corpus",
@@ -8787,8 +8830,10 @@
         "baseDrain": 4,
         "fusionLimit": 3,
         "type": "SECONDARY",
-        "compatName": "Pistol"
-      }
+        "compatName": "Pistol",
+        "isUtility": true
+      },
+      "exilus": true
     },
     {
       "id": "heated_charge",
@@ -9307,8 +9352,10 @@
         "baseDrain": 4,
         "fusionLimit": 3,
         "type": "SECONDARY",
-        "compatName": "Pistol"
-      }
+        "compatName": "Pistol",
+        "isUtility": true
+      },
+      "exilus": true
     },
     {
       "id": "lethal_torrent",
@@ -9824,12 +9871,14 @@
         "baseDrain": 2,
         "fusionLimit": 5,
         "type": "SECONDARY",
-        "compatName": "Pistol"
+        "compatName": "Pistol",
+        "isUtility": true
       },
       "exclusiveGroup": "pistol_ammo_mutation",
       "conflictsWith": [
         "primed_pistol_ammo_mutation"
-      ]
+      ],
+      "exilus": true
     },
     {
       "id": "pistol_elementalist",
@@ -10489,12 +10538,14 @@
         "baseDrain": 0,
         "fusionLimit": 10,
         "type": "SECONDARY",
-        "compatName": "Pistol"
+        "compatName": "Pistol",
+        "isUtility": true
       },
       "exclusiveGroup": "pistol_ammo_mutation",
       "conflictsWith": [
         "pistol_ammo_mutation"
-      ]
+      ],
+      "exilus": true
     },
     {
       "id": "primed_pistol_gambit",
@@ -10692,12 +10743,14 @@
         "baseDrain": 2,
         "fusionLimit": 10,
         "type": "SECONDARY",
-        "compatName": "Pistol"
+        "compatName": "Pistol",
+        "isUtility": true
       },
       "exclusiveGroup": "steady_hands",
       "conflictsWith": [
         "steady_hands"
-      ]
+      ],
+      "exilus": true
     },
     {
       "id": "primed_target_cracker",
@@ -11035,8 +11088,10 @@
         "baseDrain": 4,
         "fusionLimit": 3,
         "type": "SECONDARY",
-        "compatName": "Pistol"
-      }
+        "compatName": "Pistol",
+        "isUtility": true
+      },
+      "exilus": true
     },
     {
       "id": "ruinous_extension",
@@ -11075,7 +11130,8 @@
         "baseDrain": 2,
         "fusionLimit": 3,
         "type": "SECONDARY",
-        "compatName": "Pistol"
+        "compatName": "Pistol",
+        "isUtility": true
       },
       "onlyOn": [
         "atomos",
@@ -11091,7 +11147,8 @@
         "spectra",
         "spectra_vandal",
         "tenet_spirex"
-      ]
+      ],
+      "exilus": true
     },
     {
       "id": "saxum_spittle",
@@ -11392,8 +11449,8 @@
       "polarity": "-",
       "stats": [
         {
-          "key": "range",
-          "stat": "meleeRange",
+          "key": "beamRange",
+          "stat": "beamRange",
           "bucket": "utility",
           "unit": "flat",
           "kind": "functional",
@@ -11403,7 +11460,7 @@
             13.3333,
             20
           ],
-          "note": "单位：米"
+          "note": "光束距离（米）"
         },
         {
           "key": "syndRadial",
@@ -11434,7 +11491,8 @@
       "onlyOn": [
         "spectra",
         "spectra_vandal"
-      ]
+      ],
+      "noteZh": "需求方 2026-11-13：原文「+Xm Beam Range +X Sequence」，是光束距离（米），不是近战范围"
     },
     {
       "id": "sharpened_bullets",
@@ -11671,12 +11729,14 @@
         "baseDrain": 6,
         "fusionLimit": 3,
         "type": "SECONDARY",
-        "compatName": "Pistol"
+        "compatName": "Pistol",
+        "isUtility": true
       },
       "exclusiveGroup": "steady_hands",
       "conflictsWith": [
         "primed_steady_hands"
-      ]
+      ],
+      "exilus": true
     },
     {
       "id": "stinging_truth",
@@ -11885,8 +11945,10 @@
         "baseDrain": 2,
         "fusionLimit": 3,
         "type": "SECONDARY",
-        "compatName": "Pistol"
-      }
+        "compatName": "Pistol",
+        "isUtility": true
+      },
+      "exilus": true
     },
     {
       "id": "sure_shot",
@@ -12071,8 +12133,10 @@
         "baseDrain": 2,
         "fusionLimit": 5,
         "type": "SECONDARY",
-        "compatName": "Pistol"
-      }
+        "compatName": "Pistol",
+        "isUtility": true
+      },
+      "exilus": true
     },
     {
       "id": "thermagnetic_shells",
@@ -12216,8 +12280,10 @@
         "baseDrain": 2,
         "fusionLimit": 5,
         "type": "SECONDARY",
-        "compatName": "Pistol"
-      }
+        "compatName": "Pistol",
+        "isUtility": true
+      },
+      "exilus": true
     },
     {
       "id": "velox_conclusion",
@@ -12328,14 +12394,14 @@
           "stat": "lifeSteal",
           "bucket": null,
           "unit": "percent",
-          "kind": "special",
+          "kind": "skip",
           "levelValues": [
             0,
             6.6667,
             13.3333,
             20
           ],
-          "note": "生命吸取"
+          "note": "生命偷取：不影响伤害，需求方定为无效果"
         },
         {
           "key": "syndRadial",
@@ -12457,9 +12523,11 @@
         "baseDrain": 2,
         "fusionLimit": 3,
         "type": "PRIMARY",
-        "compatName": "PRIMARY"
+        "compatName": "PRIMARY",
+        "isUtility": true
       },
-      "set": "aero"
+      "set": "aero",
+      "exilus": true
     },
     {
       "id": "combustion_beam",
@@ -12644,8 +12712,8 @@
       "polarity": "-",
       "stats": [
         {
-          "key": "range",
-          "stat": "meleeRange",
+          "key": "beamRange",
+          "stat": "beamRange",
           "bucket": "utility",
           "unit": "flat",
           "kind": "functional",
@@ -12655,7 +12723,7 @@
             8,
             12
           ],
-          "note": "单位：米"
+          "note": "光束距离（米）"
         }
       ],
       "conditions": [],
@@ -12667,7 +12735,8 @@
         "baseDrain": 2,
         "fusionLimit": 3,
         "type": "PRIMARY",
-        "compatName": "PRIMARY"
+        "compatName": "PRIMARY",
+        "isUtility": true
       },
       "onlyOn": [
         "amprex",
@@ -12688,7 +12757,9 @@
         "panthera_prime",
         "phantasma",
         "phantasma_prime"
-      ]
+      ],
+      "noteZh": "需求方 2026-11-13：原文「+Xm Beam Range」，是光束距离（米），不是近战范围",
+      "exilus": true
     },
     {
       "id": "vigilante_armaments",
@@ -12858,9 +12929,11 @@
         "baseDrain": 4,
         "fusionLimit": 5,
         "type": "PRIMARY",
-        "compatName": "PRIMARY"
+        "compatName": "PRIMARY",
+        "isUtility": true
       },
-      "set": "vigilante"
+      "set": "vigilante",
+      "exilus": true
     },
     {
       "id": "agile_aim",
@@ -12899,8 +12972,10 @@
         "baseDrain": 2,
         "fusionLimit": 3,
         "type": "PRIMARY",
-        "compatName": "Rifle"
-      }
+        "compatName": "Rifle",
+        "isUtility": true
+      },
+      "exilus": true
     },
     {
       "id": "amalgam_argonak_metal_auger",
@@ -13161,12 +13236,14 @@
         "baseDrain": 6,
         "fusionLimit": 3,
         "type": "PRIMARY",
-        "compatName": "Rubico"
+        "compatName": "Rubico",
+        "isUtility": true
       },
       "onlyOn": [
         "rubico",
         "rubico_prime"
-      ]
+      ],
+      "exilus": true
     },
     {
       "id": "ammo_drum",
@@ -13206,8 +13283,10 @@
         "baseDrain": 2,
         "fusionLimit": 5,
         "type": "PRIMARY",
-        "compatName": "Rifle"
-      }
+        "compatName": "Rifle",
+        "isUtility": true
+      },
+      "exilus": true
     },
     {
       "id": "argon_scope",
@@ -13531,12 +13610,14 @@
         "baseDrain": 2,
         "fusionLimit": 5,
         "type": "PRIMARY",
-        "compatName": "Paris Prime"
+        "compatName": "Paris Prime",
+        "isUtility": true
       },
       "exclusiveGroup": "bhisaj_bal",
       "onlyOn": [
         "paris_prime"
-      ]
+      ],
+      "exilus": true
     },
     {
       "id": "biotic_rounds",
@@ -13852,8 +13933,10 @@
         "baseDrain": 0,
         "fusionLimit": 10,
         "type": "PRIMARY",
-        "compatName": "Rifle"
-      }
+        "compatName": "Rifle",
+        "isUtility": true
+      },
+      "exilus": true
     },
     {
       "id": "continuous_misery",
@@ -14190,12 +14273,14 @@
         "baseDrain": 10,
         "fusionLimit": 3,
         "type": "PRIMARY",
-        "compatName": "Supra"
+        "compatName": "Supra",
+        "isUtility": true
       },
       "onlyOn": [
         "supra",
         "supra_vandal"
-      ]
+      ],
+      "exilus": true
     },
     {
       "id": "disarming_purity",
@@ -14386,8 +14471,10 @@
         "baseDrain": 4,
         "fusionLimit": 3,
         "type": "PRIMARY",
-        "compatName": "Rifle"
-      }
+        "compatName": "Rifle",
+        "isUtility": true
+      },
+      "exilus": true
     },
     {
       "id": "entropy_burst",
@@ -14712,14 +14799,16 @@
         "fusionLimit": 3,
         "type": "PRIMARY",
         "compatName": "Tetra",
-        "description": "/Lotus/Language/Upgrades/TetraFasterProjAiming_desc"
+        "description": "/Lotus/Language/Upgrades/TetraFasterProjAiming_desc",
+        "isUtility": true
       },
       "onlyOn": [
         "tetra",
         "prisma_tetra",
         "tenet_tetra",
         "tenet_tetra_grenade"
-      ]
+      ],
+      "exilus": true
     },
     {
       "id": "galvanized_aptitude",
@@ -15330,8 +15419,10 @@
         "baseDrain": 2,
         "fusionLimit": 3,
         "type": "PRIMARY",
-        "compatName": "Rifle"
-      }
+        "compatName": "Rifle",
+        "isUtility": true
+      },
+      "exilus": true
     },
     {
       "id": "infected_clip",
@@ -15435,20 +15526,20 @@
       "polarity": "-",
       "stats": [
         {
-          "key": "range",
+          "key": "rangePct",
           "stat": "meleeRange",
           "bucket": "utility",
-          "unit": "flat",
+          "unit": "percent",
           "kind": "functional",
           "levelValues": [
             0,
-            0.06,
-            0.12,
-            0.18,
-            0.24,
-            0.3
+            6,
+            12,
+            18,
+            24,
+            30
           ],
-          "note": "单位：米"
+          "note": "攻击范围 +X%（百分比，不是米）"
         }
       ],
       "conditions": [],
@@ -15460,14 +15551,17 @@
         "baseDrain": 2,
         "fusionLimit": 5,
         "type": "PRIMARY",
-        "compatName": "Tetra"
+        "compatName": "Tetra",
+        "isUtility": true
       },
       "onlyOn": [
         "tetra",
         "prisma_tetra",
         "tenet_tetra",
         "tenet_tetra_grenade"
-      ]
+      ],
+      "noteZh": "需求方 2026-11-13：原文「Shots now bounce up to 6x and travel 30% further」，+30% 射程（百分比）；弹跳 6 次为功能效果",
+      "exilus": true
     },
     {
       "id": "lasting_purity",
@@ -15814,6 +15908,22 @@
             105
           ],
           "note": "对弱点伤害，按第 3.2 节爆头倍率结算，不进总和"
+        },
+        {
+          "key": "bodyshot",
+          "stat": "bodyshotDamage",
+          "bucket": null,
+          "unit": "percent",
+          "kind": "conditional",
+          "levelValues": [
+            0,
+            -9,
+            -18,
+            -27,
+            -36,
+            -45
+          ],
+          "note": "打身体（关闭爆头）时的伤害倍率"
         }
       ],
       "conditions": [],
@@ -15830,7 +15940,8 @@
       "onlyOn": [
         "vulkar",
         "vulkar_wraith"
-      ]
+      ],
+      "noteZh": "需求方 2026-11-13：补上原文的第二条「-45% Bodyshot Damage」——关闭爆头（打身体）时总伤害 ×(1−45%)，开启爆头时不生效"
     },
     {
       "id": "napalm_grenades",
@@ -16960,12 +17071,14 @@
         "baseDrain": 2,
         "fusionLimit": 10,
         "type": "PRIMARY",
-        "compatName": "Rifle"
+        "compatName": "Rifle",
+        "isUtility": true
       },
       "exclusiveGroup": "stabilizer",
       "conflictsWith": [
         "stabilizer"
-      ]
+      ],
+      "exilus": true
     },
     {
       "id": "proton_jet",
@@ -17701,9 +17814,9 @@
         {
           "key": "altDmg",
           "stat": "baseDamage",
-          "bucket": "baseDamage",
+          "bucket": null,
           "unit": "percent",
-          "kind": "conditional",
+          "kind": "skip",
           "levelValues": [
             0,
             18,
@@ -17712,7 +17825,7 @@
             72,
             90
           ],
-          "note": "特殊攻击的额外伤害"
+          "note": "需求方定为无效果（自激奇点的次级射击爆炸）"
         }
       ],
       "conditions": [],
@@ -17815,12 +17928,14 @@
         "baseDrain": 6,
         "fusionLimit": 3,
         "type": "PRIMARY",
-        "compatName": "Rifle"
+        "compatName": "Rifle",
+        "isUtility": true
       },
       "exclusiveGroup": "stabilizer",
       "conflictsWith": [
         "primed_stabilizer"
-      ]
+      ],
+      "exilus": true
     },
     {
       "id": "stormbringer",
@@ -17900,8 +18015,10 @@
         "baseDrain": 4,
         "fusionLimit": 3,
         "type": "PRIMARY",
-        "compatName": "Rifle"
-      }
+        "compatName": "Rifle",
+        "isUtility": true
+      },
+      "exilus": true
     },
     {
       "id": "tether_grenades",
@@ -17942,13 +18059,15 @@
         "baseDrain": 2,
         "fusionLimit": 5,
         "type": "PRIMARY",
-        "compatName": "Penta"
+        "compatName": "Penta",
+        "isUtility": true
       },
       "onlyOn": [
         "carmine_penta",
         "penta",
         "secura_penta"
-      ]
+      ],
+      "exilus": true
     },
     {
       "id": "thermite_rounds",
@@ -18067,8 +18186,10 @@
         "baseDrain": 4,
         "fusionLimit": 3,
         "type": "PRIMARY",
-        "compatName": "Rifle"
-      }
+        "compatName": "Rifle",
+        "isUtility": true
+      },
+      "exilus": true
     },
     {
       "id": "unseen_dread",
@@ -18235,8 +18356,10 @@
         "baseDrain": 4,
         "fusionLimit": 5,
         "type": "PRIMARY",
-        "compatName": "Rifle"
-      }
+        "compatName": "Rifle",
+        "isUtility": true
+      },
+      "exilus": true
     },
     {
       "id": "vital_sense",
@@ -18890,8 +19013,10 @@
         "baseDrain": 2,
         "fusionLimit": 5,
         "type": "PRIMARY",
-        "compatName": "Shotgun"
-      }
+        "compatName": "Shotgun",
+        "isUtility": true
+      },
+      "exilus": true
     },
     {
       "id": "burdened_magazine",
@@ -19417,7 +19542,7 @@
           "stat": "reloadSpeed",
           "bucket": "utility",
           "unit": "percent",
-          "kind": "conditional",
+          "kind": "normal",
           "levelValues": [
             0,
             24,
@@ -19426,7 +19551,7 @@
             96,
             120
           ],
-          "note": "命中条件后限时生效"
+          "note": "条件换弹（战斗装填）：按满值常驻生效"
         }
       ],
       "conditions": [],
@@ -19524,12 +19649,14 @@
         "baseDrain": 6,
         "fusionLimit": 3,
         "type": "PRIMARY",
-        "compatName": "Shotgun"
+        "compatName": "Shotgun",
+        "isUtility": true
       },
       "exclusiveGroup": "counterbalance",
       "conflictsWith": [
         "primed_counterbalance"
-      ]
+      ],
+      "exilus": true
     },
     {
       "id": "critical_deceleration",
@@ -19680,8 +19807,10 @@
         "baseDrain": 6,
         "fusionLimit": 3,
         "type": "PRIMARY",
-        "compatName": "Shotgun"
-      }
+        "compatName": "Shotgun",
+        "isUtility": true
+      },
+      "exilus": true
     },
     {
       "id": "efficient_beams",
@@ -19766,8 +19895,10 @@
         "baseDrain": 4,
         "fusionLimit": 3,
         "type": "PRIMARY",
-        "compatName": "Shotgun"
-      }
+        "compatName": "Shotgun",
+        "isUtility": true
+      },
+      "exilus": true
     },
     {
       "id": "flechette",
@@ -19848,14 +19979,16 @@
         "baseDrain": 4,
         "fusionLimit": 3,
         "type": "PRIMARY",
-        "compatName": "Drakgoon"
+        "compatName": "Drakgoon",
+        "isUtility": true
       },
       "onlyOn": [
         "drakgoon",
         "drakgoon_uncharged",
         "kuva_drakgoon",
         "kuva_drakgoon_uncharged"
-      ]
+      ],
+      "exilus": true
     },
     {
       "id": "frail_momentum",
@@ -20089,8 +20222,10 @@
         "baseDrain": 2,
         "fusionLimit": 10,
         "type": "PRIMARY",
-        "compatName": "Shotgun"
-      }
+        "compatName": "Shotgun",
+        "isUtility": true
+      },
+      "exilus": true
     },
     {
       "id": "galvanized_hell",
@@ -20446,8 +20581,10 @@
         "baseDrain": 6,
         "fusionLimit": 3,
         "type": "PRIMARY",
-        "compatName": "Shotgun"
-      }
+        "compatName": "Shotgun",
+        "isUtility": true
+      },
+      "exilus": true
     },
     {
       "id": "magnetic_strafe",
@@ -20714,8 +20851,10 @@
         "baseDrain": 2,
         "fusionLimit": 5,
         "type": "PRIMARY",
-        "compatName": "Shotgun"
-      }
+        "compatName": "Shotgun",
+        "isUtility": true
+      },
+      "exilus": true
     },
     {
       "id": "point_blank",
@@ -21212,12 +21351,14 @@
         "baseDrain": 2,
         "fusionLimit": 10,
         "type": "PRIMARY",
-        "compatName": "Shotgun"
+        "compatName": "Shotgun",
+        "isUtility": true
       },
       "exclusiveGroup": "counterbalance",
       "conflictsWith": [
         "counterbalance"
-      ]
+      ],
+      "exilus": true
     },
     {
       "id": "primed_point_blank",
@@ -21364,12 +21505,14 @@
         "baseDrain": 0,
         "fusionLimit": 10,
         "type": "PRIMARY",
-        "compatName": "Shotgun"
+        "compatName": "Shotgun",
+        "isUtility": true
       },
       "exclusiveGroup": "shotgun_ammo_mutation",
       "conflictsWith": [
         "shotgun_ammo_mutation"
-      ]
+      ],
+      "exilus": true
     },
     {
       "id": "primed_tactical_pump",
@@ -21884,8 +22027,10 @@
         "baseDrain": 2,
         "fusionLimit": 5,
         "type": "PRIMARY",
-        "compatName": "Shotgun"
-      }
+        "compatName": "Shotgun",
+        "isUtility": true
+      },
+      "exilus": true
     },
     {
       "id": "shell_shock",
@@ -21978,12 +22123,14 @@
         "baseDrain": 2,
         "fusionLimit": 5,
         "type": "PRIMARY",
-        "compatName": "Shotgun"
+        "compatName": "Shotgun",
+        "isUtility": true
       },
       "exclusiveGroup": "shotgun_ammo_mutation",
       "conflictsWith": [
         "primed_shotgun_ammo_mutation"
-      ]
+      ],
+      "exilus": true
     },
     {
       "id": "shotgun_barrage",
@@ -22261,8 +22408,10 @@
         "baseDrain": 2,
         "fusionLimit": 3,
         "type": "PRIMARY",
-        "compatName": "Shotgun"
-      }
+        "compatName": "Shotgun",
+        "isUtility": true
+      },
+      "exilus": true
     },
     {
       "id": "snap_shot",
@@ -22301,8 +22450,10 @@
         "baseDrain": 2,
         "fusionLimit": 3,
         "type": "PRIMARY",
-        "compatName": "Shotgun"
-      }
+        "compatName": "Shotgun",
+        "isUtility": true
+      },
+      "exilus": true
     },
     {
       "id": "soft_hands",
@@ -22369,8 +22520,10 @@
         "baseDrain": 4,
         "fusionLimit": 3,
         "type": "PRIMARY",
-        "compatName": "Shotgun"
-      }
+        "compatName": "Shotgun",
+        "isUtility": true
+      },
+      "exilus": true
     },
     {
       "id": "sweeping_serration",
@@ -22809,8 +22962,10 @@
         "baseDrain": 4,
         "fusionLimit": 3,
         "type": "SECONDARY",
-        "compatName": "Tome"
-      }
+        "compatName": "Tome",
+        "isUtility": true
+      },
+      "exilus": true
     },
     {
       "id": "jahu_canticle",
@@ -22849,8 +23004,10 @@
         "baseDrain": 4,
         "fusionLimit": 3,
         "type": "SECONDARY",
-        "compatName": "Tome"
-      }
+        "compatName": "Tome",
+        "isUtility": true
+      },
+      "exilus": true
     },
     {
       "id": "khra_canticle",
@@ -22889,8 +23046,10 @@
         "baseDrain": 4,
         "fusionLimit": 3,
         "type": "SECONDARY",
-        "compatName": "Tome"
-      }
+        "compatName": "Tome",
+        "isUtility": true
+      },
+      "exilus": true
     },
     {
       "id": "lohk_canticle",
@@ -22937,8 +23096,10 @@
         "baseDrain": 4,
         "fusionLimit": 3,
         "type": "SECONDARY",
-        "compatName": "Tome"
-      }
+        "compatName": "Tome",
+        "isUtility": true
+      },
+      "exilus": true
     },
     {
       "id": "netra_invocation",

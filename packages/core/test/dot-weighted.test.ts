@@ -1,9 +1,9 @@
-﻿/**
- * D-060：DoT 加权每层秒伤 —— 按触发占比加权。
+/**
+ * D-060：异常加权单层秒伤 —— 按触发占比加权。
  *
  * 触发是互斥的（一次触发只落在一个类型上），所以合计不能直接相加。
  * ```
- * 加权每层秒伤 = Σ_t ( 该类型每层秒伤 × 该类型占比 )
+ * 加权单层秒伤 = Σ_t ( 该类型每层秒伤 × 该类型占比 )
  * ```
  */
 import { describe, it } from 'node:test';
@@ -29,7 +29,7 @@ const slashPlusHeat: any[] = [
   { stat: 'elemental:heat', form: 'pct', amount: 100, source: 'hellfire' },
 ];
 
-describe('DoT 加权每层秒伤（D-060 / D-061）', () => {
+describe('异常加权单层秒伤（D-060 / D-061）', () => {
   /**
    * D-107：某类型的"触发份额"。
    * 合成元素（毒气/爆炸…）在命中分布里没有自己的份，用**来源元素之和**代替。
@@ -149,9 +149,9 @@ describe('DoT 加权每层秒伤（D-060 / D-061）', () => {
     near(res.output.dot6s, expected);
   });
 
-  it('输出口径名称已改为「DoT 加权每层秒伤」', () => {
+  it('输出口径名称已改为「异常加权单层秒伤」', () => {
     const res = compute(weapon, weapon.modes[0], [], {});
     const line = res.output.lines.find((l: any) => l.id === 'dotPerSecond');
-    assert.equal(line.label, 'DoT 加权每层秒伤');
+    assert.equal(line.label, '异常加权单层秒伤');
   });
 });

@@ -82,7 +82,7 @@ describe('面板数值下沉到模式级（D-050）', () => {
     near(res.output.fireRate, 10); // 没覆盖 → 回退
   });
 
-  it('模式级弹匣/装填生效，影响持续伤害', () => {
+  it('模式级弹匣/装填生效，影响续航秒伤', () => {
     const w = makeWeapon();
     const a = compute(w, w.modes[0], [], {});
     const b = compute(w, w.modes[2], [], {});

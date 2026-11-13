@@ -1,4 +1,4 @@
-﻿/* wfcalc demo 样式 —— 目标是可读、信息密度高，不追求视觉效果 */
+/* wfcalc demo 样式 —— 目标是可读、信息密度高，不追求视觉效果 */
 :root {
   --bg: #14171c;
   --panel: #1c2027;
@@ -102,10 +102,18 @@ body {
 .col > .section-title:not(:first-child) { margin-top: 12px; }
 .muted { color: var(--muted); font-size: 12px; }
 
-/* 左栏整体压缩：行高与间距收紧 */
+/* 左栏整体压缩：行高与间距收紧
+   （需求方 2026-11-12：「左边整体也压缩一下高度」）
+   → 节标题上方留白 12px → 8px，标题下沿 6px → 2px，表格行距同步收窄。
+   ⚠ 只作用于左栏，右栏「拆解」的节奏不动。 */
 .col-left { font-size: 12px; }
-.col-left .section-title { margin-bottom: 4px; }
-.col-left .panel-row { padding: 2px 5px; }
+.col-left .section-title { margin-bottom: 2px; }
+.col-left .section-title:not(:first-child) { margin-top: 8px; }
+.col-left .panel-row { padding: 1px 5px; }
+/* 面板表与输出口径的行距也跟着收 */
+.col-left .panel-table { gap: 1px; }
+.col-left .output-list { gap: 1px; margin-top: 0; }
+.col-left .output-row { padding: 1px 6px; }
 
 /* 输出口径：只读数值 + 单位 */
 .output-list { display: flex; flex-direction: column; gap: 1px; margin-top: 4px; }
@@ -117,7 +125,6 @@ body {
 .output-name { color: var(--muted); font-size: 11.5px; }
 .output-unit { margin-left: 5px; font-size: 10.5px; color: #5d6674; }
 .output-val { font-weight: 700; color: var(--accent); }
-.dot-row { padding: 1px 6px; font-size: 11.5px; }
 
 .metric-picker-inline {
   margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--line);
@@ -163,9 +170,18 @@ body {
 }
 .kuva-controls { display: flex; gap: 12px; align-items: center; font-size: 12px; margin-bottom: 8px; }
 .kuva-controls select { background: var(--panel-2); color: var(--text); border: 1px solid var(--line); border-radius: 4px; padding: 2px 6px; }
-.co-controls { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--line); }
-.co-controls .controls-row { margin-bottom: 4px; }
-.co-controls select { background: var(--panel-2); color: var(--text); border: 1px solid var(--line); border-radius: 4px; padding: 2px 6px; }
+/* 镀层加成：配置区里的**第二段**（需求方 2026-11-12：「镀层加成要变成配置的次级」）。
+   ⚠ 之前只把 DOM 挪进了配置区，但样式还是「上方 10px 留白 + 分隔线 + 独立标题」，
+   看起来仍是配置区下方另起一块——这条改掉：不再分隔线，标题降成与控件齐平的小标签。 */
+.co-controls { display: inline-flex; }
+/* 小标签「镀层」与控件同一行，竖排居中 */
+.co-controls .co-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 12px; }
+.co-controls .co-row .section-title { margin: 0; font-size: 11px; color: var(--muted); letter-spacing: 0; }
+.co-controls select, .co-controls input[type="number"] {
+  background: var(--panel-2); color: var(--text); border: 1px solid var(--line);
+  border-radius: 4px; padding: 2px 6px;
+}
+.co-controls .muted { font-size: 11px; }
 
 .metric-list { display: flex; flex-direction: column; gap: 2px; margin-top: 10px; }
 .metric-row { display: flex; gap: 8px; padding: 4px 6px; border-radius: 4px; cursor: pointer; }
@@ -176,17 +192,31 @@ body {
 .metric-val { font-variant-numeric: tabular-nums; color: var(--accent); }
 .metric-desc { grid-column: 1 / -1; font-size: 11px; color: var(--muted); }
 
-.dot-list { margin-top: 8px; display: flex; flex-direction: column; gap: 2px; }
-.dot-row { display: flex; gap: 8px; align-items: center; font-size: 12px; padding: 2px 6px; }
+.dot-list { margin-top: 8px; display: flex; flex-direction: column; gap: 1px; }
+.dot-row { display: flex; gap: 8px; align-items: center; font-size: 11.5px; padding: 0 6px; line-height: 1.5; }
 .dot-name { width: 48px; }
 .dot-stacks { color: var(--muted); }
 .dot-val { margin-left: auto; font-variant-numeric: tabular-nums; }
 /* 分段标题（需求方 2026-11-12：异常状态按攻击方式分段显示） */
 .dot-seg-title {
-  font-size: 11px; font-weight: 600; color: var(--accent);
-  padding: 4px 6px 1px; margin-top: 4px;
+  font-size: 11px; font-weight: 700; color: var(--accent);
+  padding: 2px 5px 0; margin-top: 2px;
 }
 .dot-seg-title:first-child { margin-top: 0; }
+
+/* ── 折叠块（需求方 2026-11-12）：标题永远显示，收起只藏内部项 ──
+   需求方 2026-11-12（续）：「标题栏的高度也压缩下，不需要那么大间距」
+   → 组标题按 11px 小标题画，上下各 1px，不再和正文行一样占一整个行高。 */
+.collapse-block.collapsed > .collapse-body { display: none; }
+.collapse-head {
+  display: flex; align-items: center; gap: 5px; width: 100%;
+  background: none; border: none; padding: 1px 5px; margin: 0;
+  color: var(--muted); font: inherit; line-height: 1.5; cursor: pointer; text-align: left;
+}
+.collapse-head:hover { background: var(--panel-2); border-radius: 3px; color: var(--text); }
+.collapse-caret { color: var(--muted); font-size: 9px; width: 9px; flex: none; }
+.collapse-title { font-size: 11px; font-weight: 600; letter-spacing: 0.02em; }
+.collapse-count { margin-left: auto; font-size: 10px; color: #5d6674; }
 
 /* 槽位 */
 .slot-area, .cand-area { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 12px; }
@@ -320,6 +350,9 @@ body {
 .slot.arcane, .slot.exilus { flex: none; }
 .slot.exilus { border-color: #4a5a70; }
 .slot.arcane { border-color: #6a5a80; }
+/* 需求方 2026-11-12：守护 / 同伴武器没有赋能槽 —— 槽留着占位，但灰掉、不可拖入 */
+.slot.arcane.disabled { border-color: var(--line); opacity: 0.55; }
+.slot.arcane.disabled .slot-empty { color: #4a525f; }
 .slot.arcane .slot-name,
 .slot-name {
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
@@ -338,6 +371,11 @@ body {
 .slot-gain-val.up { color: var(--pos); }
 .slot-gain-val.down { color: var(--neg); }
 .slot-gain-val.flat { color: var(--muted); }
+/* 增幅后的小字：`to dot` 表示这是「对异常伤害」的口径（D-171） */
+.gain-to-dot {
+  font-size: 9.5px; color: #7a8698; opacity: 0.9;
+  margin-left: 3px; letter-spacing: 0.02em;
+}
 .slot-desc { font-size: 11px; color: var(--muted); }
 .btn-remove {
   margin-top: auto; align-self: flex-start;
@@ -413,6 +451,123 @@ body {
 .metric-picker { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 /* 增幅基准沿用筛选按钮组样式（D-042）；.filter-group 由 JS 挂上 */
 .metric-options { display: flex; flex-wrap: wrap; }
+
+/* D-171：秒数选择器就挂在「增幅基准」这一排上（需求方 2026-11-13：
+   「你怎么放到左边去了啊，肯定是放到增幅基准那边啊」）。
+   与右侧的按钮组之间加一条细分隔线，说明它是**另一个**控件，不是基准按钮之一。 */
+.metric-window-label { margin-left: 6px; }
+.dot-window-picker {
+  display: inline-flex;
+  align-items: center;
+  padding-left: 10px;
+  border-left: 1px solid var(--line);
+}
+.dot-window-select {
+  background: var(--panel-2); color: var(--text); border: 1px solid var(--line);
+  border-radius: 4px; padding: 2px 6px; font-size: 12px; cursor: pointer;
+}
+.dot-window-select:hover { border-color: var(--accent); }
+
+/* ─────────────────────────────────────────────────────────────
+   裂罅 Mod 区（D-162）
+   紫色主题：裂罅在游戏里是紫色 Mod，槽位里的那张卡也走同一套紫色。
+   ───────────────────────────────────────────────────────────── */
+.riven-area { border-color: #4a3a63; }
+.riven-head { cursor: pointer; user-select: none; }
+.riven-head .section-title { color: #b48ce8; }
+.riven-head.open .cand-hint::after { content: ''; }
+.riven-body { margin-top: 10px; }
+.riven-body[hidden] { display: none; }
+
+.riven-top {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  font-size: 12px; margin-bottom: 10px;
+}
+.riven-mode-label { margin-left: 6px; }
+.riven-main { display: flex; gap: 12px; align-items: flex-start; }
+.riven-left { flex: 0 0 320px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.riven-left-head { display: flex; align-items: center; justify-content: space-between; }
+.riven-compose { display: flex; flex-direction: column; gap: 6px; }
+.riven-right { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+.riven-search { width: 100%; flex: none; }
+/* 右栏顶部一行：排序按钮组 + 搜索框（D-168） */
+.riven-right-top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 12px; }
+.riven-right-top .riven-search { width: auto; flex: 1 1 140px; min-width: 0; }
+
+/* 左：一个词条槽（词条选择 + 数值滑杆 + 区间 + 这一条的收益） */
+.riven-slot {
+  background: var(--panel-2); border: 1px solid #4a3a63; border-radius: 5px;
+  padding: 6px 8px; display: flex; flex-direction: column; gap: 4px;
+}
+.riven-slot.neg { border-color: #5a3a3a; }
+.riven-slot.empty { border-style: dashed; border-color: var(--line); }
+.riven-slot-head { display: flex; align-items: center; gap: 6px; }
+/* 词条槽顶行：整行是拖拽手柄（需求方：滑杆要能正常拖） */
+.riven-slot-head.draggable { cursor: grab; }
+.riven-slot-name {
+  flex: 1; min-width: 0; font-size: 12px; font-weight: 600; color: #dcd0f2;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.riven-slot.empty .riven-slot-name { color: #555d6b; font-weight: 400; }
+.riven-slot-tag { font-size: 10px; color: #b48ce8; flex: none; }
+.riven-slot.neg .riven-slot-tag { color: var(--neg); }
+.riven-slot select {
+  flex: 1; min-width: 0;
+  background: #1c2027; color: var(--text); border: 1px solid var(--line);
+  border-radius: 4px; font-size: 12px; padding: 2px 4px;
+}
+.riven-slot-row { display: flex; align-items: center; gap: 6px; font-size: 11.5px; }
+.riven-slot-row input[type='range'] { flex: 1; min-width: 0; accent-color: #b48ce8; }
+.riven-slot-row input[type='number'] {
+  width: 74px; flex: none;
+  background: #1c2027; color: var(--text); border: 1px solid var(--line);
+  border-radius: 4px; font-size: 11.5px; padding: 1px 4px;
+  font-variant-numeric: tabular-nums;
+}
+.riven-range { color: var(--muted); font-size: 10.5px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.riven-stat-gain { font-variant-numeric: tabular-nums; font-weight: 600; font-size: 11.5px; }
+.riven-slot-hint { color: #555d6b; font-size: 11.5px; }
+.riven-rarity { font-size: 10.5px; color: #b48ce8; margin-left: auto; }
+/* 整卡预览卡：可以拖到 Mod 槽（装了以后就不能再拖，见 app.js） */
+.riven-slot.draggable { cursor: grab; }
+.riven-slot.draggable:hover { border-color: #a07ad0; }
+.riven-slot.installed { border-color: #7a5aa8; background: #2a2137; }
+/* 词条槽 / 待选区作为拖拽目标时的高亮（D-165） */
+.riven-slot.drop-target,
+.riven-compose.drop-target,
+.riven-candidates.drop-target { border-color: #a07ad0; background: #2a2137; }
+.riven-slot.draggable.dragging { opacity: 0.45; }
+/* 待选词条行：可拖（与备选 Mod 卡一致） */
+.riven-row.draggable { cursor: grab; }
+.riven-row.dragging { opacity: 0.45; }
+
+/* 右：待选词条表（一个词条一行，带区间与收益） */
+.riven-candidates {
+  max-height: 46vh; overflow: auto;
+  border: 1px solid var(--line); border-radius: 5px;
+  background: var(--panel-2);
+}
+.riven-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 8px; align-items: baseline;
+  padding: 3px 9px; cursor: pointer;
+  border-bottom: 1px solid #262b33;
+  font-size: 12px;
+}
+.riven-row:last-child { border-bottom: 0; }
+.riven-row:hover { background: #2a2f3a; }
+.riven-row.used { opacity: 0.4; cursor: default; }
+.riven-row .riven-row-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.riven-row .riven-row-val { color: #c9b3ea; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.riven-row .riven-row-gain { font-variant-numeric: tabular-nums; font-weight: 600; white-space: nowrap; min-width: 64px; text-align: right; }
+.riven-empty { padding: 10px; color: var(--muted); font-size: 12px; }
+
+/* 槽位里的裂罅卡：紫色实线（表示"已装入的裂罅"），整卡收益 */
+.slot.riven { border-color: #7a5aa8; border-style: solid; background: #241d31; }
+.slot.riven .slot-name { color: #d3bcf5; }
+.slot-stat.riven-stat { background: #3a2d4f; color: #dcd0f2; }
+
 .opt { display: flex; align-items: center; gap: 4px; font-size: 11px; background: var(--panel-2); border: 1px solid var(--line); border-radius: 4px; padding: 2px 7px; cursor: pointer; }
 .opt:has(input:checked) { border-color: var(--accent); color: var(--accent); }
 

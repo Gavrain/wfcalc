@@ -31,6 +31,28 @@ export const DOT_COEF: Readonly<Record<string, number>> = {
 export const DOT_TYPES = ['heat', 'toxin', 'electric', 'gas', 'slash'];
 export type DoTType = (typeof DOT_TYPES)[number];
 
+/**
+ * **非伤害性异常**（需求方 2026-11-12）：会叠层，但本身不掉血，所以只有「层/秒」，没有每层伤害。
+ *
+ * > 「把非伤害性异常也加上去，标上 xx 层/秒就行，不需要后面那个伤害。」
+ *
+ * 顺序即界面顺序（需求方 2026-11-12：「复合元素在前，然后冰，然后冲击穿刺」）：
+ *   病毒 → 腐蚀 → 磁力 → 辐射 → 冰冻 → 冲击 → 穿刺
+ *
+ * ⚠ 这些类型**不参与**任何伤害口径（异常加权单层秒伤、六秒异常总伤都不变）。
+ *   冰冻也不改护甲（需求方 2026-11-12：「冰冻不会让护甲减半，这个不搞」）。
+ */
+export const NON_DAMAGE_STATUS_TYPES = [
+  'viral',
+  'corrosive',
+  'magnetic',
+  'radiation',
+  'cold',
+  'impact',
+  'puncture',
+] as const;
+export type NonDamageStatusType = (typeof NON_DAMAGE_STATUS_TYPES)[number];
+
 export const DOT_DURATION: Readonly<Record<DoTType, number>> = {
   heat: 6,
   toxin: 6,
@@ -78,6 +100,9 @@ export function multishot(
   mode?: AttackMode,
 ): number {
   const panel = weapon && mode ? panelStats(weapon, mode).multishot : (weapon?.modes[0]?.multishot ?? 1);
+  // 需求方 2026-11-13：锁多重（敏锐主武 / 敏锐手枪「Multishot cannot be modified」）——
+  // 装上后所有多重来源都不生效，多重恒为面板值。
+  if (contribs.some((c) => c.locksMultishot)) return panel;
   return bucket(panel, 'multishot', contribs);
 }
 
@@ -121,54 +146,41 @@ export interface DotTickDetail {
 }
 
 /**
- * DoT 每跳的基础值（D-107 / Q6 定案，需求方 2026-11-06）。
+ * DoT 每跳的基础值（需求方 2026-11-12 定为 **口径 B**）。
  *
  * ```
- * 每跳基础触发值 = Σ(命中基础分布) × 系数 × (1 + 元素加成按命中占比分摊之和)
+ * 每跳基础触发值 = dotBase 全部类型之和 × 系数
  * ```
  *
- * 关键：**元素 % 只作用于"它的类型真的出现在命中分布里"**。
- *   · 火焰 +90% 只放大火焰那一份 → 火被拿去合成毒气后，那一份不存在，
- *     这个 +90% 对毒气 DoT **没有任何贡献**；
- *   · 毒气 % 只放大毒气那一份 → 由火 + 毒合成的毒气有那一份，所以吃得到；
- *   · 效价炼成那种"原生毒气 %"给的就是 `elemental:gas`，同样生效。
+ * **口径 B**（需求方原话：「B，dotbase就是不含元素mod乘区的全部之和」）：
+ *   · 基础值取 `dotBase` **所有伤害类型之和**，不是"该元素自己那一份"；
+ *     `dotBase` 本身已经剔除了元素 / 物理 Mod 的加量（见 `side='dotBase'`）；
+ *   · 所以纯物理武器即使面板上没有火，火 DoT 也有基础值；
+ *   · 元素 % 在 {@link dotTick} 的 ③ 单独乘一次（见下）。
  *
- * 这解释了需求方的原话：「火加毒确实是会合成毒气，但是他仍然是火焰加成，
- * 不会对毒气 dot 加成……火冰毒电这种 dot 是不会出现这个问题的，只有毒气有这个问题。」
+ * ⚠ 曾经的错误实现：按「`dotBase` 里各类型占比 × 该类型元素%」做加权分摊。
+ *   因为 `dotBase` **不含元素 Mod 加量**，面板上本来就没有元素的武器占比恒为 0，
+ *   于是元素 % 对 DoT 完全不起作用（火 / 电 / 毒 / 毒气的上限全被吃掉）。
  *
- * @param base      命中分布（暴击后、未含元素/物理 Mod 加量）
+ * `exclude` 保留给"某些类型不吃自己的元素 %"的场合（目前只有毒气的特例，在 `dotTick` 里处理）。
+ *
+ * @param base      命中分布（`dotBase`：暴击后、未含元素/物理 Mod 加量）
  * @param coef      DoT 该类型的系数
- * @param contribs  全部贡献（用来找元素 %）
- * @param exclude   不给加成的元素类型（例如 `['gas']`：毒气不吃"毒气 %"）
  */
-export function dotTickBase(
-  base: DamageSpread,
-  coef: number,
-  contribs: readonly Contribution[],
-  exclude: readonly DamageType[] = [],
-): number {
+export function dotTickBase(base: DamageSpread, coef: number): number {
   const total = spreadTotal(base);
   if (total === 0) return 0;
-  let elementMix = 0;
-  for (const key of Object.keys(base)) {
-    const t = key as DamageType;
-    if (exclude.includes(t)) continue;
-    const part = base[t] ?? 0;
-    if (part === 0) continue;
-    // 只按该类型**自己**的元素 % 加成，且只在它出现在命中分布里才算数
-    elementMix += (part / total) * sumPct(contribs, `elemental:${t}`);
-  }
-  return total * coef * (1 + elementMix);
+  return total * coef;
 }
 
 /**
- * §6.2 `dotTick`：DoT 每跳伤害（完整链）。**D-107 / Q6 定案后**：
+ * §6.2 `dotTick`：DoT 每跳伤害（完整链）。
  *
  * ```
- * ① 基础命中伤 = 命中分布（暴击后，**不含**元素/物理 Mod 加量）
+ * ① 基础命中伤 = dotBase 全部类型之和（暴击后、**不含**元素/物理 Mod 加量）
  *                 D-137：这一份**已含派系**（命中结算前的那一次，见 resolveSegment）
- * ② 基础触发值 = Σ① × 系数 × (1 + 元素加成分摊)   ← 见 dotTickBase
- * ③ 每跳伤害 = ② × (1 + Σ异常状态伤害%) × (1 + Σ派系%)      ← 派系**第二次**
+ * ② 基础触发值 = ① × 系数                                  ← 见 dotTickBase（口径 B）
+ * ③ 每跳伤害 = ② × (1 + 该类型元素%) × (1 + Σ异常状态伤害%) × (1 + Σ派系%)
  * ```
  *
  * ⚠ **派系乘两次是本项目已确认的口径，不是 bug**（`乘区归属表.md` §5.3、§6.2③）：
@@ -176,14 +188,15 @@ export function dotTickBase(
  *   第一次：计算 DoT 基础命中伤时，命中伤害已享受一次派系加成（§6.2 ①）
  *   第二次：DoT 每跳时，再乘一次派系加成（§6.2 ③）
  *   ```
- *   「这不是"平方"这种说法」——它是两次先后作用在同一数值上的两个独立乘算。
- *   D-136 我一度把这个第二次乘算删掉了，是**擅自改已确认口径**，D-137 已恢复。
  *
- * ⚠ **① 取的是所有类型之和，不是该类型自己的那一份**（文档 §6.2 原文：
- *   「计入：全部伤害类型（物理 + 元素）」）。
- *   之前错误地取了 `dotBase[t]`，导致：
- *     · 毒气完全由 Mod 合成、`dotBase` 里没有毒气这一项 → 每跳恒为 0；
- *     · 火焰/毒素等也只按自己那部分计，数值偏低。
+ * ⚠ **毒气吃「毒气 %」，不吃火 % / 毒 %**（需求方 2026-11-12 确认）：
+ *   毒气由火 + 毒合成，合成之后它**自己的类型是毒气**；
+ *   每跳的 ③ 只能按「毒气 %」放大，火 / 毒的元素 % 在合成阶段就已经结算完，
+ *   不会再去放大毒气 DoT。所以这里**不再对毒气做特殊排除**——
+ *   和其它 DoT 类型一样，各自吃自己那一份元素 %。
+ *
+ * ⚠ **爆炸不吃元素 %**（需求方 2026-11-12：「爆炸应该不生效」）：爆炸走 `blast.ts` 独立结算，
+ *   那里只有派系 / 暴击 / 异常状态伤害 / 爆头，没有元素 %。
  */
 export function dotTick(
   dotBase: DamageSpread,
@@ -191,20 +204,18 @@ export function dotTick(
   contribs: readonly Contribution[],
   opts: { factionPct: number; headshot?: HeadshotOptions; headshotMul: number },
 ): DotTickDetail {
-  // ① 基础命中伤（已含暴击 / 爆头 / 爆头暴击 / **派系第一次**，见 resolveSegment 的 tickBase）
+  // ① 基础命中伤 = 全部类型之和（口径 B）
   const baseValue = spreadTotal(dotBase);
-  // ② 该元素自己的那一份，仅用于展示/排查；不参与数值
+  // 该元素自己在 dotBase 里的那一份，仅用于展示 / 排查
   const ownTypeValue = dotBase[t] ?? 0;
-  // D-107（Q6）：毒气不吃"毒气 %"——它的两份来源早已被火/毒各自的 % 放大过，
-  // 命中分布里也没有 `gas` 这一项；其余类型照常按自己的 % 分摊。
-  const exclude: DamageType[] = t === 'gas' ? ['gas'] : [];
-  const baseTick = dotTickBase(dotBase, DOT_COEF[t] ?? 0, contribs, exclude);
-  // 该类型自己的元素 %（只用于展示；数值已按命中占比分摊进 baseTick）
+  // ② 基础触发值 = ① × 系数（不含任何元素 %）
+  const baseTick = dotTickBase(dotBase, DOT_COEF[t] ?? 0);
+  // ③ 该类型自己的元素 %（毒气吃「毒气 %」，与其它类型一致）
   const elementPct = sumPct(contribs, `elemental:${t}`);
   const statusDamagePct = sumPct(contribs, 'statusDamage');
-  // ── D-062 / D-137：DoT 每跳额外吃「异常状态伤害 %」，以及派系的**第二次**乘算 ──
-  // （元素 % 已在 baseTick 里按类型分摊；射速与多重影响的是"叠几层"。）
-  const tick = baseTick * (1 + statusDamagePct) * (1 + opts.factionPct);
+  // ③ 元素 % → 异常状态伤害 % → 派系第二次
+  // （射速与多重影响的是"叠几层"，不在这条链上。）
+  const tick = baseTick * (1 + elementPct) * (1 + statusDamagePct) * (1 + opts.factionPct);
   return {
     type: t,
     baseValue,

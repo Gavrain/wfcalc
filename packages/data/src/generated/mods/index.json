@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-12T09:01:11.723Z",
+  "generatedAt": "2026-11-13T11:24:37.291Z",
   "sources": [
     {
       "name": "mods/baseline.json",
@@ -39,7 +39,7 @@
     "officialMatched": 478,
     "withStats": 478,
     "unresolvedWeapons": 0,
-    "meleeMissingSpecific": 34,
+    "meleeMissingSpecific": 35,
     "zhMissing": 0
   },
   "todo": {
@@ -56,8 +56,6 @@
       "KuvaGhoulSaw (Kuva Ghoulsaw)",
       "CrpGunbladeWeapon (Stropha)",
       "DuviriDualSwordsWeapon (Sun & Moon)",
-      "SentGlaiveWeapon (Deconstructor)",
-      "PrimeHeliosGlaiveWeapon (Deconstructor Prime)",
       "ReaperMeleeWeapon (Shadow Claws)",
       "SevagothShadowPrimeClawsWeapon (Shadow Claws Prime)",
       "PacifistFist (Desert Wind)",
@@ -80,6 +78,9 @@
       "BerserkerMeleePrime (Valkyr Prime Talons)",
       "BerserkerMelee (Valkyr Talons)",
       "NechroTechSwordWeapon (Ironbride)",
+      "ZanukaPetMeleeWeaponIP (Batoten)",
+      "ZanukaPetMeleeWeaponIS (Lacerten)",
+      "ZanukaPetMeleeWeaponPS (Akaten)",
       "TnBayonetMeleeWeapon (Vinquibus (Melee))",
       "PrimeCorufellScytheWeapon (Corufell Prime)"
     ],

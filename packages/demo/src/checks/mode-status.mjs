@@ -11,6 +11,13 @@ import { createChecks } from '../dom/report.mjs';
 import { loadPage } from '../dom/load-page.mjs';
 
 const { registry, html } = await loadPage({ waitMs: 400 });
+// ⚠ 2026-11-12：守护 / 同伴武器（Gremlin 阿塔克斯）并进主要大类后成了默认武器，
+//   它们**不能装赋能**，右侧赋能区是收起的 —— 本脚本要验证赋能互换，先切一把普通步枪。
+//   守护武器禁用赋能由 `interact.mjs` 第 50 节专门验证。
+if (typeof globalThis.__wfcalcSwitchWeapon === 'function') {
+  await globalThis.__wfcalcSwitchWeapon('Rifle');
+  await new Promise((r) => setTimeout(r, 400));
+}
 const rec = createChecks('mode-status');
 const check = rec.check.bind(rec);
 
@@ -360,10 +367,14 @@ check('备选区已渲染', registry['#candidate-list'].children.length > 50);
   const text = out.textContent;
   check('口径含「单弹头」且标 /弹头', text.includes('单弹头') && text.includes('/弹头'));
   check('口径含「单次射击」且标 /发', text.includes('单次射击') && text.includes('/发'));
-  check('「每秒命中」已改名「爆发伤害」', text.includes('爆发伤害') && !text.includes('每秒命中'));
-  check('「持续射击」已改名「持续伤害」', text.includes('持续伤害'));
-  check('DoT 改为「加权每层秒伤」与「六秒异常状态总伤」（D-057/D-060）',
-    text.includes('DoT 加权每层秒伤') && text.includes('六秒异常状态总伤'));
+  // ⚠ 2026-11-12 口径统一改名（见 interact.mjs 第 15 节，唯一维护点）：
+  //   「爆发伤害」→「连发秒伤」、「持续伤害」→「续航秒伤」、
+  //   「DoT 加权每层秒伤」→「异常加权单层秒伤」、「六秒异常状态总伤」→「六秒异常总伤」。
+  check('口径里有「连发秒伤」（旧的「爆发伤害」已不存在）',
+    text.includes('连发秒伤') && !text.includes('爆发伤害') && !text.includes('每秒命中'));
+  check('口径里有「续航秒伤」', text.includes('续航秒伤'));
+  check('异常口径改为「异常加权单层秒伤」与「六秒异常总伤」（D-057/D-060）',
+    text.includes('异常加权单层秒伤') && text.includes('六秒异常总伤'));
   check('旧名「DoT 六秒总伤」已不存在', !text.includes('DoT 六秒总伤'));
   check('口径行数 = 6', out.children.length === 6);
 }
@@ -373,7 +384,7 @@ check('备选区已渲染', registry['#candidate-list'].children.length > 50);
   const picker = registry['#metric-options'];
   check('增幅基准单选框存在', picker.children.length === 6);
   const opts = picker.children.map((l) => l.textContent);
-  check('单选框使用新名称', opts.some((t) => t.includes('爆发伤害')) && opts.some((t) => t.includes('单弹头')));
+  check('单选框使用新名称', opts.some((t) => t.includes('连发秒伤')) && opts.some((t) => t.includes('单弹头')));
 }
 
 // ── 17. 暴击分档常驻显示在伤害分布下 ──
@@ -455,7 +466,11 @@ check('玄骸显示 60%', registry['#kuva-ratio-val'].textContent === '60%');
   check('玄骸加成位于武器面板之上', kuvaPos > 0 && kuvaPos < panelPos);
   const dmgPos = html.indexOf('id="damage-table"');
   const outPos = html.indexOf('id="output-list"');
-  check('伤害数值紧跟伤害分布之后', outPos > dmgPos && outPos - dmgPos < 400);
+  // 2026-11-12：异常状态整块（`#dot-detail`）插在「伤害分布」与「伤害」之间，
+  //   所以"紧跟"的判据要按**中间允许夹异常状态块**来算，不能再用固定 400 字符。
+  const dotPos = html.indexOf('id="dot-detail"');
+  check('伤害数值紧跟伤害分布之后（中间只夹异常状态块）',
+    outPos > dmgPos && (dotPos > dmgPos && dotPos < outPos) && html.slice(dmgPos, outPos).indexOf('id="panel-table"') < 0);
   const arcanePos = html.indexOf('id="arcane-list"');
   const detailPos = html.indexOf('id="detail"');
   // D-127：赋能待选区回到右栏、拆解**上方**（D-124 曾挪到中栏，拖到左边槽位太远）

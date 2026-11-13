@@ -1,4 +1,4 @@
-﻿/**
+/**
  * D-055：配装里**没有**的元素不会触发，层数与秒伤必须为 0。
  *
  * bug 背景：`dotTick` 的 ① 基础值取的是**全类型之和**（§6.2 要求），
@@ -62,7 +62,7 @@ describe('没有的元素不触发（D-055）', () => {
     const res = compute(weapon, slashOnly, [], {});
     const out: any = res.output;
     near(out.blast.perStack, 0);
-    near(out.blast.perSecond, 0);
+    near(out.blast.totalInWindow ?? 0, 0);
     assert.equal(out.blast.stacksPerSecond, 0);
   });
 

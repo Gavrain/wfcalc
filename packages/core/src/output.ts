@@ -1,38 +1,44 @@
 /**
- * L6 输出口径（表 0.1 / 0.2 / 9 节）：把单段结算结果折算成六个可比较的伤害量。
+ * L6 输出口径（表 0.1 / 0.2 / 9 节）：把单段结算结果折算成可比较的伤害量。
  *
  * ```
- * 单弹头伤害 = 合成后总伤 × 暴击期望 × 爆头开关（实弹**不乘多重**）
- * 单次射击   = 单弹头 × 多重
- * 每秒命中   = 单次射击 × 射速（**不含装填**）
- * 持续射击   = 单次 × 弹匣 / (弹匣/射速 + 装填)（口径 B，全文档唯一除法）
- * DoT        = Σ 各类型（每秒叠层 × 每跳），与六秒曲线
+ * 单弹头         = 合成后总伤 × 暴击期望 × 爆头开关（实弹**不乘多重**）
+ * 单次射击       = 单弹头 × 多重
+ * 连发秒伤       = 单次射击 × 射速（**不含装填**）
+ * 续航秒伤       = 单次 × 弹匣 / (弹匣/射速 + 装填)（口径 B，全文档唯一除法）
+ * 异常加权单层秒伤 / N 秒异常总伤 = Σ 各类型（每秒叠层 × 每跳），与 N 秒曲线
+ * N 秒总伤       = 续航秒伤 × N + N 秒异常总伤          ← D-171
  * ```
+ *
+ * **D-171（需求方 2026-11-13）**：窗口从写死的 6 秒改成可选的 N 秒（1~6），
+ * 并把「续航秒伤 × N + 异常总伤」单列成一个口径（续航秒伤本身含装填）。
  */
 import type { AttackMode, Weapon } from './weapon.ts';
 import { firstSegment, panelStats } from './weapon.ts';
 import type { Contribution } from './contributions.ts';
 import { sumPct } from './contributions.ts';
 import { bucket } from './buckets.ts';
+import { bladeShadowMultiplier } from './crit.ts';
 import { spreadTotal } from './damage-types.ts';
 import type { Ctx } from './ctx.ts';
 import type { SegmentResult } from './segment.ts';
 import { factionFor } from './segment.ts';
-import type { DoTType } from './dot.ts';
-import { DOT_TYPES, multishot, stacksPerShot } from './dot.ts';
+import type { DoTType, NonDamageStatusType } from './dot.ts';
+import { DOT_TYPES, NON_DAMAGE_STATUS_TYPES, multishot, stacksPerShot } from './dot.ts';
 import type { DamageType } from './damage-types.ts';
 import type { BlastDetail } from './blast.ts';
 import { BLAST, blastDetail } from './blast.ts';
 import { firingFraction } from './timeline.ts';
-import { dotSixSecondCurve, hasDotElement } from './six-second.ts';
+import { dotSixSecondCurve, hasDotElement, stacksInWindow } from './six-second.ts';
 import { ammoEfficiencyMultiplier } from './weapon-state.ts';
+import { DEFAULT_DOT_WINDOW_SECONDS } from './ctx.ts';
 
 /**
  * D-107（Q6）：合成元素对应的**来源基础元素**。
  * 用于"这个触发池到底存不存在 / 该分多少份"——合成出来的元素没有面板份，
  * 但它的来源元素出现在基础分布里，就说明它确实会被触发。
  */
-const DOT_ELEMENT_SOURCES: Record<DoTType, readonly DamageType[]> = {
+const DOT_ELEMENT_SOURCES: Record<DoTType | NonDamageStatusType, readonly DamageType[]> = {
   blast: ['heat', 'cold'],
   gas: ['heat', 'toxin'],
   radiation: ['heat', 'electric'],
@@ -43,10 +49,32 @@ const DOT_ELEMENT_SOURCES: Record<DoTType, readonly DamageType[]> = {
   heat: [],
   toxin: [],
   electric: [],
+  cold: [],
+  impact: [],
+  puncture: [],
 };
 
 /** 输出口径 id（可比较 / 可作为备选区增幅基准的一类伤害量） */
-export type OutputId = 'pelletPerHit' | 'perShot' | 'hitDps' | 'sustainedDps' | 'dotPerSecond' | 'dot6s';
+export type OutputId =
+  | 'pelletPerHit'
+  | 'perShot'
+  | 'hitDps'
+  | 'sustainedDps'
+  | 'dotPerSecond'
+  | 'dot6s'
+  | 'totalInWindow'
+  | 'steadyDps';
+
+/**
+ * 口径 id 里「六秒」那个名字（D-171）。
+ *
+ * 字段名仍是 `dot6s`：它是**字段标识**，不是显示名。改名会让所有读它的测试、校验脚本、
+ * 界面代码一起失效，而显示名已经随秒数变了（{@link windowLabel}）。
+ */
+export const DOT_WINDOW_OUTPUT_ID: OutputId = 'dot6s';
+
+/** 「N 秒总伤」的口径 id（D-171） */
+export const WINDOW_TOTAL_OUTPUT_ID: OutputId = 'totalInWindow';
 
 export interface OutputLine {
   id: OutputId;
@@ -62,11 +90,26 @@ export interface OutputLine {
 export const OUTPUT_IDS: readonly OutputId[] = [
   'pelletPerHit', // 单弹头
   'perShot', // 单次射击
-  'hitDps', // 爆发伤害
-  'sustainedDps', // 持续伤害
-  'dotPerSecond', // DoT 每层秒伤
-  'dot6s', // DoT 六秒总伤
+  'hitDps', // 连发秒伤
+  'sustainedDps', // 续航秒伤
+  'dotPerSecond', // 异常加权单层秒伤
+  'dot6s', // N 秒异常总伤（字段名沿用旧的 dot6s，显示名随窗口秒数变）
+  'totalInWindow', // N 秒总伤（D-179：窗口内直击 + 窗口内异常）
+  'steadyDps', // 稳态秒伤（D-180）
 ];
+
+/**
+ * 窗口口径的显示名（D-171）。
+ *
+ * 需求方 2026-11-13：
+ * > 「六秒异常总伤改成 n 秒异常总伤」
+ * > 「六改成 6 吧」
+ *
+ * 所以**一律用阿拉伯数字**：「6 秒异常总伤 / 6 秒总伤」，不再用「六秒」这种中文数字。
+ */
+export function windowLabel(seconds: number): string {
+  return `${seconds}秒`;
+}
 
 export interface OutputBreakdown {
   lines: OutputLine[];
@@ -79,11 +122,22 @@ export interface OutputBreakdown {
   hitDps: number;
   sustainedDps: number;
   dotPerSecond: number;
+  /** N 秒异常总伤（含爆炸主目标，D-171） */
   dot6s: number;
+  /** 本结果的窗口长度（秒，D-171） */
+  windowSeconds: number;
+  /** N 秒总伤 = 窗口内直击 + N 秒异常总伤（D-179：直击也走开火时间线） */
+  totalInWindow: number;
+  /** 窗口内直击（= 连发秒伤 × 窗口内开火时长，D-179） */
+  directInWindow: number;
+  /** 稳态秒伤：续航秒伤 + 各异常按「一个循环内能叠的层数」折算（D-180） */
+  steadyDps: number;
   /** 每个 DoT 类型的每秒输出（期望层数 × 每跳）——**各段合并**后的合计 */
   dotPerType: Partial<Record<DoTType, number>>;
   /** 每个 DoT 类型的每秒期望叠层——**各段合并**后的合计 */
   stacksPerType: Partial<Record<DoTType, number>>;
+  /** 每个非伤害性异常的每秒期望叠层——**各段合并**后的合计（需求方 2026-11-12） */
+  nonDamageStacks: Partial<Record<NonDamageStatusType, number>>;
   /**
    * 逐段的 DoT 明细（需求方 2026-11-12）。
    *
@@ -103,12 +157,19 @@ export interface SegmentDotDetail {
   index: number;
   /** 该段每秒输出合计（Σ 各类型 每层秒伤 × 触发占比） */
   dotPerSecond: number;
-  /** 该段六秒异常状态总伤 */
+  /** 该段 N 秒异常总伤（含该段的爆炸主目标） */
   dot6s: number;
   /** 该段每个 DoT 类型的每层秒伤 */
   dotPerType: Partial<Record<DoTType, number>>;
   /** 该段每个 DoT 类型的每秒期望叠层 */
   stacksPerType: Partial<Record<DoTType, number>>;
+  /**
+   * 该段每个**非伤害性异常**的每秒期望叠层（需求方 2026-11-12）。
+   *
+   * 它们不掉血，所以只有层/秒，没有每层伤害；也不进任何伤害口径。
+   * 判据与 DoT 相同（D-109）：合成结束后面板里有这个元素才算。
+   */
+  nonDamageStacks: Partial<Record<NonDamageStatusType, number>>;
   /** 该段的爆炸明细 */
   blast: BlastDetail;
 }
@@ -133,9 +194,9 @@ export function fireRateFinal(weapon: Weapon, contribs: readonly Contribution[],
  * 所以这里的口径是：
  * ```
  * 每段：各自走完 ①玄骸 → ②基伤 → ③④⑤元素合成 → 暴击 → DoT 每跳 → 爆炸
- *        得到该段自己的「单弹头 / DoT 每层 / 六秒总伤」
- * 最后：命中类口径（单弹头 / 单次射击 / 爆发 / 持续）把各段**单弹头相加再乘多重与射速**
- *       DoT 与爆炸类口径把各段的**每秒叠层与每跳**各自累加后统一积分
+ *        得到该段自己的「单弹头 / 异常加权单层秒伤 / 六秒异常总伤」
+ * 最后：命中类口径（单弹头 / 单次射击 / 连发秒伤 / 续航秒伤）把各段**单弹头相加再乘多重与射速**
+ *       异常与爆炸类口径把各段的**每秒叠层与每跳**各自累加后统一积分
  * ```
  *
  * ⚠ 修掉的 bug：以前 `compute()` 只把 `segments[0]` 传进来，
@@ -153,21 +214,83 @@ export function fireRateFinal(weapon: Weapon, contribs: readonly Contribution[],
  * 这一段逻辑以前写在 `buildOutput` 里、只对 `segments[0]` 生效，
  * 多段武器（巴什穆电击+火焰、伯斯顿 Prime 灵化命中+爆炸）因此漏算后面的段。
  */
+/**
+ * 稳态秒伤里的**异常部分**（D-180，需求方 2026-11-13）。
+ *
+ * > 「加一个稳态秒伤……用来体现连续射击下弹匣装填的影响」
+ * > 「全部按一个循环」
+ *
+ * ```
+ * 每个 DoT 类型稳态每秒 = 每跳 × "一个循环内能叠的层数" ÷ 循环时长
+ * 一个循环内能叠的层数 = 层/秒 × 开火段时长（弹匣 ÷ 射速），毒气再按 10 层封顶
+ * 循环时长 = 开火段 + 装填
+ * ```
+ *
+ * 为什么全部用"一个循环"：装填期间不叠层，长期平均只跟"一个循环能叠多少"有关；
+ * 用固定 N 秒窗口会随窗口长度产生假亏损（弹匣比窗口长时火还没叠满就被截断）。
+ */
+function steadyStateDot(
+  segmentResults: readonly SegmentResult[],
+  contribs: readonly Contribution[],
+  ms: number,
+  fr: number,
+  mag: number,
+  reload: number,
+  window: number,
+  firingTimeline: (sec: number) => number,
+): number {
+  // 开火段 = 弹匣 ÷ 射速；数据缺失时退化为窗口长度
+  // 开火段 = 弹匣 ÷ 射速（一个循环里实际开火多久）
+  const fireDur = fr > 0 && mag > 0 ? mag / fr : window;
+  const cycle = fireDur + Math.max(0, reload);
+  if (!(cycle > 0)) return 0;
+  let total = 0;
+  for (const segRes of segmentResults) {
+    const seg = segmentDotAndBlast(segRes, contribs, ms, fr, firingTimeline, window);
+    for (const [t, rate] of Object.entries(seg.stacksPerType) as [DoTType, number][]) {
+      if (!(rate > 0)) continue;
+      const tick = segRes.dotTicks.find((d) => d.type === t);
+      if (!tick) continue;
+      const raw = rate * fireDur;
+      const stacks = t === 'gas' ? Math.min(10, raw) : raw;
+      total += tick.tick * stacks / cycle;
+    }
+  }
+  return total;
+}
+
 function segmentDotAndBlast(
   res: SegmentResult,
   contribs: readonly Contribution[],
   ms: number,
   fr: number,
   firingTimeline: (sec: number) => number,
+  window: number,
 ): {
   dotPerSecond: number;
   dot6s: number;
   dotPerType: Partial<Record<DoTType, number>>;
   stacksPerType: Partial<Record<DoTType, number>>;
+  nonDamageStacks: Partial<Record<NonDamageStatusType, number>>;
   blast: BlastDetail;
 } {
   const dotPerType: Partial<Record<DoTType, number>> = {};
   const stacksPerType: Partial<Record<DoTType, number>> = {};
+  const nonDamageStacks: Partial<Record<NonDamageStatusType, number>> = {};
+
+  /**
+   * **D-189：近战·刃影只放大叠层**（需求方 2026-11-13）。
+   *
+   * > 「DoT/爆炸基础值 × (1 + w·P1)；这里不对，不放大 dot 基础值。只放大叠层」
+   *
+   * 追加那一下是一次**独立攻击**，它自己也会触发异常，所以：
+   * ```
+   * 单发叠层期望 × 刃影倍率      ← 本函数的唯一接入点
+   * 每跳伤害（tick） × 1        ← 不放大
+   * ```
+   * 倍率由这一段自己的暴率 `res.critChance` 算（`P1 = 一级暴击概率`）。
+   */
+  const bladeMul = bladeShadowMultiplier(res.critChance, sumPct(contribs, 'bladeShadow'));
 
   // D-109（需求方 2026-11-06）：**该异常是否存在，只看「当前面板」里有没有这个元素**。
   //
@@ -215,28 +338,57 @@ function segmentDotAndBlast(
     dotPerType[tick.type] = perStackPerSecond;
     dotPerSecond += perStackPerSecond * shareOfType;
 
-    // ── 口径二：**六秒异常状态总伤**（D-043 / D-057 修订）──
+    // ── 口径二：**N 秒异常总伤**（D-043 / D-057 修订 / D-171）──
     // 单发层数 = 触发率 × 元素占比 × 多重；每秒叠层 = 单发层数 × 射速。
     // D-107：占比取自**这一段自己的**命中分布（`res.finalHit`）。
-    const stacksPerShotOfType = stacksPerShot(tick.type, res.finalHit, res.kind ? res.procChance : 0, contribs, res.beam, ms);
+    // D-189：单发叠层期望再乘刃影倍率（追加那一下自己也会触发异常）。
+    const stacksPerShotOfType =
+      stacksPerShot(tick.type, res.finalHit, res.kind ? res.procChance : 0, contribs, res.beam, ms) * bladeMul;
     const stacksPerSecond = stacksPerShotOfType * fr;
     stacksPerType[tick.type] = stacksPerSecond;
 
-    // **逐秒曲线**（§0.2 / D-057 / D-058 / D-059）
+    // **逐秒曲线**（§0.2 / D-057 / D-058 / D-059）/ 窗口长度由需求方选（D-171）
     dot6s += dotSixSecondCurve(
-      tick.type, stacksPerSecond, perStackPerSecond, 6, firingTimeline, stacksPerShotOfType,
+      tick.type, stacksPerSecond, perStackPerSecond, window, firingTimeline, stacksPerShotOfType,
     );
   }
 
-  // 爆炸异常（D-031）：独立机制，有 1.5 秒延迟、10 层上限、满层 3 倍。
+  // ── 非伤害性异常（需求方 2026-11-12）：只要层/秒，不掉血 ──
+  //
+  // > 「把非伤害性异常也加上去，标上 xx 层/秒就行，不需要后面那个伤害。」
+  //
+  // 层数算法与上面完全同一套：触发率 × 元素占比 × 多重 × 射速。
+  // 存在性判据也与 DoT 相同（D-109）：**合成结束后面板里有这个元素**才算，
+  // 所以「电毒火复合成腐蚀火」不会凭空多出一行毒气/病毒。
+  //
+  // ⚠ 这些值**不进**任何伤害口径：异常加权、N 秒异常总伤、爆炸都不读它。
+  //   冰冻不改护甲（需求方 2026-11-12：「冰冻不会让护甲减半，这个不搞」）。
+  for (const t of NON_DAMAGE_STATUS_TYPES) {
+    const present = (res.finalHit[t] ?? 0) > 0;
+    if (!present) {
+      nonDamageStacks[t] = 0;
+      continue;
+    }
+    nonDamageStacks[t] = stacksPerShot(t, res.finalHit, res.kind ? res.procChance : 0, contribs, res.beam, ms) * fr * bladeMul;
+  }
+
+  // 爆炸异常（D-031 / D-171）：独立机制。
+  //
+  //   · **主目标**：每层恒 0.3 倍，窗口里叠了几层就结算几层 —— 不看层数上限、不看 1.5 秒延迟
+  //     （需求方 2026-11-13：「爆炸叠层的快慢不影响主目标伤害」）；
+  //   · **范围**：只有 1.5 秒内叠满 10 层才触发，系数 0.3 → 3，单列展示、**不进任何总伤**。
   //
   // ⚠ 基础值**不能**取 `res.dotBase.blast`（D-056 修复）：
   //   dotBase 是"剔除元素/物理 Mod 加量"后的分布，而爆炸几乎总是由 Mod 合成
   //   （火+冰、火+电），dotBase 里根本没有 blast 这一项 → 恒为 0。
   //   按 §6.2 ①，DoT 基础值是「**全类型之和**」，爆炸同样适用。
   const blastBase = hasDotElement(res.finalHit, 'blast') ? spreadTotal(res.dotBase) : 0;
-  const blastStacks = stacksPerShot('blast', res.finalHit, res.procChance, contribs, res.beam, ms);
-  const detail = blastDetail(blastBase, blastStacks * fr, {
+  // D-189：爆炸叠层同样乘刃影倍率（每层基础值 `blastBase` 不动）
+  const blastStacks = stacksPerShot('blast', res.finalHit, res.procChance, contribs, res.beam, ms) * bladeMul;
+  const blastSps = blastStacks * fr;
+  // D-171：窗口内叠上的层数按**真实开火时间**逐秒累加（装填期间不叠）
+  const blastStacksInWindow = stacksInWindow(blastSps, window, firingTimeline);
+  const detail = blastDetail(blastBase, blastSps, {
     factionPct: factionFor(res.faction, contribs),
     statusDamagePct: sumPct(contribs, 'statusDamage'),
     // ⚠ 这里要的是**暴击倍率**，不是命中伤害的绝对值（D-056 修复）。
@@ -244,6 +396,8 @@ function segmentDotAndBlast(
     //   所以这里传 1，否则会重复乘。
     critDamageMul: 1,
     headshotMul: 1,
+    stacksInWindow: blastStacksInWindow,
+    window,
   });
 
   return {
@@ -251,13 +405,16 @@ function segmentDotAndBlast(
     dot6s,
     dotPerType,
     stacksPerType,
+    nonDamageStacks,
     blast: {
       ...detail,
-      // D-055：这一段没有爆炸元素时，爆炸根本不会触发 → 六秒总伤归 0
-      total6s: blastStacks > 0 ? detail.total6s : 0,
-      splash6s: blastStacks > 0 ? detail.splash6s : 0,
+      // D-055：这一段没有爆炸元素时，爆炸根本不会触发 → 总伤归 0
+      totalInWindow: blastStacks > 0 ? detail.totalInWindow : 0,
+      total6s: blastStacks > 0 ? detail.totalInWindow : 0,
+      splashOnTrigger: blastStacks > 0 ? detail.splashOnTrigger : 0,
+      splash6s: blastStacks > 0 ? detail.splashOnTrigger : 0,
       // 逐段口径：这一段的每秒叠层（不是整个模式的）
-      stacksPerSecond: blastStacks * fr,
+      stacksPerSecond: blastSps,
     },
   };
 }
@@ -292,27 +449,43 @@ export function buildOutput(
   //   · `magazine` 是**弹匣容量**的加法 %；
   //   · `reloadSpeed` 是**装填速度**的加法 %，装填**时间** = 面板时间 ÷ (1 + Σ装填速度%)；
   //   · **弹药效率**（D-084 / D-123）：每发实际只消耗 `1-x`，
-  //     打空同一份弹药能开 `1/(1-x)` 次 → 持续伤害里的弹匣要乘这个倍数
+  //     打空同一份弹药能开 `1/(1-x)` 次 → 续航秒伤里的弹匣要乘这个倍数
   //     （之前只写进了 `state.computed.等效弹匣`，`sustainedDps` 根本没有读它，
   //      所以主要·准星 / 次要·妨害 / 头盔射击这类弹药效率词条"看起来没生效"）。
-  //   这些词条都直接影响"持续伤害"口径，所以它们不算纯功能类 Mod。
+  //   这些词条都直接影响"续航秒伤"口径，所以它们不算纯功能类 Mod。
   //   面板值同样取该模式的（D-050）。
   const magBase: number = ps.magazineSize ?? 0;
   const mag: number = bucket(magBase, 'magazine', contribs) * ammoEfficiencyMultiplier(contribs);
   const reloadBase: number = ps.reloadTime ?? 0;
   const reloadSpeedMul: number = 1 + sumPct(contribs, 'reloadSpeed');
   const reload: number = reloadBase > 0 && reloadSpeedMul > 0 ? reloadBase / reloadSpeedMul : reloadBase;
-  const sustained: number = mag > 0 && fr > 0 ? (perShot * mag) / (mag / fr + reload) : 0;
+  /**
+   * 续航秒伤（需求方 2026-11-13）。
+   *
+   * ```
+   * 弹匣 > 0：续航秒伤 = 单次射击 × 弹匣 ÷ (弹匣 ÷ 射速 + 装填时间)
+   * 弹匣 = 0：续航秒伤 = 连发秒伤        ← 弹匣内无限子弹，不需要装填
+   * ```
+   *
+   * 弹匣 0 的武器（魔典等）在游戏里是「弹匣内无限子弹」，没有装填这回事。
+   * 以前这里直接算成 0，于是续航秒伤那一栏恒为 0，
+   * 连带弹药效率类赋能在它上面也恒为 0 收益（需求方：「直接等于连发秒伤」）。
+   */
+  const sustained: number = mag > 0 && fr > 0 ? (perShot * mag) / (mag / fr + reload) : hitDps;
+
+  // D-171：窗口长度由需求方选（1~6 秒），缺省 6 秒。
+  const window = ctx.dotWindowSeconds ?? DEFAULT_DOT_WINDOW_SECONDS;
 
   const seg = firstSegment(mode)!;
   const dotPerType: Partial<Record<DoTType, number>> = {};
   const stacksPerType: Partial<Record<DoTType, number>> = {};
+  const nonDamageStacks: Partial<Record<NonDamageStatusType, number>> = {};
   // 开火时间线（D-058 / D-067）：打满弹匣后要装填，期间不叠层。
   // D-067 改为**毫秒精度的开火占比**，否则射速提升会产生阶梯式负收益。
   const firingTimeline = (sec: number): number => firingFraction(mag, fr, reload, sec);
   // D-061：加权**只在有 DoT 的类型之间**分配。
   // 冲击/穿刺/辐射/腐蚀/病毒等没有 DoT 的类型**不参与**加权 ——
-  // 它们虽然也占触发池，但不会产生持续伤害，不该摊薄 DoT 的份。
+  // 它们虽然也占触发池，但不会产生 DoT，不该摊薄 DoT 的份。
   //
   // D-107（Q6）把"占比"拆成了两件事，必须分开算：
   //   ① **触发占比**（划分母/叠层用）→ 看**命中分布 `finalHit`**。
@@ -365,24 +538,24 @@ export function buildOutput(
   const blastAcc = {
     perStack: 0,
     perStackDetonated: 0,
-    perSecond: 0,
-    splashPerSecond: 0,
+    totalInWindow: 0,
+    splashOnTrigger: 0,
     splashActive: false,
-    dot6s: 0,
     stacksPerSecond: 0,
     reachesMaxInWindow: false,
   };
   const dotBySegment: SegmentDotDetail[] = [];
   for (let segIdx = 0; segIdx < segmentResults.length; segIdx++) {
     const segRes = segmentResults[segIdx]!;
-    const segOut = segmentDotAndBlast(segRes, contribs, ms, fr, firingTimeline);
+    const segOut = segmentDotAndBlast(segRes, contribs, ms, fr, firingTimeline, window);
     // 逐段各留一份（需求方 2026-11-12：异常状态要按段显示，各段触发自己的 DoT）
     dotBySegment.push({
       index: segIdx,
       dotPerSecond: segOut.dotPerSecond,
-      dot6s: segOut.dot6s + segOut.blast.total6s,
+      dot6s: segOut.dot6s + segOut.blast.totalInWindow,
       dotPerType: segOut.dotPerType,
       stacksPerType: segOut.stacksPerType,
+      nonDamageStacks: segOut.nonDamageStacks,
       blast: segOut.blast,
     });
     dotPerSecond += segOut.dotPerSecond;
@@ -393,19 +566,21 @@ export function buildOutput(
     for (const [t, v] of Object.entries(segOut.stacksPerType)) {
       stacksPerType[t as DoTType] = (stacksPerType[t as DoTType] ?? 0) + (v ?? 0);
     }
+    for (const [t, v] of Object.entries(segOut.nonDamageStacks)) {
+      nonDamageStacks[t as NonDamageStatusType] = (nonDamageStacks[t as NonDamageStatusType] ?? 0) + (v ?? 0);
+    }
     blastAcc.perStack += segOut.blast.perStack;
     blastAcc.perStackDetonated += segOut.blast.perStackDetonated;
-    blastAcc.perSecond += segOut.blast.perSecond;
-    blastAcc.splashPerSecond += segOut.blast.splashPerSecond;
+    blastAcc.totalInWindow += segOut.blast.totalInWindow;
+    blastAcc.splashOnTrigger += segOut.blast.splashOnTrigger;
     blastAcc.splashActive = blastAcc.splashActive || segOut.blast.splashActive;
-    blastAcc.dot6s += segOut.blast.total6s;
     blastAcc.stacksPerSecond += segOut.blast.stacksPerSecond;
     blastAcc.reachesMaxInWindow =
       blastAcc.reachesMaxInWindow || segOut.blast.reachesMaxInWindow;
   }
-  // 爆炸是**非 DoT 机制**（D-057）：不计入「DoT 每层秒伤」，但计入「六秒异常状态总伤」。
-  // 范围伤害（系数 3）依旧单独列出，不进合计（D-031 修订）。
-  dot6s += blastAcc.dot6s;
+  // 爆炸是**非 DoT 机制**（D-057）：不计入「异常加权单层秒伤」，但计入「N 秒异常总伤」。
+  // 进总伤的**只有主目标**；范围伤害（满层后对周围敌人系数 3）单列展示、不进任何总伤（D-171）。
+  dot6s += blastAcc.totalInWindow;
 
   const blast: BlastDetail = {
     perStack: blastAcc.perStack,
@@ -414,26 +589,73 @@ export function buildOutput(
     timeToMaxSeconds: blastAcc.reachesMaxInWindow && blastAcc.stacksPerSecond > 0
       ? BLAST.maxStacks / blastAcc.stacksPerSecond
       : null,
-    perSecond: blastAcc.perSecond,
+    totalInWindow: blastAcc.totalInWindow,
     perStackDetonated: blastAcc.perStackDetonated,
-    splashPerSecond: blastAcc.splashPerSecond,
+    splashOnTrigger: blastAcc.splashOnTrigger,
     splashActive: blastAcc.splashActive,
-    total6s: blastAcc.perSecond * 6,
-    splash6s: blastAcc.splashPerSecond * 6,
+    total6s: blastAcc.totalInWindow,
+    splash6s: blastAcc.splashOnTrigger,
   };
 
+  // D-179（需求方 2026-11-13）：**N 秒总伤的直击部分也走开火时间线**。
+  //
+  // > 「需要把 n 秒总伤的直击部分也一样改为计算装填窗口，射击窗口使用爆发伤害」
+  //
+  // 以前是 `续航秒伤 × N` —— 那是"每个循环都摊装填"的长期平均，窗口短于一个循环时会多扣装填。
+  // 现在与异常用**同一条** `firingFraction` 时间线：
+  //   窗口内直击 = 连发秒伤 × Σ 每秒开火占比     （发射即命中，装填期间不产生新伤害）
+  let firingSecondsInWindow = 0;
+  for (let sec = 1; sec <= window; sec++) firingSecondsInWindow += firingTimeline(sec);
+  const directInWindow = hitDps * firingSecondsInWindow;
+  const totalInWindow = directInWindow + dot6s;
+
+  // D-180：稳态秒伤（长期平均）——
+  //   直击：续航秒伤（已含装填摊薄）
+  //   异常：各类型在**一个循环**内能叠的层数 × 每跳 ÷ 循环时长
+  // ⚠ 稳态的"一个循环"必须用**真实的循环控制变量**，不能拿窗口 1 秒去积分开火占比
+  //   （窗口 1 秒时 firingFraction 恒为 1，会算出"1 秒开火叠满"的错误稳态）。
+  //   所以这里传一个不受窗口限制的时间线。
+  const cycleTimeline = (sec: number): number => firingFraction(mag, fr, reload, sec);
+  const steadyDot = steadyStateDot(segmentResults, contribs, ms, fr, mag, reload, window, cycleTimeline);
+  // 稳态秒伤 = 直击（续航秒伤，已含装填摊薄）+ 异常稳态
+  const steady = sustained + steadyDot;
+  const win = windowLabel(window);
   const lines: OutputLine[] = [
     { id: 'pelletPerHit', label: '单弹头', description: '合成后总伤 × 暴击期望 × 爆头开关', unit: '/弹头', value: pelletPerHit },
     { id: 'perShot', label: '单次射击', description: '单弹头 × 多重', unit: '/发', value: perShot },
-    { id: 'hitDps', label: '爆发伤害', description: '单次射击 × 射速（不含装填）', unit: '/秒', value: hitDps },
-    { id: 'sustainedDps', label: '持续伤害', description: '单次射击 × 弹匣 ÷ (弹匣÷射速 + 装填)', unit: '/秒', value: sustained },
-    { id: 'dotPerSecond', label: 'DoT 加权每层秒伤', description: '单层 DoT 每秒伤害 × 该类型触发占比（爆炸不计入）', unit: '/层/秒', value: dotPerSecond },
-    { id: 'dot6s', label: '六秒异常状态总伤', description: 'Σ 各类型逐秒累加（毒气封顶 10 层、火焰递增）；含爆炸', unit: '', value: dot6s },
+    { id: 'hitDps', label: '连发秒伤', description: '单次射击 × 射速（不含装填）', unit: '/秒', value: hitDps },
+    { id: 'sustainedDps', label: '续航秒伤', description: '单次射击 × 弹匣 ÷ (弹匣÷射速 + 装填)', unit: '/秒', value: sustained },
+    { id: 'dotPerSecond', label: '异常加权单层秒伤', description: '单层 DoT 每秒伤害 × 该类型触发占比（爆炸不计入）', unit: '/层/秒', value: dotPerSecond },
+    {
+      id: 'dot6s',
+      label: `${win}异常总伤`,
+      description: `Σ 各类型逐秒累加（毒气封顶 10 层、火焰递增）；含爆炸${win}对主目标的合计（不含范围伤害）`,
+      unit: '',
+      value: dot6s,
+    },
+    {
+      id: 'totalInWindow',
+      label: `${win}总伤`,
+      description: `窗口内直击（开火时长 × 连发秒伤）+ ${win}异常总伤`,
+      unit: '',
+      value: totalInWindow,
+    },
+    {
+      id: 'steadyDps',
+      label: '稳态秒伤',
+      description: '长期平均：续航秒伤 + 各异常按「一个循环内能叠的层数」折算',
+      unit: '/秒',
+      value: steady,
+    },
   ];
 
   return {
     lines: lines,
     pelletPerHit: pelletPerHit,
+    /** 稳态秒伤（D-180） */
+    steadyDps: steady,
+    /** 窗口内直击（D-179：开火时长 × 连发秒伤） */
+    directInWindow: directInWindow,
     multishot: ms,
     perShot: perShot,
     fireRate: fr,
@@ -441,8 +663,11 @@ export function buildOutput(
     sustainedDps: sustained,
     dotPerSecond: dotPerSecond,
     dot6s: dot6s,
+    windowSeconds: window,
+    totalInWindow: totalInWindow,
     dotPerType: dotPerType,
     stacksPerType: stacksPerType,
+    nonDamageStacks: nonDamageStacks,
     // 需求方 2026-11-12：异常状态按段显示，各段触发自己的 DoT
     dotBySegment: dotBySegment,
     blast: blast,

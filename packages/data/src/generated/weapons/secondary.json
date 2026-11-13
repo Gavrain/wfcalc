@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-11-12T09:03:52.193Z",
+  "generatedAt": "2026-11-13T13:45:23.349Z",
   "source": "WFCD/warframe-items (MIT)",
   "category": "secondary",
-  "count": 149,
+  "count": 148,
   "note": "暴率/触发为 0~1 小数；伤害分布为绝对值；procChance 同为 0~1；kuva 表示需用户在计算器里选元素与加成（25%~60%）",
   "weapons": [
     {
@@ -52,7 +52,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         }
       ]
     },
@@ -90,7 +91,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         }
       ]
     },
@@ -128,7 +130,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         }
       ]
     },
@@ -165,7 +168,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         }
       ]
     },
@@ -210,7 +214,8 @@
           ],
           "override": {
             "fireRate": 5
-          }
+          },
+          "_label": "普攻"
         }
       ]
     },
@@ -249,7 +254,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         }
       ]
     },
@@ -288,7 +294,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         }
       ]
     },
@@ -327,7 +334,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         }
       ]
     },
@@ -366,7 +374,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         }
       ]
     },
@@ -404,7 +413,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         }
       ]
     },
@@ -443,7 +453,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         }
       ]
     },
@@ -482,7 +493,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         }
       ]
     },
@@ -560,7 +572,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         }
       ]
     },
@@ -708,12 +721,14 @@
                 }
               ],
               "override": {
-                "critChance": 0.15
+                "critChance": 0.15,
+                "fireRate": 1
               }
             }
           ],
           "override": {
-            "critChance": 0.15
+            "critChance": 0.15,
+            "fireRate": 1
           }
         },
         {
@@ -739,7 +754,8 @@
               "override": {
                 "critChance": 0.2,
                 "critMultiplier": 2,
-                "statusChance": 0.2
+                "statusChance": 0.2,
+                "fireRate": 2.5
               }
             }
           ],
@@ -748,7 +764,8 @@
             "critMultiplier": 2,
             "statusChance": 0.2,
             "magazineSize": 0,
-            "reloadTime": 0
+            "reloadTime": 0,
+            "fireRate": 2.5
           }
         }
       ]
@@ -788,7 +805,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         },
         {
           "id": "incarnon",
@@ -800,6 +818,7 @@
             {
               "id": "direct",
               "label": "直接命中",
+              "trigger": "held",
               "segments": [
                 {
                   "kind": "attack",
@@ -807,7 +826,8 @@
                   "damage": {
                     "heat": 100
                   },
-                  "procChance": 0.24
+                  "procChance": 0.24,
+                  "beam": true
                 }
               ],
               "override": {
@@ -864,7 +884,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         },
         {
           "id": "incarnon",
@@ -948,7 +969,8 @@
           ],
           "override": {
             "fireRate": 3.5
-          }
+          },
+          "_label": "普攻"
         },
         {
           "id": "incarnon",
@@ -1025,7 +1047,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         },
         {
           "id": "incarnon",
@@ -1117,7 +1140,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         },
         {
           "id": "incarnon",
@@ -1439,7 +1463,8 @@
                 "fireRate": 0
               }
             }
-          ]
+          ],
+          "_label": "普攻"
         }
       ]
     },
@@ -1484,7 +1509,8 @@
           ],
           "override": {
             "fireRate": 1.8
-          }
+          },
+          "_label": "普攻"
         },
         {
           "id": "incarnon",
@@ -1510,7 +1536,7 @@
               "override": {
                 "critChance": 0.2,
                 "statusChance": 0.4,
-                "fireRate": 1
+                "fireRate": 1.6667
               }
             },
             {
@@ -1536,7 +1562,7 @@
           "override": {
             "critChance": 0.2,
             "statusChance": 0.4,
-            "fireRate": 1,
+            "fireRate": 1.6667,
             "magazineSize": 0,
             "reloadTime": 0
           }
@@ -1576,7 +1602,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         }
       ]
     },
@@ -1611,7 +1638,10 @@
                   },
                   "procChance": 0.22
                 }
-              ]
+              ],
+              "override": {
+                "fireRate": 2
+              }
             },
             {
               "id": "blast",
@@ -1625,9 +1655,15 @@
                   },
                   "procChance": 0.22
                 }
-              ]
+              ],
+              "override": {
+                "fireRate": 2
+              }
             }
-          ]
+          ],
+          "override": {
+            "fireRate": 2
+          }
         },
         {
           "id": "incarnon",
@@ -1702,7 +1738,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         },
         {
           "id": "incarnon",
@@ -1778,7 +1815,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         }
       ]
     },
@@ -1879,7 +1917,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         }
       ]
     },
@@ -1916,7 +1955,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         },
         {
           "id": "mode2",
@@ -2008,14 +2048,14 @@
               "override": {
                 "critChance": 0.4,
                 "statusChance": 0.2,
-                "fireRate": 1
+                "fireRate": 1.25
               }
             }
           ],
           "override": {
             "critChance": 0.4,
             "statusChance": 0.2,
-            "fireRate": 1
+            "fireRate": 1.25
           }
         },
         {
@@ -2087,7 +2127,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         }
       ]
     },
@@ -2126,7 +2167,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         },
         {
           "id": "mode2",
@@ -2197,7 +2239,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         }
       ]
     },
@@ -2247,7 +2290,10 @@
                   },
                   "procChance": 0.28
                 }
-              ]
+              ],
+              "override": {
+                "fireRate": 1
+              }
             },
             {
               "id": "blast",
@@ -2280,9 +2326,15 @@
                   },
                   "procChance": 0.28
                 }
-              ]
+              ],
+              "override": {
+                "fireRate": 1
+              }
             }
           ],
+          "override": {
+            "fireRate": 1
+          },
           "_label": "未蓄力投射物"
         }
       ]
@@ -2376,7 +2428,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         }
       ]
     },
@@ -2415,7 +2468,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         }
       ]
     },
@@ -2453,7 +2507,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         }
       ]
     },
@@ -2569,7 +2624,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         }
       ]
     },
@@ -2608,7 +2664,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         }
       ]
     },
@@ -2646,7 +2703,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         }
       ]
     },
@@ -2685,7 +2743,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         }
       ]
     },
@@ -2724,7 +2783,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         }
       ]
     },
@@ -2763,7 +2823,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         }
       ]
     },
@@ -2801,7 +2862,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         }
       ]
     },
@@ -2838,7 +2900,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         },
         {
           "id": "incarnon",
@@ -2858,7 +2921,8 @@
                   "damage": {
                     "radiation": 30
                   },
-                  "procChance": 0.18
+                  "procChance": 0.18,
+                  "beam": true
                 }
               ],
               "override": {
@@ -2957,7 +3021,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         }
       ]
     },
@@ -3070,7 +3135,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         }
       ]
     },
@@ -3243,7 +3309,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         }
       ]
     },
@@ -3282,7 +3349,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         }
       ]
     },
@@ -3398,7 +3466,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         },
         {
           "id": "incarnon",
@@ -3500,7 +3569,8 @@
           ],
           "override": {
             "fireRate": 2.83
-          }
+          },
+          "_label": "普攻"
         }
       ]
     },
@@ -3610,7 +3680,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         }
       ]
     },
@@ -3649,7 +3720,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         }
       ]
     },
@@ -3688,7 +3760,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         }
       ]
     },
@@ -3727,7 +3800,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         }
       ]
     },
@@ -3918,7 +3992,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         }
       ]
     },
@@ -4014,7 +4089,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         },
         {
           "id": "incarnon",
@@ -4092,7 +4168,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         }
       ]
     },
@@ -4131,7 +4208,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         },
         {
           "id": "incarnon",
@@ -4405,7 +4483,8 @@
                 "statusChance": 0.5
               }
             }
-          ]
+          ],
+          "_label": "普攻"
         },
         {
           "id": "mode2",
@@ -4483,7 +4562,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         },
         {
           "id": "incarnon",
@@ -4578,7 +4658,8 @@
                 "fireRate": 0
               }
             }
-          ]
+          ],
+          "_label": "普攻"
         }
       ]
     },
@@ -4616,7 +4697,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         }
       ]
     },
@@ -4655,7 +4737,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         },
         {
           "id": "incarnon",
@@ -4746,7 +4829,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         }
       ]
     },
@@ -4806,7 +4890,8 @@
           ],
           "override": {
             "fireRate": 2.83
-          }
+          },
+          "_label": "普攻"
         },
         {
           "id": "mode2",
@@ -4890,7 +4975,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         }
       ]
     },
@@ -5013,7 +5099,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         }
       ]
     },
@@ -5051,7 +5138,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         },
         {
           "id": "mode2",
@@ -5149,7 +5237,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         }
       ]
     },
@@ -5188,7 +5277,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         },
         {
           "id": "incarnon",
@@ -5266,7 +5356,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         },
         {
           "id": "incarnon",
@@ -5342,7 +5433,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         }
       ]
     },
@@ -5381,7 +5473,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         },
         {
           "id": "incarnon",
@@ -5457,7 +5550,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         },
         {
           "id": "incarnon",
@@ -5531,7 +5625,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         }
       ]
     },
@@ -5624,7 +5719,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         }
       ]
     },
@@ -5663,7 +5759,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         },
         {
           "id": "mode2",
@@ -5733,7 +5830,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         },
         {
           "id": "incarnon",
@@ -5809,7 +5907,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         }
       ]
     },
@@ -5848,7 +5947,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         }
       ]
     },
@@ -5948,7 +6048,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         }
       ]
     },
@@ -6026,7 +6127,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         }
       ]
     },
@@ -6064,7 +6166,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         },
         {
           "id": "mode2",
@@ -6163,9 +6266,15 @@
                   },
                   "procChance": 0.15
                 }
-              ]
+              ],
+              "override": {
+                "fireRate": 1.25
+              }
             }
-          ]
+          ],
+          "override": {
+            "fireRate": 1.25
+          }
         },
         {
           "id": "incarnon",
@@ -6190,7 +6299,8 @@
               "override": {
                 "critChance": 0.3,
                 "critMultiplier": 2.5,
-                "statusChance": 0.3
+                "statusChance": 0.3,
+                "fireRate": 2.5
               }
             }
           ],
@@ -6199,7 +6309,8 @@
             "critMultiplier": 2.5,
             "statusChance": 0.3,
             "magazineSize": 0,
-            "reloadTime": 0
+            "reloadTime": 0,
+            "fireRate": 2.5
           }
         }
       ]
@@ -6290,13 +6401,15 @@
               ],
               "override": {
                 "critChance": 0.5,
-                "critMultiplier": 3
+                "critMultiplier": 3,
+                "fireRate": 2.5
               }
             }
           ],
           "override": {
             "critChance": 0.5,
-            "critMultiplier": 3
+            "critMultiplier": 3,
+            "fireRate": 2.5
           }
         }
       ]
@@ -6336,7 +6449,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         }
       ]
     },
@@ -6489,7 +6603,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         }
       ]
     },
@@ -6540,7 +6655,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         }
       ]
     },
@@ -6579,7 +6695,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         },
         {
           "id": "incarnon",
@@ -6656,7 +6773,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         }
       ]
     },
@@ -6695,7 +6813,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         }
       ]
     },
@@ -6734,7 +6853,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         }
       ]
     },
@@ -6779,7 +6899,8 @@
           ],
           "override": {
             "fireRate": 5
-          }
+          },
+          "_label": "普攻"
         },
         {
           "id": "incarnon",
@@ -6855,7 +6976,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         },
         {
           "id": "incarnon",
@@ -6931,7 +7053,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         }
       ]
     },
@@ -6983,7 +7106,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         }
       ]
     },
@@ -7018,7 +7142,10 @@
                   },
                   "procChance": 0.26
                 }
-              ]
+              ],
+              "override": {
+                "fireRate": 5
+              }
             },
             {
               "id": "blast",
@@ -7032,9 +7159,15 @@
                   },
                   "procChance": 0.26
                 }
-              ]
+              ],
+              "override": {
+                "fireRate": 5
+              }
             }
-          ]
+          ],
+          "override": {
+            "fireRate": 5
+          }
         },
         {
           "id": "incarnon",
@@ -7108,7 +7241,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         }
       ]
     },
@@ -7295,12 +7429,14 @@
                 }
               ],
               "override": {
-                "critChance": 0.2
+                "critChance": 0.2,
+                "fireRate": 1
               }
             }
           ],
           "override": {
-            "critChance": 0.2
+            "critChance": 0.2,
+            "fireRate": 1
           }
         },
         {
@@ -7326,7 +7462,8 @@
               "override": {
                 "critChance": 0.25,
                 "critMultiplier": 2.2,
-                "statusChance": 0.25
+                "statusChance": 0.25,
+                "fireRate": 2.5
               }
             }
           ],
@@ -7335,7 +7472,8 @@
             "critMultiplier": 2.2,
             "statusChance": 0.25,
             "magazineSize": 0,
-            "reloadTime": 0
+            "reloadTime": 0,
+            "fireRate": 2.5
           }
         }
       ]
@@ -7375,7 +7513,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         },
         {
           "id": "incarnon",
@@ -7451,7 +7590,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         }
       ]
     },
@@ -7551,7 +7691,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         },
         {
           "id": "incarnon",
@@ -7701,7 +7842,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         },
         {
           "id": "mode2",
@@ -7764,7 +7906,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         }
       ]
     },
@@ -7803,7 +7946,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         }
       ]
     },
@@ -7842,7 +7986,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         }
       ]
     },
@@ -8000,7 +8145,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         },
         {
           "id": "mode2",
@@ -8069,55 +8215,8 @@
                 }
               ]
             }
-          ]
-        }
-      ]
-    },
-    {
-      "id": "TnDoppelgangerGrimoire",
-      "name": "Grimoire",
-      "nameZh": "魔典",
-      "category": "secondary",
-      "critChance": 0.08,
-      "critMultiplier": 1.6,
-      "statusChance": 0.1,
-      "fireRate": 1.5,
-      "reloadTime": 2,
-      "modes": [
-        {
-          "id": "primary",
-          "role": "normal",
-          "trigger": "auto",
-          "bullets": 1,
-          "multishot": 1,
-          "variants": [
-            {
-              "id": "direct",
-              "label": "直接命中",
-              "segments": [
-                {
-                  "kind": "impact",
-                  "aoe": false,
-                  "damage": {
-                    "impact": 8.4,
-                    "puncture": 3.6
-                  },
-                  "procChance": 0.1
-                },
-                {
-                  "kind": "attack",
-                  "aoe": false,
-                  "damage": {
-                    "impact": 17.5,
-                    "puncture": 7.5
-                  },
-                  "procChance": 0
-                }
-              ]
-            }
           ],
-          "_manual": "export-missing",
-          "_note": "WFCD 未收录该武器（多为显赫武器），面板来自官方导出，可能有误"
+          "_label": "普攻"
         }
       ]
     },
@@ -8130,6 +8229,7 @@
       "critMultiplier": 2,
       "statusChance": 0.26,
       "fireRate": 1.5,
+      "magazineSize": 0,
       "reloadTime": 0.01,
       "modes": [
         {
@@ -8153,7 +8253,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         },
         {
           "id": "mode2",
@@ -8225,7 +8326,9 @@
           },
           "_label": "Active Attack"
         }
-      ]
+      ],
+      "_manual": "bible",
+      "_note": "魔典弹匣内无限子弹；两份数据源都没有 magazineSize 字段，按需求方 2026-11-13 确认填 0（0 = 无需装填）"
     },
     {
       "id": "TnGuandoPistolGun",
@@ -8314,7 +8417,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         },
         {
           "id": "mode2",
@@ -8386,7 +8490,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         }
       ]
     },
@@ -8496,7 +8601,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         }
       ]
     },
@@ -8586,13 +8692,15 @@
               ],
               "override": {
                 "critChance": 0.48,
-                "critMultiplier": 2.6
+                "critMultiplier": 2.6,
+                "fireRate": 2.5
               }
             }
           ],
           "override": {
             "critChance": 0.48,
-            "critMultiplier": 2.6
+            "critMultiplier": 2.6,
+            "fireRate": 2.5
           }
         }
       ]
@@ -8644,7 +8752,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         }
       ]
     },
@@ -8689,7 +8798,8 @@
           ],
           "override": {
             "fireRate": 5
-          }
+          },
+          "_label": "普攻"
         }
       ]
     },
@@ -8728,7 +8838,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         }
       ]
     },
@@ -8820,7 +8931,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         }
       ]
     },
@@ -8859,7 +8971,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         }
       ]
     },
@@ -8898,7 +9011,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         }
       ]
     },
@@ -8936,7 +9050,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         },
         {
           "id": "incarnon",
@@ -9029,7 +9144,8 @@
           ],
           "override": {
             "fireRate": 1.8
-          }
+          },
+          "_label": "普攻"
         },
         {
           "id": "incarnon",
@@ -9055,7 +9171,7 @@
               "override": {
                 "critChance": 0.26,
                 "statusChance": 0.4,
-                "fireRate": 1
+                "fireRate": 1.6667
               }
             },
             {
@@ -9081,7 +9197,7 @@
           "override": {
             "critChance": 0.26,
             "statusChance": 0.4,
-            "fireRate": 1,
+            "fireRate": 1.6667,
             "magazineSize": 0,
             "reloadTime": 0
           }

@@ -316,6 +316,14 @@ export function buildWeaponState(
     flat.fireRate = [];
     mul.fireRate = [];
   }
+  // 锁定多重（需求方 2026-11-13）：敏锐主武 / 敏锐手枪「Multishot cannot be modified」——
+  // 与锁射速同构：装上后**所有**多重来源（正的负的都算）都不生效。
+  const lockedMultishot = contribs.some((c) => c.locksMultishot);
+  if (lockedMultishot) {
+    pct.multishot = [];
+    flat.multishot = [];
+    mul.multishot = [];
+  }
 
   const inputs: WeaponStateInputs = {
     panel: {

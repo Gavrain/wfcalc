@@ -19,10 +19,66 @@ import { sumPct } from './contributions.ts';
  * §3.1 / 表 2.0：暴率 = (面板 × (1+Σ暴率%) + 固定加算) × Πmul
  *
  * 面板取**该模式**的值（D-050）：模式有 override 时用它，否则回退武器级。
+ *
+ * **D-155：重击系攻击上，带 `heavyX2` 的暴击率贡献额外 ×2。**
+ * 需求方 2026-11-13：
+ * > 「近战的固定暴击率词条例如斩铁或者裂罅mod上都会带有重击时*2，对重击和重型震地生效。」
+ *
+ * 只放大**这部分贡献**，面板自带暴率（与其它暴击率 Mod）不受影响；
+ * 即 pct 支拿两份（×2 的那份 + 普通的），flat / mul 支不变。
  */
 export function critChanceTotal(weapon: Weapon, contribs: readonly Contribution[], mode?: AttackMode): number {
+  return Math.max(0, critChanceRaw(weapon, contribs, mode));
+}
+
+/**
+ * 未截断的暴击率（内部用）。
+ *
+ * 需求方 2026-11-13：**暴击率最低为 0，不会负** —— 负暴率没有物理意义，
+ * 而且会让期望倍率 < 1（= 白字反而打折），所以对外一律经由 {@link critChanceTotal} 截断。
+ */
+function critChanceRaw(weapon: Weapon, contribs: readonly Contribution[], mode?: AttackMode): number {
   const panel = mode ? panelStats(weapon, mode).critChance : weapon.critChance;
-  return bucket(panel, 'critChance', contribs);
+  if (!mode?._heavy) return bucket(panel, 'critChance', contribs);
+  const heavy = contribs.filter((c) => c.heavyX2 === true);
+  if (heavy.length === 0) return bucket(panel, 'critChance', contribs);
+  // 重击：原来的每个 heavyX2 贡献再加一份相同的量（等价于对这部分 ×2）
+  const doubled = [...contribs, ...heavy.map((c) => ({ ...c, source: `${c.source}#heavy` }))];
+  return bucket(panel, 'critChance', doubled);
+}
+
+/**
+ * 需求方 2026-11-13：**弱点暴击率**（敏锐主武 / 敏锐手枪）。
+ *
+ * 原话：「弱点就是爆头，只是游戏内部文本还没统一」——所以它和弱点伤害一样，
+ * **只在「开启爆头」时**加进暴击率；关闭爆头时整条不生效。
+ *
+ * ```
+ * 暴率 = bucket(面板, …) + (开启爆头 ? Σ弱点暴击率% : 0)
+ * ```
+ *
+ * 加的是**百分数加到暴率本身**（+350% = 暴率 +3.5），与 `bucket` 的百分比口径一致
+ * （内核里暴率 1.0 表示 100%，贡献的 `amount` 是百分数，所以除以 100）。
+ */
+export function weakpointCritChanceAdd(contribs: readonly Contribution[], headshotEnabled: boolean): number {
+  if (!headshotEnabled) return 0;
+  return sumPct(contribs, 'weakpointCritChance');
+}
+
+/**
+ * 需求方 2026-11-13：**打身体伤害的倍率**（细心瞄准的 `-45% Bodyshot Damage`）。
+ *
+ * 原话：「-45% 身体伤害就是减少未开启爆头配置的情况下，伤害总降」——
+ * 所以只在**关闭爆头**（= 打身体）时乘上去；开启爆头时恒为 1（不享受，也不吃这个负面）。
+ *
+ * ```
+ * 关闭爆头：命中伤害 ×(1 + Σ身体伤害%)      ← 细心瞄准时 ×(1 − 0.45)
+ * 开启爆头：不变
+ * ```
+ */
+export function bodyshotMultiplier(contribs: readonly Contribution[], headshotEnabled: boolean): number {
+  if (headshotEnabled) return 1;
+  return Math.max(0, 1 + sumPct(contribs, 'bodyshotDamage'));
 }
 
 /**
@@ -44,6 +100,68 @@ export interface CritTier {
   k: number;
   prob: number;
   mul: number;
+}
+
+/**
+ * **主命中正好是一级暴击**的概率（D-189，刃影的触发概率）。
+ *
+ * 需求方 2026-11-13：「一级暴击才触发，二级暴击时刃影可是不触发的」。
+ *
+ * ```
+ * cc ≤ 0        → 0
+ * 0 < cc ≤ 1    → cc           （小数部分就是升到一级的概率）
+ * 1 ≤ cc ≤ 2    → 2 − cc       （小数部分已是二级，一级只剩 1 − 小数）
+ * cc ≥ 2        → 0            （已经全是二级及以上，永远不是一级暴击）
+ * ```
+ */
+export function firstTierCritChance(cc: number): number {
+  if (!(cc > 0)) return 0;
+  if (cc <= 1) return cc;
+  return Math.max(0, 2 - cc);
+}
+
+/**
+ * **刃影收益关于暴击率的式子**（D-189，需求方 2026-11-13 逐轮确认）。
+ *
+ * ```
+ * cc = 暴击率（1 = 100%），cd = 暴击伤害，w = 刃影等级概率，d = cd − 1
+ * P1(cc) = 一级暴击概率                  ← firstTierCritChance
+ *
+ * 主命中期望倍率 B = 1 + cc·d
+ * 追加那一下期望 A = 1 + cc·d             ← 同一暴击率独立再判，含二级
+ * 本次挥砍期望     E = B + P1·w·A         ← 需求方实例（cd=4, cc=110%）= 8.17
+ *
+ * 增益（相对同一配装去掉刃影）= E/B − 1 = w · P1(cc)
+ * ```
+ *
+ * `A` 与 `B` 相等（追加与主命中**同分布**），所以 `cd` 在增益里被约掉：
+ * **收益只由「一级暴击出现概率」决定**，100% 暴击率处最高（满级 = +100%），
+ * 越过 100% 后二级暴击挤掉一级，线性降到 200% 处的 0。
+ *
+ * @param cc 当前暴击率（1 = 100%）
+ * @param w  刃影概率（0~1；未装刃影传 0）
+ */
+export function bladeShadowGain(cc: number, w: number): number {
+  return w * firstTierCritChance(cc);
+}
+
+/**
+ * **刃影倍率** = `1 + w·P1(cc)`（D-189）：同时乘到**命中平均**与**异常叠层期望**上。
+ *
+ * 需求方 2026-11-13 最终口径：
+ * > 「DoT/爆炸基础值 × (1 + w·P1)；这里不对，不放大 dot 基础值。只放大叠层」
+ *
+ * ```
+ * 命中平均       × 刃影倍率
+ * 异常叠层期望   × 刃影倍率        ← 追加是独立攻击，自己也触发异常
+ * DoT 每跳基础值 × 1             ← 不放大
+ * ```
+ *
+ * 未装刃影（w = 0）、暴率 ≤ 0、暴率 ≥ 200% 时恒为 1，行为与改动前逐位一致。
+ */
+export function bladeShadowMultiplier(cc: number, w: number): number {
+  if (!(w > 0)) return 1;
+  return 1 + bladeShadowGain(cc, w);
 }
 
 /** §3.1：上下限分档（暴率 150% → k=1，50% 概率 2 档、50% 概率 3 档） */

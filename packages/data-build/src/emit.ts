@@ -30,6 +30,13 @@ export interface EmitSegment {
   aoe: boolean;
   damage: DamageSpread;
   procChance: number;
+  /**
+   * 该段是射线（D-160）。**只写正面标记**，缺省 = 跟随所在攻击方式 / 模式的扳机。
+   *
+   * 目前只有灵化射线（托里德 / 野猪 / 赘骨的 Held 条 / 盗贼）会写，
+   * 判定见 `data/src/manual/incarnon-beam.ts`。
+   */
+  beam?: boolean;
 }
 
 /**
@@ -56,8 +63,11 @@ export interface EmitMode {
   id: string;
   role: string;
   /**
-   * 该模式的扳机。**射线的唯一判据**（D-148）：`'held'` 即射线，不另设 `beam` 字段。
+   * 该模式的扳机（D-148）。**普通模式下射线的唯一判据**：`'held'` 即射线。
    * 同一把武器的不同模式可以有各自的扳机（幻离子：主模式 held，子母弹副模式非 held）。
+   *
+   * ⚠ D-160：灵化模式例外——WFCD 的灵化攻击一律不带 `Held`，托里德 / 野猪 / 盗贼的射线
+   * 由人工表 `INCARNON_BEAM_ATTACKS` 点名，写在**段**的 `beam: true` 上。
    */
   trigger: string;
   bullets: number;
@@ -76,6 +86,17 @@ export interface EmitMode {
   _note?: string;
   /** D-141：模式展示名（如「球体融合」），界面优先于通用模式名 */
   _label?: string;
+  /**
+   * D-155：该模式是不是**重击系**（重型震地 / 重击 / 重击回旋刃）。
+   * 内核据此把「重击时 ×2」的固定暴击率词条（斩铁等）按双倍计入暴率。
+   */
+  _heavy?: boolean;
+  /**
+   * 需求方 2026-11-13：该模式是不是**震地系**（震地 / 重型震地）。
+   * 内核据此决定「震地伤害 +X%」（震波等）是否生效——它进独立的震地伤害乘区，
+   * 只对这两个模式起作用，普攻 / 重击 / 枪击都不吃。
+   */
+  _slam?: boolean;
 }
 
 export interface EmitWeapon {
@@ -122,6 +143,8 @@ const emitSegment = (s: DamageSegment): EmitSegment => ({
       .sort(([a], [b]) => a.localeCompare(b)),
   ),
   procChance: s.procChance,
+  // D-160：只写正面标记（射线），不写 `false`——缺省就是"跟随扳机"
+  ...(s.beam === true ? { beam: true } : {}),
 });
 
 function toEmitMode(m: AttackMode): EmitMode {
@@ -149,6 +172,8 @@ function toEmitMode(m: AttackMode): EmitMode {
     ...(m._manual ? { _manual: m._manual } : {}),
     ...(m._note ? { _note: m._note } : {}),
     ...(m._label ? { _label: m._label } : {}),
+    ...(m._heavy ? { _heavy: true } : {}),
+    ...(m._slam ? { _slam: true } : {}),
   };
 }
 

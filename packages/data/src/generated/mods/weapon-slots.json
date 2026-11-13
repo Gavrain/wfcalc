@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-12T09:01:11.717Z",
+  "generatedAt": "2026-11-13T11:24:37.285Z",
   "note": "modKinds = 该武器能装备的 Mod 槽位种类（对应 mods.json 的 slotKind）",
   "count": 765,
   "weapons": {
@@ -11688,7 +11688,7 @@
       "name": "Sweeper",
       "nameZh": "扫除者",
       "slots": {
-        "broad": "rifle",
+        "broad": "shotgun",
         "specific": [],
         "source": "wfcd-type",
         "basis": {
@@ -11699,7 +11699,7 @@
         "unresolved": false
       },
       "modKinds": [
-        "rifle",
+        "shotgun",
         "primary"
       ]
     },
@@ -11708,7 +11708,9 @@
       "nameZh": "分离",
       "slots": {
         "broad": "melee",
-        "specific": [],
+        "specific": [
+          "glaive"
+        ],
         "source": "manual",
         "basis": {
           "tags": [],
@@ -11718,15 +11720,15 @@
         "unresolved": false
       },
       "modKinds": [
-        "melee"
-      ],
-      "todo": "melee_specific"
+        "melee",
+        "glaive"
+      ]
     },
     "SentElecRailgun": {
       "name": "Vulklok",
       "nameZh": "金工火枪",
       "slots": {
-        "broad": "rifle",
+        "broad": "sniper",
         "specific": [],
         "source": "wfcd-type",
         "basis": {
@@ -11737,6 +11739,7 @@
         "unresolved": false
       },
       "modKinds": [
+        "sniper",
         "rifle",
         "primary"
       ]
@@ -11765,7 +11768,7 @@
       "name": "Prisma Burst Laser",
       "nameZh": "棱晶 激光点发",
       "slots": {
-        "broad": "rifle",
+        "broad": "pistol",
         "specific": [],
         "source": "wfcd-type",
         "basis": {
@@ -11776,15 +11779,14 @@
         "unresolved": false
       },
       "modKinds": [
-        "rifle",
-        "primary"
+        "pistol"
       ]
     },
     "PrimeSentShotgun": {
       "name": "Sweeper Prime",
       "nameZh": "扫除者 Prime",
       "slots": {
-        "broad": "rifle",
+        "broad": "shotgun",
         "specific": [],
         "source": "wfcd-type",
         "basis": {
@@ -11795,7 +11797,7 @@
         "unresolved": false
       },
       "modKinds": [
-        "rifle",
+        "shotgun",
         "primary"
       ]
     },
@@ -11841,7 +11843,7 @@
       "name": "Burst Laser Prime",
       "nameZh": "激光点发 Prime",
       "slots": {
-        "broad": "rifle",
+        "broad": "pistol",
         "specific": [],
         "source": "wfcd-type",
         "basis": {
@@ -11852,8 +11854,7 @@
         "unresolved": false
       },
       "modKinds": [
-        "rifle",
-        "primary"
+        "pistol"
       ]
     },
     "LaserRifle": {
@@ -11917,7 +11918,7 @@
       "name": "Burst Laser",
       "nameZh": "激光点发",
       "slots": {
-        "broad": "rifle",
+        "broad": "pistol",
         "specific": [],
         "source": "wfcd-type",
         "basis": {
@@ -11928,8 +11929,7 @@
         "unresolved": false
       },
       "modKinds": [
-        "rifle",
-        "primary"
+        "pistol"
       ]
     },
     "PrimeHeliosGlaiveWeapon": {
@@ -11937,7 +11937,9 @@
       "nameZh": "分离 Prime",
       "slots": {
         "broad": "melee",
-        "specific": [],
+        "specific": [
+          "glaive"
+        ],
         "source": "manual",
         "basis": {
           "tags": [],
@@ -11947,9 +11949,9 @@
         "unresolved": false
       },
       "modKinds": [
-        "melee"
-      ],
-      "todo": "melee_specific"
+        "melee",
+        "glaive"
+      ]
     },
     "ThermocorMoaWeapon": {
       "name": "Vulcax",
@@ -13409,7 +13411,7 @@
       "name": "Batoten",
       "nameZh": "巴托腾",
       "slots": {
-        "broad": "rifle",
+        "broad": "melee",
         "specific": [],
         "source": "wfcd-type",
         "basis": {
@@ -13420,15 +13422,15 @@
         "unresolved": false
       },
       "modKinds": [
-        "rifle",
-        "primary"
-      ]
+        "melee"
+      ],
+      "todo": "melee_specific"
     },
     "ZanukaPetMeleeWeaponIS": {
       "name": "Lacerten",
       "nameZh": "莱斯腾",
       "slots": {
-        "broad": "rifle",
+        "broad": "melee",
         "specific": [],
         "source": "wfcd-type",
         "basis": {
@@ -13439,15 +13441,15 @@
         "unresolved": false
       },
       "modKinds": [
-        "rifle",
-        "primary"
-      ]
+        "melee"
+      ],
+      "todo": "melee_specific"
     },
     "ZanukaPetMeleeWeaponPS": {
       "name": "Akaten",
       "nameZh": "阿卡腾",
       "slots": {
-        "broad": "rifle",
+        "broad": "melee",
         "specific": [],
         "source": "wfcd-type",
         "basis": {
@@ -13458,9 +13460,9 @@
         "unresolved": false
       },
       "modKinds": [
-        "rifle",
-        "primary"
-      ]
+        "melee"
+      ],
+      "todo": "melee_specific"
     },
     "WoundedInfestedCritterCommonRewardItem": {
       "name": "Sly Vulpaphyla",

@@ -31,6 +31,7 @@ import {
   isDualPistolByWfcd,
   resolveFromExport,
   resolveFromWfcd,
+  companionMeleeSpecificOf,
   slotsFromStanceTags,
   compatibleModKinds,
   type SlotResolution,
@@ -78,6 +79,8 @@ interface OfficialUpgrade {
   type: string;
   compatName?: string;
   description?: string;
+  /** 需求方 2026-11-13：官方「可装劣化槽」标记，见 `EXILUS_OVERRIDE` */
+  isUtility?: boolean;
 }
 
 interface OfficialUpgrades {
@@ -89,8 +92,24 @@ interface OfficialUpgrades {
     type?: string;
     compatName?: string;
     description?: string;
+    isUtility?: boolean;
   };
 }
+
+/**
+ * 劣化槽资格的**人工覆盖**（按英文名）。
+ *
+ * 需求方 2026-11-13：劣化槽资格以官方的 `isUtility` 字段为准，
+ * 但**换弹类**（收起武器时自动装填）也准进——理由：
+ * 「他不直接影响当前武器的输出，切换到别的武器才装填的」。
+ * 官方把这 4 张标成可进，这里只是把口径落成显式清单，避免以后被当成疏漏删掉。
+ */
+export const EXILUS_OVERRIDE: Readonly<Record<string, string>> = {
+  'Tactical Reload': '换弹类：收起武器时自动装填，不影响当前武器输出（需求方 2026-11-13）',
+  'Eject Magazine': '换弹类：收起武器时自动装填，不影响当前武器输出（需求方 2026-11-13）',
+  'Lock and Load': '换弹类：收起武器时自动装填，不影响当前武器输出（需求方 2026-11-13）',
+  'Bhisaj-Bal': '官方 isUtility=true（治愈羽箭）',
+};
 
 /** 官方赋能条目（只声明用到的字段） */
 interface ArcaneRaw {
@@ -168,10 +187,15 @@ async function loadWfcdWeaponIndex(force: boolean): Promise<{ index: Map<string,
   }
 }
 
-/** 从官方导出判定里取出**近战细分**（WFCD 没有这个字段，需求方：用官方架势兜底） */
-function meleeSpecificOf(fromExport: SlotResolution): SlotResolution['specific'] {
-  if (fromExport.broad !== 'melee') return [];
-  return fromExport.specific;
+/**
+ * 从官方导出判定里取出**近战细分**（WFCD 没有这个字段，需求方：用官方架势兜底）。
+ *
+ * @param fallback 官方导出没有架势标签时用的细类（同伴近战：分离 / 分离 Prime = 战刃，
+ *        见 `weapon-slots.ts` 的 `companionMeleeSpecificOf`）
+ */
+function meleeSpecificOf(fromExport: SlotResolution, fallback: SlotResolution['specific'] = []): SlotResolution['specific'] {
+  if (fromExport.broad !== 'melee') return fallback;
+  return fromExport.specific.length > 0 ? fromExport.specific : fallback;
 }
 
 /**
@@ -301,6 +325,7 @@ async function main(): Promise<number> {
       type: u.type ?? '',
       ...(u.compatName !== undefined ? { compatName: u.compatName } : {}),
       ...(u.description !== undefined ? { description: u.description } : {}),
+      ...(u.isUtility !== undefined ? { isUtility: u.isUtility } : {}),
     };
     const list = officialByName.get(en) ?? [];
     list.push(candidate);
@@ -468,10 +493,15 @@ async function main(): Promise<number> {
         ...(wfcdHit.type !== undefined ? { type: wfcdHit.type } : {}),
         ...(wfcdHit.file !== undefined ? { file: wfcdHit.file } : {}),
         ...(wfcdHit.productCategory !== undefined ? { productCategory: wfcdHit.productCategory } : {}),
+        // 守护 / 猎犬武器只能按 id + 英文名判槽（`resolveCompanionKind`）
+        ...(wfcdHit.name !== undefined ? { name: wfcdHit.name } : {}),
       });
       if (byWfcd) {
-        // 近战细分 WFCD 没有字段（需求方：可用官方架势兜底）→ 从官方判定里借架势标签
-        const specific = byWfcd.broad === 'melee' ? meleeSpecificOf(fromExport) : [];
+        // 近战细分 WFCD 没有字段（需求方：可用官方架势兜底）→ 从官方判定里借架势标签；
+        // 同伴近战（分离 = 战刃）官方导出也没有架势，用人工细类表补
+        const specific = byWfcd.broad === 'melee'
+          ? meleeSpecificOf(fromExport, companionMeleeSpecificOf(id))
+          : [];
         slots = {
           broad: byWfcd.broad,
           specific,

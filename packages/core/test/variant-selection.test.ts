@@ -148,7 +148,7 @@ describe('多段的统计口径各自算完再相加（需求方 2026-11-12）',
     assert.ok(res.segments.length >= 2, '这段测试需要多段');
   });
 
-  it('爆发伤害 / 持续伤害也按各段之和算', () => {
+  it('连发秒伤 / 续航秒伤也按各段之和算', () => {
     const { weapon, mode } = buildWeapon();
     const res = compute(weapon, mode, []);
     const sumOfSegments = res.segments.reduce((a, s) => a + s.line.average, 0);

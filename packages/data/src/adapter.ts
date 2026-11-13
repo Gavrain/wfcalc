@@ -19,6 +19,8 @@ export interface ModStat {
   unit: 'percent' | 'flat' | 'multiplier';
   kind: 'normal' | 'conditional' | 'functional' | 'special' | 'skip';
   levelValues: number[];
+  /** D-155：这条例在重击系攻击上 ×2（Mod 描述带 `(x2 for Heavy Attacks)` 或裂罅暴击词条） */
+  heavyX2?: boolean;
 }
 
 export interface ModRecord {
@@ -47,6 +49,11 @@ const FACTION_BY_MOD_ID: Readonly<Record<string, Faction>> = {
   primed_bane_of_orokin: 'orokin',
   bane_of_the_murmur: 'murmur',
   primed_bane_of_the_murmur: 'murmur',
+  // D-163：1999 势力的派系歧视 Mod（需求方 2026-11-12：「对应的派系歧视mod是存在的」）
+  bane_of_techrot: 'techrot',
+  primed_bane_of_techrot: 'techrot',
+  bane_of_scaldra: 'scaldra',
+  primed_bane_of_scaldra: 'scaldra',
 };
 
 export function factionOfMod(modId: string): Faction | null {
@@ -59,6 +66,8 @@ export const FACTION_LABELS: Readonly<Record<Faction, string>> = {
   infested: 'Infested',
   orokin: 'Orokin',
   murmur: 'Murmur（低语者）',
+  techrot: 'Techrot（科技孢子）',
+  scaldra: 'Scaldra（斯卡德拉）',
   none: '不计派系',
 };
 
@@ -72,11 +81,35 @@ export function modToContributions(mod: ModRecord, rank = mod.maxRank, slot?: nu
   // D-091：半自动炮轰系列（Semi-*-Cannonade）的负面「Fire Rate cannot be modified」。
   // 标记挂在**每条**贡献上，内核见到就清掉所有射速来源（正的负的都算）。
   const locksFireRate = SEMI_CANNONADE_MODS.has(mod.id);
+  // 需求方 2026-11-13：敏锐主武 / 敏锐手枪的「Multishot cannot be modified」，
+  // 与锁射速同构，挂到每条贡献上，内核见到就清掉所有多重来源。
+  const locksMultishot = LOCKS_MULTISHOT_MODS.has(mod.id);
   // 复合元素 Mod（如「生化弹药」同时给病毒与磁力）只能生效一个，取第一个，另一个标为未生效
   let compoundSeen = false;
   // 无限叠层类（弹能过继等）：数据值是每层值，按满层极限换算
   const stacks = modStackFactor(mod.id);
   for (const s of mod.stats) {
+    // 需求方 2026-11-13：**按连击倍率**加成的词条（急进猛突 / 创口溃烂）。
+    // 数据里是「每层连击倍率 +X%」，实际加量 = X% × 配置的连击倍率，
+    // 所以这里直接换算成最终百分比，交给内核当普通暴击率 / 触发率贡献。
+    const perCombo = COMBO_SCALED_STATS[s.stat];
+    if (perCombo) {
+      const value = s.levelValues[Math.min(rank, s.levelValues.length - 1)] ?? 0;
+      if (value === 0) continue;
+      const factor = comboFactor();
+      const amount = value * factor;
+      out.push({
+        stat: perCombo,
+        form: 'pct',
+        amount,
+        source: mod.id,
+        ...(slot !== undefined ? { slot } : {}),
+        ...(locksFireRate ? { locksFireRate: true } : {}),
+        ...(locksMultishot ? { locksMultishot: true } : {}),
+        label: `${mod.name.zh ?? mod.name.en} ${amount > 0 ? '+' : ''}${round(amount)}%（每层 ${round(value)}% × 连击倍率 ${factor}x）`,
+      });
+      continue;
+    }
     const stat = toContribStat(s, mod.id);
     if (!stat) continue;
     const value = s.levelValues[Math.min(rank, s.levelValues.length - 1)] ?? 0;
@@ -96,7 +129,11 @@ export function modToContributions(mod: ModRecord, rank = mod.maxRank, slot?: nu
       ...(slot !== undefined ? { slot } : {}),
       ...(suppressed ? { active: false } : {}),
       ...(locksFireRate ? { locksFireRate: true } : {}),
-      label: `${mod.name.zh ?? mod.name.en} ${fmtStatValue(s, amount)}${isCo ? ' / 每种异常状态' : ''}${stacks > 1 ? `（满层：每层 ${round(value)}% × ${stacks}）` : ''}${suppressed ? '（复合元素只能生效一个，已忽略）' : ''}`,
+      // 需求方 2026-11-13：锁多重（敏锐主武 / 敏锐手枪）
+      ...(locksMultishot ? { locksMultishot: true } : {}),
+      // D-155：重击系攻击上这条暴击率 ×2（斩铁 / 镀层斩铁 / 牺牲斩铁 / 裂罅暴击词条）
+      ...(s.heavyX2 && stat === 'critChance' ? { heavyX2: true } : {}),
+      label: `${mod.name.zh ?? mod.name.en} ${fmtStatValue(s, amount)}${isCo ? ' / 每种异常状态' : ''}${stacks > 1 ? `（满层：每层 ${round(value)}% × ${stacks}）` : ''}${suppressed ? '（复合元素只能生效一个，已忽略）' : ''}${s.heavyX2 && stat === 'critChance' ? '（重击时 ×2）' : ''}`,
     });
   }
   return out;
@@ -119,6 +156,14 @@ export const SEMI_CANNONADE_MODS: ReadonlySet<string> = new Set([
 export function isSemiCannonade(mod: { id: string }): boolean {
   return SEMI_CANNONADE_MODS.has(mod.id);
 }
+
+/**
+ * **锁多重**的 Mod（需求方 2026-11-13）。
+ *
+ * 原文：`+X% Weak Point Damage +X% Weak Point Critical Chance. Multishot cannot be modified.`
+ * ——与半自动炮轰系列的「射速无法被修改」同构，装上后所有多重来源都不生效。
+ */
+export const LOCKS_MULTISHOT_MODS: ReadonlySet<string> = new Set(['primary_acuity', 'pistol_acuity']);
 
 /** 判定所需的武器射击模式（只取需求方关心的字段） */
 export interface TriggerModeLike {
@@ -172,6 +217,74 @@ export function conditionOverloadMaxStacks(mod: ModRecord): number | null {
 }
 
 const COMPOUND_SET = new Set(['blast', 'gas', 'magnetic', 'radiation', 'corrosive', 'viral']);
+
+/**
+ * **按连击倍率**加成的词条（需求方 2026-11-13）。
+ *
+ * | 数据 stat | Mod | 换算 |
+ * |---|---|---|
+ * | `critChancePerCombo` | 急进猛突 +40%/层 | 暴率 += 40% × 连击倍率 |
+ * | `statusChancePerCombo` | 创口溃烂 +40%/层 | 触发 += 40% × 连击倍率 |
+ *
+ * 连击倍率来自 `setComboMultiplier()`，界面默认 12x（近战武器始终显示该配置框）。
+ */
+const COMBO_SCALED_STATS: Readonly<Record<string, 'critChance' | 'statusChance'>> = {
+  critChancePerCombo: 'critChance',
+  statusChancePerCombo: 'statusChance',
+};
+
+/** 连击倍率默认值（需求方：「默认 12x」；带凯旋之爪满层为 13x） */
+export const DEFAULT_COMBO_MULTIPLIER = 12;
+
+let comboMultiplier = DEFAULT_COMBO_MULTIPLIER;
+
+/**
+ * 设置当前的连击倍率（界面上的配置框调用它）。
+ *
+ * 放在适配层而不是内核：这个词条的加量 = 每层值 × 连击倍率，
+ * 换算成最终百分比后再当普通暴率 / 触发率贡献传给内核，内核不需要知道「连击」这回事。
+ */
+export function setComboMultiplier(v: number): void {
+  const n = Number(v);
+  comboMultiplier = Number.isFinite(n) && n > 0 ? n : DEFAULT_COMBO_MULTIPLIER;
+}
+
+/** 当前的连击倍率 */
+export function getComboMultiplier(): number {
+  return comboMultiplier;
+}
+
+function comboFactor(): number {
+  return comboMultiplier;
+}
+
+/** 次要·爆发的默认层数（需求方 2026-11-13：「默认可以设置成12层」） */
+export const DEFAULT_BURST_STACKS = 12;
+
+/** 次要·爆发的层数上限（「最高是带凯旋之爪时的13x连击倍率，即13层」） */
+export const MAX_BURST_STACKS = 13;
+
+let burstStacks = DEFAULT_BURST_STACKS;
+
+/**
+ * 设置次要·爆发的层数（界面配置框，**只有在装了次要·爆发时才显示**）。
+ *
+ * 层数 = 被消耗的连击倍率，范围 1~13，非法值回退到默认 12。
+ */
+export function setBurstStacks(v: number): void {
+  const n = Math.round(Number(v));
+  burstStacks = Number.isFinite(n) && n > 0 ? Math.min(MAX_BURST_STACKS, n) : DEFAULT_BURST_STACKS;
+}
+
+/** 当前的次要·爆发层数 */
+export function getBurstStacks(): number {
+  return burstStacks;
+}
+
+function burstStacksFactor(): number {
+  return burstStacks;
+}
+
 function isCompoundElement(t: string): boolean {
   return COMPOUND_SET.has(t);
 }
@@ -231,7 +344,7 @@ export function toContribStat(s: ModStat, modId: string): ContribStat | null {
       return 'statusDamage';
     case 'fireRate':
       return 'fireRate';
-    // 装填速度与弹匣容量直接影响「持续伤害」口径（D-037），
+    // 装填速度与弹匣容量直接影响「续航秒伤」口径（D-037），
     // 虽然数据里标成 functional/utility，但必须进计算。
     case 'reloadSpeed':
       return 'reloadSpeed';
@@ -245,6 +358,18 @@ export function toContribStat(s: ModStat, modId: string): ContribStat | null {
     case 'weakpointDamage':
     case 'headshotDamage':
       return 'headshotDamage';
+    // 需求方 2026-11-13：处决伤害进**独立的处决伤害乘区**（内核 `finisherDamage`）
+    case 'finisherDamage':
+      return 'finisherDamage';
+    // 需求方 2026-11-13：震地伤害进**独立的震地伤害乘区**，只对震地 / 重型震地生效
+    case 'slamDamage':
+      return 'slamDamage';
+    // 需求方 2026-11-13：「划砍就当百分比暴击就行」
+    case 'critOnSlide':
+      return 'critChance';
+    // 需求方 2026-11-13：细心瞄准的「-45% Bodyshot Damage」，只在关闭爆头时生效
+    case 'bodyshotDamage':
+      return 'bodyshotDamage';
     default:
       return null; // utility / special / skip 不影响伤害
   }
@@ -446,15 +571,18 @@ export function arcaneToContributions(arcane: ArcaneRecord, rank = arcane.maxRan
   // D-138：单数值槽拆多词条（次要·爆发：STAT_VALUE 同时是暴率与暴伤）
   const multi = ARCANE_MULTI_STATS[arcane.key];
   if (multi) {
+    // 需求方 2026-11-13：次要·爆发按**爆发层数**算（界面配置框，默认 12 层、最高 13 层）。
+    // 数据值是「每层消耗的连击倍率 +X% 暴率 / +X% 暴伤」，所以满层 = X% × 层数。
+    const burst = burstStacksFactor();
     for (const [, perStack] of perEntries) {
       for (const stat of multi) {
         out.push({
           stat,
           form: 'pct' as const,
-          amount: perStack * stacks,
+          amount: perStack * burst,
           source: arcane.key,
           ...(slot !== undefined ? { slot } : {}),
-          label: `${arcane.name.zh ?? arcane.name.en} +${perStack * stacks}%`,
+          label: `${arcane.name.zh ?? arcane.name.en} +${Math.round(perStack * burst * 100) / 100}%（每层 ${perStack}% × ${burst} 层）`,
         });
       }
     }
@@ -628,6 +756,11 @@ const ARCANE_STAT_OVERRIDES: Readonly<Record<string, Readonly<Record<string, Con
   PrimaryEnergyRegenOnImpactProc: { BONUS: null }, // 能量回复
   // 次要·冷颤：类镀层加成，**只对冰冻层数生效**（需求方 2026-11-06）
   SecondaryExtraDamagePerFreezeStack: { VAL: 'coFreeze' },
+  // ── 近战·刃影（D-189，需求方 2026-11-13）：`[0].CHANCE` = 25/40/55/70/85/100
+  //   是「基础暴击命中时追加一次攻击」的**概率**，不是状态触发几率。
+  //   ⚠ 不要登记 `STACKS`——它没有层数槽，`arcaneStackCount` 会自然回落到 1，
+  //     按等级直接取 CHANCE 就是满值（满级 100）。
+  ReplayLightCritHits: { CHANCE: 'bladeShadow' },
   // ── 词条名可识别，但指向的乘区要人工确认 ──
   LongbowDamageOnHeadshot: { DAMAGE: 'baseDamage' }, // "下一发"+300%
   StatusTriggerRadialDamage: { CHANCE: null, STAT1: null, RANGE: null }, // 需求方：设置成无效果
@@ -635,6 +768,10 @@ const ARCANE_STAT_OVERRIDES: Readonly<Record<string, Readonly<Record<string, Con
   IceMistOnKill: { CHANCE: null, DAMAGE: null },
   LightningStrikeOnKill: { CHANCE: null, DAMAGE: null },
   ToxicBloodOnKill: { CHANCE: null, DAMAGE: null },
+  // 需求方 2026-11-13：瀑流·强化的 750 是「触发异常时额外造成 750 伤害」——**附加伤害**，
+  // 不是加成词条。以前整张被 `ARCANE_IGNORED` 屏蔽（等于不存在），现在放行，
+  // 但数值不当作武器加成（null），界面上会显示「不参与增伤计算」。
+  SecondaryOnStatusProcBonusDamage: { AMOUNT: null },
 };
 
 /**
@@ -651,8 +788,22 @@ const ARCANE_STAT_OVERRIDES: Readonly<Record<string, Readonly<Record<string, Con
 const ARCANE_STACK_OVERRIDES: Readonly<Record<string, number>> = {
   SecondaryDamageOnHeatProc: 40, // 每层 12% × 40 = 480%
 };
+/**
+ * **没有层数槽**的赋能 → 层数恒为 1（需求方 2026-11-13 核对）。
+ *
+ * 霰弹·仇杀 / 近战·同化的官方原文**没有 STACKS**（数值槽只有 BONUS1 / BONUS2 / DURATION），
+ * 但旧实现按"每层值 × 40"在乘，等于多算了 40 倍：
+ * ```
+ * 霰弹·仇杀   多重 +180% / 装填 +75%（原文就是这么多，不是每层值）
+ * 近战·同化   重击伤害 +150% / 护盾 +30%
+ * ```
+ */
+const ARCANE_NO_STACKS: ReadonlySet<string> = new Set([
+  'ShotgunMultishotAndReloadSpeedOnCloseKill',
+  'HeavyAttackDamageAndShieldOnShieldBreak',
+]);
 
-const ARCANE_IGNORED = new Set<string>(['SecondaryOnStatusProcBonusDamage']);
+const ARCANE_IGNORED = new Set<string>([]);
 
 /** 解析单个赋能的某个词条 → 内核属性（null = 不参与伤害计算） */
 function resolveArcaneStatKey(
@@ -774,6 +925,8 @@ function statForArcaneKey(key: string): ContribStat | null | undefined {
 export function arcaneStackCount(arcane: ArcaneRecord, level?: { values: Record<string, number> }): number {
   const forced = ARCANE_STACK_OVERRIDES[arcane.key];
   if (forced !== undefined) return forced;
+  // 需求方 2026-11-13：原文没有 STACKS 槽的赋能，层数恒为 1（数值本身就是满值）
+  if (ARCANE_NO_STACKS.has(arcane.key)) return 1;
   const lv = level ?? arcane.levels[arcane.levels.length - 1];
   const desc = arcane.description?.en ?? '';
   const perStack = lv ? (arcanePerStackValues(arcane, lv)[0]?.[1] ?? 1) : 1;

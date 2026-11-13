@@ -146,8 +146,13 @@ export function applyElements(
   //
   // ⚠ 之前这里把 order 取成 -1000（负值），导致自带元素抢在所有 Mod 槽位之前配对：
   //   玄骸火 + 冰Mod 时，玄骸火先跟冰配成爆炸，把玩家想配毒气的火 Mod 晾在一边。
+  //
+  // D-174（2026-11-13，需求方确认）：**保持从 9 开始**。
+  //   槽位 0~7 是 8 个 Mod 槽，**8 是"假装装进去"的试算槽**——备选 Mod 与未安装的裂罅
+  //   共用这一号，因为它们**不会同时试算**（同一时刻只模拟装一样东西），所以不冲突。
+  //   自带元素本来就在所有 Mod 性来源之后，从 9 开始正好。
   const PANEL_ELEMENT_PRIORITY: readonly DamageType[] = ['heat', 'cold', 'electric', 'toxin'];
-  let panelOrder: number = 9; // 8 个 Mod 槽位是 0..7，自带元素从 9 开始
+  let panelOrder: number = 9; // 0~7 Mod 槽 / 8 试算槽 / 自带元素从 9 开始
   for (const t of PANEL_ELEMENT_PRIORITY) {
     const amount: number = base[t] ?? 0;
     if (amount > 0) {

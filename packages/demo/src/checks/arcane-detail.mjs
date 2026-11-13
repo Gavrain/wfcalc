@@ -18,6 +18,13 @@ const rec = createChecks('arcane-detail');
 const check = rec.check.bind(rec);
 
 const { registry, modules } = await loadPage({ waitMs: 700 });
+// ⚠ 2026-11-12：守护 / 同伴武器（Gremlin 阿塔克斯）并进主要大类后成了默认武器，
+//   它们**不能装赋能**，右侧赋能区是收起的 —— 本脚本要验证赋能本身，先切一把普通步枪。
+//   守护武器禁用赋能由 `interact.mjs` 第 50 节专门验证。
+if (typeof globalThis.__wfcalcSwitchWeapon === 'function') {
+  await globalThis.__wfcalcSwitchWeapon('Rifle');
+  await new Promise((r) => setTimeout(r, 400));
+}
 const store = modules.store.store;
 const arcList = () => registry['#arcane-list'].children;
 const arcSlot = () => registry['#arcane-slots'].children[0];
@@ -36,8 +43,8 @@ if (star) {
     text.includes('触发几率') && text.includes('弹药效率'), text.slice(0, 120));
   check('拆解有「输出口径 / 当前 / 装备后 / 增幅」表',
     text.includes('当前') && text.includes('装备后') && text.includes('增幅'));
-  check('拆解里「持续伤害」这一行有增幅（弹药效率生效）',
-    /持续伤害[^]*?%/.test(text), text.slice(0, 200));
+  check('拆解里「续航秒伤」这一行有增幅（弹药效率生效）',
+    /续航秒伤[^]*?%/.test(text), text.slice(0, 200));
   // D-129 / D-130：等效弹匣并进「面板」表，与输出口径同一形态（当前 / 装备后 / 增幅），
   // 行名就叫「等效弹匣」，不再写「弹匣（按弹药效率折算）」之类的括号说明。
   {

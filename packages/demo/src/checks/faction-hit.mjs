@@ -6,7 +6,7 @@
  * 需求方 2026-11-06：「派系伤害未对命中伤害生效，目前只对dot生效了。」
  *
  * 以前 `factionPct` 只传进了 `dotTick()`，`damageLine()` 没有乘派系 → 上「对 Grineer +30%」
- * 后 DoT 变了、命中/爆发/持续全不变。
+ * 后 DoT 变了、命中/连发/续航全不变。
  */
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';

@@ -29,9 +29,12 @@ import type { DamageLine } from './crit.ts';
 import {
   critChanceTotal,
   critDamageTotal,
+  bladeShadowMultiplier,
   damageLine,
   expectedHitMultiplier,
   headshotMultiplier,
+  weakpointCritChanceAdd,
+  bodyshotMultiplier,
 } from './crit.ts';
 import type { DoTType, DotTickDetail } from './dot.ts';
 import { DOT_TYPES, dotTick, multishot } from './dot.ts';
@@ -113,6 +116,9 @@ const FACTION_STATS: Readonly<Record<Exclude<Faction, 'none'>, `faction:${Factio
   infested: 'faction:infested',
   orokin: 'faction:orokin',
   murmur: 'faction:murmur',
+  // D-163：1999 的两个势力（派系歧视 Mod 与裂罅派系词条都会落到这两个键）
+  techrot: 'faction:techrot',
+  scaldra: 'faction:scaldra',
 };
 
 export function factionFor(faction: Faction, contribs: readonly Contribution[]): number {
@@ -183,14 +189,15 @@ export function resolveSegment(
   const { weapon, mode, contribs } = ctx;
   const panel: DamageSpread = { ...seg.damage };
 
-  // ── 该段是不是射线（需求方 2026-11-12：**按段判**）──
+  // ── 该段是不是射线（需求方 2026-11-12：**按段判**；D-160 补齐段级扳机）──
   //
-  // 模式扳机 `held` 只说明"这个模式是按住不放的武器"；段自己还可以声明 `beam`
-  // （数据层按 `shot_type` 判：只有 Hit-Scan 的段才是激光本体，方块弹 / 爆炸 / 换弹组是投射物）。
-  //   · `seg.beam === false` → 明确不是射线（即使模式是 held）；
-  //   · `seg.beam === true`  → 是射线（即使模式扳机不是 held，少见）；
-  //   · 未声明             → 跟随模式扳机（= `ctx.beam`）。
-  const isBeam: boolean = seg.beam ?? ctx.beam;
+  // 优先级（从强到弱）：
+  //   ① 段自己声明了 `beam`（数据层只写正面标记）→ 以它为准；
+  //   ② 段所在的**攻击方式**有自己的扳机（`variant.trigger`）→ 以它为准；
+  //      典型是赘骨的灵化：射线变体 `held`、蓄力变体 `charge`。⛔ 若漏掉这一层，
+  //      `ctx.beam` 会回退到模式扳机（灵化模式是 `held`），蓄力变体会被误算成射线；
+  //   ③ 否则跟随模式扳机（= `ctx.beam`）。
+  const isBeam: boolean = seg.beam ?? (seg.trigger ? seg.trigger === 'held' : ctx.beam);
 
   /**
    * §2.2 / 表 0.1：**射线的多重并进单弹头伤害**（多条激光打同一目标合并成一跳），
@@ -217,9 +224,30 @@ export function resolveSegment(
   // ③④⑤⑥ 元素 / 物理加量
   const elementResult: ApplyElementsResult = applyElements(baseAfterBaseDamage, contribs, 'hit');
   const finalHit: DamageSpread = elementResult.v;
+  /**
+   * 需求方 2026-11-13：**处决伤害 / 震地伤害是独立乘区**，不是基伤。
+   *
+   * 原话：「处决是开新乘区啊，只是不需要单独做处决开关」「他们是震地伤害乘区，可不是基伤」。
+   *
+   * ```
+   * 处决乘区 = 1 + Σ处决伤害%      ← 只有画龙点睛 / 猎人骨锯会贡献，平时恒为 1
+   * 震地乘区 = 1 + Σ震地伤害%      ← 只有震波会贡献，且**只对震地 / 重型震地生效**
+   * ```
+   * 两者都在元素合成**之后**乘上去（乘区内相加、乘区之间相乘），
+   * 所以不会和基伤 Mod 互相稀释。
+   *
+   * ⚠ 处决不做攻击类型判定（需求方：「处决就直接正常生效就行，因为跟普通攻击区分不开」）；
+   *    震地**必须**按 `mode._slam` 判定（需求方：「震波需要加标签判定啊，只对震地和重型震地生效」）。
+   */
+  const finisherMul: number = 1 + sumPct(contribs, 'finisherDamage');
+  const slamMul: number = mode._slam === true ? 1 + sumPct(contribs, 'slamDamage') : 1;
+  // 需求方 2026-11-13：细心瞄准的 -45% 身体伤害 —— 只在**关闭爆头**（打身体）时生效
+  const bodyMul: number = bodyshotMultiplier(contribs, ctx.headshot.enabled);
+  const specialMul: number = finisherMul * slamMul * bodyMul;
+  const finalHitWithSpecial: DamageSpread = specialMul === 1 ? finalHit : scaleSpread(finalHit, specialMul);
+
   /** 命中分布**剔除元素/物理 Mod 加量**后的样子（= 玄骸 + 基伤 之后、合成之前） */
   const finalHitNoAdd: DamageSpread = applyElements(baseAfterBaseDamage, contribs, 'dotBase').v;
-
   // DoT 基础值（§6.2 ①）：命中的**不含元素/物理 Mod 加量**的分布。
   //
   // 需求方 2026-11-06（Q6 定案）原文：
@@ -232,17 +260,20 @@ export function resolveSegment(
   // 也就是：DoT 每跳 = Σ(未加元素加量的命中分布) × 系数 × (1 + 元素加成按命中占比分摊)
   // 元素 %**不在基础值里乘**，而是按"它自己的类型"单独生效（见 dot.doTickBase）；
   // 暴击按期望倍率施加（见下面 dotBase / tickBase 的注释）。
-  const dotBaseRaw: DamageSpread = finalHitNoAdd;
+  const dotBaseRaw: DamageSpread = specialMul === 1 ? finalHitNoAdd : scaleSpread(finalHitNoAdd, specialMul);
 
   // L3 暴击 + 爆头
-  const cc = critChanceTotal(weapon, contribs, ctx.mode);
+  // 需求方 2026-11-13：弱点暴击率只在开启爆头时加到暴率上（弱点 == 爆头）。
+  const cc = critChanceTotal(weapon, contribs, ctx.mode) + weakpointCritChanceAdd(contribs, ctx.headshot.enabled);
   const cd = critDamageTotal(weapon, contribs, ctx.mode);
   const hsMul = headshotMultiplier(contribs, ctx.headshot.multiplier);
   // 派系（D-013：命中结算前一次）。D-135：这一项以前只进了 DoT，命中伤害完全没乘，
   // 所以上了「对 Grineer +55%」这类卡，命中伤害/爆发/持续都不动，只有 DoT 变了。
   const factionPct = factionFor(ctx.faction, contribs);
   const factionMul = 1 + factionPct;
-  const vTotal = spreadTotal(finalHit);
+  // 需求方 2026-11-13：处决 / 震地两个独立乘区已经并进 `finalHitWithSpecial`，
+  // 命中伤害直接用它，避免后面再乘一次。
+  const vTotal = spreadTotal(finalHitWithSpecial);
   /**
    * 命中伤害三行。
    *
@@ -252,6 +283,21 @@ export function resolveSegment(
    * 实弹：`msMul` 恒为 1，行为与改动前完全一致。
    */
   const line: DamageLine = damageLine(vTotal * msMul, cc, cd, ctx.headshot.enabled, hsMul, factionMul);
+  /**
+   * **D-189：近战·刃影**（需求方 2026-11-13）。
+   *
+   * 主命中为一级暴击时追加一次攻击，追加那一下按同一暴击率独立再判。
+   * ```
+   * 刃影倍率 = 1 + w·P1(cc)         ← crit.ts 的 bladeShadowMultiplier
+   * 增益（相对同一配装去掉刃影）= w·P1(cc)，与暴伤无关
+   * ```
+   * **只乘到「期望」上**（命中平均行）：
+   *   · 白字行 / 暴击行仍是单次结算的倍率，不乘（否则看起来像刃影连不暴击都放大）；
+   *   · **DoT / 爆炸的每跳基础值不放大**——需求方：「不放大 dot 基础值。只放大叠层」，
+   *     叠层那一侧在 `output.ts` 的 `bladeShadowMultiplier` 里处理。
+   */
+  const bladeMul: number = bladeShadowMultiplier(cc, sumPct(contribs, 'bladeShadow'));
+  if (bladeMul !== 1) line.average *= bladeMul;
 
   // ── D-062 / D-063：DoT 基础值 = 命中基础值 × **单弹头期望倍率** ──
   // 需求方口径：
@@ -271,11 +317,12 @@ export function resolveSegment(
   );
 
   /**
-   * 每跳用的「基础命中值」（D-107 / Q6 定案）：
+   * 每跳用的「基础命中值」（D-107 / Q6 定案，需求方 2026-11-12 定为**口径 B**）：
    * **不含元素/物理 Mod 加量**的命中分布（暴击由 `dotTick` 按期望倍率施加，避免重复）。
-   * 元素 % 由 `dotTick` 只按"命中分布里出现的类型"分摊（见 `dotTickBase`）。
+   * 每跳基础值取这份分布的**全部类型之和**；元素 % 由 `dotTick` 的 ③ 按该类型单独乘
+   * （见 `dotTickBase` / `dotTick`）。
    */
-  const tickBaseRaw: DamageSpread = finalHitNoAdd;
+  const tickBaseRaw: DamageSpread = specialMul === 1 ? finalHitNoAdd : scaleSpread(finalHitNoAdd, specialMul);
   /**
    * 与 `tickBaseRaw` 同源，但**已乘暴击/爆头期望倍率与派系**（供 `output.ts` 的触发占比与爆炸基础值用）。
    *
@@ -284,13 +331,13 @@ export function resolveSegment(
    * 需求方看到的是「命中有了，但 DoT 派系加成还是 55%」。
    */
   const tickBaseScaled: DamageSpread = scaleSpread(
-    finalHitNoAdd,
+    tickBaseRaw,
     expectedHitMultiplier(cc, cd, ctx.headshot.enabled, hsMul) * factionMul * msMul,
   );
 
   // 单弹头分布（供"加成后面板"与触发占比展示）：元素加量已含，暴击单列。
   // 射线：多重并进单弹头（表 0.1「射线单弹头 = 基础伤害项 × (1+Σ多重%)」）。
-  const singlePelletSpread: DamageSpread = isBeam ? scaleSpread(finalHit, msMul) : finalHit;
+  const singlePelletSpread: DamageSpread = isBeam ? scaleSpread(finalHitWithSpecial, msMul) : finalHitWithSpecial;
 
   const dotTicks: DotTickDetail[] = DOT_TYPES.map((t: DoTType) =>
     dotTick(tickBaseScaled, t, contribs, { factionPct, headshot: ctx.headshot, headshotMul: hsMul }),
@@ -305,7 +352,7 @@ export function resolveSegment(
     panel,
     panelWithKuva,
     baseAfterBaseDamage,
-    finalHit,
+    finalHit: finalHitWithSpecial,
     elementDetail: elementResult,
     dotBase,
     /** 每跳用的基础分布（= 命中 − 元素加量，**未**乘暴击；触发占比/爆炸基础值取此份） */

@@ -62,6 +62,23 @@ Warframe 伤害模拟器（`wfcalc`）。核心诉求：**每个乘区都能复�
 参考模板见 `docs/决策确认规范.md` 的「向需求方提问的预设格式」。
 需求方查阅入口见 `docs/需求方导读.md`（这是给他看的唯一简洁文档，其余 markdown 他不必读）。
 
+### 5. 做界面功能时不主动跑校验（需求方 2026-11-12）
+
+需求方要**先自己把功能点核对一遍**，核对完才跑校验。所以做界面类改动时：
+
+- **先把功能做出来**，可以用页面 shim 手动看一眼渲染对不对，但**不要跑 `npm run demo:check` / `demo:editor-check`**，
+  也不要为了"验证"去补新校验脚本；
+- typecheck 照常跑（它只查类型，不改变功能行为）；
+- 等需求方说「可以跑校验了」再跑，并把它要求的检查项补进对应脚本；
+- 为什么不先跑：校验脚本会一次性把断言全过一遍，界面还在按需求方意见改的时候跑，
+  改一次错一堆、还得反复修断言，白花时间。
+
+### 6. 汇报与约定要落盘
+
+需求方明确要求把某些约定写进本文件时，直接写进对应章节，不要只放在对话里。
+界面功能做完后，除了 `docs/decisions/` 的台账，**还要在对话里给出一份「用户可以自己逐项核对的清单」**
+（做了什么、在哪里看、对应哪条需求），方便需求方在跑校验前自己核对。
+
 ## 目录
 
 ```
@@ -87,12 +104,14 @@ packages/core/        计算内核（纯函数，无 DOM）
   src/analysis.ts     增幅分析（某 Mod 相对当前配置的提升）
   src/index.ts        包 re-export
 packages/data/        数据层：src/generated/ 是流水线产物（勿手改），src/manual/ 是人工层（D-144 已合并）
+  src/manual/riven.ts 裂罅词条表 / 基准值 / 组合系数（D-162）
 packages/data-build/  抓取清洗流水线
 packages/demo/        本地页面 demo（零依赖静态服务 + 配装 UI）
-  public/app.js       页面本体：渲染编排 / 拖拽 / 武器切换（1284 行）
+  public/app.js       页面本体：渲染编排 / 拖拽 / 武器切换
   public/app-store.js 共享状态 store + 中文表 + 数字格式
   public/app-data.js  数据层：读 generated/ JSON、挑可装 Mod
   public/app-compute.js 计算层薄壳：组装 compute() 参数、算相对提升
+  public/app-riven.js 裂罅状态与贡献转换（D-162）
   public/ui-editor.js 开发态武器编辑器
   public/weapon-picker.js   武器选单（纯 JS 模块）
   public/weapon-override.js override 合并规则（纯 JS 模块，页面与测试共用）

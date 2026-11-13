@@ -1,4 +1,4 @@
-﻿/**
+/**
  * D-056：爆炸每层伤害的两个 bug（回归）。
  *
  * bug 1：`blastBase` 取 `dotBase.blast`，但爆炸几乎全靠 Mod 合成
@@ -70,7 +70,7 @@ describe('爆炸每层伤害（D-056）', () => {
   it('没有爆炸元素时每层伤害仍为 0（D-055 不被破坏）', () => {
     const res = compute(weapon, weapon.modes[0], [], {});
     near(res.output.blast.perStack, 0);
-    near(res.output.blast.perSecond, 0);
+    near(res.output.blast.totalInWindow ?? 0, 0);
     assert.equal(res.output.blast.stacksPerSecond, 0);
   });
 

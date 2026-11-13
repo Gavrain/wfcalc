@@ -10,7 +10,7 @@
  * dot.ts          L4 触发率与 DoT 每跳（含 multishot）
  * blast.ts        爆炸异常（D-031，独立机制）
  * timeline.ts     开火时间线（装填空窗，D-058 / D-067）
- * six-second.ts   六秒异常状态总伤（逐秒曲线）
+ * six-second.ts   六秒异常总伤（逐秒曲线）
  * segment.ts      L0 面板切段 → ① 玄骸 → ② 基伤 → 单段结算 resolveSegment
  * output.ts       L6 输出口径（buildOutput）
  * compute.ts      一站式 compute() + WeaponState 状态树 + 各乘区拆解

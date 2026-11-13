@@ -15,6 +15,13 @@ import { createChecks } from '../dom/report.mjs';
 import { loadPage } from '../dom/load-page.mjs';
 
 const { registry, modules } = await loadPage({ waitMs: 700 });
+// ⚠ 2026-11-12：守护 / 同伴武器（Gremlin 阿塔克斯）并进主要大类后成了默认武器，
+//   它们**不能装赋能**，右侧赋能区是收起的 —— 本脚本要验证赋能本身，先切一把普通步枪。
+//   守护武器禁用赋能由 `interact.mjs` 第 50 节专门验证。
+if (typeof globalThis.__wfcalcSwitchWeapon === 'function') {
+  await globalThis.__wfcalcSwitchWeapon('Rifle');
+  await new Promise((r) => setTimeout(r, 400));
+}
 const rec = createChecks('arcane-showcase');
 const check = rec.check.bind(rec);
 
@@ -132,20 +139,20 @@ check('待选区没有 NaN', bad.length === 0);
 
 // ── 3b. 收益只按**当前口径**算（D-126，需求方纠正）──
 // 当前口径对某个赋能不敏感时显示 +0.00% 是**正确结果**，不能拿别的口径的数顶替。
-// 例：默认口径「单次射击」下，准星的弹药效率（只影响持续伤害）本来就没有收益。
+// 例：默认口径「单次射击」下，准星的弹药效率（只影响续航秒伤）本来就没有收益。
 {
   const starCard = findArc('主要·准星');
   if (starCard) {
     const before = gainOfCard(starCard);
-    // 切到「持续伤害」口径后，弹药效率应当体现出来
+    // 切到「续航秒伤」口径后，弹药效率应当体现出来
     const metricBox = registry['#metric-options'];
-    const btn = metricBox.children.find((b) => b.textContent.includes('持续伤害'));
-    check('有「持续伤害」基准按钮', Boolean(btn));
+    const btn = metricBox.children.find((b) => b.textContent.includes('续航秒伤'));
+    check('有「续航秒伤」基准按钮', Boolean(btn));
     if (btn) {
       btn.fire('click');
       const after = gainOfCard(findArc('主要·准星'));
-      check('切到「持续伤害」后准星收益变化（弹药效率生效）', after && after !== before,
-        `单次射击 ${before} → 持续伤害 ${after}`);
+      check('切到「续航秒伤」后准星收益变化（弹药效率生效）', after && after !== before,
+        `单次射击 ${before} → 续航秒伤 ${after}`);
     }
   }
   // 不论切到哪个口径，卡上的数都必须是「该口径下」的数：
@@ -162,7 +169,7 @@ check('待选区没有 NaN', bad.length === 0);
 
 // ── 4. 弹药效率真的进了指标（D-123）──
 // 需求方：「准星的弹药效率这个词条为什么没生效」——以前只写进 `state.computed.等效弹匣`，
-// `持续伤害` 根本没读它。现在持续伤害要按 1/(1−x) 放大。
+// `续航秒伤` 根本没读它。现在续航秒伤要按 1/(1−x) 放大。
 {
   const compute = modules.compute;
   const arc = arcOf('StatusAndAmmoEfficiencyOnWeakpointHit');
@@ -171,10 +178,10 @@ check('待选区没有 NaN', bad.length === 0);
   const valOf = (list, id) => (compute.runCompute(list).output.lines.find((l) => l.id === id) || {}).value;
   const before = valOf(contribs, 'sustainedDps');
   const after = valOf(contribs.concat(extra), 'sustainedDps');
-  check('弹药效率提升「持续伤害」', after > before * 1.01, `${before.toFixed(3)} → ${after.toFixed(3)}`);
-  check('弹药效率不改变「单发/爆发」口径',
+  check('弹药效率提升「续航秒伤」', after > before * 1.01, `${before.toFixed(3)} → ${after.toFixed(3)}`);
+  check('弹药效率不改变「单发/连发」口径',
     Math.abs(valOf(contribs.concat(extra), 'perShot') - valOf(contribs, 'perShot')) < 1e-9);
-  // 弹匣 × M 后的持续伤害：单次×M·m/(M·m/fr+r) ÷ [单次×m/(m/fr+r)]
+  // 弹匣 × M 后的续航秒伤：单次×M·m/(M·m/fr+r) ÷ [单次×m/(m/fr+r)]
   //   ≠ M（因为装填时间里打得更久，占比也变了），所以这里用**同一公式逐项复算**，
   //   而不是简单断言乘 M。
   const panel = compute.runCompute(contribs).panelPairs;
@@ -182,7 +189,7 @@ check('待选区没有 NaN', bad.length === 0);
   const reload = panel.reloadTime.after;
   const o = compute.runCompute(contribs).output;
   const expected = (o.perShot * mag * 2.5) / ((mag * 2.5) / o.fireRate + reload);
-  check('持续伤害按弹药效率倍数放大（弹匣 ×1/(1−x) 后代入同一公式）',
+  check('续航秒伤按弹药效率倍数放大（弹匣 ×1/(1−x) 后代入同一公式）',
     Math.abs(after - expected) / Math.max(1, expected) < 1e-6,
     `${after.toFixed(4)} vs ${expected.toFixed(4)}`);
 }

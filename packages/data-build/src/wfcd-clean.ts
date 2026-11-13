@@ -21,6 +21,10 @@
  */
 import type { AttackMode, DamageSegment, ModeRole, ModeVariant, PanelOverride, TriggerKind, Weapon } from '../../core/src/weapon.ts';
 import type { DamageSpread, DamageType } from '../../core/src/damage-types.ts';
+import { DT_KEY_MAP } from '../../core/src/damage-types.ts';
+// 需求方 2026-11-13：官方 damagePerShot 的索引↔类型对应（WFCD 伤害为空时回退用）
+import { DAMAGE_PER_SHOT_INDEX } from './clean.ts';
+import { isIncarnonBeamAttack } from '../../data/src/manual/incarnon-beam.ts';
 
 // ─────────────────────────────────────────────────────────────
 // WFCD 原始类型（只声明用到的字段）
@@ -63,6 +67,23 @@ export interface WfcdWeapon {
   masterable?: boolean;
   /** D-152：来源文件（`Primary` / `Melee` …），由 `fetchAllWfcdWeapons` 填入，用于槽位判定纠错 */
   __source?: string;
+  /**
+   * 需求方 2026-11-13：官方导出的 `damagePerShot`（20 位向量，**武器级**）。
+   *
+   * 只在「WFCD 的攻击伤害为空」时回退用（哈尔武 Haalvu）。
+   * ⚠ 它是**武器级**的，描述的是主模式；副射击的伤害官方写在 `behaviours[].impact` 里，
+   *   两者可能不同（哈尔武：普攻 `DT_SENTIENT 33`、副射击爆发 `34`）。
+   *   所以按 behaviour 逐条对应，见 `__exportBehaviourDamage`。
+   */
+  __exportDamage?: number[];
+  /**
+   * 每条 behaviour 自己的伤害分布（按 WFCD 攻击顺序一一对应）。
+   *
+   * 需求方 2026-11-13：哈尔武的 WFCD `attacks[].damage` 是 `{}`，而官方 behaviours 分别是
+   * 普攻 `DT_SENTIENT 33` / 副射击爆发 `34`——**不能用同一个 damagePerShot 顶替**，
+   * 否则副射击会错成 33。
+   */
+  __exportBehaviourDamage?: (DamageSpread | undefined)[];
   attacks?: WfcdAttack[];
 }
 
@@ -200,6 +221,70 @@ const TRIGGER_NAMES: readonly RegExp[] = [
   /^(Charged Attack|Charge Attack)$/i,
   /^(Lock-on Mode|Barrage Mode)$/i,
 ];
+
+/**
+ * **近战的另一种攻击**：各算一个独立射击模式（D-155，需求方 2026-11-13）。
+ *
+ * 需求方：
+ * > 「把近战武器的普攻、震地、重型震地拆成三个模式，这不是一个攻击内的不同段。」
+ * > 「枪击也独立出来好了，因为枪刃另外包括闪劫都有近战射击模式」
+ *
+ * WFCD 里近战武器的 `attacks[]` 本来就是按攻击种类列开的，225 把武器都带
+ * `Normal Attack` / `Slam Attack` / `Heavy Slam Attack`，枪刃再加 `Ranged Attack`，
+ * 而且**每一类都是自己的面板**（例：丝蛛皇 普通 触发 40 / 震地 触发 10 / 重型震地 504 触发 10）。
+ * 旧逻辑把它们当成同一个模式下的「攻击方式」，面板差异全被压进变体里看不见。
+ *
+ * ⚠ 它们的 `shot_type` 是 `AoE`，**不能**靠「独立弹道」分支（要求非 AoE）拆，只能按名字。
+ * ⚠ 滑行攻击（`Stormpath Slide Attack`）需求方明确「现在没人用了，可以忽略」，不收。
+ */
+const MELEE_ATTACK_NAMES: readonly RegExp[] = [
+  /^Slam Attack$/i,
+  /^Heavy Slam Attack$/i,
+  /^Ranged Attack$/i,
+];
+
+/**
+ * 该模式的**射速**：有蓄力时间的按 `1 ÷ 蓄力时间` 反推，否则 `undefined`（保持武器级）。
+ *
+ * 需求方 2026-11-13：
+ * > 「任何 charge 模式的射速肯定是被蓄力时间影响的」
+ *
+ * 取**该组攻击里第一条带 `charge_time` 的**：
+ * - 太始弓：`Quick Shot` 没有蓄力时间（速射）→ 返回 undefined，保持官方射速；
+ *   `Charged Shot` 1 秒 → 1，`Perfect Shot` 0.7 秒 → 1.4286；
+ * - 兰卡：`Partially Charged Shot` 0.3 秒 → 3.333，`Charged Shot` 1 秒 → 1。
+ *
+ * 蓄力时间为 0 或非法时同样返回 undefined（不拿 0 去除）。
+ */
+export function chargeTimeOf(attacks: readonly WfcdAttack[]): number | undefined {
+  for (const a of attacks) {
+    const ct = Number(a.charge_time);
+    if (Number.isFinite(ct) && ct > 0) return round4(1 / ct);
+  }
+  return undefined;
+}
+
+/**
+ * 「重击」类攻击（D-155）：名字里带 Heavy 的都算**重击系**。
+ * 需求方：「重击可以单独建模式」+「近战的固定暴击率词条……带有重击时 ×2，
+ * 对重击和重型震地生效」——所以模式需要一个「是不是重击」的标记给内核读。
+ */
+const HEAVY_MELEE_NAMES: readonly RegExp[] = [/^Heavy Slam Attack$/i, /Heavy Attack/i];
+
+/**
+ * 「震地」类攻击（需求方 2026-11-13）：**只认震地 / 重型震地**。
+ *
+ * 需求方：
+ * > 「震波需要加标签判定啊，只对震地和重型震地生效」
+ *
+ * 震地伤害 +X%（震波 `msd`）进**独立的震地伤害乘区**，只对这两个模式生效；
+ * 其余近战模式（普攻 / 重击 / 枪击）一律不吃。
+ * ⚠ 不再区分「空中近战震地」——游戏里没有这类攻击（需求方原话：「没有空中近战震地这种东西啊」）。
+ */
+const SLAM_MELEE_NAMES: readonly RegExp[] = [/^Slam Attack$/i, /^Heavy Slam Attack$/i];
+
+/** 近战 `Normal Attack` 是「普攻」，不是通用锚点意义上的主模式 */
+const NORMAL_ATTACK: readonly RegExp[] = [/^Normal Attack$/i];
 
 /**
  * 「独立弹道」：一种**自己飞出去的单发攻击**（鱼叉 / 长矛 / 榴弹 / 信标…）。
@@ -417,10 +502,14 @@ const ZH_OF: Readonly<Record<string, string>> = {
   'corrosive wave': '腐蚀波',
   'energy disk': '能量盘',
   'energy wave': '能量波',
-  'ranged attack': '远程攻击',
   'first shockwave': '第一道冲击波',
   'second shockwave': '第二道冲击波',
   'heavy attack glaive': '重击回旋刃',
+  'heavy attack glaive aoe': '重击回旋刃·范围',
+  // ── D-155：近战攻击种类各成一个模式（界面一律中文）──
+  'slam attack': '震地攻击',
+  'heavy slam attack': '重型震地攻击',
+  'ranged attack': '枪击',
   'polearm throw': '长柄武器投掷',
   'charged projectile': '蓄力弹',
   'dagger projectile': '匕首弹',
@@ -679,7 +768,12 @@ function groupAttacks(attacks: readonly WfcdAttack[]): { name: string; attacks: 
     // `Burst Mode` / `Semi-Auto Mode` / `Auto`，每一条都是一个独立射击模式。
     // 锚点与扳机词先判——它们定义"模式本身"，后面的子段（`Radial Attack` / `Explosion`…）
     // 才归到当前扳机组里。
-    if (matchesAny(name, TRIGGER_NAMES) || matchesAny(name, SIDE_ATTACK_NAMES) || matchesAny(name, ZOOM_ATTACK_NAMES)) {
+    if (
+      matchesAny(name, TRIGGER_NAMES) ||
+      matchesAny(name, SIDE_ATTACK_NAMES) ||
+      matchesAny(name, ZOOM_ATTACK_NAMES) ||
+      matchesAny(name, MELEE_ATTACK_NAMES)
+    ) {
       current = { name, attacks: [a] };
       groups.push(current);
       currentBomb = null;
@@ -770,7 +864,8 @@ function groupAttacks(attacks: readonly WfcdAttack[]): { name: string; attacks: 
       matchesAny(g.name, SEPARATE_MODE) ||
       matchesAny(g.name, TRIGGER_NAMES) ||
       matchesAny(g.name, SIDE_ATTACK_NAMES) ||
-      matchesAny(g.name, ZOOM_ATTACK_NAMES);
+      matchesAny(g.name, ZOOM_ATTACK_NAMES) ||
+      matchesAny(g.name, MELEE_ATTACK_NAMES);
     const stay: WfcdAttack[] = [];
     const standalone: WfcdAttack[] = [];
     for (const a of g.attacks) {
@@ -858,22 +953,44 @@ function toSpread(damage: Record<string, number> | undefined, warnings: string[]
  * 一个 WFCD 攻击 → 一段。
  * `shot_type === 'AoE'` → 范围段（`aoe: true`，不吃镀层）。
  * 段上**保留该攻击自己的暴击/触发/射速**（WFCD 攻击级有独立数值）。
+ *
+ * @param opts.isIncarnon 该攻击属于灵化模式（只有灵化才查射线人工表，见下）
+ * @param opts.weaponName WFCD 武器名（查灵化射线表用）
  */
-export function toSegment(a: WfcdAttack, warnings: string[], context: string): DamageSegment | null {
-  const damage = toSpread(a.damage, warnings, context);
+export function toSegment(
+  a: WfcdAttack,
+  warnings: string[],
+  context: string,
+  opts: { weaponName?: string; isIncarnon?: boolean; fallbackDamage?: DamageSpread } = {},
+): DamageSegment | null {
+  let damage = toSpread(a.damage, warnings, context);  // 需求方 2026-11-13：**WFCD 攻击伤害为空时回退到官方导出的 damagePerShot**。
+  //
+  // 典型是哈尔武（Haalvu）：WFCD 的 `attacks[].damage` 是 `{}`，官方导出有 `DT_SENTIENT 33/34`。
+  // 不回退的话这段会被丢掉，整把枪伤害为 0。
+  if (Object.keys(damage).length === 0 && opts.fallbackDamage && Object.keys(opts.fallbackDamage).length > 0) {
+    damage = { ...opts.fallbackDamage };
+    warnings.push(`${context}: WFCD 攻击「${a.name}」没有伤害数据，已回退到官方导出的 damagePerShot`);
+  }
   if (Object.keys(damage).length === 0) return null;
   // `forcedAoe`：WFCD 缺 `shot_type` 但确定是范围伤害的那几条（量子切割器的玩家引爆）
   const aoe = String(a.shot_type ?? '').toLowerCase() === 'aoe' || forcedAoe(a.name);
-  const isHitScan = String(a.shot_type ?? '').toLowerCase() === 'hit-scan';
+  // 射线**按段判**（D-160，需求方 2026-11-12）：
+  //   · 普通模式：不在这里写任何标记，由模式扳机 `held` 决定（全库 38 把 Held 武器都成立）；
+  //   · 灵化模式：WFCD 一律不给 `Held`，靠人工表 `INCARNON_BEAM_ATTACKS` 点名，
+  //     命中的这一条写 `beam: true`（托里德 / 野猪 / 赘骨的 Held 条 / 盗贼）。
+  //
+  // ⚠ 以前这里是「不是 Hit-Scan 就写 `beam: false`」，等于把所有非同类的段
+  //   （普通子弹、霰弹、毒云、爆炸）都盖章成"不是射线"，而 Hit-Scan 的灵化射线反而没人标
+  //   ——野猪 / 托里德灵化就是这样被当成实弹的。现在只写正面标记。
+  const isBeam = opts.isIncarnon === true && Boolean(opts.weaponName)
+    && isIncarnonBeamAttack(opts.weaponName!, a.name);
   return {
     kind: aoe ? 'explosiveAttack' : 'attack',
     aoe,
     damage,
     // WFCD 的 status_chance 是**百分比**（11.25 = 11.25%）；内核是 0~1
     procChance: typeof a.status_chance === 'number' ? a.status_chance / 100 : 0,
-    // 射线**按段判**（需求方 2026-11-12）：只有 Hit-Scan 的那一段是激光本体。
-    // 不写的段跟随模式扳机，所以这里只在"明确不是射线"时写 `false`。
-    ...(isHitScan ? {} : { beam: false }),
+    ...(isBeam ? { beam: true } : {}),
   };
 }
 
@@ -1023,6 +1140,21 @@ export function cleanWfcdWeapons(raw: readonly WfcdWeapon[]): WfcdCleanResult {
     const trigger = toTrigger(w.trigger);
     if (trigger === 'unknown') stats.unknownTrigger++;
 
+    /**
+     * 需求方 2026-11-13：官方导出的 damagePerShot 转成伤害分布，供"WFCD 伤害为空"时回退。
+     * 索引 → 类型的对应关系复用 `clean.ts` 的 `DAMAGE_PER_SHOT_INDEX`（由 842 把武器反推验证过）。
+     */
+    const exportDamage: DamageSpread = (() => {
+      const arr = w.__exportDamage;
+      if (!arr || arr.length === 0) return {};
+      const out: DamageSpread = {};
+      for (const [dtKey, idx] of Object.entries(DAMAGE_PER_SHOT_INDEX)) {
+        const v = arr[idx];
+        const t = DAMAGE_KEY[DT_KEY_MAP[dtKey] ?? ''];
+        if (t && typeof v === 'number' && v !== 0) out[t] = (out[t] ?? 0) + v;
+      }
+      return out;
+    })();
     const grouped = groupAttacks(attacks);
     const modes: AttackMode[] = [];
     const beamModeIds: string[] = [];
@@ -1037,11 +1169,24 @@ export function cleanWfcdWeapons(raw: readonly WfcdWeapon[]): WfcdCleanResult {
       // 判定同一攻击方式：名字去掉末尾的 Impact / Explosion / AoE 等子段词后相同，
       // 例如 `Plasma Bomb Impact` 与 `Plasma Bomb Explosion` 同属「Plasma Bomb」这一种攻击。
       const variantGroups = groupAttackVariants(g.attacks);
+      // 灵化模式：射线要看人工表（D-160），所以先把身份传下去
+      const isIncarnonMode = /^\s*Incarnon\s/i.test(g.name);
       const variants: ModeVariant[] = [];
       for (const vg of variantGroups) {
         const segs: DamageSegment[] = [];
         for (const a of vg.attacks) {
-          const s = toSegment(a, warnings, `${w.name}#${g.name}`);
+          /**
+           * 需求方 2026-11-13：回退伤害优先用**该攻击对应的 behaviour**，
+           * 没有才退回武器级 `damagePerShot`（哈尔武：普攻 33 / 副射击 34，不能用同一个数）。
+           */
+          const ai = attacks.indexOf(a);
+          const perAttack = w.__exportBehaviourDamage?.[ai];
+          const fb = perAttack && Object.keys(perAttack).length > 0 ? perAttack : exportDamage;
+          const s = toSegment(a, warnings, `${w.name}#${g.name}`, {
+            weaponName: w.name,
+            isIncarnon: isIncarnonMode,
+            ...(Object.keys(fb).length > 0 ? { fallbackDamage: fb } : {}),
+          });
           if (s) segs.push(s);
         }
         if (segs.length === 0) continue;
@@ -1057,34 +1202,52 @@ export function cleanWfcdWeapons(raw: readonly WfcdWeapon[]): WfcdCleanResult {
         //      但需求方明确它是射线，所以不能单靠 shot_type；
         //   2. 名字含 `Charge` / `Charged` → `charge`（蓄力）；
         //   3. 全部是 Hit-Scan 且武器级是 `held` → `held`（普通射线武器的命中攻击）；
-        //   4. 否则 undefined（跟随模式扳机）。
+        //   4. **灵化模式在射线人工表里（D-160）** → `held`。WFCD 的灵化攻击一律不带 `Held`，
+        //      托里德 / 野猪 / 盗贼只能靠表点名；赘骨已由第 1 条覆盖；
+        //   5. 否则 undefined（跟随模式扳机）。
         const vgName = vg.attacks.map((a) => String(a.name ?? '')).join(' ');
         const vgHasHeld = vg.attacks.some(
           (a) => isHeldAttack(a.name) && String(a.shot_type ?? '').toLowerCase() !== 'aoe',
         );
         const vgHasCharge = /\bCharge(d)?\b/i.test(vgName) && !vgHasHeld;
         const vgHasHitscan = vg.attacks.some((a) => String(a.shot_type ?? '').toLowerCase() === 'hit-scan');
+        const vgInBeamTable =
+          isIncarnonMode &&
+          !vgHasCharge &&
+          vg.attacks.some((a) => isIncarnonBeamAttack(w.name, a.name));
         const variantTrigger: TriggerKind | undefined = vgHasHeld
           ? 'held'
           : vgHasCharge
             ? 'charge'
             : vgHasHitscan && trigger === 'held'
               ? 'held'
-              : undefined;
+              : vgInBeamTable
+                ? 'held'
+                : undefined;
         const vOverride = attackOverride(vg.attacks[0]!, w);
+        /**
+         * 需求方 2026-11-13：**同一模式内两种扳机并存**时，射速要按**攻击方式**分别给。
+         *
+         * 唯一已知的例子是赘骨（Onos）的灵化：`Incarnon Form Held Damage` 是射线、
+         * `Incarnon Form Charge Attack` 是蓄力，两者本来共用一个模式射速，其中一条必然错。
+         * 这里只给「该攻击方式自己是蓄力」的填射速（1 ÷ 蓄力时间），其余沿用模式射速。
+         */
+        const vChargeRate = chargeTimeOf(vg.attacks);
+        const vOverrideMerged: PanelOverride | undefined =
+          vChargeRate !== undefined ? { ...(vOverride ?? {}), fireRate: vChargeRate } : vOverride;
         const v: ModeVariant = {
           id: vg.id,
           label: vg.label,
           segments: segs,
           ...(variantTrigger ? { trigger: variantTrigger } : {}),
-          ...(vOverride ? { override: vOverride } : {}),
+          ...(vOverrideMerged ? { override: vOverrideMerged } : {}),
           defaultSelected: true,
         };
         variants.push(v);
       }
       if (variants.length === 0) continue;
 
-      const isIncarnon = /^\s*Incarnon\s/i.test(g.name);
+      const isIncarnon = isIncarnonMode;
       const role: ModeRole = isIncarnon
         ? 'incarnon'
         : /^(Charged Shot|Quick Shot|Uncharged Shot|Charge|Uncharged Horizontal\/Vertical Shot|Perfect Shot)$/i.test(g.name)
@@ -1109,6 +1272,27 @@ export function cleanWfcdWeapons(raw: readonly WfcdWeapon[]): WfcdCleanResult {
         role === 'incarnon'
           ? { ...(firstOverride ?? {}), magazineSize: 0, reloadTime: 0 }
           : firstOverride;
+
+      /**
+       * 蓄力模式的射速 = **1 ÷ 蓄力时间**（需求方 2026-11-13）。
+       *
+       * 需求方原话：
+       * > 「任何 charge 模式的射速肯定是被蓄力时间影响的」
+       * > 「你只需要把他们射速从蓄力时间反推出来就好了，内核还是用射速计算」
+       *
+       * 为什么必须按**模式**反推：射速在数据模型里是**武器级**的，
+       * 而一把武器的速射 / 满蓄力 / 完美三档蓄力时间各不相同（太始弓 0.7 与 1、
+       * 兰卡 0.3 与 1），共用一个射速必然错。
+       *
+       * ⚠ 只对**自己有蓄力时间**的模式反推：
+       *   太始弓的 `Quick Shot` 没有 `charge_time`（是速射，不是蓄力），
+       *   这种保持官方给的射速，**不能**拿 0 去除（需求方 2026-11-13 确认）。
+       */
+      const chargeFireRate = chargeTimeOf(g.attacks);
+      const chargedOverride: PanelOverride | undefined =
+        chargeFireRate !== undefined
+          ? { ...(roleOverride ?? {}), fireRate: chargeFireRate }
+          : roleOverride;
 
       // ── 该模式的扳机（= 射线的唯一判据，D-148）──
       //
@@ -1175,6 +1359,9 @@ export function cleanWfcdWeapons(raw: readonly WfcdWeapon[]): WfcdCleanResult {
         if (isSideGroup) return '次要射击';
         const first = String(g.attacks[0]?.name ?? '');
         if (!first) return undefined;
+        // 近战的普攻（D-155）：必须排在通用锚点判断**之前**——`Normal Attack` 是主锚点，
+        // 先判锚点会直接返回 undefined，模式就没有「普攻」这个名字了。
+        if (matchesAny(first, NORMAL_ATTACK)) return '普攻';
         if (matchesAny(first, PRIMARY_ANCHORS) || matchesAny(first, SEPARATE_MODE) || matchesAny(first, TRIGGER_NAMES)) {
           return undefined;
         }
@@ -1192,9 +1379,13 @@ export function cleanWfcdWeapons(raw: readonly WfcdWeapon[]): WfcdCleanResult {
         bullets: 1,
         multishot: round4(w.multishot ?? 1),
         variants,
-        ...(roleOverride ? { override: roleOverride } : {}),
+        ...(chargedOverride ? { override: chargedOverride } : {}),
         ...(modeLabel ? { _label: modeLabel } : {}),
         ...(sideNote ? { _note: sideNote } : {}),
+        // D-155：重击系标记，给内核的「重击时暴击率 ×2」用
+        ...(matchesAny(String(g.attacks[0]?.name ?? ''), HEAVY_MELEE_NAMES) ? { _heavy: true } : {}),
+        // 需求方 2026-11-13：震地系标记，给内核的「震地伤害乘区」用（只认震地 / 重型震地）
+        ...(matchesAny(String(g.attacks[0]?.name ?? ''), SLAM_MELEE_NAMES) ? { _slam: true } : {}),
       };
       modes.push(mode);
       if (isBeam) beamModeIds.push(id);

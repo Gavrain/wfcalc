@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-12T09:03:52.199Z",
+  "generatedAt": "2026-11-13T13:45:23.358Z",
   "source": "WFCD/warframe-items (MIT)",
   "category": "archgun",
   "count": 20,
@@ -46,7 +46,8 @@
           ],
           "override": {
             "fireRate": 6.67
-          }
+          },
+          "_label": "普攻"
         }
       ]
     },
@@ -109,12 +110,14 @@
                 }
               ],
               "override": {
-                "critMultiplier": 3
+                "critMultiplier": 3,
+                "fireRate": 2
               }
             }
           ],
           "override": {
-            "critMultiplier": 3
+            "critMultiplier": 3,
+            "fireRate": 2
           }
         }
       ]
@@ -208,7 +211,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         }
       ]
     },
@@ -247,7 +251,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         }
       ]
     },
@@ -292,7 +297,8 @@
           ],
           "override": {
             "fireRate": 16.7
-          }
+          },
+          "_label": "普攻"
         }
       ]
     },
@@ -331,7 +337,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         }
       ]
     },
@@ -399,13 +406,15 @@
               ],
               "override": {
                 "critChance": 0.6,
-                "critMultiplier": 3.6
+                "critMultiplier": 3.6,
+                "fireRate": 1
               }
             }
           ],
           "override": {
             "critChance": 0.6,
-            "critMultiplier": 3.6
+            "critMultiplier": 3.6,
+            "fireRate": 1
           }
         }
       ]
@@ -445,7 +454,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         }
       ]
     },
@@ -878,13 +888,15 @@
               ],
               "override": {
                 "critChance": 0.56,
-                "statusChance": 0.2
+                "statusChance": 0.2,
+                "fireRate": 2
               }
             }
           ],
           "override": {
             "critChance": 0.56,
-            "statusChance": 0.2
+            "statusChance": 0.2,
+            "fireRate": 2
           }
         }
       ]
@@ -924,7 +936,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         },
         {
           "id": "mode2",
@@ -1021,7 +1034,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         }
       ]
     },
@@ -1294,7 +1308,7 @@
                 "critChance": 0.5,
                 "critMultiplier": 3.5,
                 "statusChance": 0.5,
-                "fireRate": 0.5
+                "fireRate": 1.25
               }
             },
             {
@@ -1332,7 +1346,10 @@
                 "fireRate": 0.5
               }
             }
-          ]
+          ],
+          "override": {
+            "fireRate": 1.25
+          }
         }
       ]
     },
@@ -1400,14 +1417,16 @@
               "override": {
                 "critChance": 0.3,
                 "critMultiplier": 2.5,
-                "statusChance": 0.2
+                "statusChance": 0.2,
+                "fireRate": 0.6667
               }
             }
           ],
           "override": {
             "critChance": 0.3,
             "critMultiplier": 2.5,
-            "statusChance": 0.2
+            "statusChance": 0.2,
+            "fireRate": 0.6667
           }
         }
       ]
@@ -1447,7 +1466,8 @@
                 }
               ]
             }
-          ]
+          ],
+          "_label": "普攻"
         },
         {
           "id": "mode2",
@@ -1475,7 +1495,7 @@
                 "critChance": 0.26,
                 "critMultiplier": 2.2,
                 "statusChance": 0.34,
-                "fireRate": 1
+                "fireRate": 2
               }
             },
             {
@@ -1504,7 +1524,7 @@
             "critChance": 0.26,
             "critMultiplier": 2.2,
             "statusChance": 0.34,
-            "fireRate": 1
+            "fireRate": 2
           }
         }
       ]

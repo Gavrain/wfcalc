@@ -1,9 +1,10 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="zh-CN">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>wfcalc · 赤毒·卡拉克</title>
+    <!-- D-170：这里只是首屏加载前的占位；数据一加载，app.js 会把标题换成当前武器名 -->
+    <title>wfcalc · 伤害模拟器</title>
     <link rel="stylesheet" href="/app.css" />
   </head>
   <body>
@@ -60,16 +61,18 @@
         <h2 class="section-title">伤害分布</h2>
         <div id="damage-table" class="panel-table"></div>
 
+        <!-- 异常状态整块放在「伤害分布」和「伤害」之间（需求方 2026-11-12）。
+             外层「异常状态」标题已去掉（需求方 2026-11-12：「不要这一层，就里面两层单独折叠就好了」）：
+             这里只放两个分组，由 `renderDotDetail` 画成「伤害型异常 / 非伤害型异常」两个可折叠块；
+             某一组没有对应类型时整组不画。 -->
+        <div id="dot-detail" class="dot-list"></div>
+        <div id="splash-damage"></div>
+
         <h2 class="section-title">伤害</h2>
         <div id="output-list" class="output-list"></div>
 
         <h2 class="section-title">暴击分档</h2>
         <div id="crit-tiers" class="panel-table"></div>
-
-        <h2 class="section-title">异常状态</h2>
-        <div id="dot-detail" class="dot-list"></div>
-
-        <div id="splash-damage"></div>
 
         <h2 class="section-title">配置</h2>
         <div class="controls-row">
@@ -81,8 +84,9 @@
               <option value="3" selected>×3</option>
             </select>
           </label>
+          <!-- 镀层加成是配置的次级（需求方 2026-11-12），跟派系、爆头同一行 -->
+          <span id="co-controls" class="co-controls"></span>
         </div>
-        <div id="co-controls" class="co-controls"></div>
       </section>
 
       <!-- 中：槽位 + 备选 -->
@@ -106,6 +110,44 @@
           <div class="metric-picker metric-picker-inline">
             <span class="muted">增幅基准</span>
             <div id="metric-options" class="metric-options"></div>
+            <!-- D-171（需求方 2026-11-13）：「N 秒」的口径要用几秒来算。
+                 需求方明确要放在**增幅基准这一排**（不是左栏伤害行上），所以独立成一个控件。 -->
+            <span class="muted metric-window-label">异常总伤统计</span>
+            <span id="dot-window-picker" class="dot-window-picker"></span>
+          </div>
+        </div>
+
+        <!-- 裂罅 Mod 区（D-162，需求方 2026-11-12）：
+             放在「备选 Mod 区」上方、可折叠。上方选四种组合之一，
+             左边是这张裂罅的词条组合，右边是按当前组合算出的待选词条（含数值区间与收益）。 -->
+        <div id="riven-area" class="cand-area riven-area">
+          <div class="cand-head riven-head" id="riven-toggle" role="button" tabindex="0">
+            <h2 class="section-title">裂罅 Mod <span id="riven-summary" class="muted"></span></h2>
+            <span class="cand-hint muted" id="riven-hint">点击展开</span>
+          </div>
+          <div id="riven-body" class="riven-body" hidden>
+            <div class="riven-top">
+              <span class="muted">组合</span>
+              <div id="riven-combo" class="filter-group"></div>
+              <span class="muted riven-mode-label">属性基准</span>
+              <div id="riven-value-mode" class="filter-group"></div>
+            </div>
+            <div class="riven-main">
+              <div class="riven-left">
+                <div class="riven-left-head">
+                  <button id="riven-clear" class="btn-ghost" type="button">清空词条</button>
+                </div>
+                <div id="riven-compose" class="riven-compose"></div>
+              </div>
+              <div class="riven-right">
+                <div class="riven-right-top">
+                  <span class="muted">排序</span>
+                  <div id="riven-sort" class="filter-group"></div>
+                  <input id="riven-search" class="search-input riven-search" type="search" placeholder="搜索词条" />
+                </div>
+                <div id="riven-candidates" class="riven-candidates"></div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -126,7 +168,7 @@
 
       <!-- 右：赋能 + 拆解（D-127：赋能回到拆解上方，区域加高；拆解往下挪） -->
       <aside class="col col-right">
-        <div class="cand-area arcane-area">
+        <div id="arcane-area" class="cand-area arcane-area">
           <div class="cand-head">
             <h2 class="section-title">赋能 <span id="arcane-count" class="muted"></span></h2>
             <span class="cand-hint muted">拖到 Mod 槽旁，拖回此处卸下</span>

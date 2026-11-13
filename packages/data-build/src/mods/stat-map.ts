@@ -33,6 +33,7 @@ export type ModStatId =
   | 'magazine'
   | 'faction'
   | 'weakpointDamage'
+  | 'bodyshotDamage'
   | 'weakpointCritChance'
   | 'statusDamage'
   | 'statusDuration'
@@ -51,6 +52,8 @@ export type ModStatId =
   | 'slamDamage'
   | 'finisherDamage'
   | 'critOnSlide'
+  | 'critChancePerCombo'
+  | 'statusChancePerCombo'
   | 'slashOnCrit'
   | 'impactToSlash'
   | 'impactToMagnetic'
@@ -114,31 +117,41 @@ const TABLE: Record<string, StatMapping> = {
   co: m('baseDamage', 'baseDamage', 'percent', 'conditional', '每层 × 叠层上限 × 目标异常状态种类数（不吃灵化基伤与 AoE，第 2.1 节）'),
   fac: m('faction', 'faction', 'percent', 'normal', '派系乘区；DoT 上生效两次（第 5.3 节）'),
   weak: m('weakpointDamage', null, 'percent', 'conditional', '对弱点伤害，按第 3.2 节爆头倍率结算，不进总和'),
+  // 需求方 2026-11-13：细心瞄准的第二条「-45% Bodyshot Damage」——
+  // 关闭爆头（打身体）时总伤害 ×(1−45%)；开启爆头时整条不生效。
+  bodyshot: m('bodyshotDamage', null, 'percent', 'conditional', '打身体（关闭爆头）时的伤害倍率'),
   weakcc: m('weakpointCritChance', 'critChance', 'percent', 'conditional', '仅在命中弱点时生效'),
   weakness: m('weakpointDamage', null, 'percent', 'special', 'Sentient 切口：按目标弱点附加伤害，不与其他伤害类型复合'),
   sd: m('statusDamage', 'baseDamage', 'percent', 'normal', '异常状态伤害 +X%（第 6.3 节）'),
   statusDmg: m('statusDamage', 'baseDamage', 'percent', 'normal', '异常状态伤害 +X%（第 6.3 节）'),
   statusDur: m('statusDuration', null, 'percent', 'functional', '影响 DoT 时长与火焰削甲时长'),
-  finisher: m('finisherDamage', 'baseDamage', 'percent', 'conditional', '仅处决攻击'),
+  finisher: m('finisherDamage', 'baseDamage', 'percent', 'conditional', '处决伤害：进**独立的处决伤害乘区**（需求方 2026-11-13），不做攻击类型判定'),
   heavy: m('heavyDamage', 'baseDamage', 'percent', 'conditional', '仅重击'),
-  msd: m('slamDamage', 'baseDamage', 'percent', 'conditional', '仅震地攻击'),
+  msd: m('slamDamage', 'baseDamage', 'percent', 'conditional', '震地伤害：进**独立的震地伤害乘区**，只对震地 / 重型震地生效（需求方 2026-11-13）'),
   firstShot: m('baseDamage', 'baseDamage', 'percent', 'conditional', '弹匣第一发生效'),
   lastShot: m('baseDamage', 'baseDamage', 'percent', 'conditional', '弹匣最后一发生效'),
-  br: m('critChance', 'critChance', 'percent', 'conditional', '暴率 × 连击倍率（急进猛突）'),
-  scc: m('statusChance', 'statusChance', 'percent', 'conditional', '触发率 × 连击倍率（创口溃烂）'),
-  slideCrit: m('critOnSlide', 'critChance', 'percent', 'conditional', '滑砍时生效'),
+  br: m('critChancePerCombo', 'critChance', 'percent', 'normal', '暴率 × 连击倍率（急进猛突），按配置的连击倍率放大'),
+  scc: m('statusChancePerCombo', 'statusChance', 'percent', 'normal', '触发率 × 连击倍率（创口溃烂），按配置的连击倍率放大'),
+  slideCrit: m('critOnSlide', 'critChance', 'percent', 'conditional', '滑砍时生效（需求方 2026-11-13：当成百分比暴击）'),
   critslash: m('slashOnCrit', null, 'percent', 'conditional', '猎人的战备：暴击时按几率附加切割异常，是触发源而非伤害加量'),
   slconv: m('impactToSlash', null, 'percent', 'special', '冲击异常按几率转切割（内部出血 / 失血）；射速 <2.5 时翻倍'),
   magconv: m('impactToMagnetic', null, 'percent', 'special', '冲击异常按几率转磁力（磁化冲击）；射速 <2.5 时翻倍'),
   altCC: m('critChance', 'critChance', 'percent', 'conditional', '仅作用于下一发特殊射击'),
   altCD: m('critMultiplier', 'critMultiplier', 'percent', 'conditional', '仅作用于下一发特殊射击'),
-  altDmg: m('baseDamage', 'baseDamage', 'percent', 'conditional', '特殊攻击的额外伤害'),
+  // 需求方 2026-11-13：「自激奇点……当成没效果」（次级射击的爆炸加成）
+  altDmg: m('baseDamage', null, 'percent', 'skip', '需求方定为无效果（自激奇点的次级射击爆炸）'),
   altFrate: m('fireRate', 'fireRate', 'percent', 'conditional', '仅副射击模式'),
-  killRel: m('reloadSpeed', 'utility', 'percent', 'conditional', '命中条件后限时生效'),
-  secCC: m('critChance', 'critChance', 'percent', 'special', '作用于配对的副武器'),
-  secSC: m('statusChance', 'statusChance', 'percent', 'special', '作用于配对的副武器'),
+  // 需求方 2026-11-13：「战斗装填这种就直接当满值算」——按满级常驻换弹速度处理
+  killRel: m('reloadSpeed', 'utility', 'percent', 'normal', '条件换弹（战斗装填）：按满值常驻生效'),
+  // 需求方 2026-11-13：「兽之印记无效果，他是主武器的」（给副武器的加成在主武器上无收益）
+  secCC: m('critChance', null, 'percent', 'skip', '给副武器的暴率，主武器上无收益'),
+  secSC: m('statusChance', null, 'percent', 'skip', '给副武器的触发，主武器上无收益'),
   secRel: m('reloadSpeed', 'utility', 'percent', 'special', '作用于配对的副武器'),
   secMag: m('magazine', 'utility', 'percent', 'special', '作用于配对的副武器'),
+  // 需求方 2026-11-13：卓越者优势 =「爆头 Eximus 后副武器伤害 +600%」。
+  // 它是席尔火枪专属卡、本身就是副武器，所以对本武器直接按基伤加成满层生效；
+  // 以前被错标成 `weak`（弱点伤害）算进了爆头倍率。
+  secDmg: m('baseDamage', 'baseDamage', 'percent', 'conditional', '副武器伤害（本条为席尔火枪专属，按满层当基伤）'),
 
   // ======== 射速 / 数量 / 火力相关 ========
   frate: m('fireRate', 'fireRate', 'percent', 'normal', '弓类描述为 ×2，另行处理'),
@@ -164,6 +177,13 @@ const TABLE: Record<string, StatMapping> = {
   recoil: m('recoil', 'utility', 'percent', 'functional', '负值 = 减小后坐力'),
   acc: m('accuracy', 'utility', 'percent', 'functional'),
   range: m('meleeRange', 'utility', 'flat', 'functional', '单位：米'),
+  // 需求方 2026-11-13：原文是 `+X% Range` 的（弩炮测距）按「攻击范围百分比」处理，
+  // 与固定米数的 `range`（近战范围 +X 米）区分开——同一个键在不同卡上单位不同，
+  // 不能用同一个映射（此前弩炮测距的 20% 被当成了 0.2 米近战范围）。
+  rangePct: m('meleeRange', 'utility', 'percent', 'functional', '攻击范围 +X%（百分比，不是米）'),
+  // 光束距离：`+Xm Beam Range`（凶恶延伸 / 毁灭扩展 / 延烧数列）。
+  // 需求方 2026-11-13 复核：这三张不能再按近战范围算。
+  beamRange: m('beamRange', 'utility', 'flat', 'functional', '光束距离（米）'),
   hrel: m('reloadSpeed', 'utility', 'percent', 'functional', '收起武器时的换弹速度'),
   aradius: m('explosionRadius', null, 'percent', 'functional', 'AoE 半径；衰减参数仍需人工补（data-todo 第 1 节）'),
   movesp: m('movementSpeed', null, 'percent', 'special', '移动速度，不影响伤害'),
@@ -193,15 +213,17 @@ const TABLE: Record<string, StatMapping> = {
   napalm: m('explosionRadius', null, 'percent', 'special', '燃烧弹覆盖范围'),
   massStore: m('baseDamage', null, 'percent', 'special', '蓄积伤害后引爆'),
   sacCap: m('baseDamage', null, 'percent', 'special', '可蓄积伤害上限'),
-  energyConv: m('baseDamage', null, 'percent', 'special', '消耗能量转化为额外伤害'),
+  // 需求方 2026-11-13：「自激奇点、能量导引当成没效果」
+  energyConv: m('baseDamage', null, 'percent', 'skip', '需求方定为无效果（耗能转化）'),
   tether: m('explosionRadius', null, 'flat', 'special', '榴弹索敵人数'),
   slamPull: m('explosionRadius', null, 'flat', 'special', '震地拉扯范围（米）'),
   killTrap: m('explosionRadius', null, 'flat', 'special', '击杀生成陷阱持续时间'),
   falloff: m('explosionRadius', null, 'percent', 'special', '衰减距离'),
   strip: m('armorStrip', null, 'percent', 'special', '直接削减周围敌人护甲/护盾比例'),
   stripA: m('armorFlatStrip', null, 'flat', 'special', '冲击伤害固定削甲点数'),
-  lifesteal: m('lifeSteal', null, 'percent', 'special', '生命吸取'),
-  healProc: m('healthPerHit', null, 'flat', 'special', '每个异常状态回血'),
+  // 需求方 2026-11-13：「生命偷取那些也当无效果，不影响伤害」
+  lifesteal: m('lifeSteal', null, 'percent', 'skip', '生命偷取：不影响伤害，需求方定为无效果'),
+  healProc: m('healthPerHit', null, 'flat', 'skip', '每异常回血：不影响伤害，需求方定为无效果'),
   parryFin: m('finisherDamage', null, 'percent', 'special', '招架后开启处决'),
   nullifier: m('baseDamage', null, 'percent', 'special', '击破 Nullifier 护盾发生器'),
   orbDrop: m('baseDamage', null, 'percent', 'special', '死亡掉落球体'),

@@ -33,7 +33,12 @@ check('没有「（未开放）」字样', !opts.some((o) => o.textContent.inclu
 check('四个大类都未置灰', opts.every((o) => o.disabled !== true));
 
 // ── 2. 逐个切大类 → 选第一把 → 页面正常 ──
-const expectCategory = { primary: 'primary', secondary: 'secondary', melee: 'melee', archwing: ['archgun', 'archmelee'] };
+// ⚠ 守护 / 同伴武器（需求方 2026-11-12）并入主要与近战大类，**可能排在类型树的第一位**：
+//   · 它们的文件 category 是 `companion`（不是 primary / secondary / melee）；
+//   · 它们一律不可装赋能，赋能列表本来就该是空的。
+//   这里把这两点算作预期，否则断言会把"分类正确"判成错误。
+const expectCategory = { primary: ['primary', 'companion'], secondary: 'secondary', melee: ['melee', 'companion'], archwing: ['archgun', 'archmelee'] };
+const isCompanion = (w) => Boolean(w) && w.category === 'companion';
 for (const g of opts.map((o) => o.value)) {
   gsel.value = g;
   gsel.fire('change');
@@ -56,22 +61,49 @@ for (const g of opts.map((o) => o.value)) {
       String(registry['#candidate-list'].children.length));
     check('「archwing」赋能列表为空（数据缺口，已记录）', arcList().length === 0, String(arcList().length));
   } else {
+    // ⚠ 类型树里可能有「其它」桶（例如 `TnDoppelgangerGrimoire` 没有槽位可装 Mod，
+    //   它是这批数据的既有缺口，不是本功能引入的）。判"备选 Mod 有内容"时跳过这些空桶，
+    //   取该大类里**第一个有 Mod 可装**的类型来代表；当前武器与赋能检查都按该类型算。
+    let w = store.data && store.data.weapon;
+    if (registry['#candidate-list'].children.length === 0 && tsel.children.length > 1) {
+      for (const t of tsel.children.slice(1)) {
+        tsel.value = t.value;
+        tsel.fire('change');
+        await settle();
+        if (registry['#candidate-list'].children.length > 0) break;
+      }
+      w = store.data && store.data.weapon;
+    }
     check(`「${g}」备选 Mod 有内容`, registry['#candidate-list'].children.length > 0,
       String(registry['#candidate-list'].children.length));
-    check(`「${g}」赋能列表非空`, arcList().length > 0, String(arcList().length));
+    if (isCompanion(w)) {
+      check(`「${g}」当前是守护武器（${w.id}）→ 赋能列表为空`, arcList().length === 0, String(arcList().length));
+    } else {
+      check(`「${g}」赋能列表非空`, arcList().length > 0, String(arcList().length));
+    }
+    check(`「${g}」武器下拉选中当前武器`, wsel.value === (w && w.id));
   }
-  check(`「${g}」武器下拉选中当前武器`, wsel.value === (w && w.id));
 }
 
 // ── 3. 赋能按大类过滤 ──
+// ⚠ 类型树第一位可能是守护武器（无赋能），所以取赋能样本时要**跳过大类第一项里不可装赋能的武器**，
+//   依次试该大类的类型，直到找到一件能装赋能的普通武器。
 const arcaneNamesByGroup = {};
 for (const g of opts.map((o) => o.value)) {
   gsel.value = g;
   gsel.fire('change');
-  tsel.value = tsel.children[0].value;
-  tsel.fire('change');
-  await settle();
-  arcaneNamesByGroup[g] = arcList().map((c) => (c.children[0] || {}).textContent || c.textContent).join('|');
+  let names = '';
+  for (const t of tsel.children) {
+    tsel.value = t.value;
+    tsel.fire('change');
+    await settle();
+    const w = store.data && store.data.weapon;
+    if (g === 'archwing' || isCompanion(w)) continue;
+    if (arcList().length === 0) continue;
+    names = arcList().map((c) => (c.children[0] || {}).textContent || c.textContent).join('|');
+    break;
+  }
+  arcaneNamesByGroup[g] = names;
 }
 check('近战只出近战赋能（含「近战·」前缀）', /近战·/.test(arcaneNamesByGroup.melee || '') && !/主要·/.test(arcaneNamesByGroup.melee || ''),
   (arcaneNamesByGroup.melee || '').slice(0, 60));

@@ -128,12 +128,37 @@ export function compute(
   // D-120 / D-148：按选中的「攻击方式」缩小 `mode.variants`，
   // `segments` / `totalSpread` / `spreadByVariant` 都只含选中的那几个。
   const selected = resolveVariantSelection(mode, variantSelection);
-  const scopedMode: AttackMode = selected ? { ...mode, variants: selected } : mode;
+  /**
+   * 需求方 2026-11-13：**攻击方式级射速**。
+   *
+   * 同一模式内可以有两种扳机并存（赘骨 Onos 的灵化：射线 + 蓄力），
+   * 两条的射速本来就不同（射线用武器射速、蓄力按 1÷蓄力时间）。
+   * 面板取值链是「变体 override → 模式 override → 武器级」，但**射速是被整模式共享的**
+   * （连发/续航秒伤、DoT 百分比都乘同一个射速）。
+   *
+   * 所以当**只选中一个攻击方式**、且它自己带 `fireRate` 覆盖时，
+   * 把它提到模式级——这样下游所有路径（`panelStats` / `fireRateFinal` / DoT 加权）
+   * 都拿到同一份射速，不需要逐处改签名。
+   * 多选时各段速率不同，**无法**用一个射速表达，此时沿用模式射速（与改动前一致）。
+   */
+  const onlyVariant = selected && selected.length === 1 ? selected[0] : undefined;
+  const variantFireRate = onlyVariant?.override?.fireRate;
+  const baseMode: AttackMode =
+    variantFireRate !== undefined
+      ? { ...mode, override: { ...(mode.override ?? {}), fireRate: variantFireRate } }
+      : mode;
+  const scopedMode: AttackMode = selected ? { ...baseMode, variants: selected } : baseMode;
   const ctx: Ctx = buildContext(weapon, scopedMode, contribs, options);
 
   // D-080：段只属于变体，模式上不再有 `segments`。这里把（已缩到选中变体的）各段摊平：
   // 每个段仍独立结算，结果按变体顺序排列。
-  const segs: DamageSegment[] = allSegments(scopedMode);
+  //
+  // D-160：段上要带上**所属攻击方式**的扳机——灵化模式里可以同时有射线变体（`held`）和
+  // 蓄力变体（`charge`），只按模式扳机判会把蓄力也算成射线（赘骨的 `Charge Attack`）。
+  const segs: DamageSegment[] = allSegments(scopedMode).map((seg) => {
+    const v = scopedMode.variants.find((x) => x.segments.includes(seg));
+    return v?.trigger ? { ...seg, trigger: v.trigger } : seg;
+  });
 
   // ── 每段的上游 computed 只算一次；逐段结算与 state 共用这一份（D-075）──
   // 之前 `resolveSegment()` 与 state 各算一遍玄骸→基伤，

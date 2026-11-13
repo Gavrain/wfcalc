@@ -31,16 +31,16 @@ const line = (r, id) => r.output.lines.find((l) => l.id === id).value;
 console.log('射速        无加成 :', a.output.fireRate.toFixed(3));
 console.log('射速        +60%   :', b.output.fireRate.toFixed(3), ' ← 射速确实变了');
 console.log('');
-console.log('DoT 每层秒伤 无加成 :', line(a, 'dotPerSecond').toFixed(4));
-console.log('DoT 每层秒伤 +60%   :', line(b, 'dotPerSecond').toFixed(4), ' ← 应该不变');
+console.log('异常加权单层秒伤 无加成 :', line(a, 'dotPerSecond').toFixed(4));
+console.log('异常加权单层秒伤 +60%   :', line(b, 'dotPerSecond').toFixed(4), ' ← 应该不变');
 console.log('');
-console.log('DoT 六秒总伤 无加成 :', line(a, 'dot6s').toFixed(2));
-console.log('DoT 六秒总伤 +60%   :', line(b, 'dot6s').toFixed(2), ' ← 应随射速上升');
+console.log('六秒异常总伤 无加成 :', line(a, 'dot6s').toFixed(2));
+console.log('六秒异常总伤 +60%   :', line(b, 'dot6s').toFixed(2), ' ← 应随射速上升');
 
 let ok = true;
 const near = (x, y) => Math.abs(x - y) < 1e-6;
 if (!near(line(a, 'dotPerSecond'), line(b, 'dotPerSecond'))) { ok = false; console.log('✖ 射速影响了每层秒伤！'); }
 else console.log('✔ 射速不再影响每层秒伤');
-if (!(line(b, 'dot6s') > line(a, 'dot6s'))) { ok = false; console.log('✖ 六秒总伤未随射速变化'); }
-else console.log('✔ 六秒总伤随射速上升');
+if (!(line(b, 'dot6s') > line(a, 'dot6s'))) { ok = false; console.log('✖ 六秒异常总伤未随射速变化'); }
+else console.log('✔ 六秒异常总伤随射速上升');
 process.exit(ok ? 0 : 1);

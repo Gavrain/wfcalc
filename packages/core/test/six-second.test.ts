@@ -1,5 +1,5 @@
-﻿/**
- * D-057：六秒异常状态总伤的三项规则。
+/**
+ * D-057：六秒异常总伤的三项规则。
  *   ① 毒气 10 层上限（§6.3）
  *   ② 火焰逐层累加基础值 → 曲线单调上升（§6.3）
  *   ③ 爆炸**不计入**每层秒伤，但**计入**总伤
@@ -118,7 +118,7 @@ describe('爆炸不计入每层秒伤、但计入总伤（D-057）', () => {
     assert.ok(withBlast.output.blast.perStack > 0, '爆炸本身应有每层伤害');
   });
 
-  it('爆炸计入六秒异常状态总伤', () => {
+  it('爆炸计入六秒异常总伤', () => {
     const withBlast = compute(weapon, weapon.modes[0], blastMods, {});
     const seg: any = withBlast.segments[0];
     const present = new Set(Object.keys(seg.finalHit));
@@ -132,9 +132,9 @@ describe('爆炸不计入每层秒伤、但计入总伤（D-057）', () => {
     near(total, dotPart + withBlast.output.blast.total6s);
   });
 
-  it('输出口径的名称已改为「六秒异常状态总伤」', () => {
+  it('输出口径的名称已改为「6秒异常总伤」（D-171：一律用阿拉伯数字）', () => {
     const res = compute(weapon, weapon.modes[0], [], {});
     const line = res.output.lines.find((l: any) => l.id === 'dot6s');
-    assert.equal(line.label, '六秒异常状态总伤');
+    assert.equal(line.label, '6秒异常总伤');
   });
 });
