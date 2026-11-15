@@ -44,10 +44,13 @@ describe('弹药效率 → 等效弹匣（D-084）', () => {
     assert.equal(ammoEfficiencyMultiplier(eff(-10)), 1);
   });
 
-  it('x 逼近 100% 时被夹到 0.95，不会除零', () => {
-    const mul = ammoEfficiencyMultiplier(eff(100));
-    assert.ok(Number.isFinite(mul));
-    assert.ok(Math.abs(mul - 1 / 0.05) < 1e-9);
+  it('弹药效率上限 0.75：x ≥ 75% 时被夹到 0.75，等效弹匣最多 4 倍（需求方 2026-11-15）', () => {
+    for (const x of [75, 100, 300]) {
+      const mul = ammoEfficiencyMultiplier(eff(x));
+      assert.ok(Number.isFinite(mul));
+      assert.ok(Math.abs(mul - 4) < 1e-9, `x=${x} 应夹到倍数 4，实际 ${mul}`);
+    }
+    assert.ok(Math.abs(ammoEfficiencyMultiplier(eff(74)) - 1 / 0.26) < 1e-9, '未到上限时按原值');
   });
 
   it('面板弹匣保留两位小数', () => {

@@ -130,8 +130,8 @@ const out = {
 
   // ── 第 6 步：DoT ──
   step6_dot: {
-    dotBase: entry(s2.dotBase),
-    dotBaseTotal: r(core.spreadTotal(s2.dotBase)),
+    dotBase: entry(s2.tickBaseScaled),
+    dotBaseTotal: r(core.spreadTotal(s2.tickBaseScaled)),
     ticks: s2.dotTicks.map((t) => ({ type: t.type, baseValue: r(t.baseValue), coef: t.coef, baseTick: r(t.baseTick), tick: r(t.tick) })),
   },
 

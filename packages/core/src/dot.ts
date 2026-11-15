@@ -62,12 +62,18 @@ export const DOT_DURATION: Readonly<Record<DoTType, number>> = {
 };
 
 /**
- * §0.3 ①：单弹头总触发率。
- * 射线额外 ×(1+Σ多重%)（表 2.3）—— `beam` 来自人工表，未确认前按非射线算（D-010）。
+ * §0.3 ①：单弹头总触发率 = `面板触发率 × (1 + Σ触发率%)`。
+ *
+ * 需求方 2026-11-14（D-195）：**游戏内显示的触发率不会被多重影响**，所以这里
+ * 不给射线额外乘多重。以前射线在这里 `×(1+Σ射线多重%)`、又在 {@link stacksPerShot}
+ * 里不乘多重，两处抵消；现在统一成「触发率不乘多重，叠层那一侧乘多重」——
+ * 射线与实弹走同一条逻辑，算出来的层数与伤害完全不变。
+ *
+ * 因为不再区分射线与实弹，这里**没有** `beam` 参数。
  */
-export function totalProcChance(procChance: number, contribs: readonly Contribution[], beam: boolean): number {
+export function totalProcChance(procChance: number, contribs: readonly Contribution[]): number {
   const m = 1 + sumPct(contribs, 'statusChance');
-  return beam ? procChance * m * (1 + sumPct(contribs, 'multishot')) : procChance * m;
+  return procChance * m;
 }
 
 /** §0.3 ②：某元素在触发池里的份额 */
@@ -108,7 +114,10 @@ export function multishot(
 
 /**
  * §0.3 ③④：单次射击某元素的期望层数 = 总触发率 × 元素占比 × 多重。
- * 射线**不重复乘多重**（多重已并进触发率）。
+ *
+ * 需求方 2026-11-14（D-195）：**射线与实弹统一**——多重一律在这一步乘，
+ * 触发率本身（游戏内显示的那个数）不受多重影响。以前射线把多重并进触发率、
+ * 在这里不乘，两者相乘的结果与现在完全相等，只是把倍的"位置"挪到了符合游戏显示的地方。
  *
  * @param multishotValue 当前多重（含面板多重）。不传则按「有面板多重的武器」处理时
  *   必须显式传入——见 {@link multishot}
@@ -118,11 +127,10 @@ export function stacksPerShot(
   v: DamageSpread,
   procChance: number,
   contribs: readonly Contribution[],
-  beam: boolean,
   multishotValue?: number,
 ): number {
   const ms = multishotValue ?? multishot(contribs);
-  return totalProcChance(procChance, contribs, beam) * share(t, v) * (beam ? 1 : ms);
+  return totalProcChance(procChance, contribs) * share(t, v) * ms;
 }
 
 export interface DotTickDetail {
@@ -215,7 +223,13 @@ export function dotTick(
   const statusDamagePct = sumPct(contribs, 'statusDamage');
   // ③ 元素 % → 异常状态伤害 % → 派系第二次
   // （射速与多重影响的是"叠几层"，不在这条链上。）
-  const tick = baseTick * (1 + elementPct) * (1 + statusDamagePct) * (1 + opts.factionPct);
+  //
+  // 需求方 2026-11-14：三个乘区**各自最低 0**（负词条不能让每跳变负）：
+  //   元素 % / 异常状态伤害 % / 派系 %（派系那一份在 `factionFor()` 已压到 −1 以上）
+  const elementMul = Math.max(0, 1 + elementPct);
+  const statusDamageMul = Math.max(0, 1 + statusDamagePct);
+  const factionMul = Math.max(0, 1 + opts.factionPct);
+  const tick = baseTick * elementMul * statusDamageMul * factionMul;
   return {
     type: t,
     baseValue,

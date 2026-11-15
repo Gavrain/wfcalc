@@ -76,7 +76,32 @@ export interface ApplyElementsResult {
   compounds: ElementSlot[];
   /** 合成后剩下的单元素 */
   singles: ElementSlot[];
+  /**
+   * 面板自带的**复合元素**（不参与融合，直接进最终分布）。
+   * 需求方 2026-11-15（B2）：「其他复合元素是不会影响元素融合的」。
+   */
+  nonFusingCompound: DamageSpread;
 }
+
+/**
+ * 融合队列的槽号分配（需求方 2026-11-15 最终确认）：
+ *
+ * ```
+ * [0..7] 8 个真实 Mod 槽（装进去的卡都在这里）
+ * [8]    **试算槽**：备选 Mod / 未安装裂罅的模拟位（同一时刻只试算一样）
+ * [9..]  自带四种基础元素 + 玄骸元素，按实际有几个顺延
+ * ```
+ *
+ * · 真 Mod 与试算卡都排在自带 / 玄骸元素**之前**——它们先参与配对；
+ * · 只有冰 / 火 / 毒 / 电参与融合；**复合元素（自带或玄骸）不占融合槽位、不参与配对**。
+ */
+export const TRIAL_SLOT_ORDER = 8;
+
+/** 自带 / 玄骸元素在融合队列里的起始槽号（= 试算槽之后） */
+export const PANEL_START_ORDER = TRIAL_SLOT_ORDER + 1;
+
+/** 参与融合的四种基础元素（顺序 = 优先级 火 > 冰 > 电 > 毒） */
+const PANEL_START_ORDER_TYPES: readonly DamageType[] = ['heat', 'cold', 'electric', 'toxin'];
 
 /**
  * §5.3：元素 / 物理加量 + 两两合成。
@@ -101,10 +126,12 @@ export function applyElements(
   //
   // ⚠ 物理加量**不进元素基数**：元素基数只取新面板总伤（见下），
   //   所以表 4.1 校验例 1（100 冲 + 100 切、+100% 冲、+100% 毒 → 毒 200）仍然成立。
+  // 需求方 2026-11-14：**每个物理类型单独最低 0**（负物理词条不能把该类型压到负数）。
+  //   元素加量同理：某一类元素的 Σ% 不足 −100% 时，该类型只归 0，不会倒扣别的类型。
   for (const t of PHYSICAL_TYPES) {
     const baseAmount: number = base[t] ?? 0;
     const m: number = side === 'hit' ? sumPct(contribs, `physical:${t}`) : 0;
-    if (baseAmount !== 0 || m !== 0) out[t] = baseAmount * (1 + m);
+    if (baseAmount !== 0 || m !== 0) out[t] = Math.max(0, baseAmount * (1 + m));
   }
 
   // 元素 % 的基数 = 玄骸加成后的新面板总伤（**不含**物理 %Mod 的加量）。
@@ -130,7 +157,8 @@ export function applyElements(
     if (side !== 'hit') continue; // DoT 基础值剔除元素加量（6.2）
     let pctSum: number = 0;
     for (const c of group) pctSum += c.amount / 100;
-    const amount: number = tNew * pctSum;
+    // 该元素自己这一路：Σ% 低于 −100% 时归 0（需求方 2026-11-14：只能让对应元素最低为 0）
+    const amount: number = Math.max(0, tNew * pctSum);
     let order: number = Number.MAX_SAFE_INTEGER;
     for (const c of group) order = Math.min(order, c.slot ?? Number.MAX_SAFE_INTEGER);
     const slot: ElementSlot = { type: t, amount, order, source: 'mod', fromMod: true };
@@ -144,15 +172,16 @@ export function applyElements(
   //   「这些额外元素**视为位于 Mod 槽位 9、10、11、12 号**，按同一套逻辑参与合成」
   //   自带元素的内部优先级：**火焰 > 冰冻 > 电击 > 毒素**。
   //
-  // ⚠ 之前这里把 order 取成 -1000（负值），导致自带元素抢在所有 Mod 槽位之前配对：
-  //   玄骸火 + 冰Mod 时，玄骸火先跟冰配成爆炸，把玩家想配毒气的火 Mod 晾在一边。
-  //
-  // D-174（2026-11-13，需求方确认）：**保持从 9 开始**。
-  //   槽位 0~7 是 8 个 Mod 槽，**8 是"假装装进去"的试算槽**——备选 Mod 与未安装的裂罅
-  //   共用这一号，因为它们**不会同时试算**（同一时刻只模拟装一样东西），所以不冲突。
-  //   自带元素本来就在所有 Mod 性来源之后，从 9 开始正好。
+  // 需求方 2026-11-15（B2）：**试算槽必须排在自带 / 玄骸元素之后**。
+  //   ```
+  //   融合顺序 = [0..7 Mod] → [8.. 自带四种基础元素 + 玄骸元素] → [试算槽]
+  //   ```
+  //   · 只有冰 / 火 / 毒 / 电四种基础元素参与融合；
+  //   · **复合元素（自带或玄骸）一律不参与融合**，不占融合槽位；
+  //   · 真 Mod 槽 0~7 与试算槽 8 都在自带 / 玄骸元素**之前**（需求方 2026-11-15 最终确认）：
+  //     自带 / 玄骸从 **9** 开始顺延。
   const PANEL_ELEMENT_PRIORITY: readonly DamageType[] = ['heat', 'cold', 'electric', 'toxin'];
-  let panelOrder: number = 9; // 0~7 Mod 槽 / 8 试算槽 / 自带元素从 9 开始
+  let panelOrder: number = PANEL_START_ORDER; // 0~7 Mod + 8 试算槽，自带 / 玄骸从 9 开始
   for (const t of PANEL_ELEMENT_PRIORITY) {
     const amount: number = base[t] ?? 0;
     if (amount > 0) {
@@ -160,12 +189,14 @@ export function applyElements(
       panelOrder++;
     }
   }
-  // 面板上可能还存在复合元素（例如武器自带磁力），不参与配对，排最后
+  // 面板上的复合元素（例如武器自带磁力）：**不参与配对**，也不占融合槽位——
+  // 它们直接进最终分布（需求方 2026-11-15：「其他复合元素是不会影响元素融合的」）。
+  const nonFusingCompound: DamageSpread = {};
   for (const t of COMPOUND_TYPES) {
     const amount: number = base[t] ?? 0;
     if (amount > 0) {
-      slots.push({ type: t, amount, order: panelOrder, source: 'panel', fromMod: false });
-      panelOrder++;
+      nonFusingCompound[t] = (nonFusingCompound[t] ?? 0) + amount;
+      out[t] = (out[t] ?? 0) + amount;
     }
   }
 
@@ -177,7 +208,7 @@ export function applyElements(
   for (const s of singles) out[s.type] = (out[s.type] ?? 0) + s.amount;
   for (const c of compounds) out[c.type] = (out[c.type] ?? 0) + c.amount;
 
-  return { v: out, slots, compounds, singles };
+  return { v: out, slots, compounds, singles, nonFusingCompound };
 }
 
 /**
@@ -186,7 +217,10 @@ export function applyElements(
  * 关键规则（D-006 已确认「同类型先加总再合成」）：
  *   1. 同类型的槽位（面板自带火 + 火Mod）**先合并成一个槽位**，再参与配对；
  *   2. 两个基础元素按配对表合成复合元素，合成物**不再参与配对**（表 4.3）；
- *   3. 配不上的留作单元素。
+ *   3. 配不上的留作单元素；
+ *   4. **Mod 给的复合元素**（磁力 / 病毒之类的复合 Mod）不参与配对，直接归入 `compounds`；
+ *      面板自带的复合元素在 `applyElements()` 里就已经单独拎出去（`nonFusingCompound`），
+ *      根本不进本函数——需求方 2026-11-15（B2）：「其他复合元素是不会影响元素融合的」。
  *
  * ⚠ 与文档 §5.3 伪代码的差异（`docs/decisions.md` D-023）：原伪代码"取出 a → 找能配对的 b"
  *   会因 `pairOf(火,火) = null` 而让面板火与火Mod 各自落单，得不到 §5.4 与 D-006 确认的「毒气 370」。

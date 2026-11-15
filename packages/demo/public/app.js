@@ -32,15 +32,15 @@ import { buildWeaponData, isArcaneUsableOn, isExilusMod, isModAllowedOnWeapon, l
 import {
   formatRivenRange, formatRivenValue, isRivenInstalled, placeRivenEntry,
   rivenComboNow, rivenDefOf, rivenFilledCount, rivenInstalledSlot, rivenRawRange, rivenScopeOf,
-  rivenSlotKind, rivenTableNow, rivenValueFor, setRivenCombo, setRivenEntry, setRivenEntryValue,
+  rivenSliderScale, rivenSlotKind, rivenTableNow, rivenValueFor, setRivenCombo, setRivenEntry, setRivenEntryValue,
 } from './app-riven.js';
 import {
-  RIVEN_COMBOS, RIVEN_SCOPE_LABEL,
+  RIVEN_COMBOS, RIVEN_SCOPE_LABEL, rivenDisplayUnit,
 } from '../../data/src/manual/riven.ts';
 import {
-  coDefaults, coInfo, coModGain, currentContributions, dotMetricRoleOf, effectiveModeFor,
+  coDefaults, coInfo, coModGain, currentContributions, dotGainForCandidate, dotMetricRoleOf, effectiveModeFor,
   freezeInfo, gainOf, INFINITE_GAIN, isDotMetric, isTotalLikeMetric, metricValueOf, ratioGainOf, runCompute,
-  rivenCandidateGain, rivenEntryGain, rivenGain,
+  rivenCandidateGain, rivenEntryGain, rivenGain, trialSlotNow,
 } from './app-compute.js';
 import * as editor from './ui-editor.js';
 
@@ -113,6 +113,38 @@ function statLabel(stat) {
   return STAT_LABEL[stat] || stat;
 }
 
+/**
+ * 一条**普通 Mod** 词条在卡面上的文本（需求方 2026-11-14：**按卡面描述区分**）：
+ *
+ * ```
+ * 描述里带 X%      → 百分比       膛线 +165%、重口径 −55% 精准度、过激真相 +X% 真言
+ * 描述里是 +X 米   → 米           合金钻头 +2.1m、剑风 +1.5m
+ * 描述里是 +Xs     → 秒           邪恶蓄力 −0.5s（原文 `-50% Combo Duration` 与 wiki 表一致，存的是 −0.5 秒）
+ * 描述里是 +X 发   → 只写数       过激真相 +40 弹匣容量
+ * 描述里是 +X 连击 → 次           邪恶蓄力 +30 Initial Combo
+ * ```
+ *
+ * 判据是数据层给的 `unit` + 这张卡的 `descriptionEn`，**不是**按属性名一刀切
+ * （弹匣容量在裂罅上是百分比、在过激真相上是固定 40 发，靠属性名分不出来）。
+ *
+ * ⚠ 只影响**显示**：内核读的是 `unit` 与数值本身，这一层不改任何计算。
+ */
+function modStatText(s, value, descriptionEn) {
+  const desc = String(descriptionEn || '');
+  const sign = value > 0 ? '+' : value < 0 ? '−' : '+';
+  const num = String(Math.round(Math.abs(value) * 100) / 100);
+  const body = sign + num;
+  const says = function (re) { return re.test(desc); };
+  if (s.unit === 'flat') {
+    if (says(/Xm\b|X\s*m\b/)) return body + 'm';
+    if (says(/Xs\b/)) return body + 's';
+    if (s.stat === 'comboInitial') return body + ' 连击';
+    return body;
+  }
+  // 数据层标成 percent、但描述写的其实是「米」（目前没有此类，留个兜底）
+  if (says(/\+Xm\b/)) return body + 'm';
+  return body + '%';
+}
 // ─────────────────────────────────────────────────────────────
 // 状态（D-105：真实状态在 app-store.js 的 store 里，这里只取常用别名）
 // ─────────────────────────────────────────────────────────────
@@ -494,28 +526,22 @@ function renderPanel(res) {
     // D-066：弹匣与装填各占一行，改用**核心算出的面板对照**（之前直接读武器原始值，
     // 导致弹匣/装填 Mod 在面板上看不出任何效果）
     // D-084：弹匣保留两位小数（弹药效率会算出非整数弹匣）
+    // 需求方 2026-11-15（A6）：弹匣这一行**直接显示等效弹匣**（已含弹药效率，上限 0.75），
+    // 不再单列「等效弹匣」行——计算用的就是它。
     ['弹匣容量', p.magazineSize.base.toFixed(2), p.magazineSize.after.toFixed(2)],
     ['装填时间', p.reloadTime.base.toFixed(3) + ' 秒', p.reloadTime.after.toFixed(3) + ' 秒'],
   ];
 
-  // D-125：弹药效率（主要·准星 / 次要·妨害 / 头颅射击…）体现在「等效弹匣」上。
-  // 以前这只在内核 `state.computed.等效弹匣` 里算，**面板没有这一行**，
-  // 上了准星左边面板看不出任何变化。有弹药效率时补一行「等效弹匣」。
-  {
-    const c = res.state && res.state.computed;
-    const mul = c && c.弹药效率倍数;
-    if (typeof mul === 'number' && Math.abs(mul - 1) > 1e-9) {
-      const now = c.等效弹匣;
-      const base = p.magazineSize.base;
-      rows.push([
-        '等效弹匣',
-        base.toFixed(2),
-        now.toFixed(2) + '（×' + mul.toFixed(3) + '）',
-      ]);
-    }
-  }
+  // 需求方 2026-11-15（A6）：「等效弹匣」**不再单列一行**——
+  // 上面「弹匣容量」的当前值就是等效弹匣（已乘弹药效率，上限 0.75），
+  // 这里只在有两处算法可能分叉时给出提示。
 
   fillRows('#panel-table', ['属性', '基础面板', '当前面板'], rows);
+
+  // 需求方 2026-11-15（C2）：**多段武器的每段面板不同**（暴率 / 触发率可以逐段不一样），
+  // 上面那张表只反映主段。这里按勾选的攻击方式把每一段再各列一张，
+  // 只在「有不止一段、且各段的暴率 / 触发率与主段不一致」时才画，避免单段武器多出一张重复表。
+  renderSegmentPanels(res);
 
   // ── 伤害分布：**每种攻击方式一张表，不做合计**（需求方 2026-11-12）──
   //
@@ -528,6 +554,54 @@ function renderPanel(res) {
 
   renderCritTiers(res);
   renderOutputs(res);
+}
+
+/**
+ * 逐段的面板对照（需求方 2026-11-15，C2）。
+ *
+ * 「多段武器每段的暴率 / 触发率可以不一样，面板只显示第一段会误导」——
+ * 所以除主段之外，凡是有差异的段都补一张小表：
+ * ```
+ * 段名        暴击几率        触发几率
+ *            基础 / 当前     基础 / 当前
+ * ```
+ * 单段武器、或各段与主段完全一致时**不画**（不制造噪音）。
+ *
+ * @param res `compute()` 结果（`segmentPanelPairs` 已按勾选的攻击方式切好）
+ */
+function renderSegmentPanels(res) {
+  const pairs = res.segmentPanelPairs || [];
+  if (pairs.length <= 1) return;
+  const main = pairs[0];
+  const differs = pairs.slice(1).some(function (p) {
+    return Math.abs(p.critChance.base - main.critChance.base) > 1e-9
+      || Math.abs(p.critChance.after - main.critChance.after) > 1e-9
+      || Math.abs(p.statusChance.base - main.statusChance.base) > 1e-9
+      || Math.abs(p.statusChance.after - main.statusChance.after) > 1e-9;
+  });
+  if (!differs) return;
+
+  const wrap = el('div', 'dmg-table');
+  const table = el('div', 'panel-table');
+  const head = el('div', 'panel-row panel-head');
+  head.style.gridTemplateColumns = colTemplate(3);
+  head.append(el('span', 'c-name', '逐段面板'));
+  for (const h of ['暴击几率', '触发几率']) head.append(el('span', 'c-val', h));
+  table.append(head);
+  for (let i = 0; i < pairs.length; i++) {
+    const p = pairs[i];
+    const row = el('div', 'panel-row');
+    row.style.gridTemplateColumns = colTemplate(3);
+    row.append(el('span', 'c-name', '第 ' + (p.index + 1) + ' 段 · ' + p.kind));
+    row.append(el('span', 'c-val',
+      (p.critChance.base * 100).toFixed(2) + '% / ' + (p.critChance.after * 100).toFixed(2) + '%'));
+    row.append(el('span', 'c-val',
+      (p.statusChance.base * 100).toFixed(2) + '% / ' + (p.statusChance.after * 100).toFixed(2) + '%'));
+    table.append(row);
+  }
+  wrap.append(table);
+  const host = $('#panel-table');
+  (host.parentElement || host).append(wrap);
 }
 
 /**
@@ -997,10 +1071,15 @@ function renderSplashDamage(res) {
   if (!b || b.stacksPerSecond <= 0) return; // 没有爆炸就不显示
 
   box.append(el('h2', 'section-title', '范围伤害'));
-  // 需求方 2026-11-12：「这里的六秒合计没删啊」——只留「每秒」，不再显示六秒合计。
+  // 需求方 2026-11-12：「这里的六秒合计没删啊」——只留一个数，不再显示六秒合计。
+  // 需求方 2026-11-15（C1）：以前这里读的 `splashPerSecond` 字段内核已经删掉了
+  //（D-171 改成 `splashOnTrigger`），所以这一行一直是空的。范围伤害是**触发一次的合计**，
+  // 不是每秒产出，单位也改成「/次」。
   const row = el('div', 'panel-row');
   row.append(el('span', 'c-name', '对周围敌人'));
-  row.append(el('span', 'c-val', fmt(b.splashPerSecond) + ' /秒'));
+  const splash = b.splashOnTrigger || 0;
+  row.append(el('span', 'c-val', fmt(splash) + ' /次'));
+  row.title = '1.5 秒内叠满 10 层（或目标死亡）时对周围敌人的一次范围伤害，不进任何总伤';
   const table = el('div', 'panel-table');
   table.append(row);
   box.append(table);
@@ -1145,7 +1224,7 @@ function statChips(mod) {
     const s = mod.stats[i];
     if (!s.bucket) continue;
     const max = s.levelValues[s.levelValues.length - 1] * stacks;
-    wrap.append(el('span', 'slot-stat', statLabel(s.stat) + ' ' + (max > 0 ? '+' : '') + max));
+    wrap.append(el('span', 'slot-stat', statLabel(s.stat) + ' ' + modStatText(s, max, mod.descriptionEn)));
   }
   // 需求方 2026-11-13：锁射速 / 锁多重写进卡面（原文就是这两句）
   for (const note of modLockNotes(mod)) wrap.append(el('span', 'slot-stat slot-lock', note));
@@ -1891,7 +1970,8 @@ function renderCandidates(res) {
     if (nextContribs) {
       // D-171：DoT 口径下的规则要用「**装上之后**」的配装判断
       //（待选卡还没进配装，用当前配装算合成看不到它的元素）
-      const own = modToContributions(mod, mod.maxRank, SLOT_COUNT);
+      // 试算槽号由内核给（需求方 2026-11-15 B2：排在自带 / 玄骸元素之后），不要写死 8
+      const own = modToContributions(mod, mod.maxRank, trialSlotNow());
       if (isTotalLikeMetric()) {
         // D-177 / D-180：总量类口径（N 秒总伤 / 稳态秒伤）
         gain = candidateWindowGain(base, nextContribs, own, res);
@@ -1943,7 +2023,7 @@ function candidateCard(row) {
     const s = mod.stats[i];
     if (!s.bucket) continue;
     const max = s.levelValues[s.levelValues.length - 1] * modStackFactor(mod.id);
-    statText.push(statLabel(s.stat) + ' ' + (max > 0 ? '+' : '') + max);
+    statText.push(statLabel(s.stat) + ' ' + modStatText(s, max, mod.descriptionEn));
   }
   for (const note of modLockNotes(mod)) statText.push(note);
   card.append(el('div', 'cand-stats', statText.join(' · ') || '无伤害加成'));
@@ -2019,10 +2099,12 @@ function renderRivenValueModes() {
 }
 
 /**
- * 裂罅数值输入框的显示文本：派系词条是 1.xx 倍率（两位小数），其它是百分比（一位小数）。
+ * 裂罅数值输入框里填的数：始终是**幅度**（百分比口径），派系保留两位小数（便于拖出 0.01）。
+ *
+ * 显示成什么单位由旁边的「范围」文字与卡面决定，见 `formatRivenValue`。
  */
-function fmtRivenInput(isFaction, displayValue) {
-  return isFaction ? displayValue.toFixed(2) : displayValue.toFixed(1);
+function fmtRivenInput(isFaction, amplitude) {
+  return isFaction ? amplitude.toFixed(2) : amplitude.toFixed(1);
 }
 
 /**
@@ -2084,53 +2166,58 @@ function renderRivenCompose(table) {
 
     if (def) {
       const row = el('div', 'riven-slot-row');
-      // 派系词条显示的是 1.xx 倍率，滑杆 / 输入框也按显示口径走，存盘时再换算回百分比。
-      // 滑杆范围 = 这条词条**理论上能洗出的范围**（min ~ max），与页面一致。
-      const isFaction = def.kind === 'faction';
+      // 滑杆 / 输入框一律按**这条词条的幅度**取值（正面为正、负面按幅度存正数）。
+      // 显示成什么（派系倍率 / 米 / 秒 / 百分比）只由 `formatRivenValue` 决定。
+      //
+      // ⚠ 以前派系在界面里被换算成 1.xx 再塞进滑杆，而滑杆范围是拿倍数算的，
+      //   两端对不上 → 拖动条拖不动、范围与数值不符（需求方 2026-11-14）。
+      const unit = rivenDisplayUnit(def);
       const rawRange = rivenRawRange(def, kind);
-      const dispOf = function (raw) { return isFaction ? (kind === 'pos' ? 1 + raw / 100 : 1 - raw / 100) : raw; };
-      const rawOf = function (disp) { return isFaction ? Math.abs((disp - 1) * 100) : Math.abs(disp); };
-      const lo = dispOf(rawRange.min);
-      const hi = dispOf(rawRange.max);
-      const loD = Math.min(lo, hi);
-      const hiD = Math.max(lo, hi);
-      const curD = rivenValueFor(def, kind, cur.value);
+      const isFaction = unit === 'faction';
+      const step = isFaction ? 0.01 : 0.1;
+      const curAmp = Math.min(rawRange.max, Math.max(rawRange.min, rivenValueFor(def, kind, cur.value)));
+      // 滑杆认的是「显示口径」：派系要显示成倍率（0.64 ~ 0.55），其余就是幅度本身。
+      // 存进状态的永远是幅度（`scale.toAmp` 换回来）。见 `app-riven.js` 的 `rivenSliderScale`。
+      const scale = rivenSliderScale(def, kind);
+      const minS = Math.min(scale.toSlider(rawRange.min), scale.toSlider(rawRange.max));
+      const maxS = Math.max(scale.toSlider(rawRange.min), scale.toSlider(rawRange.max));
+      const curS = Math.min(maxS, Math.max(minS, scale.toSlider(curAmp)));
 
       const range = el('input');
       range.type = 'range';
-      range.min = String(loD);
-      range.max = String(hiD);
-      range.step = '0.1';
-      range.value = String(Math.min(hiD, Math.max(loD, curD)));
+      range.min = String(minS);
+      range.max = String(maxS);
+      range.step = String(step);
+      range.value = String(curS);
 
       const num = el('input');
       num.type = 'number';
-      num.step = '0.1';
+      num.step = String(step);
       num.min = '0';
-      num.value = fmtRivenInput(isFaction, curD);
+      num.value = fmtRivenInput(isFaction, curS);
 
       // ⚠ 拖动过程中**不重绘**：重绘会把正在拖的滑杆节点换掉，导致拖不动。
       //   `input`（拖动中）只把数写进状态、并同步旁边的数字框；
       //   `change`（松开鼠标）才整页重算。
-      (function (index, toRaw, slider, numBox, isFac) {
+      (function (index, slider, numBox, isFac, sc) {
         slider.addEventListener('input', function (e) {
           const v = Number(e.target.value);
-          setRivenEntryValue(index, toRaw(v));
+          setRivenEntryValue(index, sc.toAmp(v));
           numBox.value = fmtRivenInput(isFac, v);
         });
         slider.addEventListener('change', function () { renderAll(); });
-      })(i, rawOf, range, num, isFaction);
+      })(i, range, num, isFaction, scale);
       row.append(range);
 
       // 输入框：回车 / 失焦（change）才重算，避免每敲一个字都重绘
-      (function (index, toRaw) {
+      (function (index, sc) {
         num.addEventListener('change', function (e) {
           const v = Number(e.target.value);
           if (!Number.isFinite(v)) return;
-          setRivenEntryValue(index, toRaw(v));
+          setRivenEntryValue(index, sc.toAmp(v));
           renderAll();
         });
-      })(i, rawOf);
+      })(i, scale);
       row.append(num);
       card.append(row);
 
@@ -2542,7 +2629,7 @@ function paintDetail(box, row) {
     for (let i = 0; i < mod.stats.length; i++) {
       const s = mod.stats[i];
       const max = s.levelValues[s.levelValues.length - 1];
-      ul.append(el('li', '', statLabel(s.stat) + '：' + (max > 0 ? '+' : '') + max));
+      ul.append(el('li', '', statLabel(s.stat) + '：' + modStatText(s, max, mod.descriptionEn)));
     }
     // 需求方 2026-11-13：锁射速 / 锁多重的限制写进详情（原文就这两句）
     for (const note of modLockNotes(mod)) ul.append(el('li', 'muted', note));
@@ -2593,9 +2680,10 @@ function paintDetail(box, row) {
   box.append(out);
 
   // ── 面板（D-130 / D-132）：一张表，行按「依赖顺序」排：
-  //   暴击几率 → 暴击伤害 → 平均暴击倍率 → 触发几率 → 多重 → 射速 → 弹匣 → 装填 → 等效弹匣。
+  //   暴击几率 → 暴击伤害 → 平均暴击倍率 → 触发几率 → 多重 → 射速 → 弹匣 → 装填。
   //   以前暴击几率/暴击伤害既在「面板」表里、又在「暴击」表里出现一次（D-132：合到一张表）。
   //   只列**真的会变**的行；没变化的行不出现（拆解本身就是"装上它之后"）。
+  //   需求方 2026-11-15（A6）：弹匣那一行已经是**等效弹匣**，不再单列「等效弹匣」行。
   {
     const cn = cur.state && cur.state.computed;
     const nn = next.state && next.state.computed;
@@ -2610,8 +2698,6 @@ function paintDetail(box, row) {
       ['射速', cur.panelPairs.fireRate.after, next.panelPairs.fireRate.after, 'num3'],
       ['弹匣容量', cur.panelPairs.magazineSize.after, next.panelPairs.magazineSize.after, 'num2'],
       ['装填时间', cur.panelPairs.reloadTime.after, next.panelPairs.reloadTime.after, 'num3'],
-      // D-129：等效弹匣的「当前」取面板弹匣（未乘弹药效率），装备后取加成后的等效弹匣
-      ['等效弹匣', cur.panelPairs.magazineSize.base, nn && nn.等效弹匣, 'num2'],
     ];
     const show = function (v, kind) {
       if (!Number.isFinite(v)) return '—';

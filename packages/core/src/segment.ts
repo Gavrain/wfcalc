@@ -18,13 +18,14 @@
 import type { DamageSpread, DamageType } from './damage-types.ts';
 import { scaleSpread, spreadTotal } from './damage-types.ts';
 import type { DamageSegment } from './weapon.ts';
+import type { AttackMode, ModeVariant } from './weapon.ts';
 import { allSegments } from './weapon.ts';
 import type { Contribution, Faction } from './contributions.ts';
 import { sumPct } from './contributions.ts';
 import type { Ctx } from './ctx.ts';
 import type { ApplyElementsResult } from './elements.ts';
 import { applyElements } from './elements.ts';
-import { overForStacks } from './weapon-state.ts';
+import { applyBaseDamage } from './buckets.ts';
 import type { DamageLine } from './crit.ts';
 import {
   critChanceTotal,
@@ -33,7 +34,6 @@ import {
   damageLine,
   expectedHitMultiplier,
   headshotMultiplier,
-  weakpointCritChanceAdd,
   bodyshotMultiplier,
 } from './crit.ts';
 import type { DoTType, DotTickDetail } from './dot.ts';
@@ -77,34 +77,12 @@ export function applyKuvaBonus(panel: DamageSpread, kuva: Ctx['options']['kuva']
 // ─────────────────────────────────────────────────────────────
 
 /**
- * 镀层类伤害乘区（A-03 已定案，见 `docs/decisions.md` D-024）。
+ * 镀层类伤害乘区 / 基伤乘区 / 被动基伤平摊，实现都在 `buckets.ts`。
  *
- * 实现已移到 `weapon-state.ts`（`基伤面板` 这个 computed 要用它，
- * 放这里会形成 main ↔ weapon-state 的循环依赖），此处原样转出以保持导出面不变。
+ * 这里原样转出以保持既有导入路径不变（D-024 的 `overForStacks` 一直是`
+ * `segment.ts` 的对外导出面）。
  */
-export { overForStacks } from './weapon-state.ts';
-
-/**
- * §5.2：基伤双基本值。
- *
- * ```
- * 基伤项 = 面板基伤 × (1 + Σ基伤Mod% + 镀层%) + 灵化基伤 × (1 + Σ基伤Mod%)
- * ```
- * · 镀层类（`co`）不吃灵化基伤、不吃 AoE；
- * · 玄骸那一份已经在 `applyKuvaBonus` 并入面板，所以**天然被放大**（D-017）。
- */
-export function applyBaseDamage(
-  panelWithKuva: DamageSpread,
-  seg: Pick<DamageSegment, 'kind'>,
-  contribs: readonly Contribution[],
-  coStacks = 0,
-  statusTypes = 0,
-): DamageSpread {
-  const g: number = 1 + sumPct(contribs, 'baseDamage');
-  const isAoe: boolean = seg.kind === 'explosiveAttack';
-  const k: number = isAoe ? g : g + overForStacks(contribs, coStacks, statusTypes);
-  return scaleSpread(panelWithKuva, k);
-}
+export { applyBaseDamage, overForStacks, passiveBaseDamageOf } from './buckets.ts';
 
 // ─────────────────────────────────────────────────────────────
 // 派系乘区（D-013：命中结算前乘一次、DoT 每跳再乘一次）
@@ -123,7 +101,9 @@ const FACTION_STATS: Readonly<Record<Exclude<Faction, 'none'>, `faction:${Factio
 
 export function factionFor(faction: Faction, contribs: readonly Contribution[]): number {
   if (faction === 'none') return 0;
-  return sumPct(contribs, FACTION_STATS[faction]);
+  // 派系乘区最低 0（需求方 2026-11-14）：负派系裂罅词条不能把伤害乘成负的。
+  // 返回的是「Σpct」，下游统一用 `1 + factionPct`；这里把下界压到 −1（= 倍率 0）。
+  return Math.max(-1, sumPct(contribs, FACTION_STATS[faction]));
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -154,13 +134,9 @@ export interface SegmentResult {
   finalHit: DamageSpread;
   /** 物理/元素 = 合成前的槽位 */
   elementDetail: ApplyElementsResult;
-  /** DoT 基础值的分布（= side 'dotBase'，只剔加量；**射线段已乘多重**） */
-  dotBase: DamageSpread;
-  /**
-   * 每跳用的基础分布（D-107）：命中分布**剔除元素/物理 Mod 加量**、未乘暴击。
-   * 触发占比、爆炸基础值都用这一份——它们必须看"没被元素 Mod 撑大的分布"。
-   */
-  tickBase: DamageSpread;
+  /** DoT / 爆炸的基础分布（不含元素加量；已乘期望倍率 / 派系 / 射线多重）。
+   *  需求方 2026-11-14 收敛：以前 `dotBase` 与 `tickBaseScaled` 是同一值的两个名字，现合并 */
+  tickBaseScaled: DamageSpread;
   /** 暴率 / 暴伤（已含 Mod） */
   critChance: number;
   critDamage: number;
@@ -170,6 +146,12 @@ export interface SegmentResult {
   line: DamageLine;
   /** DoT 每跳明细 */
   dotTicks: DotTickDetail[];
+  /**
+   * 该段分摊到的武器级被动基伤分布（需求方 2026-11-14）；没有被动时为 `undefined`。
+   *
+   * 从入参 `seg.passiveBaseDamage` 原样带出，供界面展示与排查"被动的 +N 加在哪一段"。
+   */
+  passiveBaseDamage?: DamageSpread;
 }
 
 /**
@@ -184,10 +166,20 @@ export interface SegmentResult {
 export function resolveSegment(
   ctx: Ctx,
   seg: DamageSegment,
-  upstream?: { 新面板: DamageSpread; 基伤面板: DamageSpread },
+  upstream?: { 新面板: DamageSpread; 基伤面板: DamageSpread; variant?: ModeVariant | undefined },
 ): SegmentResult {
   const { weapon, mode, contribs } = ctx;
   const panel: DamageSpread = { ...seg.damage };
+  /**
+   * 这一段所属攻击方式的面板 override（C2，需求方 2026-11-15）。
+   *
+   * 暴率 / 暴伤 / 触发率都要按「变体 override → 模式 override → 武器级」取——
+   * 以前 `critChanceTotal` / `critDamageTotal` 只传了 `ctx.mode`，**变体级 override 被忽略**，
+   * 于是「爆炸段自己有不同暴率」的武器，段面板和结算都不对。
+   */
+  const panelMode: AttackMode = upstream?.variant?.override
+    ? { ...mode, override: { ...(mode.override ?? {}), ...upstream.variant.override } }
+    : mode;
 
   // ── 该段是不是射线（需求方 2026-11-12：**按段判**；D-160 补齐段级扳机）──
   //
@@ -216,10 +208,13 @@ export function resolveSegment(
   // ① 玄骸（在基伤之前，D-017）
   // ② 基伤
   //   上游给过就直接取 computed，避免重复计算（数值同一份）
+  //
+  // 需求方 2026-11-14：武器级被动「+N 基础伤害」走基伤的**第二路**
+  //（只吃 Σ基伤%，不吃镀层 / 冷颤），分布已按本段原始面板平摊好（`seg.passiveBaseDamage`）。
   const panelWithKuva: DamageSpread = upstream ? upstream.新面板 : applyKuvaBonus(panel, ctx.options.kuva);
   const baseAfterBaseDamage: DamageSpread = upstream
     ? upstream.基伤面板
-    : applyBaseDamage(panelWithKuva, seg, contribs, ctx.coStacks, ctx.coStatusTypes);
+    : applyBaseDamage(panelWithKuva, seg, contribs, ctx.coStacks, ctx.coStatusTypes, seg.passiveBaseDamage);
 
   // ③④⑤⑥ 元素 / 物理加量
   const elementResult: ApplyElementsResult = applyElements(baseAfterBaseDamage, contribs, 'hit');
@@ -239,33 +234,40 @@ export function resolveSegment(
    * ⚠ 处决不做攻击类型判定（需求方：「处决就直接正常生效就行，因为跟普通攻击区分不开」）；
    *    震地**必须**按 `mode._slam` 判定（需求方：「震波需要加标签判定啊，只对震地和重型震地生效」）。
    */
-  const finisherMul: number = 1 + sumPct(contribs, 'finisherDamage');
-  const slamMul: number = mode._slam === true ? 1 + sumPct(contribs, 'slamDamage') : 1;
+  // 需求方 2026-11-14：独立乘区同样**最低 0**（负处决 / 负震地伤害不能把伤害乘成负的）
+  const finisherMul: number = Math.max(0, 1 + sumPct(contribs, 'finisherDamage'));
+  const slamMul: number = mode._slam === true ? Math.max(0, 1 + sumPct(contribs, 'slamDamage')) : 1;
   // 需求方 2026-11-13：细心瞄准的 -45% 身体伤害 —— 只在**关闭爆头**（打身体）时生效
   const bodyMul: number = bodyshotMultiplier(contribs, ctx.headshot.enabled);
   const specialMul: number = finisherMul * slamMul * bodyMul;
   const finalHitWithSpecial: DamageSpread = specialMul === 1 ? finalHit : scaleSpread(finalHit, specialMul);
 
-  /** 命中分布**剔除元素/物理 Mod 加量**后的样子（= 玄骸 + 基伤 之后、合成之前） */
+  /**
+   * 命中分布**剔除元素/物理 Mod 加量**后的样子（= 玄骸 + 基伤 之后、合成之前）。
+   *
+   * 需求方 2026-11-06（Q6 定案）：「暴击后不加元素的命中基础值……元素 mod 的作用不对，
+   * 火加毒确实是会合成毒气，但是他仍然是火焰加成，不会对毒气 dot 加成。」
+   * 所以元素 % **不在基础值里乘**，而是按"它自己的类型"在 `dotTick` 的 ③ 单独生效。
+   */
   const finalHitNoAdd: DamageSpread = applyElements(baseAfterBaseDamage, contribs, 'dotBase').v;
-  // DoT 基础值（§6.2 ①）：命中的**不含元素/物理 Mod 加量**的分布。
-  //
-  // 需求方 2026-11-06（Q6 定案）原文：
-  //   「暴击后不加元素的命中基础值，但是元素 mod 的作用不对，火加毒确实是会合成毒气，
-  //     但是他仍然是火焰加成，不会对毒气 dot 加成。只有真正的原生毒气百分比加成，
-  //     例如 lavos 的效价炼成，或者裂隙 mod 上的 +xxx 毒气% 才会增加毒气 dot。
-  //     所以我才一定要把元素后移，火冰毒电这种 dot 是不会出现这个问题的，
-  //     然后爆炸目前的设定也是不享受爆炸 mod 加成，所以只有毒气有这个问题。」
-  //
-  // 也就是：DoT 每跳 = Σ(未加元素加量的命中分布) × 系数 × (1 + 元素加成按命中占比分摊)
-  // 元素 %**不在基础值里乘**，而是按"它自己的类型"单独生效（见 dot.doTickBase）；
-  // 暴击按期望倍率施加（见下面 dotBase / tickBase 的注释）。
-  const dotBaseRaw: DamageSpread = specialMul === 1 ? finalHitNoAdd : scaleSpread(finalHitNoAdd, specialMul);
+
+  /**
+   * 每跳用的「基础命中值」（D-107 / Q6 定案，需求方 2026-11-12 定为**口径 B**）：
+   * **不含元素/物理 Mod 加量**的命中分布，含处决 / 震地 / 身体。
+   *
+   * 需求方 2026-11-14：以前这里还有一份叫 `dotBase` 的中间变量，它与本变量**逐字相同**，
+   * 却被各自乘一遍、算成两个名字不同、值相同的东西。现在只保留这一条，
+   * 乘期望倍率 / 派系 / 多重之后得到 `tickBaseScaled`——DoT 每跳与爆炸基础值共用。
+   *
+   * ⚠ 命中的口径用**含**元素加量的 `finalHitWithSpecial`；DoT 基础值用**不含**的这一份。
+   */
+  const tickBaseRaw: DamageSpread = specialMul === 1 ? finalHitNoAdd : scaleSpread(finalHitNoAdd, specialMul);
 
   // L3 暴击 + 爆头
-  // 需求方 2026-11-13：弱点暴击率只在开启爆头时加到暴率上（弱点 == 爆头）。
-  const cc = critChanceTotal(weapon, contribs, ctx.mode) + weakpointCritChanceAdd(contribs, ctx.headshot.enabled);
-  const cd = critDamageTotal(weapon, contribs, ctx.mode);
+  // 需求方 2026-11-15：弱点暴击率与普通暴击率是**同一乘区里的 Σ%**，已在 `critChanceTotal` 内部并入，
+  // 这里不能再单独加一次（以前加在括号外面，+350% 被当成暴率 +3.5）。
+  const cc = critChanceTotal(weapon, contribs, panelMode, ctx.headshot.enabled);
+  const cd = critDamageTotal(weapon, contribs, panelMode);
   const hsMul = headshotMultiplier(contribs, ctx.headshot.multiplier);
   // 派系（D-013：命中结算前一次）。D-135：这一项以前只进了 DoT，命中伤害完全没乘，
   // 所以上了「对 Grineer +55%」这类卡，命中伤害/爆发/持续都不动，只有 DoT 变了。
@@ -299,36 +301,25 @@ export function resolveSegment(
   const bladeMul: number = bladeShadowMultiplier(cc, sumPct(contribs, 'bladeShadow'));
   if (bladeMul !== 1) line.average *= bladeMul;
 
-  // ── D-062 / D-063：DoT 基础值 = 命中基础值 × **单弹头期望倍率** ──
-  // 需求方口径：
-  //   「爆头影响基础值计算。爆头暴击也是对基础值生效，dot 部分都应该以基础值为准。
-  //     参考暴击，dot 部分会额外生效的只有派系伤害和元素异常状态伤害这两种词条，
-  //     射速和多重影响的是叠层。」
-  //   「爆头倍率为 3 的时候如果没暴击，就还是三倍的爆头倍率。爆头暴击这个两倍
-  //     只在又暴击又开启了爆头时产生，如果有未暴击白字需要加权计算。」
-  //
-  // 所以直接用 `damageLine` 的**期望倍率**，而不是把 ×2 恒定乘上去：
-  //   非爆头：`(1−cc)·1 + cc·cd`
-  //   爆头：  `(1−cc)·hsM + cc·hsM·cd·2`     ← ×2 只作用于**暴击那一支**
-  // 展开后即 `1 + cc(cd−1)`（非爆头）或 `hsM·(1 + cc(2cd−1))`（爆头）。
-  const dotBase: DamageSpread = scaleSpread(
-    dotBaseRaw,
-    expectedHitMultiplier(cc, cd, ctx.headshot.enabled, hsMul) * factionMul * msMul,
-  );
-
   /**
-   * 每跳用的「基础命中值」（D-107 / Q6 定案，需求方 2026-11-12 定为**口径 B**）：
-   * **不含元素/物理 Mod 加量**的命中分布（暴击由 `dotTick` 按期望倍率施加，避免重复）。
-   * 每跳基础值取这份分布的**全部类型之和**；元素 % 由 `dotTick` 的 ③ 按该类型单独乘
-   * （见 `dotTickBase` / `dotTick`）。
-   */
-  const tickBaseRaw: DamageSpread = specialMul === 1 ? finalHitNoAdd : scaleSpread(finalHitNoAdd, specialMul);
-  /**
-   * 与 `tickBaseRaw` 同源，但**已乘暴击/爆头期望倍率与派系**（供 `output.ts` 的触发占比与爆炸基础值用）。
+   * **DoT 基础值 / 爆炸基础值 = 基础命中分布 × 期望倍率 × 派系 × 多重**（D-062 / D-063）。
+   * 需求方口径：
+   *   「爆头影响基础值计算。爆头暴击也是对基础值生效，dot 部分都应该以基础值为准。
+   *     参考暴击，dot 部分会额外生效的只有派系伤害和元素异常状态伤害这两种词条，
+   *     射速和多重影响的是叠层。」
+   *   「爆头倍率为 3 的时候如果没暴击，就还是三倍的爆头倍率。爆头暴击这个两倍
+   *     只在又暴击又开启了爆头时产生，如果有未暴击白字需要加权计算。」
+   *
+   * 用 `damageLine` 的**期望倍率**，而不是把 ×2 恒定乘上去：
+   *   非爆头：`(1−cc)·1 + cc·cd`
+   *   爆头：  `(1−cc)·hsM + cc·hsM·cd·2`     ← ×2 只作用于**暴击那一支**
+   * 展开后即 `1 + cc(cd−1)`（非爆头）或 `hsM·(1 + cc(2cd−1))`（爆头）。
    *
    * D-136：派系必须**在这里**乘进去（§5.2「命中结算前一次」）——上一轮（D-135）把派系只加到了
-   * 命中分行 `damageLine()` 上，DoT 的基础值 `tickBase` 里没有它，于是"命中吃、DoT 不吃"，
-   * 需求方看到的是「命中有了，但 DoT 派系加成还是 55%」。
+   * 命中分行 `damageLine()` 上，DoT 的基础值里没有它，于是"命中吃、DoT 不吃"。
+   *
+   * 需求方 2026-11-14：这就是**唯一的** DoT 基础值。以前它有两个名字（`dotBase` /
+   * `tickBaseScaled`），值相同却各算一遍；现在只有这一个，`dotTicks` 与爆炸基础值共用。
    */
   const tickBaseScaled: DamageSpread = scaleSpread(
     tickBaseRaw,
@@ -354,13 +345,22 @@ export function resolveSegment(
     baseAfterBaseDamage,
     finalHit: finalHitWithSpecial,
     elementDetail: elementResult,
-    dotBase,
-    /** 每跳用的基础分布（= 命中 − 元素加量，**未**乘暴击；触发占比/爆炸基础值取此份） */
-    tickBase: tickBaseRaw,
+    /**
+     * DoT / 爆炸的基础分布（需求方 2026-11-14 收敛后的**唯一**一份）：
+     * = 不含元素加量的命中 × 处决/震地/身体 × 期望倍率 × 派系 × 多重（射线）。
+     *
+     * 以前这里有三个名字：`dotBase`、`tickBase`、`tickBaseScaled`。
+     * `dotBase` 与 `tickBaseScaled` 是同一个值；`tickBase` 只服务于测试里的自证式断言
+     * （用未乘的那份再乘回去比结果），没有独立信息——需求方指出后一并删除，
+     * 测试改为直接拿**面板数字**断言。
+     */
+    tickBaseScaled,
     critChance: cc,
     critDamage: cd,
     singlePelletSpread,
     line,
     dotTicks,
+    // 武器级被动基伤（需求方 2026-11-14）：原样带出供展示 / 排查，没被动时为 undefined
+    ...(seg.passiveBaseDamage ? { passiveBaseDamage: seg.passiveBaseDamage } : {}),
   };
 }

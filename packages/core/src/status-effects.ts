@@ -1,8 +1,14 @@
 /**
  * 异常状态（proc）相关机制。
  *
- * 目前只收录已确认的 Tau 机制；其他元素异常（病毒、腐蚀、热、切割…）
- * 待确认后逐条加入 docs/乘区归属表.md 并在本文件实现。
+ * ## ⚠ 本文件的函数**尚未接进计算链**（需求方 2026-11-15，C4）
+ *
+ * 下面几个 Tau 函数没有任何调用点：`compute()` / `segment.ts` / `dot.ts` 都不读它们。
+ * 保留是因为规则已确认、以后要接线；但**不要以为它们已经在算**。
+ * 真正参与计算的异常机制在 `dot.ts`（DoT 每跳）、`blast.ts`（爆炸）、`six-second.ts`（层数）。
+ *
+ * 需求方 2026-11-15 同时删掉了原来的 `STATUS_CHANCE_HARD_CAP` 常量——
+ * 注释写「面板触发率是否封顶 100%，待确认」，但内核没有任何地方读它，是死常量。
  */
 
 /**
@@ -16,13 +22,12 @@
  *
  * 公式：effectiveStatusChance = baseStatusChance × (1 + stacks × 0.1)
  * 例：5 层 Tau、实时触发 210% → 210% × (1 + 5×0.1) = 315%。
+ *
+ * ⚠ **未接线**：见文件头。
  */
 export const TAU_STACK_BONUS_PER_STACK = 0.1;
 export const TAU_MAX_STACKS = 10;
 export const TAU_STACK_DURATION_SECONDS = 8;
-
-/** 触发布尔上限：面板触发率是否封顶 100% —— 待确认，见 docs/乘区归属表.md */
-export const STATUS_CHANCE_HARD_CAP = 3;
 
 /**
  * 把 Tau 层数换算成触发几率的额外乘数。

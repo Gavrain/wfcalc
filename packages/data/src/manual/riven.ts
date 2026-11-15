@@ -108,8 +108,10 @@ export interface RivenStatDef {
   kind: RivenStatKind;
   /** 基准值（百分比口径，见上方注释） */
   base: number;
-  /** 能不能作为负面词条出现 */
+  /** 能不能作为负面词条出现（**按类型各表**，见各表前的 `*_NEG`） */
   canNegative: boolean;
+  /** 该属性在游戏里的单位；`'flat'` 的词条页面显示成米 / 发 / 秒，不显示 `%`。缺省为百分比 */
+  statUnit?: 'percent' | 'flat';
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -167,6 +169,14 @@ interface StatTemplate {
   labelEn: string;
   stat: string;
   canNegative: boolean;
+  /**
+   * 内核属性本身的单位（**不是裂罅数值的单位**，裂罅数值一律是百分比口径）。
+   *
+   * `'flat'` = 这个属性在游戏里是固定量（米 / 发 / 秒 / 次），不是百分比：
+   *   · 穿透（m）、攻击范围（m）、连击持续时间（s）、弹药上限（发）、弹匣容量（发）。
+   * 页面按这个决定显示成 `2.7m` 还是 `106.9%`。
+   */
+  statUnit?: 'percent' | 'flat';
 }
 
 /** 页面里可能出现的全部普通词条（各类按自己的基准值挑用） */
@@ -184,7 +194,7 @@ const TEMPLATES: Readonly<Record<string, StatTemplate>> = {
   reloadHolstered: { key: 'reloadHolstered', label: '收纳时装填速度', labelEn: 'Reload (Holstered)', stat: 'reloadSpeed', canNegative: false },
   ammoMax: { key: 'ammoMax', label: '弹药上限', labelEn: 'Ammo Max', stat: 'ammoMax', canNegative: true },
   ammoEfficiency: { key: 'ammoEfficiency', label: '弹药效率', labelEn: 'Ammo Efficiency', stat: 'ammoEfficiency', canNegative: false },
-  punchThrough: { key: 'punchThrough', label: '穿透', labelEn: 'Punch Through', stat: 'punchThrough', canNegative: false },
+  punchThrough: { key: 'punchThrough', label: '穿透', labelEn: 'Punch Through', stat: 'punchThrough', canNegative: false, statUnit: 'flat' },
   recoil: { key: 'recoil', label: '后坐力', labelEn: 'Recoil', stat: 'recoil', canNegative: true },
   zoom: { key: 'zoom', label: '变焦', labelEn: 'Zoom', stat: 'zoom', canNegative: true },
   projectileSpeed: { key: 'projectileSpeed', label: '弹速', labelEn: 'Flight Speed', stat: 'projectileSpeed', canNegative: true },
@@ -192,7 +202,7 @@ const TEMPLATES: Readonly<Record<string, StatTemplate>> = {
   weakpointDamage: { key: 'weakpointDamage', label: '弱点伤害', labelEn: 'Weakpoint Damage', stat: 'weakpointDamage', canNegative: false },
   // 近战专属
   attackSpeed: { key: 'attackSpeed', label: '攻击速度', labelEn: 'Attack Speed', stat: 'fireRate', canNegative: true },
-  comboDuration: { key: 'comboDuration', label: '连击持续时间', labelEn: 'Combo Duration', stat: 'utility', canNegative: true },
+  comboDuration: { key: 'comboDuration', label: '连击持续时间', labelEn: 'Combo Duration', stat: 'utility', canNegative: true, statUnit: 'flat' },
   comboChance: { key: 'comboChance', label: '连击计数获得几率', labelEn: 'Combo Chance', stat: 'utility', canNegative: true },
   initialCombo: { key: 'initialCombo', label: '初始连击', labelEn: 'Initial Combo', stat: 'utility', canNegative: false },
   heavyEfficiency: { key: 'heavyEfficiency', label: '重击效率', labelEn: 'Heavy Efficiency', stat: 'utility', canNegative: true },
@@ -200,7 +210,7 @@ const TEMPLATES: Readonly<Record<string, StatTemplate>> = {
   finisherDamage: { key: 'finisherDamage', label: '终结者伤害', labelEn: 'Finisher Damage', stat: 'utility', canNegative: true },
   heavyDamage: { key: 'heavyDamage', label: '重击伤害', labelEn: 'Heavy Damage', stat: 'utility', canNegative: false },
   heavyWindUp: { key: 'heavyWindUp', label: '重击蓄力速度', labelEn: 'Heavy Wind Up', stat: 'utility', canNegative: false },
-  meleeRange: { key: 'meleeRange', label: '攻击范围', labelEn: 'Range', stat: 'utility', canNegative: true },
+  meleeRange: { key: 'meleeRange', label: '攻击范围', labelEn: 'Range', stat: 'utility', canNegative: true, statUnit: 'flat' },
   parryAngle: { key: 'parryAngle', label: '格挡角度', labelEn: 'Parry Angle', stat: 'utility', canNegative: false },
   slamDamage: { key: 'slamDamage', label: '震地伤害', labelEn: 'Slam Damage', stat: 'utility', canNegative: false },
 };
@@ -269,12 +279,40 @@ const RIFLE_BASES: BaseMap = {
   reloadHolstered: 90, ammoMax: 49.95, ammoEfficiency: 45, punchThrough: 2.7, recoil: 90,
   zoom: 59.99, projectileSpeed: 90, weakpointCritChance: 247.5, weakpointDamage: 225,
 };
-const RIFLE_NEG = [
+/**
+ * 负面词条池 = **每类裂罅自己的负面栏**（需求方 2026-11-14：「注意每种裂罅的负面池子也不一定一样」）。
+ *
+ * 对照 empx `?positives=3&negative=true` 的 Negative Stats 表（2026-11-14 逐类拉取）：
+ *
+ * | 类型 | 负面栏里有 | 负面栏里**没有** |
+ * |---|---|---|
+ * | 步枪 | 弹药上限、暴击几率、暴击伤害、基础伤害、射速、弹速、IPS、弹匣、多重、后坐力、装填、触发几率、异常持续、变焦、6 派系 | 弹药效率、穿透、**元素**、**异常伤害**、弱点两条 |
+ * | 霰弹 | 同步枪（样枪 Arca Plasmor） | 同步枪 |
+ * | 手枪 | 同步枪（样枪 Acrid） | 同步枪 |
+ * | 空战 | 同步枪（样枪 Arbucep） | 弹药效率、穿透、弹速、**元素**、**异常伤害**、弱点两条 |
+ * | 近战 | 攻速、连击几率、连击持续、暴击几率、暴击伤害、基础伤害、处决伤害、重击效率、IPS、攻击范围、滑砍暴击、触发几率、异常持续、6 派系 | 初始连击、重击伤害、重击蓄力、格挡角度、震地伤害、**元素**、**异常伤害** |
+ *
+ * ⚠ 页面负面栏里有 `Faction = 1.00 / 1.00 / 1.00` 这一行，表示「派系可以作负面」；
+ *   数值与公式一致（空战派系 45 × 0.75 × 1.2 = 40.5）。6 个派系都保留在负面池里。
+ *
+ * ⚠ **同一张表里正、负的数值一样**：负面的「幅度」与正面同一口径
+ *   （都是 `基准 × 系数 × 1.2`），empx 的 3+1− 负面栏实测就是正面的 0.8 倍。
+ */
+
+/** 步枪 / 霰弹 / 手枪 共用的负面池 */
+const GUN_NEG = [
   'baseDamage', 'critChance', 'critMultiplier', 'statusChance', 'statusDuration', 'multishot',
   'fireRate', 'magazine', 'reloadSpeed', 'ammoMax', 'recoil', 'zoom', 'projectileSpeed',
   'physical_impact', 'physical_puncture', 'physical_slash',
   'faction_grineer', 'faction_corpus', 'faction_infested', 'faction_orokin', 'faction_techrot', 'faction_scaldra',
 ];
+const RIFLE_NEG = GUN_NEG;
+const SHOTGUN_NEG = GUN_NEG;
+const PISTOL_NEG = GUN_NEG;
+
+/** 近战：比枪械多「连击几率 / 重击效率 / 滑砍暴击 / 处决伤害 / 攻击范围」，没有多重 / 弹匣 / 装填 */
+
+/** 空战：比枪械少「弹速」（页面负面栏没有 Flight Speed） */
 
 /** 霰弹 */
 const SHOTGUN_BASES: BaseMap = {
@@ -283,7 +321,6 @@ const SHOTGUN_BASES: BaseMap = {
   reloadHolstered: 89.98, ammoMax: 89.98, ammoEfficiency: 45, punchThrough: 2.7, recoil: 89.98,
   zoom: 42, projectileSpeed: 89.98, weakpointCritChance: 247.5, weakpointDamage: 225,
 };
-const SHOTGUN_NEG = RIFLE_NEG;
 
 /** 次要（副手） */
 const PISTOL_BASES: BaseMap = {
@@ -292,7 +329,6 @@ const PISTOL_BASES: BaseMap = {
   reloadHolstered: 89.98, ammoMax: 89.98, ammoEfficiency: 45, punchThrough: 2.7, recoil: 89.98,
   zoom: 80.13, projectileSpeed: 89.98, weakpointCritChance: 247.5, weakpointDamage: 225,
 };
-const PISTOL_NEG = RIFLE_NEG;
 
 /**
  * 近战。
@@ -314,7 +350,7 @@ const MELEE_POS = [
 ];
 const MELEE_NEG = [
   'baseDamage', 'critChance', 'critMultiplier', 'statusChance', 'statusDuration', 'attackSpeed',
-  'comboDuration', 'comboChance', 'initialCombo', 'heavyEfficiency', 'slideCrit', 'finisherDamage',
+  'comboDuration', 'comboChance', 'heavyEfficiency', 'slideCrit', 'finisherDamage',
   'meleeRange', 'physical_impact', 'physical_puncture', 'physical_slash',
   'faction_grineer', 'faction_corpus', 'faction_infested', 'faction_orokin', 'faction_techrot', 'faction_scaldra',
 ];
@@ -326,6 +362,7 @@ const ARCHGUN_BASES: BaseMap = {
   ammoMax: 99.92, ammoEfficiency: 45, punchThrough: 2.7, recoil: 89.98,
   zoom: 60.02, weakpointCritChance: 247.5, weakpointDamage: 225,
 };
+/** 空战负面池：**没有弹速**（empx 负面栏没有 Flight Speed），其余与枪械一致 */
 const ARCHGUN_NEG = [
   'baseDamage', 'critChance', 'critMultiplier', 'statusChance', 'statusDuration', 'multishot',
   'fireRate', 'magazine', 'reloadSpeed', 'ammoMax', 'recoil', 'zoom',
@@ -402,7 +439,17 @@ export interface RivenValueRange {
 }
 
 /**
- * 算一条词条在某个组合下的数值（百分比口径）。
+ * 算一条词条在某个组合下的数值（百分比口径）。**全项目唯一的一条裂罅数值公式**。
+ *
+ * ```
+ * 正面 = 基准 × combo.gain × 倾向(1.2)
+ * 负面 = 基准 × |combo.loss| × 倾向(1.2)
+ * 区间 = 平均值 × 0.9 ~ 平均值 × 1.1
+ * ```
+ *
+ * ⚠ 倾向 1.2 **只乘这一次**（需求方 2026-11-14：「只要保证只乘一次就行了」）。
+ *   页面侧的 `app-riven.js` 以前自己又抄了一遍这个公式（手写 `* 1.2`），
+ *   现在一律调这里，不要在别处再乘倾向。
  *
  * @returns 数值区间；负面词条返回**正数**（幅度），由调用方加负号
  */
@@ -421,6 +468,24 @@ export function roundRiven(v: number): number {
 export function rivenDisplayValue(def: RivenStatDef, kind: 'pos' | 'neg', raw: number): number {
   if (def.kind !== 'faction') return raw;
   return kind === 'pos' ? 1 + raw / 100 : 1 - raw / 100;
+}
+
+/**
+ * 一条词条界面上显示的**单位**（2026-11-14）。
+ *
+ * | 类 | 显示 | 例 |
+ * |---|---|---|
+ * | 派系 | 倍率 `1.xx` / 负面 `0.xx` | 1.54 / 0.73 |
+ * | 后坐力 | 裂罅数值是百分比 | 正面 −128.3%（降低）/ 负面 +21.4%（增加） |
+ * | `statUnit: 'flat'` 的词条 | **不带 %** | 穿透 3.2m、攻击范围 2.3m、连击持续时间 9.6s |
+ * | 其余 | 百分比 | 106.9% |
+ *
+ * ⚠ 裂罅数值本身一律是百分比口径；「固定数值」只影响**显示**，不改计算。
+ */
+export function rivenDisplayUnit(def: RivenStatDef): 'faction' | 'pct' | 'flat' | 'recoil' {
+  if (def.kind === 'faction') return 'faction';
+  if (def.key === 'recoil') return 'recoil';
+  return def.statUnit === 'flat' ? 'flat' : 'pct';
 }
 
 /**

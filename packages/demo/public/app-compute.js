@@ -232,6 +232,19 @@ export function runCompute(contribs, coOverride) {
 }
 
 /**
+ * **试算槽的槽号**（需求方 2026-11-15 最终确认）。
+ *
+ * ```
+ * [0..7] 8 个真实 Mod 槽 → [8] 试算槽（备选卡 / 未安装裂罅） → [9..] 自带 + 玄骸元素
+ * ```
+ *
+ * 真 Mod 与试算卡都在自带 / 玄骸元素之前；试算槽固定是 `SLOT_COUNT`（= 8）。
+ */
+export function trialSlotNow() {
+  return SLOT_COUNT;
+}
+
+/**
  * 这张 Mod 装上后**吃掉哪些镀层层数**（D-117）。
  *
  * 镀层类 Mod 的收益取决于「敌人异况数 a × 叠加层数 y」，而这两项在配置区一起调；
@@ -259,8 +272,8 @@ export function coModGain(mod) {
   const ctx = store.gainCtx;
   if (!ctx) return null;
   if (!isConditionOverloadMod(mod)) return null;
-  // 槽位排在末尾，不影响其它 Mod 的元素合成顺序
-  const extra = modToContributions(mod, mod.maxRank, SLOT_COUNT);
+  // 槽位排在末尾（试算槽，见 trialSlotNow），不影响其它 Mod 的元素合成顺序
+  const extra = modToContributions(mod, mod.maxRank, trialSlotNow());
   if (!extra.length) return null;
   const current = ctx.current;
   if (!(current > 0)) return null;
@@ -282,8 +295,8 @@ export function coPreviewGain() {
   const contribs = currentContributions();
   const current = metricValueOf(runCompute(contribs));
   if (!(current > 0)) return null;
-  // 槽位排在末尾，不影响其它 Mod 的元素合成顺序
-  const preview = modToContributions(ref.mod, ref.mod.maxRank, SLOT_COUNT);
+  // 槽位排在末尾（试算槽），不影响其它 Mod 的元素合成顺序
+  const preview = modToContributions(ref.mod, ref.mod.maxRank, trialSlotNow());
   const after = metricValueOf(runCompute(contribs.concat(preview), {
     stacks: store.ui.coStacks, // D-117：0 = 真正的 0 层（默认值由 coDefaults() 填上限）
     statusTypes: store.ui.coStatusTypes,
@@ -559,25 +572,6 @@ function feedsDamageDot(own, contribs) {
 }
 
 // ─────────────────────────────────────────────────────────────
-// N 秒总伤下的增幅：由续航 / 异常两口径加权拼（D-175，需求方 2026-11-13）
-//
-// 需求方原话：
-// > 「显然是三啊，不然我这个 n 秒异常状态总伤的口径不就白搞了吗。」
-// > 「只影响增幅这里的显示，1秒总伤统计那边还是照常算。」
-//
-// 问题：以前 N 秒总伤下的增幅是「拿掉这张卡重算总伤」，**绕开了** D-171 的异常口径规则：
-//   白霜弹头（冰）+15.7% / 异常 ±0.0% → 总伤 +12.4%
-//   致命火力（毒）+15.7% / 异常 ±0.0% → 总伤 +51.2%
-//
-// 现在：
-//   ```
-//   总伤增幅 = w1 × (续航秒伤增幅) + w2 × (N 秒异常总伤增幅)
-//   w1 = 续航秒伤 × N ÷ N 秒总伤      w2 = N 秒异常总伤 ÷ N 秒总伤      （w1 + w2 = 1）
-//   ```
-//   两部分用的都是**各自口径原本的增幅**（续航走拿掉重算；异常按 D-176 的拆法）。
-//
-// ⚠ 只改**卡上显示的增幅**：口径表里「N 秒总伤」的数值照常 = 续航秒伤 × N + 异常总伤。
-// ─────────────────────────────────────────────────────────────
 
 /**
  * 某次计算结果里某一口径的值（找不到返回 0） */
@@ -588,46 +582,7 @@ function lineValueOf(res, id) {
 }
 
 /**
- * 拿掉 `sourceId` 之后重算，返回**当前 / 拿掉后**那一对续航与异常数值。
- *
- * @returns `{ before: { sustained, dot }, after: { sustained, dot } }`；该来源没有贡献时返回 null
- */
-export function splitPairOf(contribs, sourceId) {
-  const rest = [];
-  for (let i = 0; i < contribs.length; i++) if (contribs[i].source !== sourceId) rest.push(contribs[i]);
-  if (rest.length === contribs.length) return null; // 该装备没有产出任何贡献
-  const cur = runCompute(contribs);
-  const wo = runCompute(rest);
-  return {
-    before: { sustained: lineValueOf(cur, SUSTAINED_METRIC), dot: lineValueOf(cur, DOT_WINDOW_METRIC) },
-    after: { sustained: lineValueOf(wo, SUSTAINED_METRIC), dot: lineValueOf(wo, DOT_WINDOW_METRIC) },
-  };
-}
-
-/**
- * 「N 秒总伤」下某件装备的增幅 = 续航增幅与异常增幅按**当前占比**加权（D-175）。
- *
- * ```
- * 总伤增幅 = w1 × 续航增幅 + w2 × 异常增幅
- * ```
- *
- * @param pair       {@link splitPairOf} 的结果
- * @param dotGain    该卡的「N 秒异常总伤」增幅（按 D-176 算好）
- */
-export function windowGainFromParts(pair, dotGain) {
-  if (!pair) return null;
-  const window = store.ui.dotWindowSeconds ?? 0;
-  const total = pair.before.sustained * window + pair.before.dot;
-  const w1 = total > 0 ? (pair.before.sustained * window) / total : 0;
-  const w2 = total > 0 ? pair.before.dot / total : 1;
-  const sustainGain = sustainGainOf(pair);
-  if (sustainGain === null || dotGain === null || dotGain === undefined) return null;
-  return w1 * sustainGain + w2 * dotGain;
-}
-
-/**
  * 普通边际增幅（`当前 ÷ 拿掉后 − 1`）；拿掉后为 0 而当前 > 0 → `∞`。
- * 现有 `marginalGainOf` 的数值版本，供权重拼法复用。
  */
 export function ratioGainOf(before, after) {
   // 「当前 ÷ 拿掉后 − 1」：第一个参数是**拿掉后**（分母），第二个是**当前**
@@ -636,45 +591,16 @@ export function ratioGainOf(before, after) {
 }
 
 /**
- * 两个值的“增长比”（大的 ÷ 小的 − 1）。
- *
- * ⚠ 有的调用点是把 `pair` 反过来构造的（装上某张卡再取反），所以**不靠参数命名判断**
- *   谁是"当前"、谁是"拿掉后"—— 直接按大小取分母，结果恒为非负。
- */
-function growth(before, after) {
-  const hi = before > after ? before : after;
-  const lo = before > after ? after : before;
-  if (!(lo > 0)) return hi > 0 ? INFINITE_GAIN : null;
-  return hi / lo - 1;
-}
-
-/** 续航部分的增幅（命中伤害，不涉及 D-171 的 DoT 规则） */
-export function sustainGainOf(pair) {
-  if (!pair) return null;
-  return growth(pair.after.sustained, pair.before.sustained);
-}
-
-/**
- * 异常部分的增幅（「from → to」两个值之间的普通增幅）。
- *
- * ⚠ 只在**两边的异常都不为 0** 时有意义（例如"只留触发率 vs 只留元素"），
- *   不能拿"整卡 vs 拿掉卡"来比 —— 那会因为结构变化成倍跳变。
- */
-export function dotGainOfPair(pair) {
-  if (!pair) return null;
-  return growth(pair.after.dot, pair.before.dot);
-}
-
-/**
- * 「N 秒总伤」下某件**已装**装备的增幅（D-175）。
+ * 「N 秒总伤」下某件**已装**装备的增幅（D-175 / D-177）。
  *
  * ```
- * = w1 × 续航增幅 + w2 × 异常增幅
+ * 当前总伤 ÷ 分母 − 1
+ * 分母 = 拿掉整张卡后的续航秒伤 × N + DoT 部分
  * ```
- *   · 占比 `w1 / w2` 取**当前配装**（`splitPairOf` 内部用 `store.ui.dotWindowSeconds`）；
- *   · 续航增幅 = `当前 ÷ 拿掉后 − 1`（命中伤害，普通边际增幅）；
- *   · 异常增幅 = {@link dotGainForSource}：先按 D-171 判"这张卡在异常口径下算不算"，
- *     不算 → 0；算 → `当前 ÷ 拿掉后 − 1`（拿掉后归 0 → `∞`）。
+ *
+ * 需求方 2026-11-15（C3）：以前这里旁边还有一套「续航增幅 × 占比 + 异常增幅 × 占比」的拼法
+ *（`windowGainFromParts` / `splitPairOf` / `sustainGainOf` / `dotGainOfPair`），
+ * 没有任何调用点，已整段删除——实际在跑的就是下面这一套。
  *
  * @param contribs  全部贡献（当前配装）
  * @param sourceId  要剔除的装备来源 id
@@ -988,7 +914,7 @@ export function rivenEntryGain(index) {
   const slot = rivenInstalledSlot();
   // 装了就用它的真实槽位（D-174）；没装就用虚位槽 9，**绝不传 undefined**
   //（undefined 会退化成 0、1、2，跟真实 Mod 槽撞号并改写元素合成顺序）
-  const slotBase = slot >= 0 ? slot : RIVEN_TRIAL_SLOT;
+  const slotBase = slot >= 0 ? slot : trialSlotNow();
   const rest = ctx.contribs.filter(function (c) { return c.source !== RIVEN_SLOT_ID; });
 
   // ── 当前：这张裂罅的全部词条都在 ──
@@ -1070,7 +996,11 @@ export function rivenEntryGain(index) {
  *   跟真实的 Mod 槽撞号 → 元素两两合成的顺序被改写。
  *   实测：Mod 火@0 + 电@1 + 裂罅冰 时，撞号算出「爆炸」，用 8 是「辐射」，结果完全不同。
  */
-const RIVEN_TRIAL_SLOT = SLOT_COUNT; // 8：试算槽（与备选 Mod 的临时槽同号，两者互斥）
+export const RIVEN_TRIAL_SLOT = SLOT_COUNT; // 8：试算槽（与备选 Mod 的临时槽同号，两者互斥）
+/** 实际使用的试算槽号：优先读内核算好的 `res.trialSlot`（见 `trialSlotNow`） */
+export function rivenTrialSlot() {
+  return trialSlotNow();
+}
 
 /** 某个词条 key 在裂罅组合区里的槽位下标；没有返回 -1 */
 function rivenEntryIndexOfKey(key) {
@@ -1116,7 +1046,8 @@ export function rivenCandidateGain(def, kind) {
   const base = ctx.contribs.filter(function (c) { return c.source !== RIVEN_SLOT_ID; });
 
   // 2) 分母：配装 + 组合区已填的裂罅
-  const rivenContribs = rivenToContributions(RIVEN_TRIAL_SLOT);
+  const trialSlot = trialSlotNow();
+  const rivenContribs = rivenToContributions(trialSlot);
   const before = metricValueOf(runCompute(base.concat(rivenContribs)));
   if (!(before > 0)) return null;
 
@@ -1130,7 +1061,7 @@ export function rivenCandidateGain(def, kind) {
       if (e && e.key === def.key) { value = e.value; break; }
     }
   }
-  const extra = [buildOneContribution(def, kind, value, RIVEN_TRIAL_SLOT)];
+  const extra = [buildOneContribution(def, kind, value, trialSlot)];
   if (!(before >= 0)) return null;
 
   // D-177：N 秒总伤下 = "加这一条之后的总伤" ÷ "当前（配装 + 当前裂罅）的总伤" − 1

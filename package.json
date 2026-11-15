@@ -1,4 +1,4 @@
-﻿{
+{
   "name": "wfcalc",
   "private": true,
   "version": "0.1.0",
@@ -25,7 +25,8 @@
     "report:embed": "node packages/demo/src/report-embed-death.mjs",
     "demo:editor-check": "node packages/demo/src/checks/override-merge.mjs && node packages/demo/src/checks/editor-save.mjs && node packages/demo/src/checks/editor-draft-shape.mjs && node packages/demo/src/checks/editor-edit-save.mjs && node packages/demo/src/checks/override-e2e.mjs && node packages/demo/src/checks/mode-panel.mjs && node packages/demo/src/checks/status-sync.mjs",
     "build:data": "node --experimental-strip-types packages/data-build/src/index.ts",
-    "build:mods": "node --experimental-strip-types packages/data-build/src/build-mods.ts"
+    "build:mods": "node --experimental-strip-types packages/data-build/src/build-mods.ts",
+    "build:offline": "node packages/demo/src/offline/build-offline.mjs"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",

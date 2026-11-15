@@ -28,9 +28,16 @@ import { DOT_TYPES, NON_DAMAGE_STATUS_TYPES, multishot, stacksPerShot } from './
 import type { DamageType } from './damage-types.ts';
 import type { BlastDetail } from './blast.ts';
 import { BLAST, blastDetail } from './blast.ts';
-import { firingFraction } from './timeline.ts';
-import { dotSixSecondCurve, hasDotElement, stacksInWindow } from './six-second.ts';
-import { ammoEfficiencyMultiplier } from './weapon-state.ts';
+import { firingFraction, firingIntervals, firingIntervalsWithin } from './timeline.ts';
+import {
+  dotSixSecondCurve,
+  dotStackPool,
+  hasDotElement,
+  IMMEDIATE_TICK,
+  stacksInWindow,
+  steadyDotPerSecond,
+} from './six-second.ts';
+import { effectiveMagazine } from './weapon-state.ts';
 import { DEFAULT_DOT_WINDOW_SECONDS } from './ctx.ts';
 
 /**
@@ -132,6 +139,10 @@ export interface OutputBreakdown {
   directInWindow: number;
   /** 稳态秒伤：续航秒伤 + 各异常按「一个循环内能叠的层数」折算（D-180） */
   steadyDps: number;
+  /** 稳态秒伤里的**异常部分**（DoT 五类，不含直击） — 需求方 2026-11-15（A5） */
+  steadyDotDps: number;
+  /** 稳态秒伤里的**爆炸主目标**部分 — 需求方 2026-11-15（A4：以前完全没算） */
+  steadyBlastDps: number;
   /** 每个 DoT 类型的每秒输出（期望层数 × 每跳）——**各段合并**后的合计 */
   dotPerType: Partial<Record<DoTType, number>>;
   /** 每个 DoT 类型的每秒期望叠层——**各段合并**后的合计 */
@@ -215,19 +226,20 @@ export function fireRateFinal(weapon: Weapon, contribs: readonly Contribution[],
  * 多段武器（巴什穆电击+火焰、伯斯顿 Prime 灵化命中+爆炸）因此漏算后面的段。
  */
 /**
- * 稳态秒伤里的**异常部分**（D-180，需求方 2026-11-13）。
+ * 稳态秒伤里的**异常部分**（D-180；需求方 2026-11-15 重做，A4 + A5）。
  *
  * > 「加一个稳态秒伤……用来体现连续射击下弹匣装填的影响」
  * > 「全部按一个循环」
  *
  * ```
- * 每个 DoT 类型稳态每秒 = 每跳 × "一个循环内能叠的层数" ÷ 循环时长
- * 一个循环内能叠的层数 = 层/秒 × 开火段时长（弹匣 ÷ 射速），毒气再按 10 层封顶
- * 循环时长 = 开火段 + 装填
+ * 循环 = 打空弹匣（弹匣 ÷ 射速）+ 装填
+ * 异常 = 逐秒推进层数池（层数会到期清除，装填期间虽然不新增、但照样掉）
+ *       循环内逐秒伤害之和 ÷ 循环时长
+ * 爆炸 = 每层恒定 0.3，层数同样按逐秒池结算，再按循环摊平        ← A4：以前完全没算
  * ```
  *
- * 为什么全部用"一个循环"：装填期间不叠层，长期平均只跟"一个循环能叠多少"有关；
- * 用固定 N 秒窗口会随窗口长度产生假亏损（弹匣比窗口长时火还没叠满就被截断）。
+ * ⚠ 以前这里是「层/秒 × 开火段时长 ÷ 循环」，等价于**层数永不到期**，
+ * 高射速、大弹匣的武器会被算得虚高。
  */
 function steadyStateDot(
   segmentResults: readonly SegmentResult[],
@@ -237,26 +249,58 @@ function steadyStateDot(
   mag: number,
   reload: number,
   window: number,
-  firingTimeline: (sec: number) => number,
-): number {
-  // 开火段 = 弹匣 ÷ 射速；数据缺失时退化为窗口长度
-  // 开火段 = 弹匣 ÷ 射速（一个循环里实际开火多久）
+): { dot: number; blast: number } {
   const fireDur = fr > 0 && mag > 0 ? mag / fr : window;
   const cycle = fireDur + Math.max(0, reload);
-  if (!(cycle > 0)) return 0;
-  let total = 0;
+  if (!(cycle > 0)) return { dot: 0, blast: 0 };
+  // 与窗口无关的**真实时间线**：循环 + 6 秒尾巴（让循环末尾挂着的层结算完）
+  const intervalsOf = (sec: number) => firingIntervals(mag, fr, reload, sec);
+  let dotTotal = 0;
+  let blastTotal = 0;
   for (const segRes of segmentResults) {
-    const seg = segmentDotAndBlast(segRes, contribs, ms, fr, firingTimeline, window);
-    for (const [t, rate] of Object.entries(seg.stacksPerType) as [DoTType, number][]) {
-      if (!(rate > 0)) continue;
-      const tick = segRes.dotTicks.find((d) => d.type === t);
-      if (!tick) continue;
-      const raw = rate * fireDur;
-      const stacks = t === 'gas' ? Math.min(10, raw) : raw;
-      total += tick.tick * stacks / cycle;
+    const seg = segmentDotAndBlast(segRes, contribs, ms, fr, (sec: number) => {
+      // 窗口型入参这里不用；给一个占位实现避免类型分叉（稳态不读 window）
+      void sec;
+      return 1;
+    }, window);
+    const items: {
+      type: DoTType;
+      stacksPerSecond: number;
+      perStackPerSecond: number;
+      immediateFirst?: boolean;
+      stacksPerShot?: number;
+    }[] = [];
+    for (const tick of segRes.dotTicks) {
+      const rate = seg.stacksPerType[tick.type] ?? 0;
+      if (!(rate > 0) || !(tick.tick > 0)) continue;
+      if (!((segRes.finalHit[tick.type] ?? 0) > 0)) continue; // 这一段没有这个元素
+      items.push({
+        type: tick.type,
+        stacksPerSecond: rate,
+        perStackPerSecond: tick.tick,
+        immediateFirst: IMMEDIATE_TICK.has(tick.type),
+        stacksPerShot: stacksPerShot(tick.type, segRes.finalHit, segRes.procChance, contribs, ms),
+      });
+    }
+    dotTotal += steadyDotPerSecond(
+      items,
+      cycle,
+      intervalsOf,
+      (sec: number) => firingIntervalsWithin(mag, fr, reload, sec, cycle),
+    );
+    // A4：爆炸主目标（每层 0.3，层数不封顶）同样按逐秒池结算
+    const blastSps = seg.blast.stacksPerSecond;
+    if (blastSps > 0 && seg.blast.perStack > 0) {
+      const series = dotStackPool('blast', blastSps, seg.blast.perStack, Math.ceil(cycle) + 6, intervalsOf, {
+        duration: BLAST.delaySeconds,
+        immediateFirst: false,
+      });
+      let sum = 0;
+      for (const v of series) sum += v;
+      blastTotal += sum / cycle;
     }
   }
-  return total;
+  return { dot: dotTotal, blast: blastTotal };
 }
 
 function segmentDotAndBlast(
@@ -343,7 +387,7 @@ function segmentDotAndBlast(
     // D-107：占比取自**这一段自己的**命中分布（`res.finalHit`）。
     // D-189：单发叠层期望再乘刃影倍率（追加那一下自己也会触发异常）。
     const stacksPerShotOfType =
-      stacksPerShot(tick.type, res.finalHit, res.kind ? res.procChance : 0, contribs, res.beam, ms) * bladeMul;
+      stacksPerShot(tick.type, res.finalHit, res.kind ? res.procChance : 0, contribs, ms) * bladeMul;
     const stacksPerSecond = stacksPerShotOfType * fr;
     stacksPerType[tick.type] = stacksPerSecond;
 
@@ -369,7 +413,7 @@ function segmentDotAndBlast(
       nonDamageStacks[t] = 0;
       continue;
     }
-    nonDamageStacks[t] = stacksPerShot(t, res.finalHit, res.kind ? res.procChance : 0, contribs, res.beam, ms) * fr * bladeMul;
+    nonDamageStacks[t] = stacksPerShot(t, res.finalHit, res.kind ? res.procChance : 0, contribs, ms) * fr * bladeMul;
   }
 
   // 爆炸异常（D-031 / D-171）：独立机制。
@@ -378,13 +422,16 @@ function segmentDotAndBlast(
   //     （需求方 2026-11-13：「爆炸叠层的快慢不影响主目标伤害」）；
   //   · **范围**：只有 1.5 秒内叠满 10 层才触发，系数 0.3 → 3，单列展示、**不进任何总伤**。
   //
-  // ⚠ 基础值**不能**取 `res.dotBase.blast`（D-056 修复）：
-  //   dotBase 是"剔除元素/物理 Mod 加量"后的分布，而爆炸几乎总是由 Mod 合成
-  //   （火+冰、火+电），dotBase 里根本没有 blast 这一项 → 恒为 0。
+  // ⚠ 基础值**不能**取 `res.tickBaseScaled.blast`（D-056 修复）：
+  //   tickBaseScaled 是"剔除元素/物理 Mod 加量"后的分布，而爆炸几乎总是由 Mod 合成
+  //   （火+冰、火+电），那里根本没有 blast 这一项 → 恒为 0。
   //   按 §6.2 ①，DoT 基础值是「**全类型之和**」，爆炸同样适用。
-  const blastBase = hasDotElement(res.finalHit, 'blast') ? spreadTotal(res.dotBase) : 0;
+  //
+  // 需求方 2026-11-14：以前这里读的是 `res.dotBase`——它与 `tickBaseScaled` 是同一个值，
+  // 收敛后统一读 `tickBaseScaled`（DoT 每跳与爆炸基础值本来就是同一份）。
+  const blastBase = hasDotElement(res.finalHit, 'blast') ? spreadTotal(res.tickBaseScaled) : 0;
   // D-189：爆炸叠层同样乘刃影倍率（每层基础值 `blastBase` 不动）
-  const blastStacks = stacksPerShot('blast', res.finalHit, res.procChance, contribs, res.beam, ms) * bladeMul;
+  const blastStacks = stacksPerShot('blast', res.finalHit, res.procChance, contribs, ms) * bladeMul;
   const blastSps = blastStacks * fr;
   // D-171：窗口内叠上的层数按**真实开火时间**逐秒累加（装填期间不叠）
   const blastStacksInWindow = stacksInWindow(blastSps, window, firingTimeline);
@@ -392,7 +439,7 @@ function segmentDotAndBlast(
     factionPct: factionFor(res.faction, contribs),
     statusDamagePct: sumPct(contribs, 'statusDamage'),
     // ⚠ 这里要的是**暴击倍率**，不是命中伤害的绝对值（D-056 修复）。
-    //   D-063：爆炸的 baseValue 取自 `res.dotBase`，而 dotBase **已经含**完整的期望倍率，
+    //   D-063：爆炸的 baseValue 取自 `res.tickBaseScaled`，而它**已经含**完整的期望倍率，
     //   所以这里传 1，否则会重复乘。
     critDamageMul: 1,
     headshotMul: 1,
@@ -455,7 +502,9 @@ export function buildOutput(
   //   这些词条都直接影响"续航秒伤"口径，所以它们不算纯功能类 Mod。
   //   面板值同样取该模式的（D-050）。
   const magBase: number = ps.magazineSize ?? 0;
-  const mag: number = bucket(magBase, 'magazine', contribs) * ammoEfficiencyMultiplier(contribs);
+  // 需求方 2026-11-15（A6+A7）：**等效弹匣**统一由 `effectiveMagazine()` 算——
+  // = 桶弹匣 × 1/(1−弹药效率)，弹药效率上限 0.75。面板「弹匣容量」、拆解、这里三处同一个数。
+  const mag: number = effectiveMagazine(magBase, contribs);
   const reloadBase: number = ps.reloadTime ?? 0;
   const reloadSpeedMul: number = 1 + sumPct(contribs, 'reloadSpeed');
   const reload: number = reloadBase > 0 && reloadSpeedMul > 0 ? reloadBase / reloadSpeedMul : reloadBase;
@@ -490,7 +539,7 @@ export function buildOutput(
   // D-107（Q6）把"占比"拆成了两件事，必须分开算：
   //   ① **触发占比**（划分母/叠层用）→ 看**命中分布 `finalHit`**。
   //      元素 Mod 撑出来的份也算触发池：纯切割 + 火 Mod 就是 50/50。
-  //   ② **DoT 基础值**（每跳多少）→ 看 `tickBase`，元素 Mod 的加量不进这里。
+  //   ② **DoT 基础值**（每跳多少）→ 看 `tickBaseScaled`（不含元素加量），元素 Mod 的加量不进这里。
   //   合成出来的类型（毒气/爆炸…）没有自己的面板份，用**来源元素**之和来代替，
   //   这样"火+毒 → 毒气"仍按 200 计入分母（切割 100 + 毒气 200）。
   //
@@ -609,16 +658,13 @@ export function buildOutput(
   const directInWindow = hitDps * firingSecondsInWindow;
   const totalInWindow = directInWindow + dot6s;
 
-  // D-180：稳态秒伤（长期平均）——
+  // D-180 / 需求方 2026-11-15（A4 + A5）：稳态秒伤（长期平均）——
   //   直击：续航秒伤（已含装填摊薄）
-  //   异常：各类型在**一个循环**内能叠的层数 × 每跳 ÷ 循环时长
-  // ⚠ 稳态的"一个循环"必须用**真实的循环控制变量**，不能拿窗口 1 秒去积分开火占比
-  //   （窗口 1 秒时 firingFraction 恒为 1，会算出"1 秒开火叠满"的错误稳态）。
-  //   所以这里传一个不受窗口限制的时间线。
-  const cycleTimeline = (sec: number): number => firingFraction(mag, fr, reload, sec);
-  const steadyDot = steadyStateDot(segmentResults, contribs, ms, fr, mag, reload, window, cycleTimeline);
-  // 稳态秒伤 = 直击（续航秒伤，已含装填摊薄）+ 异常稳态
-  const steady = sustained + steadyDot;
+  //   异常：**逐秒层数池**（层数会到期清除、装填期间照样掉）按一个循环摊平；爆炸也算进去
+  // ⚠ 稳态的"一个循环"必须用**真实的循环控制变量**，不能拿窗口 1 秒去积分开火占比。
+  const steadyParts = steadyStateDot(segmentResults, contribs, ms, fr, mag, reload, window);
+  // 稳态秒伤 = 直击（续航秒伤，已含装填摊薄）+ 异常稳态（DoT + 爆炸）
+  const steady = sustained + steadyParts.dot + steadyParts.blast;
   const win = windowLabel(window);
   const lines: OutputLine[] = [
     { id: 'pelletPerHit', label: '单弹头', description: '合成后总伤 × 暴击期望 × 爆头开关', unit: '/弹头', value: pelletPerHit },
@@ -652,8 +698,12 @@ export function buildOutput(
   return {
     lines: lines,
     pelletPerHit: pelletPerHit,
-    /** 稳态秒伤（D-180） */
+    /** 稳态秒伤（D-180；需求方 2026-11-15 A4+A5：层数池 + 爆炸） */
     steadyDps: steady,
+    /** 稳态秒伤里的**异常部分**（DoT，不含直击） */
+    steadyDotDps: steadyParts.dot,
+    /** 稳态秒伤里的**爆炸主目标**部分 */
+    steadyBlastDps: steadyParts.blast,
     /** 窗口内直击（D-179：开火时长 × 连发秒伤） */
     directInWindow: directInWindow,
     multishot: ms,

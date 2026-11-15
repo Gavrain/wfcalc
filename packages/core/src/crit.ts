@@ -27,8 +27,44 @@ import { sumPct } from './contributions.ts';
  * 只放大**这部分贡献**，面板自带暴率（与其它暴击率 Mod）不受影响；
  * 即 pct 支拿两份（×2 的那份 + 普通的），flat / mul 支不变。
  */
-export function critChanceTotal(weapon: Weapon, contribs: readonly Contribution[], mode?: AttackMode): number {
-  return Math.max(0, critChanceRaw(weapon, contribs, mode));
+export function critChanceTotal(
+  weapon: Weapon,
+  contribs: readonly Contribution[],
+  mode?: AttackMode,
+  headshotEnabled = false,
+): number {
+  return Math.max(0, critChanceRaw(weapon, contribs, mode, headshotEnabled));
+}
+
+/**
+ * 把「弱点暴击率（开爆头时）」与「重击 ×2」折进暴击率乘区的贡献表。
+ *
+ * 需求方 2026-11-15：**面板 / 拆解 / 结算必须用同一套折算**，所以这里只写一次，
+ * `weapon-state.ts`（面板与拆解）与 {@link critChanceTotal}（结算）都调它。
+ *
+ * ```
+ * ① 弱点暴击率：只认 `weakpointCritChance`，开爆头时换成一条 `critChance` 的副本
+ *    （source 变成 `原id#weak`，拆解里能单独看到它）
+ * ② 重击 ×2：mode._heavy 时，带 `heavyX2` 的暴率贡献再复制一份（source 加 `#heavy`）
+ * ```
+ */
+export function critBucketContribs(
+  contribs: readonly Contribution[],
+  heavy: boolean,
+  headshotEnabled: boolean,
+): readonly Contribution[] {
+  const withWeak = headshotEnabled && contribs.some((c) => c.stat === 'weakpointCritChance')
+    ? [
+      ...contribs,
+      ...contribs
+        .filter((c) => c.stat === 'weakpointCritChance')
+        .map((c) => ({ ...c, stat: 'critChance' as const, source: `${c.source}#weak` })),
+    ]
+    : contribs;
+  if (!heavy) return withWeak;
+  const heavyOnes = withWeak.filter((c) => c.heavyX2 === true && c.stat === 'critChance');
+  if (heavyOnes.length === 0) return withWeak;
+  return [...withWeak, ...heavyOnes.map((c) => ({ ...c, source: `${c.source}#heavy` }))];
 }
 
 /**
@@ -36,29 +72,35 @@ export function critChanceTotal(weapon: Weapon, contribs: readonly Contribution[
  *
  * 需求方 2026-11-13：**暴击率最低为 0，不会负** —— 负暴率没有物理意义，
  * 而且会让期望倍率 < 1（= 白字反而打折），所以对外一律经由 {@link critChanceTotal} 截断。
+ *
+ * 需求方 2026-11-15：**弱点暴击率与普通暴击率是同一个乘区里的 Σ%**：
+ * ```
+ * 暴率 = (面板暴率 × (1 + Σ普通暴率% + Σ弱点暴率%) + Σ固定暴击率) × Π额外乘区
+ * ```
+ * 弱点暴击率**只在开启爆头时**计入（它对非弱点命中不生效）。
+ * 以前它是加在括号**外面**的（`bucket(面板) + Σ弱点%`），+350% 被当成暴率 +3.5，是错的。
  */
-function critChanceRaw(weapon: Weapon, contribs: readonly Contribution[], mode?: AttackMode): number {
+function critChanceRaw(
+  weapon: Weapon,
+  contribs: readonly Contribution[],
+  mode?: AttackMode,
+  headshotEnabled = false,
+): number {
   const panel = mode ? panelStats(weapon, mode).critChance : weapon.critChance;
-  if (!mode?._heavy) return bucket(panel, 'critChance', contribs);
-  const heavy = contribs.filter((c) => c.heavyX2 === true);
-  if (heavy.length === 0) return bucket(panel, 'critChance', contribs);
-  // 重击：原来的每个 heavyX2 贡献再加一份相同的量（等价于对这部分 ×2）
-  const doubled = [...contribs, ...heavy.map((c) => ({ ...c, source: `${c.source}#heavy` }))];
-  return bucket(panel, 'critChance', doubled);
+  return bucket(panel, 'critChance', critBucketContribs(contribs, mode?._heavy === true, headshotEnabled));
 }
 
 /**
- * 需求方 2026-11-13：**弱点暴击率**（敏锐主武 / 敏锐手枪）。
+ * 需求方 2026-11-15：**弱点暴击率**（敏锐主武 / 敏锐手枪）已经并进 {@link critChanceTotal}。
  *
- * 原话：「弱点就是爆头，只是游戏内部文本还没统一」——所以它和弱点伤害一样，
- * **只在「开启爆头」时**加进暴击率；关闭爆头时整条不生效。
- *
+ * 它与普通暴击率是**同一个乘区里的 Σ%**：
  * ```
- * 暴率 = bucket(面板, …) + (开启爆头 ? Σ弱点暴击率% : 0)
+ * 暴率 = (面板暴率 × (1 + Σ普通暴率% + Σ弱点暴率%) + Σ固定暴击率) × Π额外乘区
  * ```
+ * 只在开启爆头（打弱点）时计入；关闭爆头时整条不生效。
  *
- * 加的是**百分数加到暴率本身**（+350% = 暴率 +3.5），与 `bucket` 的百分比口径一致
- * （内核里暴率 1.0 表示 100%，贡献的 `amount` 是百分数，所以除以 100）。
+ * 本函数保留给需要单独展示「弱点暴击率贡献了多少」的调用方，**不参与暴率计算**。
+ * ⚠ 以前它被加在括号外面（+350% = 暴率 +3.5），是错的。
  */
 export function weakpointCritChanceAdd(contribs: readonly Contribution[], headshotEnabled: boolean): number {
   if (!headshotEnabled) return 0;
@@ -182,7 +224,8 @@ export function critTiers(cc: number, cd: number): CritTier[] {
  * 同一乘区、加算；召唤方（`compute()`）在开关未打开时会把这个分支整段跳过。
  */
 export function headshotMultiplier(contribs: readonly Contribution[], base: number): number {
-  return base * (1 + sumPct(contribs, 'headshotDamage') + sumPct(contribs, 'weakpointDamage'));
+  // 需求方 2026-11-14：乘区最低 0（负弱点伤害词条不能把爆头倍率压成负数）
+  return Math.max(0, base * (1 + sumPct(contribs, 'headshotDamage') + sumPct(contribs, 'weakpointDamage')));
 }
 
 export interface DamageLine {

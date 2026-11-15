@@ -1,4 +1,4 @@
-/**
+﻿/**
  * D-171：窗口从写死的 6 秒改成可选的 N 秒（1~6），并新增「N 秒总伤」。
  *
  *   ① 窗口秒数经 `CtxOptions.dotWindowSeconds` 传进来，归一到 1~6；
@@ -112,7 +112,7 @@ describe('D-171 核验：0 秒出伤的异常（电击 / 毒气）', () => {
     const res = compute(rifle, rifle.modes[0], contribs, { dotWindowSeconds: 1 });
     const seg: any = res.segments[0];
     const tick = seg.dotTicks.find((t: any) => t.type === 'electric');
-    const perShot = core.stacksPerShot('electric', seg.finalHit, seg.procChance, contribs, seg.beam, 1);
+    const perShot = core.stacksPerShot('electric', seg.finalHit, seg.procChance, contribs, 1);
     const perSec = perShot * 10; // 射速 10
 
     near(tick.tick, 95, 1e-9); // 每跳 = 50 基础 × (1 + 电击 90%)
@@ -130,7 +130,7 @@ describe('D-171 核验：0 秒出伤的异常（电击 / 毒气）', () => {
     const tick = seg.dotTicks.find((t: any) => t.type === 'gas');
     assert.ok((seg.finalHit.gas ?? 0) > 0, '火+毒应合成出毒气');
 
-    const perShot = core.stacksPerShot('gas', seg.finalHit, seg.procChance, contribs, seg.beam, 1);
+    const perShot = core.stacksPerShot('gas', seg.finalHit, seg.procChance, contribs, 1);
     const perSec = perShot * 10;
     const gasOnly = core.dotSixSecondCurve('gas', perSec, tick.tick, 1, () => 1, perShot);
     near(gasOnly, perShot * tick.tick + (perShot + perSec) * tick.tick);
@@ -145,7 +145,7 @@ describe('D-171 核验：0 秒出伤的异常（电击 / 毒气）', () => {
     const res = compute(rifle, rifle.modes[0], contribs, { dotWindowSeconds: 1 });
     const seg: any = res.segments[0];
     const tick = seg.dotTicks.find((t: any) => t.type === 'heat');
-    const perShot = core.stacksPerShot('heat', seg.finalHit, seg.procChance, contribs, seg.beam, 1);
+    const perShot = core.stacksPerShot('heat', seg.finalHit, seg.procChance, contribs, 1);
     const perSec = perShot * 10;
     // 火焰第 1 秒的累计层数 = 这一秒叠上的，没有"额外一拍"
     near(res.output.dot6s, perSec * tick.tick);
@@ -159,7 +159,7 @@ describe('D-171 核验：0 秒出伤的异常（电击 / 毒气）', () => {
     const b = compute(fast, fast.modes[0], contribs, { dotWindowSeconds: 1 });
     const tickA: any = a.segments[0].dotTicks.find((t: any) => t.type === 'electric');
     const tickB: any = b.segments[0].dotTicks.find((t: any) => t.type === 'electric');
-    const perShot = core.stacksPerShot('electric', a.segments[0].finalHit, a.segments[0].procChance, contribs, false, 1);
+    const perShot = core.stacksPerShot('electric', a.segments[0].finalHit, a.segments[0].procChance, contribs, 1);
 
     // 第 0 拍两边相同 = perShot 层；第 1 秒 = (首发 + 本秒新增)
     near(a.output.dot6s, perShot * tickA.tick + (perShot + perShot * 5) * tickA.tick);
@@ -198,7 +198,7 @@ describe('D-171 核验：爆炸', () => {
       if (!present.has(t.type)) continue;
       dotPart += core.dotSixSecondCurve(
         t.type, res.output.stacksPerType[t.type] ?? 0, t.tick, 3, () => 1,
-        core.stacksPerShot(t.type, seg.finalHit, seg.procChance, mods, seg.beam, 1),
+        core.stacksPerShot(t.type, seg.finalHit, seg.procChance, mods, 1),
       );
     }
     near(res.output.dot6s, dotPart + res.output.blast.totalInWindow);

@@ -22,7 +22,8 @@ const INDEX_EXPORTS: readonly string[] = [
   'AOE_SEGMENT_KINDS', 'BASE_ELEMENTAL_TYPES', 'BLAST', 'COMPOUND_TYPES', 'DAMAGE_TYPES', 'DEFAULT_METRIC',
   'DOT_COEF', 'DOT_DURATION', 'DOT_MAX_STACKS', 'DOT_TYPES', 'DT_KEY_MAP', 'FROZEN_FULL_STACKS',
   'IMMEDIATE_TICK', 'KUVA_BONUS_MAX', 'KUVA_BONUS_MIN', 'KUVA_ELEMENT_TYPES', 'METRIC_OPTIONS',
-  'NO_DAMAGE_MULTIPLIER_TYPES', 'OUTPUT_IDS', 'PAIRS', 'PHYSICAL_TYPES', 'STATUS_CHANCE_HARD_CAP',
+  'NO_DAMAGE_MULTIPLIER_TYPES', 'OUTPUT_IDS', 'PAIRS', 'PHYSICAL_TYPES',
+  // 需求方 2026-11-15（C4）：`STATUS_CHANCE_HARD_CAP` 是没人读的死常量，已删除
   'TAU_MAX_STACKS', 'TAU_STACK_BONUS_PER_STACK', 'TAU_STACK_DURATION_SECONDS', 'activeVariant',
   'allSegments', 'ammoEfficiencyMultiplier', 'applyBaseDamage', 'applyElements', 'applyKuvaBonus',
   'applyTauToStatusChance', 'blastDetail', 'bucket', 'bucketBreakdown', 'bucketDetail', 'buildContext',

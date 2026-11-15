@@ -89,7 +89,7 @@ const out = {
   },
 
   // DoT 基础值
-  dotBase: { spread: seg.dotBase, total: r(core.spreadTotal(seg.dotBase)) },
+  dotBase: { spread: seg.tickBaseScaled, total: r(core.spreadTotal(seg.tickBaseScaled)) },
   dotTicks: seg.dotTicks.map((t) => ({
     type: t.type,
     baseValue: r(t.baseValue),

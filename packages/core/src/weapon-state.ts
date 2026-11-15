@@ -25,14 +25,15 @@
  *   · `w.元素槽位` 是数组，合成前**不合并**（自带元素与 Mod 元素各自独立）；
  *   · **面板多重来自 `mode.multishot`**，不是常量 1（57 把武器自带多重）。
  */
-import type { AttackMode, DamageSegment, Weapon } from './weapon.ts';
+import type { AttackMode, DamageSegment, ModeVariant, Weapon } from './weapon.ts';
 import { panelStats } from './weapon.ts';
 import type { Contribution, ContribStat } from './contributions.ts';
 import { contributionsFor, sumFlat, sumPct } from './contributions.ts';
 import type { DamageSpread, DamageType } from './damage-types.ts';
 import { spreadTotal } from './damage-types.ts';
 import type { BucketDetail, BucketableStat } from './buckets.ts';
-import { bucket, bucketDetail } from './buckets.ts';
+import { applyBaseDamage, bucket, bucketDetail } from './buckets.ts';
+import { critBucketContribs } from './crit.ts';
 import type { Faction } from './contributions.ts';
 import { applyElements } from './elements.ts';
 
@@ -91,8 +92,9 @@ export interface WeaponStateComputed {
   readonly 当前射速: number;
   /** **面板多重 × (1+Σ%) + Σ绝对值** */
   readonly 当前多重: number;
+  /** **等效弹匣**（需求方 2026-11-15 A6+A7）：桶弹匣 × 1/(1−弹药效率)，弹药效率上限 0.75。 */
   readonly 当前弹匣: number;
-  /** 等效弹匣（**加成的**弹匣 × 弹药效率倍数），两位小数（D-129：基础列取 `panelStats` 的弹匣，即倍数 1） */
+  /** 等效弹匣（**与 `当前弹匣` 同值**；保留旧字段名供既有调用点） */
   readonly 等效弹匣: number;
   /** 弹药效率倍数（1 = 无加成）；≈ D-084 的 `a/(1-x)` 除以面板弹匣 */
   readonly 弹药效率倍数: number;
@@ -124,6 +126,11 @@ export interface WeaponState {
   readonly computed: WeaponStateComputed;
   /** 每个乘区的拆解（面板值 / Σpct / Σflat / Πmul / 最终值 / 贡献者） */
   readonly buckets: readonly BucketDetail[];
+  /** 计算该状态时的选项快照（爆头开关 / 叠层等），面板与结算必须读同一份 */
+  readonly options: {
+    readonly headshotEnabled: boolean;
+    readonly headshotMultiplier: number;
+  };
 }
 
 /**
@@ -132,12 +139,6 @@ export interface WeaponState {
  * 注意 `faction` **不在** `BucketableStat` 里：派系加成按 `faction:<派系>` 分键
  * （第 5.2 节「异派系只一个生效」），由 `factionFor()` 单独取，不参与通用骨架。
  */
-/**
- * 冰冻"满层"的层数（D-086）。需求方：「次要·冷颤……直接给满层数的类镀层加成」。
- * 冰冻按 10 层打满计；改这个常量即可调整。
- */
-export const FROZEN_FULL_STACKS = 10;
-
 const BUCKET_STATS: readonly BucketableStat[] = [
   'baseDamage',
   'multishot',
@@ -151,63 +152,15 @@ const BUCKET_STATS: readonly BucketableStat[] = [
 ];
 
 /**
- * 镀层类伤害乘区（A-03 已定案，见 `docs/decisions.md` D-024）。
+ * 基伤乘区相关（`overForStacks` / `overForElement` / `applyBaseDamage` / `FROZEN_FULL_STACKS`）
+ * 的实现已移到 `buckets.ts`。
  *
- * 规则原文：「目标每具有 1 种异常状态 +x% 伤害，最多叠加 y 次」⇒
- * ```
- * 镀层加量 = x% × a × y
- *   x = 每层百分比（Mod 的 +X%，已在 Contribution.amount 里）
- *   y = 叠加上限（击杀后获得的 buff 层数，默认取 Mod 描述的最大值）
- *   a = 目标身上异常状态的**种类数**（不是层数：中毒 5 层只算 1 种）
- * ```
- * 返回值是**小数口径**（1.2 = +120%），直接进基伤括号。
- *
- * 放在本文件而不是 `main.ts`：`基伤面板` 这个 computed 要用它，
- * 若留在 `main.ts` 会形成 main ↔ weapon-state 的循环依赖。
- *
- * @param contribs 全部贡献（其中 `stat: 'co'` 的即镀层类）
- * @param coStacks 实际生效的叠层数 `y`（UI 下拉框，默认 = maxStacks）
- * @param statusTypes 目标身上的异常状态**种类数** `a`（UI 下拉框）
+ * 为什么搬：`segment.ts` 与 `weapon-state.ts` **都要用**基伤乘区，
+ * 而 `segment` 已经从 `weapon-state` 取 `overForStacks`——若 `weapon-state` 反向
+ * 依赖 `segment` 的 `applyBaseDamage` 就成环。放到 `buckets.ts`（只依赖
+ * contributions / damage-types / weapon 的类型）即可两边共用同一个实现。
  */
-export function overForStacks(
-  contribs: readonly Contribution[],
-  coStacks: number,
-  statusTypes = 0,
-): number {
-  if (coStacks <= 0 || statusTypes <= 0) return 0;
-  const co = contributionsFor(contribs, 'co').filter((c) => c.form === 'pct');
-  let total = 0;
-  for (const c of co) total += (c.amount / 100) * statusTypes * coStacks;
-  return total;
-}
-
-/**
- * **类镀层但只认某一种异常状态**的加成（D-086）。
- *
- * 需求方 2026-11-06：「次要·冷颤是类镀层加成，但是只对冰冻层数生效。可以设置成
- * 直接给满层数的类镀层加成，只有直接非灵化加成伤害才能享受。」
- *
- * 与 `overForStacks` 的区别：
- * - `overForStacks` 按**所有**异常状态的种类数 `a` 算（异况超量 / 镀层系列）；
- * - 这里只按**指定元素**的层数算，且**直接给满层**（读 `coStacks` 之外的固定层数）。
- *
- * 共同点：都只吃**直接伤害**，不吃灵化基伤、不吃 AoE（见 `buildWeaponState` 的 `baseFactor`）。
- *
- * @param contribs 全部贡献（`stat: 'coFreeze'` 等专用属性键）
- * @param stat     要取的属性键（`coFreeze` = 只认冰冻层数）
- * @param stacks   该元素在目标身上的层数（UI 给"满层"即最大值）
- */
-export function overForElement(
-  contribs: readonly Contribution[],
-  stat: ContribStat,
-  stacks: number,
-): number {
-  if (stacks <= 0) return 0;
-  const co = contributionsFor(contribs, stat).filter((c) => c.form === 'pct');
-  let total = 0;
-  for (const c of co) total += (c.amount / 100) * stacks;
-  return total;
-}
+export { overForElement, overForStacks, FROZEN_FULL_STACKS, applyBaseDamage } from './buckets.ts';
 
 /**
  * **弹药效率 → 等效弹药倍数**（D-084）。
@@ -231,15 +184,36 @@ export function overForElement(
  * 使用次数倍数 = 1/(1-x)      （= XP 口径的 a/(1-x) ÷ a）
  * 等效弹匣     = 面板弹匣 × 使用次数倍数
  * ```
- * ⚠ `x` 在内部夹到 `[0, 0.95]`：`x = 1` 时弹匣无限（除零），面板无法展示。
+ * ⚠ **需求方 2026-11-15（A7）**：弹药效率的上限是 **0.75**（不是 0.95），
+ * 即等效弹匣最多为面板的 **4 倍**；`x` 在内部夹到 `[0, 0.75]`。
  *
  * @param panelMagazine 面板弹匣（未经弹药效率）
  * @param contribs 全部贡献（取 `ammoEfficiency` 的 pct 之和，小数口径）
  */
+export const AMMO_EFFICIENCY_MAX = 0.75;
+
 export function ammoEfficiencyMultiplier(contribs: readonly Contribution[]): number {
   const x = sumPct(contribs, 'ammoEfficiency');
-  const clamped = Math.min(Math.max(x, 0), 0.95);
+  const clamped = Math.min(Math.max(x, 0), AMMO_EFFICIENCY_MAX);
   return 1 / (1 - clamped);
+}
+
+/**
+ * **等效弹匣**（需求方 2026-11-15 / A6 + A7）：三处口径统一读这一个函数。
+ *
+ * ```
+ * 等效弹匣 = bucket(面板弹匣) × 1/(1 − 弹药效率)     ← 弹药效率夹在 [0, 0.75]
+ * ```
+ *
+ * 为什么统一：以前面板「弹匣容量」显示的是没乘弹药效率的桶值，
+ * 「等效弹匣」单列一行，而续航秒伤公式里又自己乘了一遍弹药效率——
+ * 三处各有各的算法。现在面板 / 拆解 / 续航秒伤都读它。
+ */
+export function effectiveMagazine(
+  panelMagazine: number,
+  contribs: readonly Contribution[],
+): number {
+  return bucket(panelMagazine, 'magazine', contribs) * ammoEfficiencyMultiplier(contribs);
 }
 
 /** 面板展示用：弹匣保留两位小数（D-084） */
@@ -295,9 +269,16 @@ export function buildWeaponState(
     coStatusTypes: number;
     kuva?: { type: DamageType; ratio: number } | undefined;
     segment: DamageSegment;
+    /** 爆头开关（需求方 2026-11-15）：弱点暴击率只在开爆头时并入暴率 */
+    headshotEnabled?: boolean;
+    headshotMultiplier?: number;
+    /** 该段所属的攻击方式（面板 override 用，C2） */
+    variant?: ModeVariant | undefined;
   },
 ): { state: WeaponState } {
-  const ps = panelStats(weapon, mode);
+  // C2（需求方 2026-11-15）：面板取值顺序「变体 override → 模式 override → 武器级」。
+// 以前这里只传 (weapon, mode)，**变体级 override 被忽略**，多段武器每段的面板全都一样。
+const ps = panelStats(weapon, mode, opts.variant);
 
   // ── 输入层 ──
   const pct = {} as Record<BucketableStat, ContribEntry[]>;
@@ -308,22 +289,12 @@ export function buildWeaponState(
     flat[stat] = collect(contribs, stat, 'flat');
     mul[stat] = collect(contribs, stat, 'mul');
   }
-  // 锁定射速（D-091）：半自动炮轰系列「Fire Rate cannot be modified」——
-  // 一旦有任意贡献带这个标记，**所有**射速来源（正的负的都算）都不生效。
-  const lockedFireRate = contribs.some((c) => c.locksFireRate);
-  if (lockedFireRate) {
-    pct.fireRate = [];
-    flat.fireRate = [];
-    mul.fireRate = [];
-  }
-  // 锁定多重（需求方 2026-11-13）：敏锐主武 / 敏锐手枪「Multishot cannot be modified」——
-  // 与锁射速同构：装上后**所有**多重来源（正的负的都算）都不生效。
-  const lockedMultishot = contribs.some((c) => c.locksMultishot);
-  if (lockedMultishot) {
-    pct.multishot = [];
-    flat.multishot = [];
-    mul.multishot = [];
-  }
+  // 锁定射速（D-091）/ 锁定多重（需求方 2026-11-13）：
+  // 这里的 pct/flat/mul 是**输入层快照**，供界面展示"这条贡献原本是多少"，
+  // 不做任何过滤——「锁没锁、锁了按 0 计」统一由乘区入口 `bucketDetail()` 判定。
+  // ⚠ 以前这里手工清空过射速/多重的 pct/flat/mul，又在下面过滤 `contribs` 后喂给乘区表，
+  //   等于同一件事在两处各判一次：快照显示 0、伤害路径却拿到原始加成，两边对不上
+  //   （锁射速时装射速卡，连发秒伤照样涨）。现在只留 `bucketDetail()` 一处。
 
   const inputs: WeaponStateInputs = {
     panel: {
@@ -349,11 +320,19 @@ export function buildWeaponState(
   };
 
   // ── 乘区拆解（唯一取值入口；下游读 computed，不再各自重算）──
-  // ⚠ 传的是**过滤后**的 contribs（锁定射速时射速来源已被剔除），
-  //   不能传原始 contribs，否则锁定射速会被绕过。
-  const bucketContribs = lockedFireRate ? contribs.filter((c) => c.stat !== 'fireRate') : contribs;
+  // 传**原始** contribs：锁射速 / 锁多重由 `bucketDetail()` 自己判（见 `isStatLocked`），
+  // 这里再过滤一遍就会和伤害路径（`fireRateFinal()` / `multishot()`）判出两套结果。
+  //
+  // 需求方 2026-11-15（A1 / A2）：**弱点暴击率与普通暴击率是同一个乘区里的 Σ%**（开爆头时计入），
+  // **重击 ×2 也要体现在面板上**。两件事的折算只写在 `critBucketContribs()` 一处，
+  // 面板 / 拆解（这里）与结算（`critChanceTotal()`）都调它，保证三处永远是同一个数。
+  const bucketContribsHeavy: readonly Contribution[] = critBucketContribs(
+    contribs,
+    mode._heavy === true,
+    opts.headshotEnabled === true,
+  );
   const buckets: BucketDetail[] = BUCKET_STATS.map((stat) =>
-    bucketDetail(panelValueOf(stat, ps), stat, bucketContribs),
+    bucketDetail(panelValueOf(stat, ps), stat, bucketContribsHeavy),
   );
   const byStat = (stat: BucketableStat): number => buckets.find((b) => b.stat === stat)?.value ?? 0;
 
@@ -368,32 +347,30 @@ export function buildWeaponState(
   }
 
   // ── 基伤面板 ──
-  // ⚠ 必须与 `applyBaseDamage()` **完全相同**：基伤系数 k = (1 + Σ基伤%) + 镀层加量，
-  //   且镀层**不吃 AoE 段**（D-024：爆炸段只吃普通基伤）。
-  //   之前这里只写了 `1 + sumPct(baseDamage)`，漏掉 `overForStacks`，
-  //   导致镀层 Mod（步枪才能等）在 state 里完全不生效。
-  const g = 1 + sumPct(contribs, 'baseDamage');
-  const co = overForStacks(contribs, opts.coStacks, opts.coStatusTypes);
-  // 类镀层（只认冰冻层数，D-086）：同样只吃直接非灵化伤害，不吃 AoE
-  // 类镀层（冷颤）：**固定满层**，不读配置里的异况层数（需求方 2026-11-06 澄清：
-  // 「冷颤固定是十层，不参考这个」）。这个输入框只服务于镀层系列的"异况数量"。
-  const freezeCo = overForElement(contribs, 'coFreeze', FROZEN_FULL_STACKS);
-  // 「只有**直接非灵化**加成伤害才能享受」（需求方 2026-11-06）：
-  //   · AoE 段（explosiveAttack）不吃；
-  //   · 灵化模式（mode.role === 'incarnon'）不吃。
-  const isAoeSeg = opts.segment.kind === 'explosiveAttack';
-  const isIncarnonMode = mode.role === 'incarnon';
-  const baseFactor = isAoeSeg ? g : g + co + (isIncarnonMode ? 0 : freezeCo);
-  const 基伤面板: DamageSpread = {};
-  for (const [t, v] of Object.entries(新面板) as [DamageType, number][]) {
-    if (typeof v === 'number' && v !== 0) 基伤面板[t] = v * baseFactor;
-  }
+  // **直接调用真正的基伤乘区 `applyBaseDamage()`**（需求方 2026-11-14：
+  // 「这两个肯定应该是一样的，伤害分布不是应该直接调用基伤和其他的乘区吗」）。
+  //
+  // 以前这里是**手写的第二份**：自己算 `1+Σ基伤%` + 镀层 + 冷颤，还额外加了
+  // 「灵化模式不吃冷颤」的判断。那份与 `applyBaseDamage()` 已经分叉——
+  // 它按"整个模式是不是灵化"整段关掉冷颤，而口径是"只有被动基伤那一路不吃"，
+  // 面板基伤那一路照样该吃。分叉还会让面板展示与实际结算对不上。
+  // 现在只有一个实现，这里只负责把上游参数传进去。
+  const 基伤面板: DamageSpread = applyBaseDamage(
+    新面板,
+    opts.segment,
+    contribs,
+    opts.coStacks,
+    opts.coStatusTypes,
+    opts.segment.passiveBaseDamage,
+  );
 
   const reloadSpeedMul = 1 + sumPct(contribs, 'reloadSpeed');
-  // 弹药效率（D-084）：只影响弹匣/最大弹药，不进伤害乘区
+  // 弹药效率（D-084 / 需求方 2026-11-15 A6+A7）：等效弹匣 = 桶弹匣 × 1/(1−x)（x 夹在 [0,0.75]）。
+  // 面板「弹匣容量」、拆解、续航秒伤**都读 `等效弹匣`**，不再一处一个算法。
   const ammoMul = ammoEfficiencyMultiplier(contribs);
-  const 当前弹匣 = byStat('magazine');
-  const 等效弹匣 = displayMagazine(当前弹匣 * ammoMul);
+  const 等效弹匣值 = effectiveMagazine(inputs.panel.magazineSize, contribs);
+  const 当前弹匣 = displayMagazine(等效弹匣值);
+  const 等效弹匣 = displayMagazine(等效弹匣值);
 
   // 元素合成（合成前各占一槽 → 两两配对），与 `resolveSegment()` 共用同一实现
   const el = applyElements(基伤面板, contribs, 'hit');
@@ -410,6 +387,10 @@ export function buildWeaponState(
       coStatusTypes: opts.coStatusTypes,
       inputs,
       buckets,
+      options: {
+        headshotEnabled: opts.headshotEnabled === true,
+        headshotMultiplier: opts.headshotMultiplier ?? 3,
+      },
       computed: {
         当前暴击率: byStat('critChance'),
         当前暴击伤害: byStat('critMultiplier'),

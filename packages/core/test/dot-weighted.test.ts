@@ -1,4 +1,4 @@
-/**
+﻿/**
  * D-060：异常加权单层秒伤 —— 按触发占比加权。
  *
  * 触发是互斥的（一次触发只落在一个类型上），所以合计不能直接相加。
@@ -143,7 +143,7 @@ describe('异常加权单层秒伤（D-060 / D-061）', () => {
       if (!present.has(t.type)) continue;
       expected += core.dotSixSecondCurve(
         t.type, res.output.stacksPerType[t.type] ?? 0, t.tick, 6, firing,
-        core.stacksPerShot(t.type, seg.finalHit, seg.procChance, slashPlusHeat, false),
+        core.stacksPerShot(t.type, seg.finalHit, seg.procChance, slashPlusHeat),
       );
     }
     near(res.output.dot6s, expected);

@@ -21,7 +21,7 @@ import { buildWeaponState } from './weapon-state.ts';
 import type { Ctx, CtxOptions } from './ctx.ts';
 import { buildContext } from './ctx.ts';
 import type { SegmentResult } from './segment.ts';
-import { resolveSegment } from './segment.ts';
+import { passiveBaseDamageOf, resolveSegment } from './segment.ts';
 import type { OutputBreakdown } from './output.ts';
 import { buildOutput } from './output.ts';
 
@@ -57,7 +57,10 @@ export interface ComputeResult {
     statusChance: { base: number; after: number };
     fireRate: { base: number; after: number };
     multishot: { base: number; after: number };
-    /** D-066：弹匣容量（吃 `magazine` Mod） */
+    /**
+     * 需求方 2026-11-15（A6）：弹匣容量**直接给等效弹匣**（桶弹匣 × 1/(1−弹药效率)，上限 0.75）。
+     * `base` = 面板弹匣（没乘弹药效率），`after` = 等效弹匣——两列本来就该是这个差。
+     */
     magazineSize: { base: number; after: number };
     /** D-066：装填**时间**（吃 `reloadSpeed` Mod，速度越快时间越短） */
     reloadTime: { base: number; after: number };
@@ -75,6 +78,21 @@ export interface ComputeResult {
   spreadByVariant: DamageSpread[];
   /** 加成后面板总伤（单弹头，未乘暴击） */
   moddedPanelTotal: number;
+  /**
+   * **按段的面板对照**（需求方 2026-11-15，C2）。
+   *
+   * 多段武器的每段面板不同（暴率 / 触发率可以逐段不一样），而 `panelPairs` 只反映主段。
+   * 这里给每一段各一份 `{ index, kind, base, after }`，界面据此在面板表下面按段再列。
+   *
+   * `base` 是该段自己的暴率 / 触发率面板（同 `panelPairs` 的取值顺序，段级 override 优先），
+   * `after` 是内核算出来的加成后的值。
+   */
+  segmentPanelPairs: {
+    index: number;
+    kind: string;
+    critChance: { base: number; after: number };
+    statusChance: { base: number; after: number };
+  }[];
 }
 
 /**
@@ -155,18 +173,41 @@ export function compute(
   //
   // D-160：段上要带上**所属攻击方式**的扳机——灵化模式里可以同时有射线变体（`held`）和
   // 蓄力变体（`charge`），只按模式扳机判会把蓄力也算成射线（赘骨的 `Charge Attack`）。
+  //
+  // 需求方 2026-11-14：武器级被动（如灵化「+N 基础伤害」）对**所有攻击段**生效，
+  // 但数值随段不同，所以在这里逐段求值后挂到段上（`passiveBaseDamage`）。
+  // 平摊基数用**该段自己**的原始面板分布（玄骸前）。
   const segs: DamageSegment[] = allSegments(scopedMode).map((seg) => {
     const v = scopedMode.variants.find((x) => x.segments.includes(seg));
-    return v?.trigger ? { ...seg, trigger: v.trigger } : seg;
+    const passiveBaseDamage = passiveBaseDamageOf(seg.damage, weapon.passives);
+    return {
+      ...seg,
+      ...(v?.trigger ? { trigger: v.trigger } : {}),
+      ...(passiveBaseDamage ? { passiveBaseDamage } : {}),
+    };
   });
+  // 每段所属的攻击方式（面板 override 要按它取，C2）。
+  // ⚠ 用 `find(v => v.segments.includes(seg))` 找会踩坑：`allSegments()` 返回的是**段对象本身**，
+  //   而 `segs` 又拷了一份（`{...seg}`）——按引用比对能对上，但一旦有重复段/重排就会错配。
+  //   这里按「变体顺序 + 段数」直接算下标，天然与 `segs` 一一对应。
+  const variantIndex: number[] = [];
+  scopedMode.variants.forEach((v, vi) => {
+    for (let k = 0; k < v.segments.length; k++) variantIndex.push(vi);
+  });
+  const variantOfIndex = (i: number): ModeVariant | undefined => scopedMode.variants[variantIndex[i] ?? -1];
 
   // ── 每段的上游 computed 只算一次；逐段结算与 state 共用这一份（D-075）──
   // 之前 `resolveSegment()` 与 state 各算一遍玄骸→基伤，
   // 主段被计算两次，且 state 只覆盖第一段（60 把多段武器受影响）。
-  const ups = segs.map((seg) => segmentUpstream(weapon, scopedMode, contribs, ctx, seg));
-  const segments: SegmentResult[] = segs.map((seg, i) =>
-    resolveSegment(ctx, seg, { 新面板: ups[i]!.state.computed.新面板, 基伤面板: ups[i]!.state.computed.基伤面板 }),
-  );
+  const ups = segs.map((seg, i) => segmentUpstream(weapon, scopedMode, contribs, ctx, seg, variantOfIndex(i)));
+  const segments: SegmentResult[] = segs.map((seg, i) => {
+    const variant = variantOfIndex(i);
+    return resolveSegment(ctx, seg, {
+      新面板: ups[i]!.state.computed.新面板,
+      基伤面板: ups[i]!.state.computed.基伤面板,
+      variant,
+    });
+  });
 
   const totalSpread: DamageSpread = {};
   for (const s of segments) addSpread(totalSpread, s.finalHit);
@@ -196,10 +237,27 @@ export function compute(
 
   // ── 计算链状态树：主段（D-075），downstream 一律从这里取值 ──
   // buildWeaponState 已含元素合成（D-102），所以 perSegment 直接就是完整 computed。
-  const state: WeaponState = ups[0]!.state;
   const perSegment: WeaponState[] = ups.map((u) => u.state);
+  const state: WeaponState = perSegment[0]!;
   const c = state.computed;
   const p = state.inputs.panel;
+
+  // 需求方 2026-11-15（C2）：**按段的面板对照**——多段武器每段暴率 / 触发率不同，
+  // `panelPairs` 只反映主段。这里逐段给出 `{ index, kind, base, after }`。
+  //
+  // ⚠ 取值顺序必须是「变体 override → 模式 override → 武器级」（`panelStats` 的第三参）：
+  //    以前 `buildWeaponState` 没把变体传进去，段级 override 在面板这一侧被忽略，
+  //    所有段看起来都用模式面板（实测 179 个多段模式、0 个"有差异"，就是因此）。
+  const segmentPanelPairs = segments.map((segRes, i) => {
+    const st = perSegment[i]!;
+    const ps = panelStats(weapon, scopedMode, variantOfIndex(i));
+    return {
+      index: i,
+      kind: String(segRes.kind),
+      critChance: { base: ps.critChance, after: segRes.critChance },
+      statusChance: { base: ps.statusChance, after: st.computed.当前触发率 },
+    };
+  });
 
   return {
     ctx,
@@ -207,6 +265,7 @@ export function compute(
     output,
     state,
     perSegment,
+    segmentPanelPairs,
     panelPairs: {
       critChance: { base: p.critChance, after: c.当前暴击率 },
       critMultiplier: { base: p.critMultiplier, after: c.当前暴击伤害 },
@@ -234,6 +293,7 @@ function segmentUpstream(
   contribs: readonly Contribution[],
   ctx: Ctx,
   seg: DamageSegment,
+  variant: ModeVariant | undefined,
 ) {
   return buildWeaponState(weapon, mode, contribs, {
     beam: ctx.beam,
@@ -242,6 +302,11 @@ function segmentUpstream(
     coStatusTypes: ctx.coStatusTypes,
     kuva: ctx.options.kuva,
     segment: seg,
+    // C2：攻击方式自己的面板 override（变体 → 模式 → 武器级）
+    ...(variant ? { variant } : {}),
+    // 需求方 2026-11-15（A1）：弱点暴击率只在开爆头时并入暴率，面板与结算必须读同一个开关
+    headshotEnabled: ctx.headshot.enabled,
+    headshotMultiplier: ctx.headshot.multiplier,
   });
 }
 

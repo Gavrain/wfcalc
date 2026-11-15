@@ -19,7 +19,6 @@ import assert from 'node:assert/strict';
 import * as core from '../src/index.ts';
 
 const { compute } = core as any;
-
 const near = (a: number, b: number, eps = 1e-9) => assert.ok(Math.abs(a - b) < eps, `${a} != ${b}`);
 
 /** 一把单模式武器；`beamSeg` 控制该段是否是射线 */
@@ -116,5 +115,34 @@ describe('射线按段判定（需求方 2026-11-12）', () => {
     const r = compute(w, w.modes[0], []);
     assert.equal(r.segments[0].beam, true);
     assert.equal(r.segments[1].beam, false);
+  });
+});
+
+describe('多重只影响叠层，不影响触发率本身（需求方 2026-11-14，D-195）', () => {
+  it('显示的触发率不随多重变化，且不再有 beam 分支', () => {
+    // 游戏内显示的触发率 = 面板触发率 × (1 + Σ触发率%)，不含多重；
+    // `totalProcChance()` 已没有 beam 参数——射线与实弹同一条公式
+    near(core.totalProcChance(0.39, []), 0.39);
+    near(core.totalProcChance(0.39, [] as any), 0.39, 1e-9);
+  });
+
+  it('射线与实弹的叠层统一乘多重（stacksPerShot 不再按 beam 分支）', () => {
+    const v = { toxin: 100 };
+    const c = [{ stat: 'statusChance', form: 'pct', amount: 120, source: 'x', slot: 0 }] as any;
+    for (const ms of [1, 1.9, 3.8, 15]) {
+      const stacks = core.stacksPerShot('toxin', v, 0.39, c, ms);
+      // 与「触发率 × 占比 × 多重」一致
+      near(stacks, core.totalProcChance(0.39, c) * core.share('toxin', v) * ms, 1e-9);
+    }
+  });
+
+  it('射线 DoT 叠层随多重线性上升（等价于旧的"多重进触发率"）', () => {
+    const w = makeWeapon('held');
+    const one = compute(w, w.modes[0], []);
+    const two = compute(w, w.modes[0], MS);
+    // +90% 多重 → 叠层 ×1.9
+    near(two.output.stacksPerType.slash / one.output.stacksPerType.slash, 1.9, 1e-9);
+    // 每跳基础值也同样 ×1.9（射线的多重并进伤害，这条没变）
+    near(slashTick(two) / slashTick(one), 1.9, 1e-9);
   });
 });

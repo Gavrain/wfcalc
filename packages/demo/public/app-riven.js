@@ -14,9 +14,12 @@
  * ⚠ 本文件是**纯 JS**（浏览器直接跑，不经过剥类型）：类型信息见 `app-riven.d.ts`。
  */
 import {
+  RIVEN_DISPOSITION,
   rivenComboOf,
   roundRiven,
-  rivenDisplayRange,
+  rivenDisplayUnit,
+  rivenDisplayValue,
+  rivenStatRange,
   rivenStatTableOf,
 } from '../../data/src/manual/riven.ts';
 import { store } from './app-store.js';
@@ -56,9 +59,12 @@ export function rivenScopeOf() {
  * 游戏已取消倾向变动，全库统一 1.2（`RIVEN_DISPOSITION`）；
  * 近战页面里另有 8 把**空战近战**标着 0.5，属于这一类（`AXIOM_AEGIS_...` 之类，
  * 见 `data.md` D-164 的待确认项）——它们被归进空战后会用空战的表，不受 0.5 影响。
+ *
+ * ⚠ 这里**只做展示用**：真正参与数值计算的是 `riven.ts` 的 `rivenStatRange()`，
+ *   它已经乘过 `RIVEN_DISPOSITION`。不要在页面侧再乘一次（需求方 2026-11-14）。
  */
 export function rivenDispositionNow() {
-  return 1.2;
+  return RIVEN_DISPOSITION;
 }
 
 /** 当前武器的裂罅词条表；这一类没有数据时返回 `null`（界面显示「待补」） */
@@ -115,28 +121,32 @@ export function rivenValueModeNow() {
 }
 
 /**
- * 一条词条按当前取值口径的**显示值**（派系已换算成 1.xx）。
+ * 一条词条按当前取值口径的**幅度**（正面为正、负面按幅度存正数，百分比口径）。
+ *
+ * 显示成什么（倍率 / 百分比 / 米）由 `formatRivenValue` 决定；这里只取数。
  *
  * @param {object} def 词条定义
  * @param {'pos'|'neg'} kind
- * @param {number} [value] 如果给了实际值，就按实际值换算；没给就用 min/平均/max
+ * @param {number} [value] 如果给了实际值，就用它；没给就用当前属性基准（min/平均/max）
  */
 export function rivenValueFor(def, kind, value) {
-  if (value !== undefined && Number.isFinite(value)) {
-    return def.kind === 'faction' ? (kind === 'pos' ? 1 + value / 100 : 1 - value / 100) : value;
-  }
+  if (value !== undefined && Number.isFinite(value)) return value;
   const mode = rivenValueModeNow();
-  const r = rivenDisplayRange(def, rivenComboNow(), kind);
+  const r = rivenStatRange(def, rivenComboNow(), kind);
   return mode === 'min' ? r.min : mode === 'max' ? r.max : r.avg;
 }
 
-/** 一条词条按当前口径的**原始百分比值**（派系是 +45 这种），用于填进 `RivenEntry.value` */
+/**
+ * 一条词条按当前口径的**原始百分比值**（派系是 +45 这种），用于填进 `RivenEntry.value`。
+ *
+ * ⚠ 区间一律取自 `riven.ts` 的 `rivenStatRange()`（唯一公式：基准 × 系数 × 倾向 1.2）。
+ *   以前这里自己抄了一遍 `def.base × coef × 1.2`，与 `riven.ts` 各写一份，
+ *   两边一改就对不上（需求方 2026-11-14：「只要保证只乘一次就行了」）。
+ */
 export function rivenRawValueFor(def, kind) {
-  const c = rivenComboNow();
-  const coef = kind === 'pos' ? c.gain : Math.abs(c.loss ?? 0);
-  const avg = def.base * coef * 1.2;
+  const r = rivenStatRange(def, rivenComboNow(), kind);
   const mode = rivenValueModeNow();
-  const v = mode === 'min' ? avg * 0.9 : mode === 'max' ? avg * 1.1 : avg;
+  const v = mode === 'min' ? r.min : mode === 'max' ? r.max : r.avg;
   return roundRiven(v);
 }
 
@@ -144,29 +154,93 @@ export function rivenRawValueFor(def, kind) {
  * 一条词条在当前组合下的**原始区间**（min / 平均 / max，百分比口径）。
  *
  * 界面滑杆与输入框要用它：滑杆允许的范围就是这条词条理论上能洗出的范围。
+ * 同样取自 `rivenStatRange()`，不在这里重写公式。
  */
 export function rivenRawRange(def, kind) {
-  const c = rivenComboNow();
-  const coef = kind === 'pos' ? c.gain : Math.abs(c.loss ?? 0);
-  const avg = def.base * coef * 1.2;
-  return { avg, min: avg * 0.9, max: avg * 1.1 };
+  const r = rivenStatRange(def, rivenComboNow(), kind);
+  return { avg: r.avg, min: r.min, max: r.max };
 }
 
-/** 显示用的格式化：派系显示 `+53.5%`，其它同样带正负号 */
-export function formatRivenValue(def, kind, display) {
-  if (def.kind === 'faction') {
-    const pct = (display - 1) * 100;
-    return (pct >= 0 ? '+' : '') + pct.toFixed(1) + '%';
+/**
+ * 一条词条（或它的一个数值）**显示用**的文本（需求方 2026-11-14）。
+ *
+ * | 类 | 显示 | 例 |
+ * |---|---|---|
+ * | 派系 | **倍率，前面带 ×**（负面也是 0.xx） | 正面 `×1.54`、负面 `×0.73` |
+ * | 后坐力 | 裂罅数值是百分比：正面**降低**、负面**增加** | 正面 `−128.3%`、负面 `+21.4%` |
+ * | 穿透 / 攻击范围 / 连击持续时间 | **不带 %**（米 / 秒） | `3.2m`、`2.3m`、`9.6s` |
+ * | 其余（含裂罅的弹匣 / 弹药上限） | 百分比 | `+106.9%` |
+ *
+ * `raw` 是**幅度**（正面为正、负面按幅度存正数），方向与单位都在这里决定。
+ */
+export function formatRivenValue(def, kind, raw, withMark = true) {
+  const unit = rivenDisplayUnit(def);
+  // ⚠ 这里收的一律是**幅度**（正面为正、负面按幅度存正数）：区间、卡面、标签、待选区都传幅度。
+  //   后坐力**包进来**：正面是「降低」、负面是「增加」，见下方 `recoilSign`。
+  if (unit === 'faction') {
+    // 派系是**倍率**（正面 1.53 / 负面 0.56），前面用 ×，与普通词条的 +/− 区分（需求方 2026-11-14）。
+    // 不带 ×：滑杆刻度（0.xx）与滑杆旁的数字框，那里只放纯数字。
+    const mul = (kind === 'pos' ? 1 + raw / 100 : 1 - raw / 100).toFixed(2);
+    return withMark ? '×' + mul : mul;
   }
-  const signed = kind === 'neg' ? -display : display;
-  return (signed >= 0 ? '+' : '') + signed.toFixed(1) + '%';
+  const signed = unit === 'recoil' ? raw * recoilSign(kind) : kind === 'neg' ? -raw : raw;
+  const sign = signed >= 0 ? '+' : '−';
+  const abs = Math.abs(signed).toFixed(1);
+  if (unit === 'flat') {
+    // 裂罅里固定量的词条：穿透 / 攻击范围（米）、连击持续时间（秒）。
+    // 弹匣 / 弹药上限在裂罅上是**百分比**，不在这里（需求方 2026-11-14）。
+    if (def.key === 'comboDuration') return sign + abs + 's';
+    return sign + abs + 'm';
+  }
+  // 其余是百分比
+  return sign + abs + '%';
 }
 
-/** 区间文案：`+176.4% ~ +215.6%`（派系显示成 `+48.0% ~ +59.0%`） */
+/**
+ * 后坐力的**显示方向**（需求方 2026-11-14：「正面记作降低、负面记作增加」）。
+ *
+ * ```
+ * 正面词条 → 后坐力降低 → 显示 −X%
+ * 负面词条 → 后坐力增加 → 显示 +Y%
+ * ```
+ * 只影响显示；滑杆 / 输入框存的仍是幅度。
+ */
+export function recoilSign(kind) {
+  return kind === 'neg' ? 1 : -1;
+}
+
+/** 一条词条**显示区间**的文本：`+115.4% ~ +141.1%`（派系 `1.46 ~ 1.56`；穿透这类固定值不带 %） */
 export function formatRivenRange(def, kind) {
-  const r = rivenDisplayRange(def, rivenComboNow(), kind);
+  // 区间一律是**幅度**：方向与单位都交给 formatRivenValue 处理（负面在那里翻正负）
+  const r = rivenStatRange(def, rivenComboNow(), kind);
   return formatRivenValue(def, kind, r.min) + ' ~ ' + formatRivenValue(def, kind, r.max);
 }
+
+/**
+ * 滑杆 / 数字框的**显示口径**（需求方 2026-11-14：「范围 0.64~0.55 但拖动是 36.45~44.55」）。
+ *
+ * 滑杆拖的是词条的**幅度**（36.45 ~ 44.55），但派系要显示成倍率（0.64 ~ 0.55），
+ * 所以两端 = **把幅度按 `formatRivenValue` 换算回来的数**，保证滑杆两端与「范围」文字一致：
+ *
+ * ```
+ * 普通词条：toSlider = toAmp = 数值本身
+ * 派系正面：toSlider(幅度) = 1 + 幅度/100，toAmp(滑杆值) = (滑杆值 − 1) × 100
+ * 派系负面：toSlider(幅度) = 1 − 幅度/100，toAmp(滑杆值) = (1 − 滑杆值) × 100
+ * ```
+ * 存进 `RivenEntry.value` 的**永远是幅度**（与其它词条同一口径）。
+ */
+export function rivenSliderScale(def, kind) {
+  if (rivenDisplayUnit(def) !== 'faction') {
+    return { toSlider: function (amp) { return amp; }, toAmp: function (v) { return Math.abs(v); } };
+  }
+  const neg = kind === 'neg';
+  return {
+    toSlider: function (amp) { return neg ? 1 - amp / 100 : 1 + amp / 100; },
+    toAmp: function (v) { return Math.abs(neg ? (1 - v) * 100 : (v - 1) * 100); },
+  };
+}
+
+
 
 // ─────────────────────────────────────────────────────────────
 // 状态维护
@@ -347,16 +421,18 @@ export function rivenToContributions(slot) {
     const sign = kind === 'neg' ? -1 : 1;
     // 派系：内核口径是百分比加算（+45 = +45%），这里原样传百分比幅度
     const amount = sign * e.value;
-    // 从下到上：界面上第 i 条（0 = 最上）对应槽位基值 + (total-1-i)
+    // 从下到上：界面上第 i 条（0 = 最上）对应槽位基位 + (total-1-i)
     const innerOrder = total - 1 - i;
     const slotNo = slot !== undefined ? slot + innerOrder : innerOrder;
+    // 展示标签：方向与单位交给 `formatRivenValue`（后坐力正面显示成「降低」的负号）
+    const displayText = formatRivenValue(def, kind, Math.abs(amount));
     out.push({
       stat: def.stat,
       form: 'pct',
       amount,
       source: RIVEN_SLOT,
       slot: slotNo,
-      label: '裂罅 ' + def.label + ' ' + (amount >= 0 ? '+' : '') + roundRiven(Math.abs(amount)).toFixed(1) + '%',
+      label: '裂罅 ' + def.label + ' ' + displayText,
     });
   }
   return out;

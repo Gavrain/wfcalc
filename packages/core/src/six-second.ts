@@ -166,3 +166,195 @@ export function sixSecondTotal(
 ): number {
   return dotSixSecondCurve(t, stacksPerSecond, perStackPerSecond, window, firing);
 }
+
+// ─────────────────────────────────────────────────────────────
+// 逐秒层数池（需求方 2026-11-15，A5：稳态秒伤要按「清除」算）
+//
+// 上面 `dotSixSecondCurve()` 是**累加型**：层数只增不减，用来算 N 秒异常总伤。
+// 稳态秒伤算的是「长期平均」，必须让层数真正**到期清除**：
+//
+// ```
+// 每种 DoT 一个队列，每一项是一次触发（时刻、层数）
+// 每拍（整数秒 t）：
+//   ① 移除 t − 触发时刻 > 6 秒的项            ← 装填期间照样移除（「装填期间会掉」）
+//   ② 伤害：
+//        · 火 / 毒气 = 持续伤害，每拍按当场层数跳（毒气 10 层封顶）
+//        · 毒 / 电 / 切割 = 每层只跳 1 拍，所以每拍只结算「本秒新叠的那一批」
+//   ③ 本秒新叠的层按开火区间摊进来              ← 装填期间不新增
+// ```
+// ─────────────────────────────────────────────────────────────
+
+/** 层数池的默认持续时间（秒），与 `dot.ts` 的 `DOT_DURATION` 一致 */
+const POOL_DURATION = 6;
+
+/** 一次触发的在场记录 */
+export interface PoolEntry {
+  /** 触发时刻（秒，可以是小数——取开火区间的起点） */
+  firedAt: number;
+  /** 这一项贡献的层数 */
+  layers: number;
+}
+
+const POOL_EPS = 1e-9;
+
+/** 第 sec 秒内新叠的层数 = 该秒各开火区间时长之和 × 每秒叠层 */
+function addedInSecond(
+  intervalsOf: (sec: number) => readonly [number, number][],
+  sec: number,
+  stacksPerSecond: number,
+): number {
+  let added = 0;
+  for (const [a, b] of intervalsOf(sec)) added += stacksPerSecond * (b - a);
+  return Math.max(0, added);
+}
+
+/**
+ * 逐秒推进层数池，返回**每一拍的伤害**（长度 = `seconds`）。
+ *
+ * @param t                 DoT 类型
+ * @param stacksPerSecond   每秒期望叠层（已含触发率 × 占比 × 多重 × 射速 × 刃影）
+ * @param perStackPerSecond 单层每拍伤害（= `dotTick().tick`）
+ * @param seconds           推进多少拍
+ * @param intervalsOf       `sec → [[a,b), …]` 该秒内的开火区间（`timeline.firingIntervals`）
+ * @param options.immediateFirst 电击 / 毒气：t=0 立即跳一拍（D-059），层数取单发期望
+ * @param options.stacksPerShot  单发期望层数（`immediateFirst` 用）
+ * @param options.duration       持续时间（秒，默认 6）
+ */
+export function dotStackPool(
+  t: DoTType,
+  stacksPerSecond: number,
+  perStackPerSecond: number,
+  seconds: number,
+  intervalsOf: (sec: number) => readonly [number, number][],
+  options: { immediateFirst?: boolean | undefined; stacksPerShot?: number | undefined; duration?: number | undefined } = {},
+): number[] {
+  const duration = options.duration ?? POOL_DURATION;
+  const cap = DOT_MAX_STOCKS_FIX(t);
+  // 火焰 / 毒气是持续伤害（每拍都跳）；毒 / 电 / 切割是每层只跳一拍
+  const persistent = t === 'heat' || t === 'gas';
+  /** 队列按触发时刻升序（先到先删） */
+  const pool: PoolEntry[] = [];
+  const out: number[] = [];
+
+  /** 把新增层摊到本秒的开火区间上（区间中点作为触发时刻） */
+  const addStacks = (sec: number): void => {
+    for (const [a, b] of intervalsOf(sec)) {
+      const layers = stacksPerSecond * (b - a);
+      if (layers > POOL_EPS) pool.push({ firedAt: (a + b) / 2, layers });
+    }
+    if (cap !== null) {
+      // 封顶：超出部分替换**最早**的层
+      let total = 0;
+      for (const e of pool) total += e.layers;
+      let overflow = total - cap;
+      for (let i = 0; i < pool.length && overflow > POOL_EPS; i++) {
+        const take = Math.min(pool[i]!.layers, overflow);
+        pool[i]!.layers -= take;
+        overflow -= take;
+      }
+      for (let i = pool.length - 1; i >= 0; i--) {
+        if (pool[i]!.layers <= POOL_EPS) pool.splice(i, 1);
+      }
+    }
+  };
+
+  /** 移除超过持续时间的层（装填期间也照做） */
+  const expire = (tNow: number): void => {
+    for (let i = pool.length - 1; i >= 0; i--) {
+      if (tNow - pool[i]!.firedAt > duration + POOL_EPS) pool.splice(i, 1);
+    }
+  };
+
+  let startSec = 1;
+  // ① 第 0 拍：电击 / 毒气立即结算（D-059），这一层从 0 秒起计时
+  if (options.immediateFirst && seconds > 0) {
+    const first = options.stacksPerShot ?? 0;
+    if (first > 0) {
+      const layers = cap === null ? first : Math.min(first, cap);
+      // 这一拍在窗口开始前（t=0）
+      out.push(perStackPerSecond * layers);
+      pool.push({ firedAt: 0, layers });
+      startSec = 2;
+    } else {
+      out.push(0);
+      startSec = 1;
+    }
+  }
+
+  for (let sec = startSec; sec <= seconds; sec++) {
+    // ① 到期清除（在这一秒开始时做）
+    expire(sec);
+    if (persistent) {
+      // ② 持续伤害：先按本秒开始时的层数跳，再叠本秒新增（与端点无关，这里取"先跳后叠"）
+      let layers = 0;
+      for (const e of pool) layers += e.layers;
+      out.push(perStackPerSecond * (cap === null ? layers : Math.min(layers, cap)));
+      addStacks(sec);
+    } else {
+      // ② 每层只跳一拍：本拍伤害 = 本秒新叠的层数
+      const added = addedInSecond(intervalsOf, sec, stacksPerSecond);
+      out.push(perStackPerSecond * added);
+      // 队列只用来记录「这些层还在不在」（到期后自然消失），对每层一跳型不影响伤害
+      addStacks(sec);
+    }
+  }
+  return out;
+}
+
+/**
+ * **一个循环内的稳态异常每秒伤害**（需求方 2026-11-15，A4 + A5）。
+ *
+ * 循环 = 打空弹匣（`mag ÷ fr`）+ 装填（`reload`）。DoT 的持续时间是 6 秒，逐秒池只推进到
+ * **循环长度 + 6 秒**：循环末尾刚刚叠上、到期时刻晚于这个窗口的层**不会被结算**（A5 的「清除」）。
+ *
+ * ```
+ * 稳态异常每秒 = 循环内各拍伤害之和 ÷ 循环时长
+ *   整拍：取 t < floor(循环) 的那几拍
+ *   零头：最后一个不完整拍按「落在循环内的开火时长占该秒开火时长」折算
+ * ```
+ *
+ * ⚠ 改写前的实现是「层/秒 × 开火段时长 ÷ 循环」，层数永不到期；
+ *   中途还试过 `ceil(循环)+6` 的窗口，会把窗口外的层也算进来（已改回 `ceil(循环 + 6)`）。
+ */
+export function steadyDotPerSecond(
+  types: readonly {
+    type: DoTType;
+    stacksPerSecond: number;
+    perStackPerSecond: number;
+    immediateFirst?: boolean;
+    stacksPerShot?: number;
+  }[],
+  cycleSeconds: number,
+  intervalsOf: (sec: number) => readonly [number, number][],
+  /** 第 sec 秒里**落在 `[0, 循环长度)` 内**的开火区间（timeline.firingIntervalsWithin） */
+  withinCycle?: (sec: number) => readonly [number, number][],
+): number {
+  const cycle = Math.max(0, cycleSeconds);
+  if (!(cycle > 0)) return 0;
+  /** 窗口 = 循环 + 持续时间：这之后的拍属于下一圈，不算进来 */
+  const window = Math.ceil(cycle + POOL_DURATION);
+  let sum = 0;
+  for (const it of types) {
+    if (!(it.perStackPerSecond > 0)) continue;
+    const series = dotStackPool(it.type, it.stacksPerSecond, it.perStackPerSecond, window, intervalsOf, {
+      immediateFirst: it.immediateFirst,
+      stacksPerShot: it.stacksPerShot,
+    });
+    const whole = Math.floor(cycle);
+    let acc = 0;
+    for (let i = 0; i < whole; i++) acc += series[i]!;
+    // 零头那一拍（第 whole+1 拍覆盖 [whole, whole+1)）：
+    // 池里这一拍是"整秒"的量，这里只取循环内那一段，按开火时长比例折算。
+    const frac = cycle - whole;
+    if (frac > 1e-9) {
+      const last = whole + 1;
+      const full = intervalsOf(last).reduce((a, [x, y]) => a + (y - x), 0);
+      const part = withinCycle
+        ? withinCycle(last).reduce((a, [x, y]) => a + (y - x), 0)
+        : full * frac;
+      if (full > 0 && part > 0) acc += series[whole]! * (part / full);
+    }
+    sum += acc;
+  }
+  return sum / cycle;
+}
