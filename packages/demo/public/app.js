@@ -23,6 +23,7 @@ import { bladeShadowGain, critAverage, critTiers, DEFAULT_DOT_WINDOW_SECONDS, DO
 import { WEAPON_GROUPS, groupWeapons, searchWeapons, FIRE_STYLE_OPTIONS, filterByStyle, weaponLabel, weaponGroupId, locateWeapon, weaponMatchesStyle } from './weapon-picker.js';
 import { OVERRIDE_WEAPON_FIELDS as OVERRIDE_FIELDS, mergeWeaponOverride as applyWeaponOverride } from './weapon-override.js';
 import { arcaneDisplayStats, arcaneToContributions, DEFAULT_BURST_STACKS, isConditionOverloadMod, MAX_BURST_STACKS, modStackFactor, modToContributions } from '../../data/src/adapter.ts';
+import { SET_BONUS_EFFECTS } from '../../data/src/manual/mods.ts';
 import {
   ELEMENT_COLOR, ELEMENT_LABEL, EXILUS_INDEX, FACTION_OPTIONS, KUVA_ELEMENTS, MAX_SLOTS, RIVEN_SLOT_ID, SLOT_COUNT,
   bucketLabel, fmt, fmtPct, getSavedLoadout, lastUiState, lastWeaponId, makeLoadoutEntry, saveLoadout,
@@ -1228,6 +1229,9 @@ function statChips(mod) {
   }
   // 需求方 2026-11-13：锁射速 / 锁多重写进卡面（原文就是这两句）
   for (const note of modLockNotes(mod)) wrap.append(el('span', 'slot-stat slot-lock', note));
+  // 套装提示：只标本卡所属那一套（需求方 2026-11-18）
+  const setNote = setNoteOf(mod);
+  if (setNote) wrap.append(el('span', 'slot-stat slot-set', setNote));
   return wrap;
 }
 
@@ -1244,6 +1248,37 @@ function modLockNotes(mod) {
   if (mod.id === 'semi_pistol_cannonade' || mod.id === 'semi_rifle_cannonade' || mod.id === 'semi_shotgun_cannonade') return ['射速无法修改'];
   if (mod.id === 'primary_acuity' || mod.id === 'pistol_acuity') return ['多重无法修改'];
   return [];
+}
+
+/**
+ * 卡面上的**套装提示**（需求方 2026-11-18）。
+ *
+ * 只标**本卡所属那一套**的效果，绝不显示别的套装（不同套装不能混用）。
+ * 每张卡都标（牺牲这种「×1.25 只算一次」的也每张都标，但计算上不会重复乘）。
+ *
+ * 依据：核心事实 §11（套装效果属于数据结构化事实）。
+ */
+const SET_LABELS = { sacrifice: '牺牲', vigilante: '私法', nira: '混沌', gladiator: '角斗士' };
+
+function setNoteOf(mod) {
+  const set = mod && mod.set;
+  if (!set) return null;
+  const eff = SET_BONUS_EFFECTS[set];
+  if (!eff) return null;
+  const label = SET_LABELS[set] || set;
+  if (eff.kind === 'scaleOwnMods') {
+    return label + '套装：本套 Mod 数值 ×' + eff.value;
+  }
+  if (eff.kind === 'critChanceFlat') {
+    return label + '套装：每张 +' + eff.value + '% 几率强化主武器暴击';
+  }
+  if (eff.kind === 'slamDamage') {
+    return label + '套装：每张 +' + eff.value + '% 震地攻击伤害';
+  }
+  if (eff.kind === 'critChancePerCombo') {
+    return label + '套装：每张 +' + eff.value + '% × 连击倍率';
+  }
+  return null;
 }
 
 /**
@@ -2032,6 +2067,8 @@ function candidateCard(row) {
     statText.push(statLabel(s.stat) + ' ' + modStatText(s, max, mod.descriptionEn));
   }
   for (const note of modLockNotes(mod)) statText.push(note);
+  const setNote = setNoteOf(mod);
+  if (setNote) statText.push(setNote);
   card.append(el('div', 'cand-stats', statText.join(' · ') || '无伤害加成'));
 
   const gainEl = el('div', 'cand-gain');

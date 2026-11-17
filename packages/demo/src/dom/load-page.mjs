@@ -36,6 +36,8 @@ export async function loadModules() {
   const core = await stripTemp(ROOT, 'packages/core/src/index.ts', transpile);
   const adapter = await stripTemp(ROOT, 'packages/data/src/adapter.ts', transpile);
   const rivenData = await stripTemp(ROOT, 'packages/data/src/manual/riven.ts', transpile);
+  // 人工数据层里的套装效果表（app.js 的卡面提示与 app-compute 的套装加成都要它）
+  const manualMods = await stripTemp(ROOT, 'packages/data/src/manual/mods.ts', transpile);
   const picker = await import(pathToFileURL(join(PUBLIC, 'weapon-picker.js')).href);
   const override = await import(pathToFileURL(join(PUBLIC, 'weapon-override.js')).href);
   const store = await import(pathToFileURL(join(PUBLIC, 'app-store.js')).href);
@@ -43,7 +45,7 @@ export async function loadModules() {
   const compute = await import(pathToFileURL(join(PUBLIC, 'app-compute.js')).href);
   const riven = await import(pathToFileURL(join(PUBLIC, 'app-riven.js')).href);
   const editor = await import(pathToFileURL(join(PUBLIC, 'ui-editor.js')).href);
-  return { core, adapter, rivenData, picker, override, store, data, compute, riven, editor, transpile };
+  return { core, adapter, rivenData, manualMods, picker, override, store, data, compute, riven, editor, transpile };
 }
 
 /**
@@ -57,6 +59,7 @@ export function inlineImports(src, ns) {
     [/core\/src\/index\.ts$/, 'ns.core'],
     [/data\/src\/adapter\.ts$/, 'ns.adapter'],
     [/data\/src\/manual\/riven\.ts$/, 'ns.rivenData'],
+    [/data\/src\/manual\/mods\.ts$/, 'ns.manualMods'],
     [/weapon-picker\.js$/, 'ns.picker'],
     [/\/weapon-override\.js$/, 'ns.override'],
     [/\/app-store\.js$/, 'ns.store'],
@@ -152,6 +155,7 @@ export async function loadPage(opts = {}) {
     core: modules.core,
     adapter: modules.adapter,
     rivenData: modules.rivenData,
+    manualMods: modules.manualMods,
     picker: modules.picker,
     override: modules.override,
     store: modules.store,
