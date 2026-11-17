@@ -42,7 +42,3 @@ packages/data/src/generated/reports/*.md
 
 # demo éªŒè¯è„šæœ¬çš„ä¸´æ—¶ç¼–è¯‘äº§ç‰©
 .demo-check/
-
-# ±¾»ú git Æ¾¾İÖúÊÖ£¨´Ó gh È¡ token£¬²»Èë¿â£©
-.repotools/
-.cache/
