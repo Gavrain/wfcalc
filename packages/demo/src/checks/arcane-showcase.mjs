@@ -67,7 +67,8 @@ for (const name of ['主要·无情', '主要·霜冻', '主要·堡垒', '主�
   const card = findArc(name);
   const arc = arcaneByZh(name);
   if (!card || !arc) continue;
-  const shown = chipTexts(card).length;
+  // 卡上还有一枚「满层 N 层」标签，它不是内核贡献，数词条时要排除
+  const shown = chipTexts(card).filter((t) => !/^满层\s*\d+\s*层$/.test(t.trim())).length;
   const contribs = adapter.arcaneToContributions(arc).length;
   check(`「${name}」的词条数与内核贡献数一致`, shown === contribs, `显示 ${shown} / 贡献 ${contribs}`);
 }

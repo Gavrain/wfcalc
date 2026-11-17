@@ -118,7 +118,25 @@ let lastBoot = null;
  * @param opts.waitMs 等 `boot()` 完成的时间（默认 300ms；编辑器等更慢的路径可调大）
  * @returns `{ registry, document, modules }`
  */
+/** 测试环境的内存版 localStorage：真实浏览器有，Node 里没有，不补就没法测"刷新后恢复" */
+function installMemoryStorage() {
+  if (globalThis.localStorage) return;
+  const mem = new Map();
+  Object.defineProperty(globalThis, 'localStorage', {
+    configurable: true,
+    value: {
+      getItem: (k) => (mem.has(String(k)) ? mem.get(String(k)) : null),
+      setItem: (k, v) => { mem.set(String(k), String(v)); },
+      removeItem: (k) => { mem.delete(String(k)); },
+      clear: () => mem.clear(),
+      key: (i) => Array.from(mem.keys())[i] ?? null,
+      get length() { return mem.size; },
+    },
+  });
+}
+
 export async function loadPage(opts = {}) {
+  installMemoryStorage();
   const { registry, html } = await buildRegistry(readFile, join(PUBLIC, 'index.html'));
   const document = makeDocument(registry);
   const modules = opts.modules ?? (await loadModules());

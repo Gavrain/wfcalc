@@ -12,6 +12,9 @@ import { findDeep } from '../dom/shim.mjs';
 import { createChecks } from '../dom/report.mjs';
 import { ROOT, loadPage, invokeBoot } from '../dom/load-page.mjs';
 
+// 测试自己产生的「上次武器」会跨用例残留（同一个进程内 localStorage 是内存版），
+// 所以每个脚本开头先清掉，保证从默认武器开始。
+if (typeof localStorage !== 'undefined') localStorage.clear();
 const { registry, modules } = await loadPage({ waitMs: 400 });
 const store = modules.store;
 const rec = createChecks('interact');
@@ -111,10 +114,10 @@ const appSrc = await readFile(join(ROOT, 'packages/demo/public/app.js'), 'utf8')
   check('「每秒命中」已改名「连发秒伤」', text.includes('连发秒伤') && !text.includes('每秒命中'));
   check('「持续伤害」已改名「续航秒伤」', text.includes('续航秒伤') && !text.includes('持续伤害'));
   check('DoT 改为「异常加权单层秒伤」与「六秒异常总伤」（D-057/D-060）',
-    text.includes('异常加权单层秒伤') && text.includes('六秒异常总伤'));
+    text.includes('异常加权单层秒伤') && text.includes('6秒异常总伤'));
   check('旧名「DoT 六秒总伤」已不存在', !text.includes('DoT 六秒总伤'));
   check('旧名「DoT 加权每层秒伤」已不存在', !text.includes('DoT 加权每层秒伤'));
-  check('口径行数 = 6', out.children.length === 6);
+  check('口径行数 = 8', out.children.length === 8);
 }
 
 // ── 33. 异常状态伤害单位是 /层/秒（D-038）──
@@ -233,7 +236,7 @@ const appSrc = await readFile(join(ROOT, 'packages/demo/public/app.js'), 'utf8')
 // ── 41. 增幅基准与备选筛选同样式（D-042）──
 {
   const mbox = registry['#metric-options'];
-  check('增幅基准用按钮', mbox.children.length === 6 && mbox.children.every((b) => b.tagName === 'BUTTON'));
+  check('增幅基准用按钮', mbox.children.length === 8 && mbox.children.every((b) => b.tagName === 'BUTTON'));
   check('增幅基准有 filter-btn 样式类', mbox.children.every((b) => (b.className || '').includes('filter-btn')));
   check('增幅基准当前项高亮', mbox.children.filter((b) => (b.className || '').includes('active')).length === 1);
 }
@@ -460,6 +463,9 @@ const appSrc = await readFile(join(ROOT, 'packages/demo/public/app.js'), 'utf8')
 //   · D-117（需求方 2026-11-06）：「镀层加成那边的小字推演去掉，这应该是放到镀层 mod 本身上显示的」
 //     → 配置区不再有推演/公式小字；收益显示在备选区的镀层卡上。
 {
+  // 这一段的语义是「首次加载、没装任何 Mod」时的状态，
+  // 所以同样要先清存档再重启，否则会带着前面用例装过的镀层卡。
+  if (typeof localStorage !== 'undefined') localStorage.clear();
   await invokeBoot();
   await new Promise((r) => setTimeout(r, 300));
   const box = registry['#co-controls'];
@@ -494,6 +500,9 @@ const appSrc = await readFile(join(ROOT, 'packages/demo/public/app.js'), 'utf8')
 
 // ── 49. 启动时的默认武器 = 主要 → 步枪的第一把（需求方 2026-11-06）──
 {
+  // 这是「从零启动」的用例：前面各段换过枪，存档里记着「上次是哪把」，
+  // 不清掉的话重启会按 D-157 回到上次那把 —— 这里要测的是没存档时的默认值。
+  if (typeof localStorage !== 'undefined') localStorage.clear();
   await invokeBoot();
   await new Promise((r) => setTimeout(r, 400));
   const st = store.store; // 命名空间里的真实状态对象

@@ -3667,8 +3667,6 @@ async function switchWeapon(weaponId) {
     return;
   }
 
-  // D-157：换枪**前**先把当前这把枪的配卡存好（否则刚装好的卡会随换枪丢掉）
-  persistLoadout();
 
   // 清空配置：换枪后原来的 Mod 可能已不适用。
   // D-157 之后紧跟着 `restoreLoadout`：这把枪以前存过就把它的配卡放回来，没存过就保持清空。
@@ -3700,6 +3698,11 @@ async function switchWeapon(weaponId) {
   if (styleSel && styleSel.value !== 'all' && !weaponMatchesStyle(weapon, styleSel.value)) styleSel.value = 'all';
   renderWeaponOptions($('#weapon-group').value, $('#weapon-type').value);
   renderAll();
+  // 依据：核心事实 §10（刷新后回到上次的武器与配卡）。
+  //   换枪流程先 persistLoadout() 存**旧枪**，再 loadWeapon 换新枪；
+  //   renderAll 末尾那次 persistLoadout() 用的还是换枪前的材料，
+  //   所以这里必须再存一次，把「上次是哪把枪」落到新武器上。
+  persistLoadout();
   // D-122：编辑器里属于上一把枪的草稿与"已保存到 …"提示都要清掉，
   //        「已修改」标记必须按**新武器**重新判断（以前只有 reloadWeaponOverrides 会刷新它）
   editor.resetEditorForWeaponSwitch();

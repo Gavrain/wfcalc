@@ -45,8 +45,8 @@ if (star) {
     text.includes('当前') && text.includes('装备后') && text.includes('增幅'));
   check('拆解里「续航秒伤」这一行有增幅（弹药效率生效）',
     /续航秒伤[^]*?%/.test(text), text.slice(0, 200));
-  // D-129 / D-130：等效弹匣并进「面板」表，与输出口径同一形态（当前 / 装备后 / 增幅），
-  // 行名就叫「等效弹匣」，不再写「弹匣（按弹药效率折算）」之类的括号说明。
+  // 依据：核心事实 §3（弹药效率）。面板「弹匣容量」直接显示等效弹匣，
+  // 不再单列「等效弹匣」行，也不再写「按弹药效率折算」的括号说明。
   {
     const boxes = detail().children.filter((c) => (c.className || '').includes('merge-box'));
     const pbox = boxes.find((b) => (b.children[0] || {}).textContent === '面板');
@@ -55,8 +55,8 @@ if (star) {
     const ptext = pbox ? pbox.textContent : '';
     check('面板表头是「当前 / 装备后 / 增幅」',
       ['当前', '装备后', '增幅'].every((h) => ptext.includes(h)), ptext.slice(0, 60));
-    check('等效弹匣是面板表里的一行（行名就叫「等效弹匣」）',
-      ptext.includes('等效弹匣') && !ptext.includes('按弹药效率折算'), ptext.slice(0, 160));
+    check('面板表不再有过时的「按弹药效率折算」说明',
+      !ptext.includes('按弹药效率折算'), ptext.slice(0, 160));
     check('暴击几率 / 暴击伤害在拆解里只出现一次（D-132 合并后）',
       (detail().textContent.match(/暴击伤害/g) || []).length <= 1,
       '暴击伤害 出现 ' + (detail().textContent.match(/暴击伤害/g) || []).length + ' 次');
@@ -81,23 +81,32 @@ if (star) {
   check('Mod 拆解仍然可用', detail().textContent.includes('输出口径') || detail().textContent.includes('当前'));
 }
 
-// ── 2. 左边面板：上了准星要有「等效弹匣」行 ──
+// ── 2. 左边面板：装上准星后，弹匣容量要变成等效弹匣（弹药效率 60% → ×2.5，100 → 250）──
 const panelText = () => registry['#panel-table'].textContent;
-check('未装准星时面板没有「等效弹匣」行', !panelText().includes('等效弹匣'), panelText().slice(0, 120));
-if (star) {
-  star.fire('dragstart');
-  arcSlot().fire('drop');
-  await settle();
-  check('准星已装上', Boolean(store.arcaneKey));
-  check('装上准星后面板出现「等效弹匣」行', panelText().includes('等效弹匣'), panelText().slice(0, 200));
-  check('等效弹匣数值大于面板弹匣（弹药效率 60% → ×2.5）',
-    /等效弹匣\s*[\d.]+\s*[\d.]+\s*（×2\.500）/.test(panelText()) || panelText().includes('×2.500'),
-    panelText().slice(0, 220));
-  // 卸下后该行消失
-  arcSlot().fire('dragstart');
-  registry['#arcane-list'].fire('drop');
-  await settle();
-  check('卸下准星后「等效弹匣」行消失', !panelText().includes('等效弹匣'));
+{
+  // 面板行是「弹匣容量 → 基础面板 → 当前面板」，两个数都是两位小数（如 100.00 100.00）
+  const magazineText = () => {
+    const m = /弹匣容量(\d+\.\d{2})(\d+\.\d{2})/.exec(panelText());
+    return m ? { base: Number(m[1]), after: Number(m[2]) } : null;
+  };
+  const before = magazineText();
+  check('未装准星时弹匣容量 = 基础弹匣', Boolean(before) && before.after === before.base);
+  if (star) {
+    star.fire('dragstart');
+    arcSlot().fire('drop');
+    await settle();
+    check('准星已装上', Boolean(store.arcaneKey));
+    const after = magazineText();
+    check('装上准星后弹匣容量 = 基础 × 2.5（弹药效率 60%）',
+      Boolean(after) && Boolean(before) && Math.abs(after.after - before.base * 2.5) < 0.01,
+      JSON.stringify(after));
+    // 卸下后恢复
+    arcSlot().fire('dragstart');
+    registry['#arcane-list'].fire('drop');
+    await settle();
+    const restored = magazineText();
+    check('卸下准星后弹匣容量恢复', Boolean(restored) && restored.after === restored.base, JSON.stringify(restored));
+  }
 }
 
 // ── 3. 槽位布局（D-127）：赋能 / 劣化槽与 Mod 槽同尺寸，且装入后不改变高度 ──

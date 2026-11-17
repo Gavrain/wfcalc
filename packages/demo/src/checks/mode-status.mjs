@@ -10,6 +10,7 @@ import { findDeep, collect } from '../dom/shim.mjs';
 import { createChecks } from '../dom/report.mjs';
 import { loadPage } from '../dom/load-page.mjs';
 
+if (typeof localStorage !== 'undefined') localStorage.clear();
 const { registry, html } = await loadPage({ waitMs: 400 });
 // ⚠ 2026-11-12：守护 / 同伴武器（Gremlin 阿塔克斯）并进主要大类后成了默认武器，
 //   它们**不能装赋能**，右侧赋能区是收起的 —— 本脚本要验证赋能互换，先切一把普通步枪。
@@ -47,11 +48,11 @@ function candName(card) {
 }
 const candNameList = () => registry['#candidate-list'].children.map(candName).filter(Boolean);
 /**
- * 备选卡的「功能」标签挂在 **cand-top** 里（不是 card 的直接子节点），
- * 所以要用 collect 往下收集，不能只看 `c.children`。
+ * 备选卡的劣化标签现在是「劣化」（需求方 2026-11-13 改的，以前叫「功能」），
+ * 挂在 **cand-top** 里（不是 card 的直接子节点），所以要用 collect 往下收集。
  */
 function hasExilusTag(card) {
-  return collect(card, 'tag').some((n) => n.textContent === '功能');
+  return collect(card, 'tag').some((n) => n.textContent === '劣化');
 }
 function dragOutSlot(i) {
   const card = grid()[i];
@@ -222,13 +223,16 @@ check('备选区已渲染', registry['#candidate-list'].children.length > 50);
     plainCard.fire('dragstart');
     grid()[0].fire('drop');
     const exTarget = registry['#candidate-list'].children.find(hasExilusTag);
+    check('备选区仍能找到功能类卡（否则拖放用例没有目标）', Boolean(exTarget));
+    if (!exTarget) { /* 没有目标就没有可测的拖放 */ } else {
     const exTargetName = candName(exTarget);
     grid()[0].fire('dragstart');
     let swallowed = false;
-    for (const h of exTarget._listeners.dragover ?? []) h({ preventDefault() { swallowed = true; }, dataTransfer: {} });
+    exTarget.fire('dragover', { preventDefault() { swallowed = true; } });
     check('功能卡不接受普通槽 Mod（不显示可放置）', swallowed === false);
     registry['#candidate-list'].fire('drop');
     check('普通槽 Mod 拖到功能卡上也按卸下处理', slotTexts()[0].includes('空'));
+    }
   }
 }
 
@@ -374,15 +378,15 @@ check('备选区已渲染', registry['#candidate-list'].children.length > 50);
     text.includes('连发秒伤') && !text.includes('爆发伤害') && !text.includes('每秒命中'));
   check('口径里有「续航秒伤」', text.includes('续航秒伤'));
   check('异常口径改为「异常加权单层秒伤」与「六秒异常总伤」（D-057/D-060）',
-    text.includes('异常加权单层秒伤') && text.includes('六秒异常总伤'));
+    text.includes('异常加权单层秒伤') && text.includes('6秒异常总伤'));
   check('旧名「DoT 六秒总伤」已不存在', !text.includes('DoT 六秒总伤'));
-  check('口径行数 = 6', out.children.length === 6);
+  check('口径行数 = 8', out.children.length === 8);
 }
 
 // ── 16. 口径单选框移到 Mod 槽位上方 ──
 {
   const picker = registry['#metric-options'];
-  check('增幅基准单选框存在', picker.children.length === 6);
+  check('增幅基准单选框存在', picker.children.length === 8);
   const opts = picker.children.map((l) => l.textContent);
   check('单选框使用新名称', opts.some((t) => t.includes('连发秒伤')) && opts.some((t) => t.includes('单弹头')));
 }
