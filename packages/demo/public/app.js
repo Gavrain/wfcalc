@@ -1398,16 +1398,30 @@ function restoreLoadout(saved) {
   state.selectedVariants = sel && sel.length ? sel : null;
 
   // ── 配置区（D-157：只恢复跟"算出来的数"有关的项）──
-  const factionOk = FACTION_OPTIONS.some(function (o) { return o[0] === ui.faction; });
-  if (factionOk) state.faction = ui.faction;
+  //
+  // ⚠ 每项都**先回默认、存档里有合法值才覆盖**（需求方 2026-11-18）。
+  //   以前这里写的是「有值才覆盖」——那等于**沿用上一把武器的值**：
+  //   在 A 枪开了爆头，切到从没存过的 B 枪，B 枪会接着显示开爆头。
+  //   这与 `dotWindowSeconds` 当年修的是同一个毛病（见下方那段说明）。
+  // 没有存档项 → 回到"无派系"，而不是沿用上一把枪的派系
+  state.faction = 'none';
+  if (FACTION_OPTIONS.some(function (o) { return o[0] === ui.faction; })) state.faction = ui.faction;
+  state.headshot = false;
   if (typeof ui.headshot === 'boolean') state.headshot = ui.headshot;
+  state.headshotMult = 3;
   if ([1, 2, 3].indexOf(Number(ui.headshotMult)) >= 0) state.headshotMult = Number(ui.headshotMult);
+  state.kuvaType = 'none';
   if (KUVA_ELEMENTS.indexOf(ui.kuvaType) >= 0) state.kuvaType = ui.kuvaType;
+  // 玄骸滑条有上下限（25%~60%），默认取中间值 60%
+  state.kuvaRatio = 0.6;
   if (Number.isFinite(Number(ui.kuvaRatio))) {
-    // 玄骸滑条有上下限（25%~60%），越界的存档值夹回去
     state.kuvaRatio = Math.min(0.6, Math.max(0.25, Number(ui.kuvaRatio)));
   }
+  state.coStatusTypes = 0;
   if (Number.isFinite(Number(ui.coStatusTypes))) state.coStatusTypes = Math.max(0, Math.floor(Number(ui.coStatusTypes)));
+  // ⚠ `coStacks` / `coFreezeStacks` **不在这里重置**：它们的默认值是「叠层上限」，
+  //   由 `coDefaults()` 在 boot 与切枪时按当前武器填（D-112 / D-117）。
+  //   这里只覆盖存档里的合法值，没存过就交给调用方填默认。
   if (Number.isFinite(Number(ui.coStacks))) state.coStacks = Math.max(0, Math.floor(Number(ui.coStacks)));
   if (Number.isFinite(Number(ui.coFreezeStacks))) state.coFreezeStacks = Math.max(0, Math.floor(Number(ui.coFreezeStacks)));
   // 需求方 2026-11-13：连击倍率 1~13，爆发层数 1~13（越界夹回去，缺省回默认值）
