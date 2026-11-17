@@ -638,38 +638,30 @@ export function dotFactorOfCard(own, beforeRes, withCard) {
 const DOT_DAMAGE_TYPES = ['heat', 'toxin', 'electric', 'gas', 'slash'];
 
 /**
- * 这张卡贡献的元素，最终是否形成了伤害型 DoT。
+ * 这张卡贡献的元素，是否给某个伤害型 DoT **提供了它自己的元素加成**。
  *
- * 判法：用完整贡献算一遍合成结果（`elementDetail.v`），看它有份的那些类型
- * **在最终的命中分布里是否作为伤害型 DoT 类型存在**。
+ * 需求方 2026-11-18 的规则（按 DoT 算，不按命中分布猜）：
+ * ```
+ * 每个 DoT 只吃自己的元素 %：火 DoT 吃火、毒气 DoT 吃毒气、**切割 DoT 恒不吃切割**。
+ * ```
+ * 所以「火 + 毒 → 毒气」时，火和毒都不给毒气提供元素加成；
+ * 而裂罅的毒气词条直接命中毒气，算提供。
  *
- * | 卡 | 它的元素 | 合成后命中分布 | 是否形成 DoT |
- * |---|---|---|---|
- * | 地狱火（火） | heat | 病毒 + **heat** | **是** → 有贡献 |
- * | 致命火力（毒） | toxin | 病毒 + heat（毒被合进病毒） | 毒不在 DoT 里 → **否** |
- * | 白霜弹头（冰） | cold | 病毒 + heat（冰被合进病毒） | 冰不在 DoT 里 → **否** |
- *
- * 这样：「地狱火对 dot 收益 90%，致命火力和冰霜弹头为 0」——
- * 正好对应需求方 2026-11-12 的原话。
+ * 判据落在**命中分布**上：这张卡的元素，在最终分布里还剩没剩；
+ * 且该元素必须是**伤害型 DoT 类型**（切割除外，它不吃元素 %）。
  */
 function feedsDamageDot(own, contribs) {
-  const ownTypes = [];
+  const res = runCompute(contribs);
   for (const c of own) {
     const m = /^elemental:(.+)$/.exec(c.stat);
-    // 需求方 2026-11-18：切割**不**算进这里——切割 Mod 只改命中分布里的占比
-    // （那一份照常进 DoT 基础值），但切割 DoT 自己不吃切割元素%，所以切割卡
-    // 在 DoT 口径下没有元素贡献。
-    if (m) ownTypes.push(m[1]);
-  }
-  if (!ownTypes.length) return false;
-
-  const res = runCompute(contribs);
-  // 最终命中分布（合成之后）：只有落在伤害型 DoT 类型上才算数
-  for (let i = 0; i < res.segments.length; i++) {
-    const ed = res.segments[i].elementDetail;
-    if (!ed || !ed.v) continue;
-    for (const t of ownTypes) {
-      if (DOT_DAMAGE_TYPES.indexOf(t) >= 0 && (ed.v[t] || 0) > 0) return true;
+    if (!m) continue;
+    const t = m[1];
+    // 切割不吃元素 %，其它非 DoT 元素（病毒 / 腐蚀 …）也不贡献 DoT
+    if (DOT_DAMAGE_TYPES.indexOf(t) < 0) continue;
+    if (t === 'slash') continue;
+    for (const seg of res.segments) {
+      const ed = seg.elementDetail;
+      if (ed && ed.v && (ed.v[t] || 0) > 0) return true;
     }
   }
   return false;
