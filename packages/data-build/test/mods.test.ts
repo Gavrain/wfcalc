@@ -160,6 +160,15 @@ describe('Mod 清洗', () => {
     assert.equal(mod.conditions[0]!.durationSeconds, 20);
   });
 
+  it('skip 类属性不派内核键，哪怕它借的是伤害类型名（需求方 2026-11-18）', () => {
+    // 能量导引：`energyConv` 记在 baseDamage 上，但只是"耗能转化"，不进基伤乘区；
+    // 该卡与招架是同一个毛病（乘区转换出错），这里用能量导引当样板防回退。
+    const { mod } = cleanMod(zk({ i: 'energy_channel', n: 'Energy Channel', t: 'melee', p: [['energyConv', 200]], f: 3 }));
+    assert.equal(mod.stats[0]!.stat, 'baseDamage');
+    assert.equal(mod.stats[0]!.kind, 'skip');
+    assert.equal(mod.stats[0]!.contribStat, undefined);
+  });
+
   it('等级上限的已知笔误被修正（Amanata Pressure：f 写 1，实为 6 级）', () => {
     assert.equal(effectiveMaxRank({ i: 'amanata_pressure', f: 1 }), 5);
     assert.equal(effectiveMaxRank({ i: 'serration', f: 10 }), 10);

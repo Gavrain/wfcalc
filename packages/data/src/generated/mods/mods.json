@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-17T15:35:32.008Z",
+  "generatedAt": "2026-11-17T16:37:00.534Z",
   "source": "mods/baseline.json（Mod 数值基线） + ExportUpgrades（元数据交叉校验）",
   "note": "levelValues 为 0 级到满级的逐级数值；bucket 对应核心事实里的乘区口径",
   "count": 503,
@@ -2509,7 +2509,6 @@
             96,
             120
           ],
-          "contribStat": "statusChance",
           "note": "给副武器的触发，主武器上无收益"
         },
         {
@@ -2526,7 +2525,6 @@
             96,
             120
           ],
-          "contribStat": "critChance",
           "note": "给副武器的暴率，主武器上无收益"
         }
       ],
@@ -3691,7 +3689,6 @@
             133.3333,
             200
           ],
-          "contribStat": "baseDamage",
           "note": "需求方定为无效果（耗能转化）"
         }
       ],
@@ -4683,6 +4680,7 @@
             99,
             110
           ],
+          "contribStat": "statusDuration",
           "note": "影响 DoT 时长与火焰削甲时长"
         }
       ],
@@ -5266,7 +5264,7 @@
           "stat": "finisherDamage",
           "bucket": null,
           "unit": "percent",
-          "kind": "special",
+          "kind": "skip",
           "levelValues": [
             0,
             19.2,
@@ -5275,8 +5273,7 @@
             76.8,
             96
           ],
-          "contribStat": "finisherDamage",
-          "note": "招架后开启处决"
+          "note": "招架后开启处决：只给处决机会，不加处决伤害（需求方 2026-11-18）"
         }
       ],
       "conditions": [],
@@ -7561,6 +7558,7 @@
             72,
             90
           ],
+          "contribStat": "statusDuration",
           "note": "影响 DoT 时长与火焰削甲时长"
         }
       ],
@@ -9937,6 +9935,7 @@
             72,
             90
           ],
+          "contribStat": "statusDuration",
           "note": "影响 DoT 时长与火焰削甲时长"
         }
       ],
@@ -12443,6 +12442,7 @@
             133.3333,
             200
           ],
+          "contribStat": "statusDuration",
           "note": "影响 DoT 时长与火焰削甲时长"
         },
         {
@@ -12879,6 +12879,7 @@
             72,
             90
           ],
+          "contribStat": "statusDuration",
           "note": "影响 DoT 时长与火焰削甲时长"
         }
       ],
@@ -14220,6 +14221,7 @@
             66.6667,
             100
           ],
+          "contribStat": "statusDuration",
           "note": "影响 DoT 时长与火焰削甲时长"
         }
       ],
@@ -14570,8 +14572,7 @@
             13.3333,
             26.6667,
             40
-          ],
-          "contribStat": "baseDamage"
+          ]
         }
       ],
       "conditions": [],
@@ -18162,7 +18163,6 @@
             72,
             90
           ],
-          "contribStat": "baseDamage",
           "note": "需求方定为无效果（自激奇点的次级射击爆炸）"
         }
       ],
@@ -20920,6 +20920,7 @@
             72,
             90
           ],
+          "contribStat": "statusDuration",
           "note": "影响 DoT 时长与火焰削甲时长"
         }
       ],

@@ -58,6 +58,11 @@ export type ContribStat =
   | 'critMultiplier'
   | 'statusChance'
   | 'statusDamage'
+  /**
+   * 异常状态持续时间（需求方 2026-11-18）：**拉长 DoT 的存活时长**。
+   * 每层独立计时，活满「6 秒 × (1 + Σ持续%)」才掉；跳数跟着变多，单跳伤害不变。
+   */
+  | 'statusDuration'
   | 'fireRate'
   | 'magazine'
   | 'reloadSpeed'

@@ -236,6 +236,17 @@ export function fireRateFinal(weapon: Weapon, contribs: readonly Contribution[],
  *
  * 高射速、大弹匣的武器会被算得虚高。
  */
+/**
+ * 本节 DoT 的持续时间（秒）。
+ *
+ * 依据：核心事实 §6.3 —— 每层独立计时，活满 `6 × (1 + Σ异常状态持续%)` 才掉。
+ * 持续时间翻倍 → 跳数与总伤随之上涨，**单跳伤害不变**。
+ */
+function durationOfDot(contribs: readonly Contribution[]): number {
+  const pct = sumPct(contribs, 'statusDuration');
+  return Math.max(0.1, 6 * (1 + pct));
+}
+
 function steadyStateDot(
   segmentResults: readonly SegmentResult[],
   contribs: readonly Contribution[],
@@ -282,6 +293,8 @@ function steadyStateDot(
       cycle,
       intervalsOf,
       (sec: number) => firingIntervalsWithin(mag, fr, reload, sec, cycle),
+      // 依据：核心事实 §6.3 —— 持续时间 = 6 × (1 + Σ异常状态持续%)
+      () => durationOfDot(contribs),
     );
     const blastSps = seg.blast.stacksPerSecond;
     if (blastSps > 0 && seg.blast.perStack > 0) {
@@ -388,6 +401,7 @@ function segmentDotAndBlast(
     // **逐秒曲线**（§0.2 / D-057 / D-058 / D-059）/ 窗口长度由需求方选（D-171）
     dot6s += dotSixSecondCurve(
       tick.type, stacksPerSecond, perStackPerSecond, window, firingTimeline, stacksPerShotOfType,
+      durationOfDot(contribs),
     );
   }
 
