@@ -69,6 +69,7 @@ export const FACTION_LABELS: Readonly<Record<Faction, string>> = {
   murmur: 'Murmur（低语者）',
   techrot: 'Techrot（科技孢子）',
   scaldra: 'Scaldra（斯卡德拉）',
+  sentient: 'Sentient（S 系）',
   none: '不计派系',
 };
 

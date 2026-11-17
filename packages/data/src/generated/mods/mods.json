@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-17T15:21:04.303Z",
+  "generatedAt": "2026-11-17T15:35:32.008Z",
   "source": "mods/baseline.json（Mod 数值基线） + ExportUpgrades（元数据交叉校验）",
   "note": "levelValues 为 0 级到满级的逐级数值；bucket 对应核心事实里的乘区口径",
   "count": 503,
@@ -76,6 +76,7 @@
             40,
             50
           ],
+          "contribStat": "fireRate",
           "note": "弓类描述为 ×2，另行处理"
         },
         {
@@ -92,6 +93,7 @@
             80,
             100
           ],
+          "contribStat": "reloadSpeed",
           "note": "换弹速度，非换弹时间"
         }
       ],
@@ -149,6 +151,7 @@
             48,
             60
           ],
+          "contribStat": "fireRate",
           "note": "弓类描述为 ×2，另行处理"
         }
       ],
@@ -229,7 +232,8 @@
             20,
             40,
             60
-          ]
+          ],
+          "contribStat": "elemental:electric"
         },
         {
           "key": "sc",
@@ -242,7 +246,8 @@
             20,
             40,
             60
-          ]
+          ],
+          "contribStat": "statusChance"
         }
       ],
       "conditions": [],
@@ -283,7 +288,8 @@
             72,
             96,
             120
-          ]
+          ],
+          "contribStat": "elemental:heat"
         }
       ],
       "conditions": [],
@@ -329,6 +335,7 @@
             72,
             90
           ],
+          "contribStat": "physical:impact",
           "note": "加量基数是该类型自身面板值"
         }
       ],
@@ -368,7 +375,8 @@
             20,
             40,
             60
-          ]
+          ],
+          "contribStat": "elemental:radiation"
         },
         {
           "key": "ms",
@@ -382,6 +390,7 @@
             20,
             30
           ],
+          "contribStat": "multishot",
           "note": "独立乘区，与基伤相乘（第 2.2 节）"
         }
       ],
@@ -421,7 +430,8 @@
             20,
             40,
             60
-          ]
+          ],
+          "contribStat": "elemental:toxin"
         },
         {
           "key": "sc",
@@ -434,7 +444,8 @@
             20,
             40,
             60
-          ]
+          ],
+          "contribStat": "statusChance"
         }
       ],
       "conditions": [],
@@ -475,7 +486,8 @@
             36,
             48,
             60
-          ]
+          ],
+          "contribStat": "critChance"
         },
         {
           "key": "cd",
@@ -490,7 +502,8 @@
             36,
             48,
             60
-          ]
+          ],
+          "contribStat": "critMultiplier"
         }
       ],
       "conditions": [
@@ -541,6 +554,7 @@
             96,
             120
           ],
+          "contribStat": "baseDamage",
           "note": "基伤，不限槽位全部相加（第 2.1 节）"
         }
       ],
@@ -595,6 +609,7 @@
             48,
             60
           ],
+          "contribStat": "multishot",
           "note": "独立乘区，与基伤相乘（第 2.2 节）"
         }
       ],
@@ -640,7 +655,8 @@
             72,
             96,
             120
-          ]
+          ],
+          "contribStat": "elemental:electric"
         }
       ],
       "conditions": [],
@@ -680,7 +696,8 @@
             26.6667,
             53.3333,
             80
-          ]
+          ],
+          "contribStat": "critMultiplier"
         }
       ],
       "conditions": [],
@@ -719,7 +736,8 @@
             20,
             40,
             60
-          ]
+          ],
+          "contribStat": "elemental:cold"
         },
         {
           "key": "sc",
@@ -732,7 +750,8 @@
             20,
             40,
             60
-          ]
+          ],
+          "contribStat": "statusChance"
         }
       ],
       "conditions": [],
@@ -773,7 +792,8 @@
             36,
             48,
             60
-          ]
+          ],
+          "contribStat": "magazine"
         }
       ],
       "conditions": [],
@@ -812,7 +832,8 @@
             20,
             40,
             60
-          ]
+          ],
+          "contribStat": "elemental:heat"
         },
         {
           "key": "sc",
@@ -825,7 +846,8 @@
             20,
             40,
             60
-          ]
+          ],
+          "contribStat": "statusChance"
         }
       ],
       "conditions": [],
@@ -864,7 +886,8 @@
             20,
             40,
             60
-          ]
+          ],
+          "contribStat": "elemental:magnetic"
         },
         {
           "key": "frate",
@@ -878,6 +901,7 @@
             20,
             30
           ],
+          "contribStat": "fireRate",
           "note": "弓类描述为 ×2，另行处理"
         }
       ],
@@ -919,7 +943,8 @@
             72,
             96,
             120
-          ]
+          ],
+          "contribStat": "statusChance"
         }
       ],
       "conditions": [
@@ -965,7 +990,8 @@
             36,
             48,
             60
-          ]
+          ],
+          "contribStat": "statusChance"
         }
       ],
       "conditions": [],
@@ -1004,7 +1030,8 @@
             33.3333,
             66.6667,
             100
-          ]
+          ],
+          "contribStat": "critChance"
         }
       ],
       "conditions": [],
@@ -1045,7 +1072,8 @@
             72,
             96,
             120
-          ]
+          ],
+          "contribStat": "elemental:cold"
         }
       ],
       "conditions": [],
@@ -1145,7 +1173,8 @@
             149.6,
             168.3,
             187
-          ]
+          ],
+          "contribStat": "elemental:heat"
         }
       ],
       "conditions": [],
@@ -1196,6 +1225,7 @@
             198,
             220
           ],
+          "contribStat": "baseDamage",
           "note": "基伤，不限槽位全部相加（第 2.1 节）"
         }
       ],
@@ -1255,6 +1285,7 @@
             99,
             110
           ],
+          "contribStat": "multishot",
           "note": "独立乘区，与基伤相乘（第 2.2 节）"
         }
       ],
@@ -1305,7 +1336,8 @@
             149.6,
             168.3,
             187
-          ]
+          ],
+          "contribStat": "elemental:cold"
         }
       ],
       "conditions": [],
@@ -1356,6 +1388,7 @@
             168.3,
             187
           ],
+          "contribStat": "baseDamage",
           "note": "基伤，不限槽位全部相加（第 2.1 节）"
         }
       ],
@@ -1406,7 +1439,8 @@
             149.6,
             168.3,
             187
-          ]
+          ],
+          "contribStat": "elemental:toxin"
         }
       ],
       "conditions": [],
@@ -1452,6 +1486,7 @@
             72,
             90
           ],
+          "contribStat": "physical:puncture",
           "note": "加量基数是该类型自身面板值"
         }
       ],
@@ -1492,6 +1527,7 @@
             66.6667,
             100
           ],
+          "contribStat": "reloadSpeed",
           "note": "换弹速度，非换弹时间"
         }
       ],
@@ -1590,6 +1626,7 @@
             80,
             100
           ],
+          "contribStat": "baseDamage",
           "note": "基伤，不限槽位全部相加（第 2.1 节）"
         }
       ],
@@ -1636,6 +1673,7 @@
             48,
             60
           ],
+          "contribStat": "baseDamage",
           "note": "基伤，不限槽位全部相加（第 2.1 节）"
         },
         {
@@ -1692,6 +1730,7 @@
             33.3333,
             50
           ],
+          "contribStat": "fireRate",
           "note": "弓类描述为 ×2，另行处理"
         }
       ],
@@ -1733,7 +1772,8 @@
             72,
             96,
             120
-          ]
+          ],
+          "contribStat": "elemental:toxin"
         }
       ],
       "conditions": [],
@@ -1779,6 +1819,7 @@
             72,
             90
           ],
+          "contribStat": "physical:slash",
           "note": "加量基数是该类型自身面板值"
         }
       ],
@@ -2063,6 +2104,7 @@
             60,
             75
           ],
+          "contribStat": "fireRate",
           "note": "弓类描述为 ×2，另行处理"
         }
       ],
@@ -2112,6 +2154,7 @@
             13.3333,
             20
           ],
+          "contribStat": "reloadSpeed",
           "note": "收起武器时的换弹速度"
         }
       ],
@@ -2160,7 +2203,8 @@
             52.8,
             59.4,
             66
-          ]
+          ],
+          "contribStat": "magazine"
         },
         {
           "key": "rel",
@@ -2181,6 +2225,7 @@
             -29.7,
             -33
           ],
+          "contribStat": "reloadSpeed",
           "note": "换弹速度，非换弹时间"
         }
       ],
@@ -2223,6 +2268,7 @@
             80,
             100
           ],
+          "contribStat": "multishot",
           "note": "独立乘区，与基伤相乘（第 2.2 节）"
         },
         {
@@ -2300,6 +2346,7 @@
             72,
             90
           ],
+          "contribStat": "baseDamage",
           "note": "基伤，不限槽位全部相加（第 2.1 节）"
         },
         {
@@ -2316,6 +2363,7 @@
             24,
             30
           ],
+          "contribStat": "physical:slash",
           "note": "加量基数是该类型自身面板值"
         }
       ],
@@ -2359,6 +2407,7 @@
             80,
             100
           ],
+          "contribStat": "reloadSpeed",
           "note": "作用于配对的副武器"
         },
         {
@@ -2375,6 +2424,7 @@
             80,
             100
           ],
+          "contribStat": "magazine",
           "note": "作用于配对的副武器"
         }
       ],
@@ -2459,6 +2509,7 @@
             96,
             120
           ],
+          "contribStat": "statusChance",
           "note": "给副武器的触发，主武器上无收益"
         },
         {
@@ -2475,6 +2526,7 @@
             96,
             120
           ],
+          "contribStat": "critChance",
           "note": "给副武器的暴率，主武器上无收益"
         }
       ],
@@ -2804,7 +2856,8 @@
             51,
             68,
             85
-          ]
+          ],
+          "contribStat": "critMultiplier"
         },
         {
           "key": "windup",
@@ -2866,6 +2919,7 @@
             96,
             120
           ],
+          "contribStat": "physical:puncture",
           "note": "加量基数是该类型自身面板值"
         }
       ],
@@ -2908,6 +2962,7 @@
             28,
             35
           ],
+          "contribStat": "fireRate",
           "note": "弓类描述为 ×2，另行处理"
         }
       ],
@@ -3052,6 +3107,7 @@
             96,
             120
           ],
+          "contribStat": "physical:slash",
           "note": "加量基数是该类型自身面板值"
         }
       ],
@@ -3094,6 +3150,7 @@
             72,
             90
           ],
+          "contribStat": "physical:slash",
           "note": "加量基数是该类型自身面板值"
         },
         {
@@ -3109,7 +3166,8 @@
             36,
             48,
             60
-          ]
+          ],
+          "contribStat": "statusChance"
         }
       ],
       "conditions": [],
@@ -3152,6 +3210,7 @@
             96,
             120
           ],
+          "contribStat": "physical:impact",
           "note": "加量基数是该类型自身面板值"
         }
       ],
@@ -3194,6 +3253,7 @@
             64,
             80
           ],
+          "contribStat": "co",
           "note": "每层 × 叠层上限 × 目标异常状态种类数（不吃灵化基伤与 AoE，第 2.1 节）"
         }
       ],
@@ -3234,6 +3294,7 @@
             66.6667,
             100
           ],
+          "contribStat": "statusChance",
           "note": "Tennokai：仅时机攻击的触发"
         }
       ],
@@ -3506,7 +3567,8 @@
             13.3333,
             26.6667,
             40
-          ]
+          ],
+          "contribStat": "statusChance"
         }
       ],
       "conditions": [],
@@ -3548,7 +3610,8 @@
             60,
             80,
             100
-          ]
+          ],
+          "contribStat": "statusChance"
         }
       ],
       "conditions": [],
@@ -3628,6 +3691,7 @@
             133.3333,
             200
           ],
+          "contribStat": "baseDamage",
           "note": "需求方定为无效果（耗能转化）"
         }
       ],
@@ -3669,7 +3733,8 @@
             54,
             72,
             90
-          ]
+          ],
+          "contribStat": "elemental:toxin"
         }
       ],
       "conditions": [],
@@ -3710,6 +3775,7 @@
             40,
             60
           ],
+          "contribStat": "finisherDamage",
           "note": "处决伤害：进**独立的处决伤害乘区**（需求方 2026-11-13），不做攻击类型判定"
         }
       ],
@@ -3766,7 +3832,8 @@
             20,
             40,
             60
-          ]
+          ],
+          "contribStat": "elemental:electric"
         }
       ],
       "conditions": [],
@@ -3805,7 +3872,8 @@
             20,
             40,
             60
-          ]
+          ],
+          "contribStat": "elemental:radiation"
         },
         {
           "key": "windup",
@@ -3903,6 +3971,7 @@
             24,
             30
           ],
+          "contribStat": "fireRate",
           "note": "弓类描述为 ×2，另行处理"
         }
       ],
@@ -3954,6 +4023,7 @@
             72,
             80
           ],
+          "contribStat": "statusDamage",
           "note": "异常状态伤害 +X%（第 6.3 节）"
         },
         {
@@ -3974,7 +4044,8 @@
             24,
             27,
             30
-          ]
+          ],
+          "contribStat": "statusChance"
         }
       ],
       "conditions": [
@@ -4107,6 +4178,7 @@
             99,
             110
           ],
+          "contribStat": "critChance",
           "heavyX2": true
         },
         {
@@ -4127,7 +4199,8 @@
             24,
             27,
             30
-          ]
+          ],
+          "contribStat": "critMultiplier"
         }
       ],
       "conditions": [
@@ -4177,7 +4250,8 @@
             36,
             48,
             60
-          ]
+          ],
+          "contribStat": "critMultiplier"
         }
       ],
       "conditions": [],
@@ -4263,6 +4337,7 @@
             24,
             30
           ],
+          "contribStat": "fireRate",
           "note": "弓类描述为 ×2，另行处理"
         }
       ],
@@ -4397,6 +4472,7 @@
             72,
             90
           ],
+          "contribStat": "physical:impact",
           "note": "加量基数是该类型自身面板值"
         }
       ],
@@ -4440,6 +4516,7 @@
             72,
             90
           ],
+          "contribStat": "physical:slash",
           "note": "加量基数是该类型自身面板值"
         }
       ],
@@ -4483,6 +4560,7 @@
             72,
             90
           ],
+          "contribStat": "physical:puncture",
           "note": "加量基数是该类型自身面板值"
         },
         {
@@ -4498,7 +4576,8 @@
             36,
             48,
             60
-          ]
+          ],
+          "contribStat": "statusChance"
         }
       ],
       "conditions": [],
@@ -4683,7 +4762,8 @@
             20,
             40,
             60
-          ]
+          ],
+          "contribStat": "elemental:magnetic"
         },
         {
           "key": "frate",
@@ -4697,6 +4777,7 @@
             13.3333,
             20
           ],
+          "contribStat": "fireRate",
           "note": "弓类描述为 ×2，另行处理"
         }
       ],
@@ -4739,6 +4820,7 @@
             120,
             150
           ],
+          "contribStat": "critChance",
           "note": "滑砍时生效（需求方 2026-11-13：当成百分比暴击）"
         }
       ],
@@ -4830,6 +4912,7 @@
             72,
             90
           ],
+          "contribStat": "statusDamage",
           "note": "异常状态伤害 +X%（第 6.3 节）"
         },
         {
@@ -4888,7 +4971,8 @@
             54,
             72,
             90
-          ]
+          ],
+          "contribStat": "statusChance"
         }
       ],
       "conditions": [],
@@ -4975,7 +5059,8 @@
             54,
             72,
             90
-          ]
+          ],
+          "contribStat": "elemental:heat"
         }
       ],
       "conditions": [],
@@ -5057,7 +5142,8 @@
             54,
             72,
             90
-          ]
+          ],
+          "contribStat": "elemental:cold"
         }
       ],
       "conditions": [],
@@ -5145,7 +5231,8 @@
             54,
             72,
             90
-          ]
+          ],
+          "contribStat": "critMultiplier"
         }
       ],
       "conditions": [],
@@ -5188,6 +5275,7 @@
             76.8,
             96
           ],
+          "contribStat": "finisherDamage",
           "note": "招架后开启处决"
         }
       ],
@@ -5235,6 +5323,7 @@
             96,
             120
           ],
+          "contribStat": "baseDamage",
           "note": "基伤，不限槽位全部相加（第 2.1 节）"
         }
       ],
@@ -5282,7 +5371,8 @@
             132,
             148.5,
             165
-          ]
+          ],
+          "contribStat": "elemental:toxin"
         }
       ],
       "conditions": [],
@@ -5330,6 +5420,7 @@
             49.5,
             55
           ],
+          "contribStat": "fireRate",
           "note": "弓类描述为 ×2，另行处理"
         }
       ],
@@ -5381,6 +5472,7 @@
             148.5,
             165
           ],
+          "contribStat": "physical:impact",
           "note": "加量基数是该类型自身面板值"
         }
       ],
@@ -5429,6 +5521,7 @@
             148.5,
             165
           ],
+          "contribStat": "baseDamage",
           "note": "基伤，不限槽位全部相加（第 2.1 节）"
         }
       ],
@@ -5525,6 +5618,7 @@
             49.5,
             55
           ],
+          "contribStat": "faction:corpus",
           "note": "派系乘区；DoT 上生效两次（第 5.3 节）"
         }
       ],
@@ -5573,6 +5667,7 @@
             49.5,
             55
           ],
+          "contribStat": "faction:orokin",
           "note": "派系乘区；DoT 上生效两次（第 5.3 节）"
         }
       ],
@@ -5621,6 +5716,7 @@
             49.5,
             55
           ],
+          "contribStat": "faction:grineer",
           "note": "派系乘区；DoT 上生效两次（第 5.3 节）"
         }
       ],
@@ -5669,6 +5765,7 @@
             49.5,
             55
           ],
+          "contribStat": "faction:infested",
           "note": "派系乘区；DoT 上生效两次（第 5.3 节）"
         }
       ],
@@ -5717,6 +5814,7 @@
             49.5,
             55
           ],
+          "contribStat": "faction:murmur",
           "note": "派系乘区；DoT 上生效两次（第 5.3 节）"
         }
       ],
@@ -5757,7 +5855,8 @@
             33.3333,
             66.6667,
             100
-          ]
+          ],
+          "contribStat": "elemental:toxin"
         },
         {
           "key": "sc",
@@ -5770,7 +5869,8 @@
             16.6667,
             33.3333,
             50
-          ]
+          ],
+          "contribStat": "statusChance"
         }
       ],
       "conditions": [],
@@ -5811,6 +5911,7 @@
             26.6667,
             40
           ],
+          "contribStat": "fireRate",
           "note": "弓类描述为 ×2，另行处理"
         },
         {
@@ -5992,6 +6093,7 @@
             40,
             60
           ],
+          "contribStat": "physical:slash",
           "note": "加量基数是该类型自身面板值"
         },
         {
@@ -6006,6 +6108,7 @@
             53.3333,
             80
           ],
+          "contribStat": "physical:puncture",
           "note": "加量基数是该类型自身面板值"
         }
       ],
@@ -6053,6 +6156,7 @@
             99,
             110
           ],
+          "contribStat": "baseDamage",
           "note": "基伤，不限槽位全部相加（第 2.1 节）"
         },
         {
@@ -6074,6 +6178,7 @@
             29.7,
             33
           ],
+          "contribStat": "faction:sentient",
           "note": "派系乘区；DoT 上生效两次（第 5.3 节）"
         }
       ],
@@ -6123,6 +6228,7 @@
             198,
             220
           ],
+          "contribStat": "critChance",
           "heavyX2": true
         },
         {
@@ -6144,6 +6250,7 @@
             29.7,
             33
           ],
+          "contribStat": "faction:sentient",
           "note": "派系乘区；DoT 上生效两次（第 5.3 节）"
         }
       ],
@@ -6188,6 +6295,7 @@
             72,
             90
           ],
+          "contribStat": "physical:impact",
           "note": "加量基数是该类型自身面板值"
         },
         {
@@ -6203,7 +6311,8 @@
             36,
             48,
             60
-          ]
+          ],
+          "contribStat": "statusChance"
         }
       ],
       "conditions": [],
@@ -6244,6 +6353,7 @@
             133.3333,
             200
           ],
+          "contribStat": "slamDamage",
           "note": "震地伤害：进**独立的震地伤害乘区**，只对震地 / 重型震地生效（需求方 2026-11-13）"
         }
       ],
@@ -6327,7 +6437,8 @@
             54,
             72,
             90
-          ]
+          ],
+          "contribStat": "elemental:electric"
         }
       ],
       "conditions": [],
@@ -6369,6 +6480,7 @@
             24,
             30
           ],
+          "contribStat": "faction:corpus",
           "note": "派系乘区；DoT 上生效两次（第 5.3 节）"
         }
       ],
@@ -6412,6 +6524,7 @@
             24,
             30
           ],
+          "contribStat": "faction:grineer",
           "note": "派系乘区；DoT 上生效两次（第 5.3 节）"
         }
       ],
@@ -6455,6 +6568,7 @@
             24,
             30
           ],
+          "contribStat": "faction:infested",
           "note": "派系乘区；DoT 上生效两次（第 5.3 节）"
         }
       ],
@@ -6498,6 +6612,7 @@
             24,
             30
           ],
+          "contribStat": "faction:orokin",
           "note": "派系乘区；DoT 上生效两次（第 5.3 节）"
         }
       ],
@@ -6541,6 +6656,7 @@
             24,
             30
           ],
+          "contribStat": "faction:murmur",
           "note": "派系乘区；DoT 上生效两次（第 5.3 节）"
         }
       ],
@@ -6582,6 +6698,7 @@
             66.6667,
             100
           ],
+          "contribStat": "baseDamage",
           "note": "基伤，不限槽位全部相加（第 2.1 节）"
         },
         {
@@ -6596,6 +6713,7 @@
             -13.3333,
             -20
           ],
+          "contribStat": "fireRate",
           "note": "弓类描述为 ×2，另行处理"
         }
       ],
@@ -6685,7 +6803,8 @@
             40,
             80,
             120
-          ]
+          ],
+          "contribStat": "critMultiplier"
         }
       ],
       "conditions": [],
@@ -6728,6 +6847,7 @@
             72,
             90
           ],
+          "contribStat": "physical:puncture",
           "note": "加量基数是该类型自身面板值"
         }
       ],
@@ -6866,6 +6986,7 @@
             96,
             120
           ],
+          "contribStat": "critChance",
           "heavyX2": true
         }
       ],
@@ -6953,7 +7074,8 @@
             20,
             40,
             60
-          ]
+          ],
+          "contribStat": "elemental:cold"
         },
         {
           "key": "sc",
@@ -6966,7 +7088,8 @@
             20,
             40,
             60
-          ]
+          ],
+          "contribStat": "statusChance"
         }
       ],
       "conditions": [],
@@ -7005,7 +7128,8 @@
             20,
             40,
             60
-          ]
+          ],
+          "contribStat": "elemental:toxin"
         },
         {
           "key": "sc",
@@ -7018,7 +7142,8 @@
             20,
             40,
             60
-          ]
+          ],
+          "contribStat": "statusChance"
         }
       ],
       "conditions": [],
@@ -7057,7 +7182,8 @@
             20,
             40,
             60
-          ]
+          ],
+          "contribStat": "elemental:heat"
         },
         {
           "key": "sc",
@@ -7070,7 +7196,8 @@
             20,
             40,
             60
-          ]
+          ],
+          "contribStat": "statusChance"
         }
       ],
       "conditions": [],
@@ -7109,7 +7236,8 @@
             20,
             40,
             60
-          ]
+          ],
+          "contribStat": "elemental:electric"
         },
         {
           "key": "sc",
@@ -7122,7 +7250,8 @@
             20,
             40,
             60
-          ]
+          ],
+          "contribStat": "statusChance"
         }
       ],
       "conditions": [],
@@ -7203,7 +7332,8 @@
             20,
             40,
             60
-          ]
+          ],
+          "contribStat": "elemental:radiation"
         },
         {
           "key": "frate",
@@ -7217,6 +7347,7 @@
             26.6667,
             40
           ],
+          "contribStat": "fireRate",
           "note": "弓类描述为 ×2，另行处理"
         }
       ],
@@ -7259,6 +7390,7 @@
             87.6,
             109.5
           ],
+          "contribStat": "multishot",
           "note": "独立乘区，与基伤相乘（第 2.2 节）"
         },
         {
@@ -7325,6 +7457,7 @@
             72,
             90
           ],
+          "contribStat": "fireRate",
           "note": "弓类描述为 ×2，另行处理"
         },
         {
@@ -7341,6 +7474,7 @@
             -12,
             -15
           ],
+          "contribStat": "baseDamage",
           "note": "基伤，不限槽位全部相加（第 2.1 节）"
         }
       ],
@@ -7383,6 +7517,7 @@
             72,
             90
           ],
+          "contribStat": "baseDamage",
           "note": "基伤，不限槽位全部相加（第 2.1 节）"
         }
       ],
@@ -7469,6 +7604,7 @@
             96,
             120
           ],
+          "contribStat": "multishot",
           "note": "独立乘区，与基伤相乘（第 2.2 节）"
         }
       ],
@@ -7516,6 +7652,7 @@
             96,
             120
           ],
+          "contribStat": "physical:puncture",
           "note": "加量基数是该类型自身面板值"
         }
       ],
@@ -7558,6 +7695,7 @@
             72,
             90
           ],
+          "contribStat": "physical:slash",
           "note": "加量基数是该类型自身面板值"
         },
         {
@@ -7573,7 +7711,8 @@
             36,
             48,
             60
-          ]
+          ],
+          "contribStat": "statusChance"
         }
       ],
       "conditions": [],
@@ -7616,6 +7755,7 @@
             72,
             90
           ],
+          "contribStat": "physical:impact",
           "note": "加量基数是该类型自身面板值"
         }
       ],
@@ -7657,7 +7797,8 @@
             54,
             72,
             90
-          ]
+          ],
+          "contribStat": "elemental:electric"
         }
       ],
       "conditions": [],
@@ -7702,7 +7843,8 @@
             120,
             160,
             200
-          ]
+          ],
+          "contribStat": "critChance"
         },
         {
           "key": "frate",
@@ -7718,6 +7860,7 @@
             -16,
             -20
           ],
+          "contribStat": "fireRate",
           "note": "弓类描述为 ×2，另行处理"
         }
       ],
@@ -7764,7 +7907,8 @@
             18,
             24,
             30
-          ]
+          ],
+          "contribStat": "critMultiplier"
         },
         {
           "key": "cc",
@@ -7779,7 +7923,8 @@
             18,
             24,
             30
-          ]
+          ],
+          "contribStat": "critChance"
         }
       ],
       "conditions": [],
@@ -7824,7 +7969,8 @@
             144,
             192,
             240
-          ]
+          ],
+          "contribStat": "elemental:viral"
         }
       ],
       "conditions": [],
@@ -7868,6 +8014,7 @@
             266.6667,
             400
           ],
+          "contribStat": "weakpointCritChance",
           "note": "仅在命中弱点时生效"
         }
       ],
@@ -7913,7 +8060,8 @@
             54,
             72,
             90
-          ]
+          ],
+          "contribStat": "elemental:cold"
         }
       ],
       "conditions": [],
@@ -7952,7 +8100,8 @@
             66.6667,
             133.3333,
             200
-          ]
+          ],
+          "contribStat": "statusChance"
         }
       ],
       "conditions": [],
@@ -7997,6 +8146,7 @@
             13.3333,
             20
           ],
+          "contribStat": "reloadSpeed",
           "note": "收起武器时的换弹速度"
         }
       ],
@@ -8044,7 +8194,8 @@
             54,
             72,
             90
-          ]
+          ],
+          "contribStat": "statusChance"
         }
       ],
       "conditions": [
@@ -8135,7 +8286,8 @@
             66.6667,
             133.3333,
             200
-          ]
+          ],
+          "contribStat": "magazine"
         },
         {
           "key": "syndRadial",
@@ -8149,6 +8301,7 @@
             0.6667,
             1
           ],
+          "contribStat": "baseDamage",
           "note": "集团特效的满额加成（3 级生效），触发叠层另算"
         }
       ],
@@ -8195,6 +8348,7 @@
             480,
             600
           ],
+          "contribStat": "baseDamage",
           "note": "副武器伤害（本条为席尔火枪专属，按满层当基伤）"
         }
       ],
@@ -8243,6 +8397,7 @@
             24,
             30
           ],
+          "contribStat": "faction:corpus",
           "note": "派系乘区；DoT 上生效两次（第 5.3 节）"
         }
       ],
@@ -8289,6 +8444,7 @@
             24,
             30
           ],
+          "contribStat": "faction:grineer",
           "note": "派系乘区；DoT 上生效两次（第 5.3 节）"
         }
       ],
@@ -8335,6 +8491,7 @@
             24,
             30
           ],
+          "contribStat": "faction:infested",
           "note": "派系乘区；DoT 上生效两次（第 5.3 节）"
         }
       ],
@@ -8381,6 +8538,7 @@
             24,
             30
           ],
+          "contribStat": "faction:orokin",
           "note": "派系乘区；DoT 上生效两次（第 5.3 节）"
         }
       ],
@@ -8427,6 +8585,7 @@
             24,
             30
           ],
+          "contribStat": "faction:murmur",
           "note": "派系乘区；DoT 上生效两次（第 5.3 节）"
         }
       ],
@@ -8470,7 +8629,8 @@
             20,
             40,
             60
-          ]
+          ],
+          "contribStat": "elemental:cold"
         },
         {
           "key": "sc",
@@ -8483,7 +8643,8 @@
             20,
             40,
             60
-          ]
+          ],
+          "contribStat": "statusChance"
         }
       ],
       "conditions": [],
@@ -8574,7 +8735,8 @@
             256,
             288,
             320
-          ]
+          ],
+          "contribStat": "critChance"
         }
       ],
       "conditions": [
@@ -8645,6 +8807,7 @@
             207,
             230
           ],
+          "contribStat": "multishot",
           "note": "独立乘区，与基伤相乘（第 2.2 节）"
         }
       ],
@@ -8704,7 +8867,8 @@
             32,
             36,
             40
-          ]
+          ],
+          "contribStat": "statusChance"
         },
         {
           "key": "co",
@@ -8725,6 +8889,7 @@
             36,
             40
           ],
+          "contribStat": "co",
           "note": "每层 × 叠层上限 × 目标异常状态种类数（不吃灵化基伤与 AoE，第 2.1 节）"
         }
       ],
@@ -8779,6 +8944,7 @@
             57.6,
             72
           ],
+          "contribStat": "fireRate",
           "note": "弓类描述为 ×2，另行处理"
         }
       ],
@@ -8861,7 +9027,8 @@
             54,
             72,
             90
-          ]
+          ],
+          "contribStat": "elemental:heat"
         }
       ],
       "conditions": [],
@@ -8953,7 +9120,8 @@
             36,
             48,
             60
-          ]
+          ],
+          "contribStat": "critMultiplier"
         },
         {
           "key": "dmg",
@@ -8969,6 +9137,7 @@
             -12,
             -15
           ],
+          "contribStat": "baseDamage",
           "note": "基伤，不限槽位全部相加（第 2.1 节）"
         }
       ],
@@ -9016,6 +9185,7 @@
             198,
             220
           ],
+          "contribStat": "baseDamage",
           "note": "基伤，不限槽位全部相加（第 2.1 节）"
         }
       ],
@@ -9057,7 +9227,8 @@
             81,
             108,
             135
-          ]
+          ],
+          "contribStat": "critChance"
         }
       ],
       "conditions": [
@@ -9109,7 +9280,8 @@
             13.3333,
             26.6667,
             40
-          ]
+          ],
+          "contribStat": "magazine"
         },
         {
           "key": "cold",
@@ -9122,7 +9294,8 @@
             13.3333,
             26.6667,
             40
-          ]
+          ],
+          "contribStat": "elemental:cold"
         }
       ],
       "conditions": [],
@@ -9161,7 +9334,8 @@
             20,
             40,
             60
-          ]
+          ],
+          "contribStat": "elemental:electric"
         },
         {
           "key": "sc",
@@ -9174,7 +9348,8 @@
             20,
             40,
             60
-          ]
+          ],
+          "contribStat": "statusChance"
         }
       ],
       "conditions": [],
@@ -9216,6 +9391,7 @@
             72,
             90
           ],
+          "contribStat": "physical:puncture",
           "note": "加量基数是该类型自身面板值"
         },
         {
@@ -9231,7 +9407,8 @@
             36,
             48,
             60
-          ]
+          ],
+          "contribStat": "statusChance"
         }
       ],
       "conditions": [],
@@ -9273,7 +9450,8 @@
             180,
             240,
             300
-          ]
+          ],
+          "contribStat": "elemental:gas"
         },
         {
           "key": "sc",
@@ -9288,7 +9466,8 @@
             180,
             240,
             300
-          ]
+          ],
+          "contribStat": "statusChance"
         }
       ],
       "conditions": [
@@ -9384,6 +9563,7 @@
             48,
             60
           ],
+          "contribStat": "fireRate",
           "note": "弓类描述为 ×2，另行处理"
         },
         {
@@ -9400,6 +9580,7 @@
             48,
             60
           ],
+          "contribStat": "multishot",
           "note": "独立乘区，与基伤相乘（第 2.2 节）"
         }
       ],
@@ -9439,7 +9620,8 @@
             20,
             40,
             60
-          ]
+          ],
+          "contribStat": "elemental:magnetic"
         },
         {
           "key": "cd",
@@ -9452,7 +9634,8 @@
             13.3333,
             26.6667,
             40
-          ]
+          ],
+          "contribStat": "critMultiplier"
         }
       ],
       "conditions": [],
@@ -9499,6 +9682,7 @@
             148.5,
             165
           ],
+          "contribStat": "baseDamage",
           "note": "基伤，不限槽位全部相加（第 2.1 节）"
         },
         {
@@ -9561,6 +9745,7 @@
             96,
             120
           ],
+          "contribStat": "physical:slash",
           "note": "加量基数是该类型自身面板值"
         }
       ],
@@ -9602,7 +9787,8 @@
             27,
             36,
             45
-          ]
+          ],
+          "contribStat": "critMultiplier"
         },
         {
           "key": "punch",
@@ -9660,6 +9846,7 @@
             480,
             600
           ],
+          "contribStat": "headshotDamage",
           "note": "对弱点伤害，按第 3.2 节爆头倍率结算，不进总和"
         }
       ],
@@ -9707,7 +9894,8 @@
             54,
             72,
             90
-          ]
+          ],
+          "contribStat": "elemental:toxin"
         }
       ],
       "conditions": [],
@@ -9796,6 +9984,7 @@
             315,
             350
           ],
+          "contribStat": "headshotDamage",
           "note": "对弱点伤害，按第 3.2 节爆头倍率结算，不进总和"
         },
         {
@@ -9817,6 +10006,7 @@
             315,
             350
           ],
+          "contribStat": "weakpointCritChance",
           "note": "仅在命中弱点时生效"
         }
       ],
@@ -9907,6 +10097,7 @@
             72,
             90
           ],
+          "contribStat": "statusDamage",
           "note": "异常状态伤害 +X%（第 6.3 节）"
         },
         {
@@ -9923,6 +10114,7 @@
             48,
             60
           ],
+          "contribStat": "reloadSpeed",
           "note": "换弹速度，非换弹时间"
         }
       ],
@@ -9964,7 +10156,8 @@
             72,
             96,
             120
-          ]
+          ],
+          "contribStat": "critChance"
         }
       ],
       "conditions": [],
@@ -10008,7 +10201,8 @@
             20,
             40,
             60
-          ]
+          ],
+          "contribStat": "elemental:toxin"
         },
         {
           "key": "sc",
@@ -10021,7 +10215,8 @@
             20,
             40,
             60
-          ]
+          ],
+          "contribStat": "statusChance"
         }
       ],
       "conditions": [],
@@ -10063,6 +10258,7 @@
             72,
             90
           ],
+          "contribStat": "fireRate",
           "note": "弓类描述为 ×2，另行处理"
         }
       ],
@@ -10118,7 +10314,8 @@
             132,
             148.5,
             165
-          ]
+          ],
+          "contribStat": "elemental:electric"
         }
       ],
       "conditions": [],
@@ -10169,6 +10366,7 @@
             49.5,
             55
           ],
+          "contribStat": "faction:corpus",
           "note": "派系乘区；DoT 上生效两次（第 5.3 节）"
         }
       ],
@@ -10220,6 +10418,7 @@
             49.5,
             55
           ],
+          "contribStat": "faction:grineer",
           "note": "派系乘区；DoT 上生效两次（第 5.3 节）"
         }
       ],
@@ -10271,6 +10470,7 @@
             49.5,
             55
           ],
+          "contribStat": "faction:infested",
           "note": "派系乘区；DoT 上生效两次（第 5.3 节）"
         }
       ],
@@ -10322,6 +10522,7 @@
             49.5,
             55
           ],
+          "contribStat": "faction:orokin",
           "note": "派系乘区；DoT 上生效两次（第 5.3 节）"
         }
       ],
@@ -10373,6 +10574,7 @@
             49.5,
             55
           ],
+          "contribStat": "faction:murmur",
           "note": "派系乘区；DoT 上生效两次（第 5.3 节）"
         }
       ],
@@ -10475,7 +10677,8 @@
             132,
             148.5,
             165
-          ]
+          ],
+          "contribStat": "elemental:heat"
         }
       ],
       "conditions": [],
@@ -10578,7 +10781,8 @@
             149.6,
             168.3,
             187
-          ]
+          ],
+          "contribStat": "critChance"
         }
       ],
       "conditions": [],
@@ -10630,6 +10834,7 @@
             79.2,
             88
           ],
+          "contribStat": "reloadSpeed",
           "note": "换弹速度，非换弹时间"
         }
       ],
@@ -10680,7 +10885,8 @@
             44,
             49.5,
             55
-          ]
+          ],
+          "contribStat": "magazine"
         }
       ],
       "conditions": [],
@@ -10783,7 +10989,8 @@
             88,
             99,
             110
-          ]
+          ],
+          "contribStat": "critMultiplier"
         }
       ],
       "conditions": [],
@@ -10828,7 +11035,8 @@
             54,
             72,
             90
-          ]
+          ],
+          "contribStat": "elemental:electric"
         }
       ],
       "conditions": [],
@@ -10874,6 +11082,7 @@
             96,
             120
           ],
+          "contribStat": "physical:impact",
           "note": "加量基数是该类型自身面板值"
         }
       ],
@@ -10916,6 +11125,7 @@
             38.4,
             48
           ],
+          "contribStat": "reloadSpeed",
           "note": "换弹速度，非换弹时间"
         }
       ],
@@ -10962,6 +11172,7 @@
             240,
             300
           ],
+          "contribStat": "baseDamage",
           "note": "基伤，不限槽位全部相加（第 2.1 节）"
         }
       ],
@@ -11008,6 +11219,7 @@
             72,
             90
           ],
+          "contribStat": "physical:slash",
           "note": "加量基数是该类型自身面板值"
         }
       ],
@@ -11177,6 +11389,7 @@
             72,
             90
           ],
+          "contribStat": "physical:impact",
           "note": "加量基数是该类型自身面板值"
         },
         {
@@ -11192,7 +11405,8 @@
             36,
             48,
             60
-          ]
+          ],
+          "contribStat": "statusChance"
         }
       ],
       "conditions": [],
@@ -11232,7 +11446,8 @@
             20,
             40,
             60
-          ]
+          ],
+          "contribStat": "elemental:heat"
         },
         {
           "key": "sc",
@@ -11245,7 +11460,8 @@
             20,
             40,
             60
-          ]
+          ],
+          "contribStat": "statusChance"
         }
       ],
       "conditions": [],
@@ -11329,6 +11545,7 @@
             240,
             300
           ],
+          "contribStat": "baseDamage",
           "note": "基伤，不限槽位全部相加（第 2.1 节）"
         },
         {
@@ -11387,7 +11604,8 @@
             36,
             48,
             60
-          ]
+          ],
+          "contribStat": "statusChance"
         },
         {
           "key": "cc",
@@ -11402,7 +11620,8 @@
             36,
             48,
             60
-          ]
+          ],
+          "contribStat": "critChance"
         }
       ],
       "conditions": [
@@ -11474,6 +11693,7 @@
             0.6667,
             1
           ],
+          "contribStat": "baseDamage",
           "note": "集团特效的满额加成（3 级生效），触发叠层另算"
         }
       ],
@@ -11520,7 +11740,8 @@
             45,
             60,
             75
-          ]
+          ],
+          "contribStat": "critMultiplier"
         }
       ],
       "conditions": [
@@ -11566,6 +11787,7 @@
           "levelValues": [
             200
           ],
+          "contribStat": "multishot",
           "note": "独立乘区，与基伤相乘（第 2.2 节）"
         },
         {
@@ -11577,6 +11799,7 @@
           "levelValues": [
             -66
           ],
+          "contribStat": "baseDamage",
           "note": "基伤，不限槽位全部相加（第 2.1 节）"
         }
       ],
@@ -11620,7 +11843,8 @@
             33.3333,
             66.6667,
             100
-          ]
+          ],
+          "contribStat": "ammoEfficiency"
         }
       ],
       "conditions": [
@@ -11673,7 +11897,8 @@
             18,
             24,
             30
-          ]
+          ],
+          "contribStat": "magazine"
         }
       ],
       "conditions": [],
@@ -11763,6 +11988,7 @@
             26.6667,
             40
           ],
+          "contribStat": "magazine",
           "note": "固定加弹匣数"
         },
         {
@@ -11777,6 +12003,7 @@
             0.6667,
             1
           ],
+          "contribStat": "baseDamage",
           "note": "集团特效的满额加成（3 级生效），触发叠层另算"
         }
       ],
@@ -11821,7 +12048,8 @@
             66.6667,
             133.3333,
             200
-          ]
+          ],
+          "contribStat": "magazine"
         },
         {
           "key": "syndRadial",
@@ -11835,6 +12063,7 @@
             0.6667,
             1
           ],
+          "contribStat": "baseDamage",
           "note": "集团特效的满额加成（3 级生效），触发叠层另算"
         }
       ],
@@ -11881,6 +12110,7 @@
             26.6667,
             40
           ],
+          "contribStat": "reloadSpeed",
           "note": "换弹速度，非换弹时间"
         },
         {
@@ -11894,7 +12124,8 @@
             10,
             20,
             30
-          ]
+          ],
+          "contribStat": "statusChance"
         }
       ],
       "conditions": [],
@@ -11976,7 +12207,8 @@
             54,
             72,
             90
-          ]
+          ],
+          "contribStat": "statusChance"
         }
       ],
       "conditions": [],
@@ -12020,6 +12252,7 @@
             133.3333,
             200
           ],
+          "contribStat": "baseDamage",
           "note": "弹匣最后一发生效"
         }
       ],
@@ -12067,7 +12300,8 @@
             36,
             48,
             60
-          ]
+          ],
+          "contribStat": "critMultiplier"
         }
       ],
       "conditions": [],
@@ -12223,6 +12457,7 @@
             0.6667,
             1
           ],
+          "contribStat": "baseDamage",
           "note": "集团特效的满额加成（3 级生效），触发叠层另算"
         }
       ],
@@ -12358,6 +12593,7 @@
             24000,
             30000
           ],
+          "contribStat": "baseDamage",
           "note": "可蓄积伤害上限"
         }
       ],
@@ -12415,6 +12651,7 @@
             0.6667,
             1
           ],
+          "contribStat": "baseDamage",
           "note": "集团特效的满额加成（3 级生效），触发叠层另算"
         }
       ],
@@ -12462,7 +12699,8 @@
             45,
             60,
             75
-          ]
+          ],
+          "contribStat": "ammoEfficiency"
         }
       ],
       "conditions": [
@@ -12788,6 +13026,7 @@
             48,
             60
           ],
+          "contribStat": "multishot",
           "note": "独立乘区，与基伤相乘（第 2.2 节）"
         }
       ],
@@ -12831,6 +13070,7 @@
             36,
             45
           ],
+          "contribStat": "fireRate",
           "note": "弓类描述为 ×2，另行处理"
         }
       ],
@@ -13053,6 +13293,7 @@
             60,
             75
           ],
+          "contribStat": "headshotDamage",
           "note": "对弱点伤害，按第 3.2 节爆头倍率结算，不进总和"
         }
       ],
@@ -13102,7 +13343,8 @@
             27,
             36,
             45
-          ]
+          ],
+          "contribStat": "magazine"
         }
       ],
       "conditions": [],
@@ -13156,6 +13398,7 @@
             139.5,
             155
           ],
+          "contribStat": "baseDamage",
           "note": "基伤，不限槽位全部相加（第 2.1 节）"
         },
         {
@@ -13314,7 +13557,8 @@
             81,
             108,
             135
-          ]
+          ],
+          "contribStat": "critChance"
         }
       ],
       "conditions": [
@@ -13369,6 +13613,7 @@
             24,
             30
           ],
+          "contribStat": "faction:corpus",
           "note": "派系乘区；DoT 上生效两次（第 5.3 节）"
         }
       ],
@@ -13415,6 +13660,7 @@
             24,
             30
           ],
+          "contribStat": "faction:grineer",
           "note": "派系乘区；DoT 上生效两次（第 5.3 节）"
         }
       ],
@@ -13461,6 +13707,7 @@
             24,
             30
           ],
+          "contribStat": "faction:infested",
           "note": "派系乘区；DoT 上生效两次（第 5.3 节）"
         }
       ],
@@ -13507,6 +13754,7 @@
             24,
             30
           ],
+          "contribStat": "faction:orokin",
           "note": "派系乘区；DoT 上生效两次（第 5.3 节）"
         }
       ],
@@ -13553,6 +13801,7 @@
             24,
             30
           ],
+          "contribStat": "faction:murmur",
           "note": "派系乘区；DoT 上生效两次（第 5.3 节）"
         }
       ],
@@ -13598,7 +13847,8 @@
             54,
             72,
             90
-          ]
+          ],
+          "contribStat": "statusChance"
         }
       ],
       "conditions": [],
@@ -13645,7 +13895,8 @@
             90,
             120,
             150
-          ]
+          ],
+          "contribStat": "elemental:viral"
         },
         {
           "key": "magnetic",
@@ -13660,7 +13911,8 @@
             90,
             120,
             150
-          ]
+          ],
+          "contribStat": "elemental:magnetic"
         },
         {
           "key": "sc",
@@ -13675,7 +13927,8 @@
             90,
             120,
             150
-          ]
+          ],
+          "contribStat": "statusChance"
         }
       ],
       "conditions": [],
@@ -13719,7 +13972,8 @@
             72,
             96,
             120
-          ]
+          ],
+          "contribStat": "critMultiplier"
         }
       ],
       "conditions": [
@@ -13767,7 +14021,8 @@
             33.3333,
             66.6667,
             100
-          ]
+          ],
+          "contribStat": "ammoEfficiency"
         }
       ],
       "conditions": [
@@ -13821,6 +14076,7 @@
             160,
             200
           ],
+          "contribStat": "baseDamage",
           "note": "蓄积伤害后引爆"
         }
       ],
@@ -13866,7 +14122,8 @@
             36,
             48,
             60
-          ]
+          ],
+          "contribStat": "statusChance"
         }
       ],
       "conditions": [
@@ -14005,6 +14262,7 @@
             96,
             120
           ],
+          "contribStat": "physical:impact",
           "note": "加量基数是该类型自身面板值"
         }
       ],
@@ -14046,7 +14304,8 @@
             120,
             160,
             200
-          ]
+          ],
+          "contribStat": "critChance"
         },
         {
           "key": "frate",
@@ -14062,6 +14321,7 @@
             -16,
             -20
           ],
+          "contribStat": "fireRate",
           "note": "弓类描述为 ×2，另行处理"
         }
       ],
@@ -14107,7 +14367,8 @@
             300,
             400,
             500
-          ]
+          ],
+          "contribStat": "critChance"
         }
       ],
       "conditions": [],
@@ -14154,7 +14415,8 @@
             54,
             72,
             90
-          ]
+          ],
+          "contribStat": "elemental:cold"
         }
       ],
       "conditions": [],
@@ -14197,7 +14459,8 @@
             66.6667,
             133.3333,
             200
-          ]
+          ],
+          "contribStat": "critChance"
         },
         {
           "key": "syndRadial",
@@ -14211,6 +14474,7 @@
             0.6667,
             1
           ],
+          "contribStat": "baseDamage",
           "note": "集团特效的满额加成（3 级生效），触发叠层另算"
         }
       ],
@@ -14306,7 +14570,8 @@
             13.3333,
             26.6667,
             40
-          ]
+          ],
+          "contribStat": "baseDamage"
         }
       ],
       "conditions": [],
@@ -14353,6 +14618,7 @@
             13.3333,
             20
           ],
+          "contribStat": "baseDamage",
           "note": "基伤，不限槽位全部相加（第 2.1 节）"
         }
       ],
@@ -14401,6 +14667,7 @@
             64,
             80
           ],
+          "contribStat": "baseDamage",
           "note": "基伤，不限槽位全部相加（第 2.1 节）"
         },
         {
@@ -14416,7 +14683,8 @@
             48,
             64,
             80
-          ]
+          ],
+          "contribStat": "statusChance"
         }
       ],
       "conditions": [],
@@ -14500,7 +14768,8 @@
             6.6667,
             13.3333,
             20
-          ]
+          ],
+          "contribStat": "statusChance"
         },
         {
           "key": "syndRadial",
@@ -14514,6 +14783,7 @@
             0.6667,
             1
           ],
+          "contribStat": "baseDamage",
           "note": "集团特效的满额加成（3 级生效），触发叠层另算"
         }
       ],
@@ -14559,7 +14829,8 @@
             180,
             240,
             300
-          ]
+          ],
+          "contribStat": "critChance"
         }
       ],
       "conditions": [],
@@ -14605,6 +14876,7 @@
             96,
             120
           ],
+          "contribStat": "physical:slash",
           "note": "加量基数是该类型自身面板值"
         }
       ],
@@ -14647,6 +14919,7 @@
             24,
             30
           ],
+          "contribStat": "reloadSpeed",
           "note": "换弹速度，非换弹时间"
         }
       ],
@@ -14737,7 +15010,8 @@
             120,
             160,
             200
-          ]
+          ],
+          "contribStat": "statusChance"
         }
       ],
       "conditions": [],
@@ -14841,7 +15115,8 @@
             32,
             36,
             40
-          ]
+          ],
+          "contribStat": "statusChance"
         },
         {
           "key": "co",
@@ -14862,6 +15137,7 @@
             36,
             40
           ],
+          "contribStat": "co",
           "note": "每层 × 叠层上限 × 目标异常状态种类数（不吃灵化基伤与 AoE，第 2.1 节）"
         }
       ],
@@ -14921,6 +15197,7 @@
             207,
             230
           ],
+          "contribStat": "multishot",
           "note": "独立乘区，与基伤相乘（第 2.2 节）"
         }
       ],
@@ -14979,7 +15256,8 @@
             256,
             288,
             320
-          ]
+          ],
+          "contribStat": "critChance"
         }
       ],
       "conditions": [
@@ -15040,6 +15318,7 @@
             53.3333,
             80
           ],
+          "contribStat": "fireRate",
           "note": "弓类描述为 ×2，另行处理"
         },
         {
@@ -15054,6 +15333,7 @@
             0.6667,
             1
           ],
+          "contribStat": "baseDamage",
           "note": "集团特效的满额加成（3 级生效），触发叠层另算"
         }
       ],
@@ -15098,7 +15378,8 @@
             20,
             40,
             60
-          ]
+          ],
+          "contribStat": "critMultiplier"
         },
         {
           "key": "sc",
@@ -15111,7 +15392,8 @@
             26.6667,
             53.3333,
             80
-          ]
+          ],
+          "contribStat": "statusChance"
         }
       ],
       "conditions": [],
@@ -15152,7 +15434,8 @@
             7.2,
             9.6,
             12
-          ]
+          ],
+          "contribStat": "critChance"
         }
       ],
       "conditions": [],
@@ -15203,6 +15486,7 @@
             148.5,
             165
           ],
+          "contribStat": "baseDamage",
           "note": "基伤，不限槽位全部相加（第 2.1 节）"
         },
         {
@@ -15264,7 +15548,8 @@
             54,
             72,
             90
-          ]
+          ],
+          "contribStat": "elemental:heat"
         }
       ],
       "conditions": [],
@@ -15306,6 +15591,7 @@
             360,
             450
           ],
+          "contribStat": "baseDamage",
           "note": "基伤，不限槽位全部相加（第 2.1 节）"
         }
       ],
@@ -15355,7 +15641,8 @@
             20,
             40,
             60
-          ]
+          ],
+          "contribStat": "elemental:electric"
         },
         {
           "key": "sc",
@@ -15368,7 +15655,8 @@
             20,
             40,
             60
-          ]
+          ],
+          "contribStat": "statusChance"
         }
       ],
       "conditions": [],
@@ -15450,7 +15738,8 @@
             54,
             72,
             90
-          ]
+          ],
+          "contribStat": "elemental:toxin"
         }
       ],
       "conditions": [],
@@ -15588,6 +15877,7 @@
             40,
             60
           ],
+          "contribStat": "baseDamage",
           "note": "基伤，不限槽位全部相加（第 2.1 节）"
         },
         {
@@ -15602,6 +15892,7 @@
             0.6667,
             1
           ],
+          "contribStat": "baseDamage",
           "note": "集团特效的满额加成（3 级生效），触发叠层另算"
         }
       ],
@@ -15653,7 +15944,8 @@
             18,
             24,
             30
-          ]
+          ],
+          "contribStat": "magazine"
         }
       ],
       "conditions": [],
@@ -15696,7 +15988,8 @@
             20,
             40,
             60
-          ]
+          ],
+          "contribStat": "elemental:magnetic"
         },
         {
           "key": "mag",
@@ -15709,7 +16002,8 @@
             13.3333,
             26.6667,
             40
-          ]
+          ],
+          "contribStat": "magazine"
         }
       ],
       "conditions": [],
@@ -15748,7 +16042,8 @@
             20,
             40,
             60
-          ]
+          ],
+          "contribStat": "elemental:toxin"
         },
         {
           "key": "sc",
@@ -15761,7 +16056,8 @@
             20,
             40,
             60
-          ]
+          ],
+          "contribStat": "statusChance"
         }
       ],
       "conditions": [],
@@ -15844,7 +16140,8 @@
             54,
             72,
             90
-          ]
+          ],
+          "contribStat": "magazine"
         },
         {
           "key": "ammo",
@@ -15907,6 +16204,7 @@
             84,
             105
           ],
+          "contribStat": "headshotDamage",
           "note": "对弱点伤害，按第 3.2 节爆头倍率结算，不进总和"
         },
         {
@@ -15923,6 +16221,7 @@
             -36,
             -45
           ],
+          "contribStat": "bodyshotDamage",
           "note": "打身体（关闭爆头）时的伤害倍率"
         }
       ],
@@ -15969,7 +16268,8 @@
             18,
             24,
             30
-          ]
+          ],
+          "contribStat": "statusChance"
         }
       ],
       "conditions": [],
@@ -16016,7 +16316,8 @@
             216,
             288,
             360
-          ]
+          ],
+          "contribStat": "critChance"
         },
         {
           "key": "cd",
@@ -16031,7 +16332,8 @@
             216,
             288,
             360
-          ]
+          ],
+          "contribStat": "critMultiplier"
         }
       ],
       "conditions": [],
@@ -16075,6 +16377,7 @@
             60,
             90
           ],
+          "contribStat": "baseDamage",
           "note": "击破 Nullifier 护盾发生器"
         },
         {
@@ -16089,6 +16392,7 @@
             0.6667,
             1
           ],
+          "contribStat": "baseDamage",
           "note": "集团特效的满额加成（3 级生效），触发叠层另算"
         }
       ],
@@ -16228,7 +16532,8 @@
             54,
             72,
             90
-          ]
+          ],
+          "contribStat": "critMultiplier"
         }
       ],
       "conditions": [],
@@ -16275,6 +16580,7 @@
             96,
             120
           ],
+          "contribStat": "physical:puncture",
           "note": "加量基数是该类型自身面板值"
         }
       ],
@@ -16317,6 +16623,7 @@
             72,
             90
           ],
+          "contribStat": "physical:puncture",
           "note": "加量基数是该类型自身面板值"
         }
       ],
@@ -16358,7 +16665,8 @@
             90,
             120,
             150
-          ]
+          ],
+          "contribStat": "critChance"
         }
       ],
       "conditions": [],
@@ -16402,6 +16710,7 @@
             100,
             150
           ],
+          "contribStat": "reloadSpeed",
           "note": "换弹速度，非换弹时间"
         }
       ],
@@ -16461,6 +16770,7 @@
             315,
             350
           ],
+          "contribStat": "headshotDamage",
           "note": "对弱点伤害，按第 3.2 节爆头倍率结算，不进总和"
         },
         {
@@ -16482,6 +16792,7 @@
             315,
             350
           ],
+          "contribStat": "weakpointCritChance",
           "note": "仅在命中弱点时生效"
         }
       ],
@@ -16529,6 +16840,7 @@
             49.5,
             55
           ],
+          "contribStat": "faction:corpus",
           "note": "派系乘区；DoT 上生效两次（第 5.3 节）"
         }
       ],
@@ -16580,6 +16892,7 @@
             49.5,
             55
           ],
+          "contribStat": "faction:grineer",
           "note": "派系乘区；DoT 上生效两次（第 5.3 节）"
         }
       ],
@@ -16631,6 +16944,7 @@
             49.5,
             55
           ],
+          "contribStat": "faction:infested",
           "note": "派系乘区；DoT 上生效两次（第 5.3 节）"
         }
       ],
@@ -16682,6 +16996,7 @@
             49.5,
             55
           ],
+          "contribStat": "faction:orokin",
           "note": "派系乘区；DoT 上生效两次（第 5.3 节）"
         }
       ],
@@ -16733,6 +17048,7 @@
             49.5,
             55
           ],
+          "contribStat": "faction:murmur",
           "note": "派系乘区；DoT 上生效两次（第 5.3 节）"
         }
       ],
@@ -16783,7 +17099,8 @@
             132,
             148.5,
             165
-          ]
+          ],
+          "contribStat": "elemental:cold"
         }
       ],
       "conditions": [],
@@ -16834,6 +17151,7 @@
             49.5,
             55
           ],
+          "contribStat": "reloadSpeed",
           "note": "换弹速度，非换弹时间"
         }
       ],
@@ -16936,7 +17254,8 @@
             44,
             49.5,
             55
-          ]
+          ],
+          "contribStat": "magazine"
         }
       ],
       "conditions": [],
@@ -16987,6 +17306,7 @@
             49.5,
             55
           ],
+          "contribStat": "fireRate",
           "note": "弓类描述为 ×2，另行处理"
         },
         {
@@ -17104,7 +17424,8 @@
             40,
             80,
             120
-          ]
+          ],
+          "contribStat": "critChance"
         }
       ],
       "conditions": [],
@@ -17144,7 +17465,8 @@
             20,
             40,
             60
-          ]
+          ],
+          "contribStat": "elemental:radiation"
         },
         {
           "key": "rel",
@@ -17158,6 +17480,7 @@
             26.6667,
             40
           ],
+          "contribStat": "reloadSpeed",
           "note": "换弹速度，非换弹时间"
         }
       ],
@@ -17199,7 +17522,8 @@
             54,
             72,
             90
-          ]
+          ],
+          "contribStat": "statusChance"
         }
       ],
       "conditions": [],
@@ -17245,6 +17569,7 @@
             72,
             90
           ],
+          "contribStat": "statusDamage",
           "note": "异常状态伤害 +X%（第 6.3 节）"
         },
         {
@@ -17300,7 +17625,8 @@
             20,
             40,
             60
-          ]
+          ],
+          "contribStat": "elemental:cold"
         },
         {
           "key": "sc",
@@ -17313,7 +17639,8 @@
             20,
             40,
             60
-          ]
+          ],
+          "contribStat": "statusChance"
         }
       ],
       "conditions": [],
@@ -17355,6 +17682,7 @@
             72,
             90
           ],
+          "contribStat": "physical:impact",
           "note": "加量基数是该类型自身面板值"
         }
       ],
@@ -17397,6 +17725,7 @@
             72,
             90
           ],
+          "contribStat": "physical:slash",
           "note": "加量基数是该类型自身面板值"
         }
       ],
@@ -17439,6 +17768,7 @@
             192,
             240
           ],
+          "contribStat": "baseDamage",
           "note": "基伤，不限槽位全部相加（第 2.1 节）"
         },
         {
@@ -17501,6 +17831,7 @@
             240,
             300
           ],
+          "contribStat": "critChance",
           "note": "仅作用于下一发特殊射击"
         },
         {
@@ -17517,6 +17848,7 @@
             240,
             300
           ],
+          "contribStat": "critMultiplier",
           "note": "仅作用于下一发特殊射击"
         }
       ],
@@ -17568,6 +17900,7 @@
             148.5,
             165
           ],
+          "contribStat": "baseDamage",
           "note": "基伤，不限槽位全部相加（第 2.1 节）"
         }
       ],
@@ -17615,6 +17948,7 @@
             24,
             30
           ],
+          "contribStat": "fireRate",
           "note": "弓类描述为 ×2，另行处理"
         },
         {
@@ -17682,6 +18016,7 @@
             270,
             330
           ],
+          "contribStat": "baseDamage",
           "note": "基伤，不限槽位全部相加（第 2.1 节）"
         }
       ],
@@ -17737,6 +18072,7 @@
             48,
             60
           ],
+          "contribStat": "fireRate",
           "note": "弓类描述为 ×2，另行处理"
         }
       ],
@@ -17779,6 +18115,7 @@
             72,
             90
           ],
+          "contribStat": "multishot",
           "note": "独立乘区，与基伤相乘（第 2.2 节）"
         }
       ],
@@ -17825,6 +18162,7 @@
             72,
             90
           ],
+          "contribStat": "baseDamage",
           "note": "需求方定为无效果（自激奇点的次级射击爆炸）"
         }
       ],
@@ -17871,6 +18209,7 @@
             32,
             40
           ],
+          "contribStat": "baseDamage",
           "note": "基伤，不限槽位全部相加（第 2.1 节）"
         }
       ],
@@ -17963,7 +18302,8 @@
             54,
             72,
             90
-          ]
+          ],
+          "contribStat": "elemental:electric"
         }
       ],
       "conditions": [],
@@ -18093,7 +18433,8 @@
             20,
             40,
             60
-          ]
+          ],
+          "contribStat": "elemental:heat"
         },
         {
           "key": "sc",
@@ -18106,7 +18447,8 @@
             20,
             40,
             60
-          ]
+          ],
+          "contribStat": "statusChance"
         }
       ],
       "conditions": [],
@@ -18217,7 +18559,8 @@
             105,
             140,
             175
-          ]
+          ],
+          "contribStat": "critMultiplier"
         }
       ],
       "conditions": [
@@ -18270,6 +18613,7 @@
             72,
             90
           ],
+          "contribStat": "fireRate",
           "note": "弓类描述为 ×2，另行处理"
         },
         {
@@ -18286,6 +18630,7 @@
             -12,
             -15
           ],
+          "contribStat": "baseDamage",
           "note": "基伤，不限槽位全部相加（第 2.1 节）"
         }
       ],
@@ -18344,6 +18689,7 @@
             -28.8,
             -36
           ],
+          "contribStat": "fireRate",
           "note": "弓类描述为 ×2，另行处理"
         }
       ],
@@ -18387,7 +18733,8 @@
             72,
             96,
             120
-          ]
+          ],
+          "contribStat": "critMultiplier"
         }
       ],
       "conditions": [],
@@ -18520,6 +18867,7 @@
             320,
             400
           ],
+          "contribStat": "fireRate",
           "note": "仅副射击模式"
         }
       ],
@@ -18563,7 +18911,8 @@
             6.6667,
             13.3333,
             20
-          ]
+          ],
+          "contribStat": "magazine"
         },
         {
           "key": "heat",
@@ -18576,7 +18925,8 @@
             20,
             40,
             60
-          ]
+          ],
+          "contribStat": "elemental:heat"
         }
       ],
       "conditions": [],
@@ -18616,6 +18966,7 @@
             40,
             60
           ],
+          "contribStat": "fireRate",
           "note": "弓类描述为 ×2，另行处理"
         },
         {
@@ -18630,6 +18981,7 @@
             40,
             60
           ],
+          "contribStat": "physical:puncture",
           "note": "加量基数是该类型自身面板值"
         }
       ],
@@ -18719,6 +19071,7 @@
             68,
             85
           ],
+          "contribStat": "fireRate",
           "note": "弓类描述为 ×2，另行处理"
         }
       ],
@@ -18768,7 +19121,8 @@
             36,
             48,
             60
-          ]
+          ],
+          "contribStat": "magazine"
         }
       ],
       "conditions": [],
@@ -18811,7 +19165,8 @@
             20,
             40,
             60
-          ]
+          ],
+          "contribStat": "elemental:radiation"
         },
         {
           "key": "mag",
@@ -18824,7 +19179,8 @@
             13.3333,
             26.6667,
             40
-          ]
+          ],
+          "contribStat": "magazine"
         }
       ],
       "conditions": [],
@@ -18864,6 +19220,7 @@
             40,
             60
           ],
+          "contribStat": "baseDamage",
           "note": "基伤，不限槽位全部相加（第 2.1 节）"
         },
         {
@@ -18877,7 +19234,8 @@
             20,
             40,
             60
-          ]
+          ],
+          "contribStat": "elemental:heat"
         }
       ],
       "conditions": [],
@@ -18918,7 +19276,8 @@
             54,
             72,
             90
-          ]
+          ],
+          "contribStat": "critChance"
         }
       ],
       "conditions": [],
@@ -18960,6 +19319,7 @@
             96,
             120
           ],
+          "contribStat": "physical:puncture",
           "note": "加量基数是该类型自身面板值"
         }
       ],
@@ -19044,7 +19404,8 @@
             36,
             48,
             60
-          ]
+          ],
+          "contribStat": "magazine"
         },
         {
           "key": "rel",
@@ -19060,6 +19421,7 @@
             -14.4,
             -18
           ],
+          "contribStat": "reloadSpeed",
           "note": "换弹速度，非换弹时间"
         }
       ],
@@ -19101,7 +19463,8 @@
             54,
             72,
             90
-          ]
+          ],
+          "contribStat": "elemental:electric"
         }
       ],
       "conditions": [],
@@ -19146,7 +19509,8 @@
             54,
             72,
             90
-          ]
+          ],
+          "contribStat": "elemental:cold"
         }
       ],
       "conditions": [],
@@ -19189,7 +19553,8 @@
             20,
             40,
             60
-          ]
+          ],
+          "contribStat": "elemental:cold"
         },
         {
           "key": "rel",
@@ -19203,6 +19568,7 @@
             26.6667,
             40
           ],
+          "contribStat": "reloadSpeed",
           "note": "换弹速度，非换弹时间"
         }
       ],
@@ -19245,6 +19611,7 @@
             24,
             30
           ],
+          "contribStat": "faction:corpus",
           "note": "派系乘区；DoT 上生效两次（第 5.3 节）"
         }
       ],
@@ -19291,6 +19658,7 @@
             24,
             30
           ],
+          "contribStat": "faction:grineer",
           "note": "派系乘区；DoT 上生效两次（第 5.3 节）"
         }
       ],
@@ -19337,6 +19705,7 @@
             24,
             30
           ],
+          "contribStat": "faction:infested",
           "note": "派系乘区；DoT 上生效两次（第 5.3 节）"
         }
       ],
@@ -19383,6 +19752,7 @@
             24,
             30
           ],
+          "contribStat": "faction:orokin",
           "note": "派系乘区；DoT 上生效两次（第 5.3 节）"
         }
       ],
@@ -19429,6 +19799,7 @@
             24,
             30
           ],
+          "contribStat": "faction:murmur",
           "note": "派系乘区；DoT 上生效两次（第 5.3 节）"
         }
       ],
@@ -19474,7 +19845,8 @@
             9,
             12,
             15
-          ]
+          ],
+          "contribStat": "statusChance"
         },
         {
           "key": "ms",
@@ -19490,6 +19862,7 @@
             12,
             15
           ],
+          "contribStat": "multishot",
           "note": "独立乘区，与基伤相乘（第 2.2 节）"
         }
       ],
@@ -19551,6 +19924,7 @@
             96,
             120
           ],
+          "contribStat": "reloadSpeed",
           "note": "条件换弹（战斗装填）：按满值常驻生效"
         }
       ],
@@ -19597,7 +19971,8 @@
             54,
             72,
             90
-          ]
+          ],
+          "contribStat": "elemental:toxin"
         }
       ],
       "conditions": [],
@@ -19684,7 +20059,8 @@
             120,
             160,
             200
-          ]
+          ],
+          "contribStat": "critChance"
         },
         {
           "key": "frate",
@@ -19700,6 +20076,7 @@
             -16,
             -20
           ],
+          "contribStat": "fireRate",
           "note": "弓类描述为 ×2，另行处理"
         }
       ],
@@ -19742,6 +20119,7 @@
             72,
             90
           ],
+          "contribStat": "physical:impact",
           "note": "加量基数是该类型自身面板值"
         }
       ],
@@ -19838,7 +20216,8 @@
             90,
             120,
             150
-          ]
+          ],
+          "contribStat": "statusChance"
         }
       ],
       "conditions": [],
@@ -19927,6 +20306,7 @@
             72,
             90
           ],
+          "contribStat": "physical:puncture",
           "note": "加量基数是该类型自身面板值"
         }
       ],
@@ -20017,6 +20397,7 @@
             72,
             90
           ],
+          "contribStat": "fireRate",
           "note": "弓类描述为 ×2，另行处理"
         },
         {
@@ -20033,6 +20414,7 @@
             -12,
             -15
           ],
+          "contribStat": "baseDamage",
           "note": "基伤，不限槽位全部相加（第 2.1 节）"
         }
       ],
@@ -20072,7 +20454,8 @@
             20,
             40,
             60
-          ]
+          ],
+          "contribStat": "elemental:cold"
         },
         {
           "key": "sc",
@@ -20085,7 +20468,8 @@
             20,
             40,
             60
-          ]
+          ],
+          "contribStat": "statusChance"
         }
       ],
       "conditions": [],
@@ -20127,6 +20511,7 @@
             96,
             120
           ],
+          "contribStat": "physical:impact",
           "note": "加量基数是该类型自身面板值"
         }
       ],
@@ -20259,6 +20644,7 @@
             207,
             230
           ],
+          "contribStat": "multishot",
           "note": "独立乘区，与基伤相乘（第 2.2 节）"
         }
       ],
@@ -20317,7 +20703,8 @@
             32,
             36,
             40
-          ]
+          ],
+          "contribStat": "statusChance"
         },
         {
           "key": "co",
@@ -20338,6 +20725,7 @@
             36,
             40
           ],
+          "contribStat": "co",
           "note": "每层 × 叠层上限 × 目标异常状态种类数（不吃灵化基伤与 AoE，第 2.1 节）"
         }
       ],
@@ -20392,6 +20780,7 @@
             96,
             120
           ],
+          "contribStat": "multishot",
           "note": "独立乘区，与基伤相乘（第 2.2 节）"
         }
       ],
@@ -20437,7 +20826,8 @@
             54,
             72,
             90
-          ]
+          ],
+          "contribStat": "elemental:heat"
         }
       ],
       "conditions": [],
@@ -20478,7 +20868,8 @@
             72,
             96,
             120
-          ]
+          ],
+          "contribStat": "critChance"
         }
       ],
       "conditions": [
@@ -20569,6 +20960,7 @@
             13.3333,
             20
           ],
+          "contribStat": "reloadSpeed",
           "note": "收起武器时的换弹速度"
         }
       ],
@@ -20610,7 +21002,8 @@
             20,
             40,
             60
-          ]
+          ],
+          "contribStat": "elemental:magnetic"
         },
         {
           "key": "frate",
@@ -20624,6 +21017,7 @@
             26.6667,
             40
           ],
+          "contribStat": "fireRate",
           "note": "弓类描述为 ×2，另行处理"
         }
       ],
@@ -20710,7 +21104,8 @@
             33.3333,
             66.6667,
             100
-          ]
+          ],
+          "contribStat": "critChance"
         },
         {
           "key": "sc",
@@ -20723,7 +21118,8 @@
             33.3333,
             66.6667,
             100
-          ]
+          ],
+          "contribStat": "statusChance"
         }
       ],
       "conditions": [
@@ -20780,7 +21176,8 @@
             54,
             72,
             90
-          ]
+          ],
+          "contribStat": "statusChance"
         }
       ],
       "conditions": [
@@ -20883,6 +21280,7 @@
             72,
             90
           ],
+          "contribStat": "baseDamage",
           "note": "基伤，不限槽位全部相加（第 2.1 节）"
         }
       ],
@@ -20933,7 +21331,8 @@
             88,
             99,
             110
-          ]
+          ],
+          "contribStat": "magazine"
         }
       ],
       "conditions": [],
@@ -20983,7 +21382,8 @@
             132,
             148.5,
             165
-          ]
+          ],
+          "contribStat": "elemental:electric"
         }
       ],
       "conditions": [],
@@ -21033,7 +21433,8 @@
             132,
             148.5,
             165
-          ]
+          ],
+          "contribStat": "elemental:cold"
         }
       ],
       "conditions": [],
@@ -21084,6 +21485,7 @@
             49.5,
             55
           ],
+          "contribStat": "faction:corpus",
           "note": "派系乘区；DoT 上生效两次（第 5.3 节）"
         }
       ],
@@ -21135,6 +21537,7 @@
             49.5,
             55
           ],
+          "contribStat": "faction:grineer",
           "note": "派系乘区；DoT 上生效两次（第 5.3 节）"
         }
       ],
@@ -21186,6 +21589,7 @@
             49.5,
             55
           ],
+          "contribStat": "faction:infested",
           "note": "派系乘区；DoT 上生效两次（第 5.3 节）"
         }
       ],
@@ -21237,6 +21641,7 @@
             49.5,
             55
           ],
+          "contribStat": "faction:orokin",
           "note": "派系乘区；DoT 上生效两次（第 5.3 节）"
         }
       ],
@@ -21288,6 +21693,7 @@
             49.5,
             55
           ],
+          "contribStat": "faction:murmur",
           "note": "派系乘区；DoT 上生效两次（第 5.3 节）"
         }
       ],
@@ -21392,6 +21798,7 @@
             148.5,
             165
           ],
+          "contribStat": "baseDamage",
           "note": "基伤，不限槽位全部相加（第 2.1 节）"
         }
       ],
@@ -21442,7 +21849,8 @@
             88,
             99,
             110
-          ]
+          ],
+          "contribStat": "critMultiplier"
         }
       ],
       "conditions": [],
@@ -21546,6 +21954,7 @@
             90,
             100
           ],
+          "contribStat": "reloadSpeed",
           "note": "换弹速度，非换弹时间"
         }
       ],
@@ -21591,7 +22000,8 @@
             36,
             48,
             60
-          ]
+          ],
+          "contribStat": "critMultiplier"
         }
       ],
       "conditions": [],
@@ -21637,6 +22047,7 @@
             84,
             105
           ],
+          "contribStat": "fireRate",
           "note": "弓类描述为 ×2，另行处理"
         }
       ],
@@ -21686,6 +22097,7 @@
             133.3333,
             200
           ],
+          "contribStat": "multishot",
           "note": "独立乘区，与基伤相乘（第 2.2 节）"
         },
         {
@@ -21700,6 +22112,7 @@
             0.6667,
             1
           ],
+          "contribStat": "baseDamage",
           "note": "集团特效的满额加成（3 级生效），触发叠层另算"
         }
       ],
@@ -21744,7 +22157,8 @@
             20,
             40,
             60
-          ]
+          ],
+          "contribStat": "elemental:heat"
         },
         {
           "key": "sc",
@@ -21757,7 +22171,8 @@
             20,
             40,
             60
-          ]
+          ],
+          "contribStat": "statusChance"
         }
       ],
       "conditions": [],
@@ -21841,6 +22256,7 @@
             12,
             15
           ],
+          "contribStat": "reloadSpeed",
           "note": "换弹速度，非换弹时间"
         },
         {
@@ -21899,6 +22315,7 @@
             192,
             240
           ],
+          "contribStat": "baseDamage",
           "note": "基伤，不限槽位全部相加（第 2.1 节）"
         },
         {
@@ -21955,7 +22372,8 @@
             30,
             60,
             90
-          ]
+          ],
+          "contribStat": "statusChance"
         },
         {
           "key": "syndRadial",
@@ -21969,6 +22387,7 @@
             0.6667,
             1
           ],
+          "contribStat": "baseDamage",
           "note": "集团特效的满额加成（3 级生效），触发叠层另算"
         }
       ],
@@ -22056,7 +22475,8 @@
             20,
             40,
             60
-          ]
+          ],
+          "contribStat": "elemental:electric"
         },
         {
           "key": "sc",
@@ -22069,7 +22489,8 @@
             20,
             40,
             60
-          ]
+          ],
+          "contribStat": "statusChance"
         }
       ],
       "conditions": [],
@@ -22159,6 +22580,7 @@
             72,
             90
           ],
+          "contribStat": "fireRate",
           "note": "弓类描述为 ×2，另行处理"
         }
       ],
@@ -22205,6 +22627,7 @@
             72,
             90
           ],
+          "contribStat": "statusDamage",
           "note": "异常状态伤害 +X%（第 6.3 节）"
         },
         {
@@ -22220,7 +22643,8 @@
             36,
             48,
             60
-          ]
+          ],
+          "contribStat": "magazine"
         }
       ],
       "conditions": [],
@@ -22261,7 +22685,8 @@
             54,
             72,
             90
-          ]
+          ],
+          "contribStat": "statusChance"
         }
       ],
       "conditions": [],
@@ -22306,7 +22731,8 @@
             59.4,
             79.2,
             99
-          ]
+          ],
+          "contribStat": "critMultiplier"
         }
       ],
       "conditions": [
@@ -22357,6 +22783,7 @@
             72,
             90
           ],
+          "contribStat": "physical:slash",
           "note": "加量基数是该类型自身面板值"
         }
       ],
@@ -22552,6 +22979,7 @@
             96,
             120
           ],
+          "contribStat": "physical:slash",
           "note": "加量基数是该类型自身面板值"
         }
       ],
@@ -22594,6 +23022,7 @@
             48,
             60
           ],
+          "contribStat": "reloadSpeed",
           "note": "换弹速度，非换弹时间"
         }
       ],
@@ -22665,6 +23094,7 @@
             -49.5,
             -55
           ],
+          "contribStat": "fireRate",
           "note": "弓类描述为 ×2，另行处理"
         }
       ],
@@ -22704,7 +23134,8 @@
             20,
             40,
             60
-          ]
+          ],
+          "contribStat": "elemental:toxin"
         },
         {
           "key": "sc",
@@ -22717,7 +23148,8 @@
             20,
             40,
             60
-          ]
+          ],
+          "contribStat": "statusChance"
         }
       ],
       "conditions": [],
@@ -22759,6 +23191,7 @@
             72,
             90
           ],
+          "contribStat": "baseDamage",
           "note": "基伤，不限槽位全部相加（第 2.1 节）"
         },
         {
@@ -22814,6 +23247,7 @@
             26.6667,
             40
           ],
+          "contribStat": "baseDamage",
           "note": "弹匣第一发生效"
         }
       ],
@@ -22896,6 +23330,7 @@
             66.6667,
             100
           ],
+          "contribStat": "baseDamage",
           "note": "弹匣第一发生效"
         }
       ],
@@ -22936,6 +23371,7 @@
             26.6667,
             40
           ],
+          "contribStat": "baseDamage",
           "note": "给队友的增益"
         },
         {
@@ -22950,6 +23386,7 @@
             -18.6667,
             -28
           ],
+          "contribStat": "baseDamage",
           "note": "给队友的增益"
         }
       ],
@@ -23034,6 +23471,7 @@
             8,
             12
           ],
+          "contribStat": "baseDamage",
           "note": "死亡掉落球体"
         }
       ],
@@ -23076,6 +23514,7 @@
             20,
             30
           ],
+          "contribStat": "fireRate",
           "note": "弓类描述为 ×2，另行处理"
         }
       ],
@@ -23288,6 +23727,7 @@
             264,
             330
           ],
+          "contribStat": "baseDamage",
           "note": "基伤，不限槽位全部相加（第 2.1 节）"
         }
       ],
@@ -23332,7 +23772,8 @@
             33.3333,
             66.6667,
             100
-          ]
+          ],
+          "contribStat": "statusChance"
         }
       ],
       "conditions": [],
@@ -23378,6 +23819,7 @@
             66.6667,
             100
           ],
+          "contribStat": "baseDamage",
           "note": "基伤，不限槽位全部相加（第 2.1 节）"
         }
       ],
@@ -23441,6 +23883,7 @@
             36,
             45
           ],
+          "contribStat": "fireRate",
           "note": "弓类描述为 ×2，另行处理"
         }
       ],
@@ -23489,6 +23932,7 @@
             96,
             120
           ],
+          "contribStat": "statusDamage",
           "note": "异常状态伤害 +X%（第 6.3 节）"
         }
       ],
@@ -23534,7 +23978,8 @@
             180,
             240,
             300
-          ]
+          ],
+          "contribStat": "elemental:blast"
         }
       ],
       "conditions": [],
@@ -23578,6 +24023,7 @@
             66.6667,
             100
           ],
+          "contribStat": "baseDamage",
           "note": "基伤，不限槽位全部相加（第 2.1 节）"
         }
       ],
@@ -23666,7 +24112,8 @@
             33.3333,
             66.6667,
             100
-          ]
+          ],
+          "contribStat": "elemental:toxin"
         }
       ],
       "conditions": [],
@@ -23711,7 +24158,8 @@
             333.3333,
             666.6667,
             1000
-          ]
+          ],
+          "contribStat": "elemental:blast"
         }
       ],
       "conditions": [],
@@ -23756,6 +24204,7 @@
             0,
             0
           ],
+          "contribStat": "baseDamage",
           "note": "基伤，不限槽位全部相加（第 2.1 节）"
         }
       ],
@@ -23802,6 +24251,7 @@
             66.6667,
             100
           ],
+          "contribStat": "baseDamage",
           "note": "基伤，不限槽位全部相加（第 2.1 节）"
         }
       ],
@@ -23851,6 +24301,7 @@
             72,
             90
           ],
+          "contribStat": "physical:slash",
           "note": "加量基数是该类型自身面板值"
         }
       ],
@@ -23892,7 +24343,8 @@
             72,
             96,
             120
-          ]
+          ],
+          "contribStat": "elemental:heat"
         }
       ],
       "conditions": [],
@@ -23938,7 +24390,8 @@
             88,
             99,
             110
-          ]
+          ],
+          "contribStat": "critMultiplier"
         }
       ],
       "conditions": [],
@@ -23979,7 +24432,8 @@
             72,
             96,
             120
-          ]
+          ],
+          "contribStat": "elemental:electric"
         }
       ],
       "conditions": [],
@@ -24018,7 +24472,8 @@
             20,
             40,
             60
-          ]
+          ],
+          "contribStat": "elemental:radiation"
         },
         {
           "key": "cc",
@@ -24031,7 +24486,8 @@
             20,
             40,
             60
-          ]
+          ],
+          "contribStat": "critChance"
         }
       ],
       "conditions": [],
@@ -24070,7 +24526,8 @@
             20,
             40,
             60
-          ]
+          ],
+          "contribStat": "elemental:cold"
         },
         {
           "key": "sc",
@@ -24083,7 +24540,8 @@
             20,
             40,
             60
-          ]
+          ],
+          "contribStat": "statusChance"
         }
       ],
       "conditions": [],
@@ -24130,6 +24588,7 @@
             99,
             110
           ],
+          "contribStat": "baseDamage",
           "note": "基伤，不限槽位全部相加（第 2.1 节）"
         }
       ],
@@ -24210,6 +24669,7 @@
             6.6667,
             10
           ],
+          "contribStat": "fireRate",
           "note": "弓类描述为 ×2，另行处理"
         }
       ],
@@ -24251,7 +24711,8 @@
             72,
             96,
             120
-          ]
+          ],
+          "contribStat": "elemental:cold"
         }
       ],
       "conditions": [],
@@ -24290,7 +24751,8 @@
             20,
             40,
             60
-          ]
+          ],
+          "contribStat": "elemental:toxin"
         },
         {
           "key": "sc",
@@ -24303,7 +24765,8 @@
             20,
             40,
             60
-          ]
+          ],
+          "contribStat": "statusChance"
         }
       ],
       "conditions": [],
@@ -24342,7 +24805,8 @@
             20,
             40,
             60
-          ]
+          ],
+          "contribStat": "elemental:electric"
         },
         {
           "key": "sc",
@@ -24355,7 +24819,8 @@
             20,
             40,
             60
-          ]
+          ],
+          "contribStat": "statusChance"
         }
       ],
       "conditions": [],
@@ -24394,7 +24859,8 @@
             20,
             40,
             60
-          ]
+          ],
+          "contribStat": "elemental:magnetic"
         },
         {
           "key": "cd",
@@ -24407,7 +24873,8 @@
             13.3333,
             26.6667,
             40
-          ]
+          ],
+          "contribStat": "critMultiplier"
         }
       ],
       "conditions": [],
@@ -24449,6 +24916,7 @@
             72,
             90
           ],
+          "contribStat": "physical:impact",
           "note": "加量基数是该类型自身面板值"
         }
       ],
@@ -24491,6 +24959,7 @@
             72,
             90
           ],
+          "contribStat": "physical:puncture",
           "note": "加量基数是该类型自身面板值"
         }
       ],
@@ -24532,7 +25001,8 @@
             72,
             96,
             120
-          ]
+          ],
+          "contribStat": "elemental:toxin"
         }
       ],
       "conditions": [],
@@ -24571,7 +25041,8 @@
             20,
             40,
             60
-          ]
+          ],
+          "contribStat": "elemental:heat"
         },
         {
           "key": "sc",
@@ -24584,7 +25055,8 @@
             20,
             40,
             60
-          ]
+          ],
+          "contribStat": "statusChance"
         }
       ],
       "conditions": [],
@@ -24625,7 +25097,8 @@
             36,
             48,
             60
-          ]
+          ],
+          "contribStat": "statusChance"
         }
       ],
       "conditions": [],
@@ -24666,7 +25139,8 @@
             90,
             120,
             150
-          ]
+          ],
+          "contribStat": "critChance"
         }
       ],
       "conditions": [],
@@ -24708,6 +25182,7 @@
             48,
             60
           ],
+          "contribStat": "headshotDamage",
           "note": "对弱点伤害，按第 3.2 节爆头倍率结算，不进总和"
         }
       ],
@@ -24750,6 +25225,7 @@
             72,
             90
           ],
+          "contribStat": "physical:puncture",
           "note": "加量基数是该类型自身面板值"
         }
       ],
@@ -24796,7 +25272,8 @@
             149.6,
             168.3,
             187
-          ]
+          ],
+          "contribStat": "elemental:electric"
         }
       ],
       "conditions": [],
@@ -24838,6 +25315,7 @@
             72,
             90
           ],
+          "contribStat": "baseDamage",
           "note": "基伤，不限槽位全部相加（第 2.1 节）"
         },
         {
@@ -24854,6 +25332,7 @@
             48,
             60
           ],
+          "contribStat": "statusDamage",
           "note": "异常状态伤害 +X%（第 6.3 节）"
         }
       ],
@@ -24896,6 +25375,7 @@
             72,
             90
           ],
+          "contribStat": "baseDamage",
           "note": "基伤，不限槽位全部相加（第 2.1 节）"
         },
         {
@@ -24911,7 +25391,8 @@
             36,
             48,
             60
-          ]
+          ],
+          "contribStat": "statusChance"
         }
       ],
       "conditions": [],
@@ -24951,6 +25432,7 @@
             66.6667,
             100
           ],
+          "contribStat": "finisherDamage",
           "note": "处决伤害：进**独立的处决伤害乘区**（需求方 2026-11-13），不做攻击类型判定"
         }
       ],

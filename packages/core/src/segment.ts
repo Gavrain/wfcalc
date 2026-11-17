@@ -95,6 +95,7 @@ const FACTION_STATS: Readonly<Record<Exclude<Faction, 'none'>, `faction:${Factio
   // D-163：1999 的两个势力（派系歧视 Mod 与裂罅派系词条都会落到这两个键）
   techrot: 'faction:techrot',
   scaldra: 'faction:scaldra',
+  sentient: 'faction:sentient',
 };
 
 export function factionFor(faction: Faction, contribs: readonly Contribution[]): number {

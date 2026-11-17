@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-17T15:21:04.315Z",
+  "generatedAt": "2026-11-17T15:35:32.031Z",
   "note": "modKinds = 该武器能装备的 Mod 槽位种类（对应 mods.json 的 slotKind）",
   "count": 765,
   "weapons": {

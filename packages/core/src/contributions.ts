@@ -29,6 +29,12 @@ export type Faction =
    */
   | 'techrot'
   | 'scaldra'
+  /**
+   * Sentient（S 系）：与 Orokin **不是**同一系（需求方 2026-11-17）。
+   * 牺牲系列 Mod 的「对 Sentient 伤害」落在这里。
+   * 注意：界面派系下拉**没有**这一项（需求方 2026-11-17），所以目前只影响数据正确性。
+   */
+  | 'sentient'
   | 'none';
 
 /**

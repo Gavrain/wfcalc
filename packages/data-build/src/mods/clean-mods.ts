@@ -10,6 +10,7 @@
  *   · `f` = 等级上限（0 表示无等级）
  * 这几条会在产出时逐一落成 `levelValues` 数组，计算内核不需要再推算。
  */
+import { FACTION_BY_MOD_ID } from '../../../data/src/manual/mods.ts';
 import type { ModRecord, ModBuff } from './mod-record.ts';
 import { MOD_VALUE_OVERRIDES, coOverloadPerStack, lookupStat, type StatMapping } from './stat-map.ts';
 
@@ -23,6 +24,13 @@ export interface ModStatValue {
   kind: 'normal' | 'functional' | 'conditional' | 'special' | 'skip';
   /** 0 级 → 满级 的逐级数值 */
   levelValues: number[];
+  /**
+   * 内核认的属性键（生成阶段算好，内核启动不再查表）。
+   *
+   * 依据：核心事实 §11（数据层给内核结构化事实）。
+   * 与属性键的换算见 `CONTRIB_STAT_MAP`；算不出（不影响伤害的 utility / special）时为空。
+   */
+  contribStat?: string;
   note?: string;
   /**
    * 这条加成在**重击系**攻击上额外 ×2（D-155）。
@@ -207,6 +215,9 @@ export function cleanMod(raw: ModRecord, official?: CleanMod['official']): Clean
       kind: map.kind,
       levelValues: values,
     };
+    // 内核认的键：生成阶段就算好（需求方 2026-11-17「不可能每次启动都算一遍表格」）
+    const cs = contribStatOf(map.stat, key, raw);
+    if (cs !== null) base.contribStat = cs;
     if (map.note !== undefined) base.note = map.note;
     // D-155：只有「暴击率」这一条会被重击 ×2；同卡上的其它属性（暴伤 / 派系伤害）不乘
     if (map.stat === 'critChance' && (HEAVY_X2_MARKER.test(raw.de ?? '') || RIVEN_HEAVY_X2.test(raw.i))) {
@@ -307,4 +318,50 @@ export const RANK_FIXUPS: Readonly<Record<string, { maxRank: number; reason: str
 export function effectiveMaxRank(raw: { i: string; f: number }): number {
   const fix = RANK_FIXUPS[raw.i];
   return fix ? fix.maxRank : raw.f;
+}
+
+
+/**
+ * 属性键 → 内核认的键（生成阶段算一次，内核启动不再查表）。
+ *
+ * 依据：核心事实 §11（数据层给内核结构化事实）。
+ * 这套换算是从运行时（`packages/data/src/adapter.ts` 的 `toContribStat`）搬到流水线的：
+ * 规则本身没变，只是**算的时机**从"每次启动"变成"生成时一次"。
+ *
+ * 返回 `null` 表示这一条不影响伤害（utility / special / skip），内核不用管。
+ */
+function contribStatOf(stat: string, key: string, raw: ModRecord): string | null {
+  // 集团特效（+X Justice / Truth …）不建模
+  if (stat === 'syndicateEffect') return null;
+  if (stat.startsWith('elemental:') || stat.startsWith('physical:')) return stat;
+  switch (stat) {
+    // 镀层 / 异况超量类走独立的 'co'，普通基伤走 'baseDamage'
+    case 'baseDamage':
+      return key === 'co' ? 'co' : 'baseDamage';
+    case 'faction':
+      // 派系伤害按 Mod 自己的派系落到具体键上
+      return 'faction:' + (FACTION_BY_MOD_ID[raw.i] ?? 'none');
+    case 'weakpointDamage':
+    case 'headshotDamage':
+      return 'headshotDamage';
+    // 划砍当百分比暴击
+    case 'critOnSlide':
+      return 'critChance';
+    case 'multishot':
+    case 'critChance':
+    case 'weakpointCritChance':
+    case 'critMultiplier':
+    case 'statusChance':
+    case 'statusDamage':
+    case 'fireRate':
+    case 'reloadSpeed':
+    case 'magazine':
+    case 'ammoEfficiency':
+    case 'finisherDamage':
+    case 'slamDamage':
+    case 'bodyshotDamage':
+      return stat;
+    default:
+      return null; // utility / special / skip：不影响伤害
+  }
 }
