@@ -38,6 +38,8 @@ export interface ModStat {
   unit: 'percent' | 'flat' | 'multiplier';
   kind: 'normal' | 'conditional' | 'functional' | 'special' | 'skip';
   levelValues: number[];
+  /** 生成阶段算好的内核键（见 `data-build/src/mods/clean-mods.ts` 的 `contribStatOf`） */
+  contribStat?: string;
   /** D-155：这条例在重击系攻击上 ×2（Mod 描述带 `(x2 for Heavy Attacks)` 或裂罅暴击词条） */
   heavyX2?: boolean;
 }
@@ -112,7 +114,10 @@ export function modToContributions(mod: ModRecord, rank = mod.maxRank, slot?: nu
       });
       continue;
     }
-    const stat = toContribStat(s, mod.id);
+    // 内核键在**生成阶段**就算好了（`stats[].contribStat`），这里直接取；
+    // 老数据没有该字段时退回运行时换算，保证兼容。
+    // 依据：核心事实 §11（数据层给内核结构化事实）。
+    const stat = (s.contribStat ?? toContribStat(s, mod.id)) as ContribStat | null | undefined;
     if (!stat) continue;
     const value = s.levelValues[Math.min(rank, s.levelValues.length - 1)] ?? 0;
     if (value === 0) continue;
