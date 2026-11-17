@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-17T16:44:40.014Z",
+  "generatedAt": "2026-11-17T17:15:25.013Z",
   "source": "mods/baseline.json（Mod 数值基线） + ExportUpgrades（元数据交叉校验）",
   "note": "levelValues 为 0 级到满级的逐级数值；bucket 对应核心事实里的乘区口径",
   "count": 503,
@@ -3019,6 +3019,7 @@
             36,
             40
           ],
+          "contribStat": "critChance",
           "note": "暴率 × 连击倍率（急进猛突），按配置的连击倍率放大"
         }
       ],
@@ -7289,6 +7290,7 @@
             32,
             40
           ],
+          "contribStat": "statusChance",
           "note": "触发率 × 连击倍率（创口溃烂），按配置的连击倍率放大"
         }
       ],

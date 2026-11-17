@@ -343,6 +343,11 @@ function contribStatOf(stat: string, key: string, raw: ModRecord): string | null
     case 'faction':
       // 派系伤害按 Mod 自己的派系落到具体键上
       return 'faction:' + (FACTION_BY_MOD_ID[raw.i] ?? 'none');
+    // 按连击倍率加成的词条：换算成最终的暴击率 / 触发率，交给内核当普通贡献
+    case 'critChancePerCombo':
+      return 'critChance';
+    case 'statusChancePerCombo':
+      return 'statusChance';
     case 'weakpointDamage':
     case 'headshotDamage':
       return 'headshotDamage';

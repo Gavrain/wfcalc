@@ -114,10 +114,10 @@ export function modToContributions(mod: ModRecord, rank = mod.maxRank, slot?: nu
       });
       continue;
     }
-    // 内核键在**生成阶段**就算好了（`stats[].contribStat`），这里直接取；
-    // 老数据没有该字段时退回运行时换算，保证兼容。
-    // 依据：核心事实 §11（数据层给内核结构化事实）。
-    const stat = (s.contribStat ?? toContribStat(s, mod.id)) as ContribStat | null | undefined;
+    // 内核键在**生成阶段**就算好了（`stats[].contribStat`），这里直接用。
+    // 依据：核心事实 §11 —— 数据层给结构化事实，内核不再查表换算。
+    // ⚠ 没有 `contribStat` = 这一条不影响伤害（utility / special / skip），直接跳过。
+    const stat = (s.contribStat ?? null) as ContribStat | null;
     if (!stat) continue;
     const value = s.levelValues[Math.min(rank, s.levelValues.length - 1)] ?? 0;
     if (value === 0) continue;
