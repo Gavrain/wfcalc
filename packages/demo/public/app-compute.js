@@ -516,34 +516,25 @@ export function dotMetricRoleOf(own, contribs) {
   if (!isDotMetric()) return { kind: 'normal' };
   if (!own.length) return { kind: 'normal' };
 
-  // ── ① 单层口径：触发几率单独成卡时不影响"每层伤害" → 0 贡献 ──
-  // （需求方：「在单层口径下，触发率无贡献，所以白霜弹头显示 0」）
-  if (isPerStackMetric()) {
-    const onlyRate = own.every(function (c) { return c.stat === 'statusChance'; });
-    if (onlyRate) return { kind: 'zero' };
-  }
-
-  // ── ② 只有**元素类**卡才需要判断"这个元素最终有没有形成 DoT" ──
-  //   非元素卡（触发几率 / 异常状态伤害 / 基伤…）照常走普通算法。
   const hasElement = own.some(function (c) { return /^elemental:/.test(c.stat) || c.stat === 'physical:slash'; });
+  const hasRate = own.some(function (c) { return c.stat === 'statusChance'; });
+
+  // ── ① 单层口径：触发几率不影响"每层伤害" ──
+  // （需求方：「在单层口径下，触发率无贡献，所以白霜弹头显示 0」）
+  if (isPerStackMetric() && !hasElement && hasRate) return { kind: 'zero' };
+
+  // ── ② 非元素卡（触发率 / 异常状态伤害 / 基伤…）→ 照常算 ──
   if (!hasElement) return { kind: 'normal', feedsDot: false };
 
-  // ── ②b 切割卡（需求方 2026-11-18）──
-  //   切割 Mod 不碰 DoT 基础值（基础值本来就不含元素/物理加量），
-  //   也不碰切割 DoT 的元素乘区（切割 DoT 的元素% 恒为 0）：
-  //     · **单层口径**：每跳伤害不变 → 0；
-  //     · **总量口径**：切割占比变大 → 触发层数变多 → 总量上涨，照常算。
-  const onlySlash = own.every(function (c) { return c.stat === 'physical:slash'; });
-  if (onlySlash) {
-    return isPerStackMetric() ? { kind: 'zero', feedsDot: true } : { kind: 'normal', feedsDot: true };
-  }
-
-  // 元素卡：它贡献的元素最终落进「伤害型 DoT」了吗？
-  //   有（例如病毒火里的火）→ 走普通算法，分母为 0 时由调用方显示 ∞
-  //   没有（病毒火里的冰 / 毒）→ **元素部分** 0；N 秒异常总伤下触发率部分照常算（D-176）
+  // ── ③ 元素卡：它给某个伤害型 DoT 提供了**该 DoT 自己的元素**吗 ──
+  //
+  // 需求方 2026-11-18 的模型：每个 DoT 只吃自己的元素 %（切割 DoT 谁都不吃），
+  // 所以「火 + 毒 → 毒气」时火和毒都不给毒气提供元素。判据在 `feedsDamageDot`。
+  //
+  //   有 → 正常重算；**拿掉后为 0 时由调用方显示 ∞**（这张卡让该异常从无到有）
+  //   没有 → 元素部分 0；带触发率时只算触发率那部分（D-176），否则 0
   if (feedsDamageDot(own, contribs)) return { kind: 'normal', feedsDot: true };
   if (isPerStackMetric()) return { kind: 'zero', feedsDot: false };
-  const hasRate = own.some(function (c) { return c.stat === 'statusChance'; });
   return hasRate ? { kind: 'split', feedsDot: false } : { kind: 'zero', feedsDot: false };
 }
 
