@@ -528,6 +528,16 @@ export function dotMetricRoleOf(own, contribs) {
   const hasElement = own.some(function (c) { return /^elemental:/.test(c.stat) || c.stat === 'physical:slash'; });
   if (!hasElement) return { kind: 'normal', feedsDot: false };
 
+  // ── ②b 切割卡（需求方 2026-11-18）──
+  //   切割 Mod 不碰 DoT 基础值（基础值本来就不含元素/物理加量），
+  //   也不碰切割 DoT 的元素乘区（切割 DoT 的元素% 恒为 0）：
+  //     · **单层口径**：每跳伤害不变 → 0；
+  //     · **总量口径**：切割占比变大 → 触发层数变多 → 总量上涨，照常算。
+  const onlySlash = own.every(function (c) { return c.stat === 'physical:slash'; });
+  if (onlySlash) {
+    return isPerStackMetric() ? { kind: 'zero', feedsDot: true } : { kind: 'normal', feedsDot: true };
+  }
+
   // 元素卡：它贡献的元素最终落进「伤害型 DoT」了吗？
   //   有（例如病毒火里的火）→ 走普通算法，分母为 0 时由调用方显示 ∞
   //   没有（病毒火里的冰 / 毒）→ **元素部分** 0；N 秒异常总伤下触发率部分照常算（D-176）
@@ -646,8 +656,10 @@ function feedsDamageDot(own, contribs) {
   const ownTypes = [];
   for (const c of own) {
     const m = /^elemental:(.+)$/.exec(c.stat);
+    // 需求方 2026-11-18：切割**不**算进这里——切割 Mod 只改命中分布里的占比
+    // （那一份照常进 DoT 基础值），但切割 DoT 自己不吃切割元素%，所以切割卡
+    // 在 DoT 口径下没有元素贡献。
     if (m) ownTypes.push(m[1]);
-    else if (c.stat === 'physical:slash') ownTypes.push('slash');
   }
   if (!ownTypes.length) return false;
 

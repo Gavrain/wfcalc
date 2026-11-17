@@ -215,7 +215,12 @@ export function dotTick(
   // ② 基础触发值 = ① × 系数（不含任何元素 %）
   const baseTick = dotTickBase(dotBase, DOT_COEF[t] ?? 0);
   // ③ 该类型自己的元素 %（毒气吃「毒气 %」，与其它类型一致）
-  const elementPct = sumPct(contribs, `elemental:${t}`);
+  //
+  // 需求方 2026-11-18：**切割 DoT 不吃切割 Mod 的元素加成**。
+  // 切割 DoT 的基础值是「全类型之和」，而基础值本身**不含**元素/物理加量
+  // （见 `segment.ts` 的 `finalHitNoAdd`，Q6 定案），所以切割 Mod 对切割 DoT
+  // 既不进基础值、也不进元素乘区 —— 等于完全没作用，这里把元素% 定为 0。
+  const elementPct = t === 'slash' ? 0 : sumPct(contribs, `elemental:${t}`);
   const statusDamagePct = sumPct(contribs, 'statusDamage');
   // ③ 元素 % → 异常状态伤害 % → 派系第二次
   // （射速与多重影响的是"叠几层"，不在这条链上。）
