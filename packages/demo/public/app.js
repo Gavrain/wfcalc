@@ -250,8 +250,17 @@ function candidateWindowGain(base, next, own, baseRes) {
     denomDot = steady ? lineValue(ke, 'steadyDps') - denomBase : lineValue(ke, 'dot6s');
   }
   const window = steady ? 0 : (store.ui.dotWindowSeconds ?? 0);
-  const denom = steady ? denomBase + denomDot : denomBase * window + denomDot;
-  const after = steady ? lineValue(aftRes, 'steadyDps') : lineValue(aftRes, 'sustainedDps') * window + lineValue(aftRes, 'dot6s');
+  // 需求方 2026-11-18：N 秒总伤**直接取内核那一行 `totalInWindow`**，不要自己拼
+  // `sustainedDps × N + dot6s`——自己拼的值和内核那一行不一定相等，
+  // 会让备选区与已装卡显示出两个不同的增幅。
+  if (!steady) {
+    const denomTotal = lineValue(curRes, 'totalInWindow');
+    const afterTotal = lineValue(aftRes, 'totalInWindow');
+    if (!(denomTotal > 0)) return null;
+    return ratioGainOf(denomTotal, afterTotal);
+  }
+  const denom = denomBase + denomDot;
+  const after = lineValue(aftRes, 'steadyDps');
   if (!(denom > 0)) return null;
   return ratioGainOf(denom, after);
 }

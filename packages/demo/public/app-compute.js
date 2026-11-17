@@ -764,7 +764,10 @@ function windowDenominator(contribs, own, curRes) {
     dot = lineValueOf(runCompute(keepRate), DOT_WINDOW_METRIC);
   }
   const sustained = lineValueOf(woRes, SUSTAINED_METRIC);
-  const total = sustained * window + dot;
+  // 需求方 2026-11-18：分母直接取**内核算好的 `totalInWindow`**，不要自己拼
+  // `sustainedDps × N + dot6s`——那样拼出来的值和内核那一行不一定相等，
+  // 于是「装上 ÷ 不装」与「装着 ÷ 拿掉」会给出两个不同的增幅。
+  const total = lineValueOf(woRes, WINDOW_TOTAL_METRIC) || sustained * window + dot;
   return total > 0 ? total : null;
 }
 
