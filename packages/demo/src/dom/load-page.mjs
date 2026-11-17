@@ -50,7 +50,8 @@ export async function loadModules() {
   const uiLabels = await import(pathToFileURL(join(PUBLIC, 'ui-labels.js')).href);
   const uiParts = await import(pathToFileURL(join(PUBLIC, 'ui-parts.js')).href);
   const uiDetail = await import(pathToFileURL(join(PUBLIC, 'ui-detail.js')).href);
-  return { core, adapter, rivenData, manualMods, picker, override, store, data, compute, riven, editor, uiDom, uiRiven, uiLabels, uiParts, uiDetail, transpile };
+  const uiPanel = await import(pathToFileURL(join(PUBLIC, 'ui-panel.js')).href);
+  return { core, adapter, rivenData, manualMods, picker, override, store, data, compute, riven, editor, uiDom, uiRiven, uiLabels, uiParts, uiDetail, uiPanel, transpile };
 }
 
 /**
@@ -77,6 +78,7 @@ export function inlineImports(src, ns) {
     [/\/ui-labels\.js$/, 'ns.uiLabels'],
     [/\/ui-parts\.js$/, 'ns.uiParts'],
     [/\/ui-detail\.js$/, 'ns.uiDetail'],
+    [/\/ui-panel\.js$/, 'ns.uiPanel'],
   ];
 
   const unresolved = [];
@@ -178,6 +180,7 @@ export async function loadPage(opts = {}) {
     uiLabels: modules.uiLabels,
     uiParts: modules.uiParts,
     uiDetail: modules.uiDetail,
+    uiPanel: modules.uiPanel,
   });
   // 把私有的 `async function boot()` 暴露成返回值，供 invokeBoot() 二次启动
   src += '\n;return { boot: boot };\n';
