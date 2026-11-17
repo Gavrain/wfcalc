@@ -208,7 +208,10 @@ export function getComboMultiplier(): number {
 }
 
 function comboFactor(): number {
-  return comboMultiplier;
+  // 依据：核心事实 §6（连击倍率加成）。**1x 不加，2x 起才开始加**：
+  //   急进猛突满级每层 +40%，12x 时为 40 × (12−1) = +440%（上限），不是 ×12 的 480%。
+  //   需求方 2026-11-18：「1x 是不加的，2x 开始加 10%……急进猛突也是这样，最多 440%」
+  return Math.max(0, comboMultiplier - 1);
 }
 
 /** 次要·爆发的默认层数（需求方 2026-11-13：「默认可以设置成12层」） */

@@ -152,3 +152,30 @@ export const COMPAT_CLASS_TO_SPECIFIC: Readonly<Record<string, readonly string[]
   Glaives: ['glaive'],
   'Thrown Melee': ['glaive'],
 };
+
+
+/**
+ * 套装效果里**会影响武器输出**的那几套（其余是减伤 / 控制 / 召唤，不进伤害计算）。
+ *
+ * 依据：核心事实 §11（数据层给内核结构化事实）+ 需求方 2026-11-18 确认：
+ *   · 牺牲：**×1.25 一次**（不是每件叠乘），放大本套 Mod 自身数值；
+ *   · 私法：**每件 +5% 固定暴击率**（直接加到暴击率，不是百分比）；
+ *   · 混沌（Nira）：每件 **+150% 震地攻击伤害**，只作用于震地 / 重型震地模式；
+ *   · 角斗士：每件「+10% × 连击倍率」，与急进猛突同类（1x 不加，2x 起算）。
+ * 诡文（Boreal）是空中减伤，不影响输出，不在此表。
+ */
+export interface SetBonusEffect {
+  /** 本套在武器上最多能装几张（战甲卡不计入） */
+  weaponMods: number;
+  /** 效果形态 */
+  kind: 'scaleOwnMods' | 'critChanceFlat' | 'slamDamage' | 'critChancePerCombo';
+  /** 具体加成：scaleOwnMods = 倍数（1.25）；其余 = 每件百分比 */
+  value: number;
+}
+
+export const SET_BONUS_EFFECTS: Readonly<Record<string, SetBonusEffect>> = {
+  sacrifice: { weaponMods: 2, kind: 'scaleOwnMods', value: 1.25 },
+  vigilante: { weaponMods: 4, kind: 'critChanceFlat', value: 5 },
+  nira: { weaponMods: 1, kind: 'slamDamage', value: 150 },
+  gladiator: { weaponMods: 3, kind: 'critChancePerCombo', value: 10 },
+};
