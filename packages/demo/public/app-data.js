@@ -79,9 +79,12 @@ export function buildWeaponData(weaponId, options = {}) {
 
   const entry = all.slotFile.weapons[weaponId] || { slots: {}, modKinds: [] };
   const kinds = modKindsFor(entry, entry.slots);
+  // 可装判定要按**槽位细类**比（如 Daggers / Polearms / Whips）：把本武器的细类带上
+  const weaponWithSpecifics = { ...weapon, specifics: (entry.slots && entry.slots.specific) || [] };
+
   const availableMods = all.modFile.mods
     .filter(function (m) { return kinds.indexOf(m.slotKind) >= 0; })
-    .filter(function (m) { return isModCompatibleWithWeapon(m, weapon); })
+    .filter(function (m) { return isModCompatibleWithWeapon(m, weaponWithSpecifics); })
     .sort(function (a, b) { return String(modName(a)).localeCompare(String(modName(b)), 'zh-CN'); });
 
   const byId = new Map();

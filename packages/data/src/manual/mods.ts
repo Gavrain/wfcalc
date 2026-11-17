@@ -85,3 +85,36 @@ export interface WeaponLike {
   uniqueName?: string;
 }
 
+
+/**
+ * WFCD 的 `compatName` 里**武器类别**（复数形式）→ 我们武器槽位上的细类。
+ *
+ * 依据：核心事实 §11（可装判定读数据给的结构化字段）。
+ * · 近战细类取值见 weapon-slots.json 的 `slots.specific`（dagger / polearm / whip …）；
+ * · 没列在这里的 compatName 一律当作"具体武器名"处理。
+ */
+export const COMPAT_CLASS_TO_SPECIFIC: Readonly<Record<string, readonly string[]>> = {
+  Daggers: ['dagger'],
+  'Dual Daggers': ['dual_daggers'],
+  'Dual Swords': ['dual_swords'],
+  Polearms: ['polearm'],
+  Whips: ['whip'],
+  'Blade And Whip': ['blade_and_whip'],
+  Claws: ['claws'],
+  Fists: ['fist'],
+  Hammers: ['hammer'],
+  'Heavy Blade': ['heavy_blade'],
+  Machetes: ['machete'],
+  Nikanas: ['nikana'],
+  Nunchaku: ['nunchaku'],
+  Rapiers: ['rapier'],
+  Scythes: ['scythe'],
+  Sparring: ['sparring'],
+  Staves: ['staff'],
+  Swords: ['sword'],
+  'Sword And Shield': ['sword_and_shield'],
+  Tonfas: ['tonfa'],
+  Warfans: ['warfan'],
+  Glaives: ['glaive'],
+  'Thrown Melee': ['glaive'],
+};

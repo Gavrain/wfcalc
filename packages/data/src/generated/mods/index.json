@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-13T11:24:37.291Z",
+  "generatedAt": "2026-11-17T15:21:04.322Z",
   "sources": [
     {
       "name": "mods/baseline.json",
@@ -28,7 +28,7 @@
     }
   ],
   "counts": {
-    "weaponMods": 478,
+    "weaponMods": 503,
     "arcanes": 56,
     "arcanesSkipped": 6,
     "modSets": 19,
@@ -36,8 +36,8 @@
     "weapons": 765
   },
   "coverage": {
-    "officialMatched": 478,
-    "withStats": 478,
+    "officialMatched": 503,
+    "withStats": 503,
     "unresolvedWeapons": 0,
     "meleeMissingSpecific": 35,
     "zhMissing": 0

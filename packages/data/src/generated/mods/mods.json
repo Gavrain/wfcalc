@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-11-13T11:24:37.278Z",
+  "generatedAt": "2026-11-17T15:21:04.303Z",
   "source": "mods/baseline.json（Mod 数值基线） + ExportUpgrades（元数据交叉校验）",
-  "note": "levelValues 为 0 级到满级的逐级数值；bucket 对应 docs/乘区归属表.md 的乘区",
-  "count": 478,
+  "note": "levelValues 为 0 级到满级的逐级数值；bucket 对应核心事实里的乘区口径",
+  "count": 503,
   "mods": [
     {
       "id": "ammo_chain",
@@ -8523,7 +8523,7 @@
             16,
             24
           ],
-          "note": "AoE 半径；衰减参数仍需人工补（data-todo 第 1 节）"
+          "note": "AoE 半径；衰减参数本版不建模"
         }
       ],
       "conditions": [],
@@ -10424,7 +10424,7 @@
             39.6,
             44
           ],
-          "note": "AoE 半径；衰减参数仍需人工补（data-todo 第 1 节）"
+          "note": "AoE 半径；衰减参数本版不建模"
         }
       ],
       "conditions": [],
@@ -14691,7 +14691,7 @@
             16,
             24
           ],
-          "note": "AoE 半径；衰减参数仍需人工补（data-todo 第 1 节）"
+          "note": "AoE 半径；衰减参数本版不建模"
         }
       ],
       "conditions": [],
@@ -16885,7 +16885,7 @@
             39.6,
             44
           ],
-          "note": "AoE 半径；衰减参数仍需人工补（data-todo 第 1 节）"
+          "note": "AoE 半径；衰减参数本版不建模"
         }
       ],
       "conditions": [],
@@ -23823,6 +23823,1148 @@
       ],
       "syndicate": "purity",
       "noteZh": "近战伤害 +100% · 纯洁 +1"
+    },
+    {
+      "id": "astral_slash",
+      "name": {
+        "en": "Astral Slash",
+        "zh": "星体切砍"
+      },
+      "slotKind": "archmelee",
+      "category": "g",
+      "maxRank": 5,
+      "drain": 2,
+      "rarity": "common",
+      "polarity": "-",
+      "stats": [
+        {
+          "key": "slash",
+          "stat": "physical:slash",
+          "bucket": "physical",
+          "unit": "percent",
+          "kind": "normal",
+          "levelValues": [
+            0,
+            18,
+            36,
+            54,
+            72,
+            90
+          ],
+          "note": "加量基数是该类型自身面板值"
+        }
+      ],
+      "conditions": [],
+      "descriptionEn": "+X% Slash",
+      "official": {
+        "uniqueName": "/Lotus/Upgrades/Mods/Archwing/Melee/ArchwingDualStatSlashStatusMeleeMod",
+        "name": "/Lotus/Language/Mods/ArchwingDualStatSlashStatusMeleeMod",
+        "rarity": "RARE",
+        "baseDrain": 2,
+        "fusionLimit": 5,
+        "type": "ARCH-MELEE",
+        "compatName": "Archmelee"
+      }
+    },
+    {
+      "id": "blazing_steel",
+      "name": {
+        "en": "Blazing Steel",
+        "zh": "炽烈坚刃"
+      },
+      "slotKind": "archmelee",
+      "category": "g",
+      "maxRank": 5,
+      "drain": 2,
+      "rarity": "common",
+      "polarity": "-",
+      "stats": [
+        {
+          "key": "heat",
+          "stat": "elemental:heat",
+          "bucket": "elemental",
+          "unit": "percent",
+          "kind": "normal",
+          "levelValues": [
+            0,
+            24,
+            48,
+            72,
+            96,
+            120
+          ]
+        }
+      ],
+      "conditions": [],
+      "descriptionEn": "+X% Heat",
+      "official": {
+        "uniqueName": "/Lotus/Upgrades/Mods/Archwing/Melee/ArchwingWeaponFireDamageMod",
+        "name": "/Lotus/Language/Items/ArchwingWeaponFireDamageMelee",
+        "rarity": "UNCOMMON",
+        "baseDrain": 4,
+        "fusionLimit": 5,
+        "type": "ARCH-MELEE",
+        "compatName": "Archmelee"
+      }
+    },
+    {
+      "id": "bleeding_edge",
+      "name": {
+        "en": "Bleeding Edge",
+        "zh": "血色刃缘"
+      },
+      "slotKind": "archmelee",
+      "category": "g",
+      "maxRank": 10,
+      "drain": 4,
+      "rarity": "uncommon",
+      "polarity": "-",
+      "stats": [
+        {
+          "key": "cd",
+          "stat": "critMultiplier",
+          "bucket": "critMultiplier",
+          "unit": "percent",
+          "kind": "normal",
+          "levelValues": [
+            0,
+            11,
+            22,
+            33,
+            44,
+            55,
+            66,
+            77,
+            88,
+            99,
+            110
+          ]
+        }
+      ],
+      "conditions": [],
+      "descriptionEn": "+X% Critical Damage",
+      "official": {
+        "uniqueName": "/Lotus/Upgrades/Mods/Archwing/Melee/ArchwingMeleeCritDamageMod",
+        "name": "/Lotus/Language/Items/ArchwingMeleeCritDamageMod",
+        "rarity": "COMMON",
+        "baseDrain": 4,
+        "fusionLimit": 10,
+        "type": "ARCH-MELEE",
+        "compatName": "Archmelee"
+      }
+    },
+    {
+      "id": "conductive_blade",
+      "name": {
+        "en": "Conductive Blade",
+        "zh": "通电刀刃"
+      },
+      "slotKind": "archmelee",
+      "category": "g",
+      "maxRank": 5,
+      "drain": 2,
+      "rarity": "common",
+      "polarity": "-",
+      "stats": [
+        {
+          "key": "electric",
+          "stat": "elemental:electric",
+          "bucket": "elemental",
+          "unit": "percent",
+          "kind": "normal",
+          "levelValues": [
+            0,
+            24,
+            48,
+            72,
+            96,
+            120
+          ]
+        }
+      ],
+      "conditions": [],
+      "descriptionEn": "+X% Electricity",
+      "official": {
+        "uniqueName": "/Lotus/Upgrades/Mods/Archwing/Melee/ArchwingWeaponElectricityDamageMod",
+        "name": "/Lotus/Language/Items/ArchwingWeaponElectricityDamageMelee",
+        "rarity": "UNCOMMON",
+        "baseDrain": 6,
+        "fusionLimit": 5,
+        "type": "ARCH-MELEE",
+        "compatName": "Archmelee"
+      }
+    },
+    {
+      "id": "critical_meltdown",
+      "name": {
+        "en": "Critical Meltdown",
+        "zh": "关键熔毁"
+      },
+      "slotKind": "archmelee",
+      "category": "g",
+      "maxRank": 3,
+      "drain": 2,
+      "rarity": "common",
+      "polarity": "-",
+      "stats": [
+        {
+          "key": "radiation",
+          "stat": "elemental:radiation",
+          "bucket": "elemental",
+          "unit": "percent",
+          "kind": "normal",
+          "levelValues": [
+            0,
+            20,
+            40,
+            60
+          ]
+        },
+        {
+          "key": "cc",
+          "stat": "critChance",
+          "bucket": "critChance",
+          "unit": "percent",
+          "kind": "normal",
+          "levelValues": [
+            0,
+            20,
+            40,
+            60
+          ]
+        }
+      ],
+      "conditions": [],
+      "descriptionEn": "+X% Radiation +X% Critical Chance",
+      "official": {
+        "uniqueName": "/Lotus/Upgrades/Mods/Archwing/Melee/ArchwingEventRadiationCritChanceMeleeMod",
+        "name": "/Lotus/Language/Upgrades/ArchwingEventRadiationCritChanceMeleeMod",
+        "rarity": "RARE",
+        "baseDrain": 4,
+        "fusionLimit": 3,
+        "type": "ARCH-MELEE",
+        "compatName": "Archmelee"
+      }
+    },
+    {
+      "id": "cryo_coating",
+      "name": {
+        "en": "Cryo Coating",
+        "zh": "冷冻包覆"
+      },
+      "slotKind": "archmelee",
+      "category": "g",
+      "maxRank": 3,
+      "drain": 2,
+      "rarity": "common",
+      "polarity": "-",
+      "stats": [
+        {
+          "key": "cold",
+          "stat": "elemental:cold",
+          "bucket": "elemental",
+          "unit": "percent",
+          "kind": "normal",
+          "levelValues": [
+            0,
+            20,
+            40,
+            60
+          ]
+        },
+        {
+          "key": "sc",
+          "stat": "statusChance",
+          "bucket": "statusChance",
+          "unit": "percent",
+          "kind": "normal",
+          "levelValues": [
+            0,
+            20,
+            40,
+            60
+          ]
+        }
+      ],
+      "conditions": [],
+      "descriptionEn": "+X% Cold +X% Status Chance",
+      "official": {
+        "uniqueName": "/Lotus/Upgrades/Mods/Archwing/Melee/ArchwingEventColdStatusMeleeMod",
+        "name": "/Lotus/Language/Items/ArchwingColdEventMeleeMod",
+        "rarity": "RARE",
+        "baseDrain": 4,
+        "fusionLimit": 3,
+        "type": "ARCH-MELEE",
+        "compatName": "Archmelee"
+      }
+    },
+    {
+      "id": "cutting_edge",
+      "name": {
+        "en": "Cutting Edge",
+        "zh": "切割刃缘"
+      },
+      "slotKind": "archmelee",
+      "category": "g",
+      "maxRank": 10,
+      "drain": 4,
+      "rarity": "uncommon",
+      "polarity": "-",
+      "stats": [
+        {
+          "key": "dmg",
+          "stat": "baseDamage",
+          "bucket": "baseDamage",
+          "unit": "percent",
+          "kind": "normal",
+          "levelValues": [
+            0,
+            11,
+            22,
+            33,
+            44,
+            55,
+            66,
+            77,
+            88,
+            99,
+            110
+          ],
+          "note": "基伤，不限槽位全部相加（第 2.1 节）"
+        }
+      ],
+      "conditions": [],
+      "descriptionEn": "+X% Melee Damage",
+      "official": {
+        "uniqueName": "/Lotus/Upgrades/Mods/Archwing/Melee/ArchwingMeleeDamageMod",
+        "name": "/Lotus/Language/Items/ArchwingMeleeDamageMod",
+        "rarity": "UNCOMMON",
+        "baseDrain": 6,
+        "fusionLimit": 10,
+        "type": "ARCH-MELEE",
+        "compatName": "Archmelee"
+      }
+    },
+    {
+      "id": "extend",
+      "name": {
+        "en": "Extend",
+        "zh": "延展"
+      },
+      "slotKind": "archmelee",
+      "category": "g",
+      "maxRank": 3,
+      "drain": 2,
+      "rarity": "common",
+      "polarity": "-",
+      "stats": [
+        {
+          "key": "range",
+          "stat": "meleeRange",
+          "bucket": "utility",
+          "unit": "flat",
+          "kind": "functional",
+          "levelValues": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "note": "单位：米"
+        }
+      ],
+      "conditions": [],
+      "descriptionEn": "+X Attraction Range +X Melee Range",
+      "official": {
+        "uniqueName": "/Lotus/Upgrades/Mods/Archwing/Melee/ArchwingMeleeRangeIncMod",
+        "name": "/Lotus/Language/Items/ArchwingMeleeRangeIncMod",
+        "rarity": "COMMON",
+        "baseDrain": 6,
+        "fusionLimit": 3,
+        "type": "ARCH-MELEE",
+        "compatName": "Archmelee"
+      }
+    },
+    {
+      "id": "furor",
+      "name": {
+        "en": "Furor",
+        "zh": "狂怒"
+      },
+      "slotKind": "archmelee",
+      "category": "g",
+      "maxRank": 3,
+      "drain": 2,
+      "rarity": "common",
+      "polarity": "-",
+      "stats": [
+        {
+          "key": "frate",
+          "stat": "fireRate",
+          "bucket": "fireRate",
+          "unit": "percent",
+          "kind": "normal",
+          "levelValues": [
+            0,
+            3.3333,
+            6.6667,
+            10
+          ],
+          "note": "弓类描述为 ×2，另行处理"
+        }
+      ],
+      "conditions": [],
+      "descriptionEn": "+X% Attack Speed",
+      "official": {
+        "uniqueName": "/Lotus/Upgrades/Mods/Archwing/Melee/ArchwingMeleeFireRateMod",
+        "name": "/Lotus/Language/Items/ArchwingMeleeFireRateMod",
+        "rarity": "UNCOMMON",
+        "baseDrain": 4,
+        "fusionLimit": 3,
+        "type": "ARCH-MELEE",
+        "compatName": "Archmelee"
+      }
+    },
+    {
+      "id": "glacial_edge",
+      "name": {
+        "en": "Glacial Edge",
+        "zh": "冰冷刃缘"
+      },
+      "slotKind": "archmelee",
+      "category": "g",
+      "maxRank": 5,
+      "drain": 2,
+      "rarity": "common",
+      "polarity": "-",
+      "stats": [
+        {
+          "key": "cold",
+          "stat": "elemental:cold",
+          "bucket": "elemental",
+          "unit": "percent",
+          "kind": "normal",
+          "levelValues": [
+            0,
+            24,
+            48,
+            72,
+            96,
+            120
+          ]
+        }
+      ],
+      "conditions": [],
+      "descriptionEn": "+X% Cold",
+      "official": {
+        "uniqueName": "/Lotus/Upgrades/Mods/Archwing/Melee/ArchwingWeaponFreezeDamageMod",
+        "name": "/Lotus/Language/Items/ArchwingWeaponFreezeDamageMelee",
+        "rarity": "UNCOMMON",
+        "baseDrain": 4,
+        "fusionLimit": 5,
+        "type": "ARCH-MELEE",
+        "compatName": "Archmelee"
+      }
+    },
+    {
+      "id": "infectious_injection",
+      "name": {
+        "en": "Infectious Injection",
+        "zh": "传染性注射"
+      },
+      "slotKind": "archmelee",
+      "category": "g",
+      "maxRank": 3,
+      "drain": 2,
+      "rarity": "common",
+      "polarity": "-",
+      "stats": [
+        {
+          "key": "toxin",
+          "stat": "elemental:toxin",
+          "bucket": "elemental",
+          "unit": "percent",
+          "kind": "normal",
+          "levelValues": [
+            0,
+            20,
+            40,
+            60
+          ]
+        },
+        {
+          "key": "sc",
+          "stat": "statusChance",
+          "bucket": "statusChance",
+          "unit": "percent",
+          "kind": "normal",
+          "levelValues": [
+            0,
+            20,
+            40,
+            60
+          ]
+        }
+      ],
+      "conditions": [],
+      "descriptionEn": "+X% Toxin +X% Status Chance",
+      "official": {
+        "uniqueName": "/Lotus/Upgrades/Mods/Archwing/Melee/ArchwingEventToxinStatusMeleeMod",
+        "name": "/Lotus/Language/Items/ArchwingToxinEventMeleeMod",
+        "rarity": "RARE",
+        "baseDrain": 4,
+        "fusionLimit": 3,
+        "type": "ARCH-MELEE",
+        "compatName": "Archmelee"
+      }
+    },
+    {
+      "id": "ion_infusion",
+      "name": {
+        "en": "Ion Infusion",
+        "zh": "离子注入"
+      },
+      "slotKind": "archmelee",
+      "category": "g",
+      "maxRank": 3,
+      "drain": 2,
+      "rarity": "common",
+      "polarity": "-",
+      "stats": [
+        {
+          "key": "electric",
+          "stat": "elemental:electric",
+          "bucket": "elemental",
+          "unit": "percent",
+          "kind": "normal",
+          "levelValues": [
+            0,
+            20,
+            40,
+            60
+          ]
+        },
+        {
+          "key": "sc",
+          "stat": "statusChance",
+          "bucket": "statusChance",
+          "unit": "percent",
+          "kind": "normal",
+          "levelValues": [
+            0,
+            20,
+            40,
+            60
+          ]
+        }
+      ],
+      "conditions": [],
+      "descriptionEn": "+X% Electricity +X% Status Chance",
+      "official": {
+        "uniqueName": "/Lotus/Upgrades/Mods/Archwing/Melee/ArchwingEventElectricStatusMeleeMod",
+        "name": "/Lotus/Language/Items/ArchwingElectricEventMeleeMod",
+        "rarity": "RARE",
+        "baseDrain": 4,
+        "fusionLimit": 3,
+        "type": "ARCH-MELEE",
+        "compatName": "Archmelee"
+      }
+    },
+    {
+      "id": "magnetized_core",
+      "name": {
+        "en": "Magnetized Core",
+        "zh": "磁性核心"
+      },
+      "slotKind": "archmelee",
+      "category": "g",
+      "maxRank": 3,
+      "drain": 2,
+      "rarity": "common",
+      "polarity": "-",
+      "stats": [
+        {
+          "key": "magnetic",
+          "stat": "elemental:magnetic",
+          "bucket": "elemental",
+          "unit": "percent",
+          "kind": "normal",
+          "levelValues": [
+            0,
+            20,
+            40,
+            60
+          ]
+        },
+        {
+          "key": "cd",
+          "stat": "critMultiplier",
+          "bucket": "critMultiplier",
+          "unit": "percent",
+          "kind": "normal",
+          "levelValues": [
+            0,
+            13.3333,
+            26.6667,
+            40
+          ]
+        }
+      ],
+      "conditions": [],
+      "descriptionEn": "+X% Magnetic +X% Critical Damage",
+      "official": {
+        "uniqueName": "/Lotus/Upgrades/Mods/Archwing/Melee/ArchwingEventMagneticCritDamageMeleeMod",
+        "name": "/Lotus/Language/Upgrades/ArchwingEventMagneticCritDamageMeleeMod",
+        "rarity": "RARE",
+        "baseDrain": 4,
+        "fusionLimit": 3,
+        "type": "ARCH-MELEE",
+        "compatName": "Archmelee"
+      }
+    },
+    {
+      "id": "meteor_crash",
+      "name": {
+        "en": "Meteor Crash",
+        "zh": "流星撞击"
+      },
+      "slotKind": "archmelee",
+      "category": "g",
+      "maxRank": 5,
+      "drain": 2,
+      "rarity": "common",
+      "polarity": "-",
+      "stats": [
+        {
+          "key": "impact",
+          "stat": "physical:impact",
+          "bucket": "physical",
+          "unit": "percent",
+          "kind": "normal",
+          "levelValues": [
+            0,
+            18,
+            36,
+            54,
+            72,
+            90
+          ],
+          "note": "加量基数是该类型自身面板值"
+        }
+      ],
+      "conditions": [],
+      "descriptionEn": "+X% Impact",
+      "official": {
+        "uniqueName": "/Lotus/Upgrades/Mods/Archwing/Melee/ArchwingDualStatImpactStatusMeleeMod",
+        "name": "/Lotus/Language/Mods/ArchwingDualStatImpactStatusMeleeMod",
+        "rarity": "RARE",
+        "baseDrain": 2,
+        "fusionLimit": 5,
+        "type": "ARCH-MELEE",
+        "compatName": "Archmelee"
+      }
+    },
+    {
+      "id": "nebula_bore",
+      "name": {
+        "en": "Nebula Bore",
+        "zh": "星云钻孔"
+      },
+      "slotKind": "archmelee",
+      "category": "g",
+      "maxRank": 5,
+      "drain": 2,
+      "rarity": "common",
+      "polarity": "-",
+      "stats": [
+        {
+          "key": "puncture",
+          "stat": "physical:puncture",
+          "bucket": "physical",
+          "unit": "percent",
+          "kind": "normal",
+          "levelValues": [
+            0,
+            18,
+            36,
+            54,
+            72,
+            90
+          ],
+          "note": "加量基数是该类型自身面板值"
+        }
+      ],
+      "conditions": [],
+      "descriptionEn": "+X% Puncture",
+      "official": {
+        "uniqueName": "/Lotus/Upgrades/Mods/Archwing/Melee/ArchwingDualStatPunctureStatusMeleeMod",
+        "name": "/Lotus/Language/Mods/ArchwingDualStatPunctureStatusMeleeMod",
+        "rarity": "RARE",
+        "baseDrain": 2,
+        "fusionLimit": 5,
+        "type": "ARCH-MELEE",
+        "compatName": "Archmelee"
+      }
+    },
+    {
+      "id": "poisonous_sting",
+      "name": {
+        "en": "Poisonous Sting",
+        "zh": "剧毒螫刺"
+      },
+      "slotKind": "archmelee",
+      "category": "g",
+      "maxRank": 5,
+      "drain": 2,
+      "rarity": "common",
+      "polarity": "-",
+      "stats": [
+        {
+          "key": "toxin",
+          "stat": "elemental:toxin",
+          "bucket": "elemental",
+          "unit": "percent",
+          "kind": "normal",
+          "levelValues": [
+            0,
+            24,
+            48,
+            72,
+            96,
+            120
+          ]
+        }
+      ],
+      "conditions": [],
+      "descriptionEn": "+X% Toxin",
+      "official": {
+        "uniqueName": "/Lotus/Upgrades/Mods/Archwing/Melee/ArchwingWeaponToxinDamageMod",
+        "name": "/Lotus/Language/Items/ArchwingWeaponToxicDamageMelee",
+        "rarity": "UNCOMMON",
+        "baseDrain": 4,
+        "fusionLimit": 5,
+        "type": "ARCH-MELEE",
+        "compatName": "Archmelee"
+      }
+    },
+    {
+      "id": "searing_steel",
+      "name": {
+        "en": "Searing Steel",
+        "zh": "炽燃钢铁"
+      },
+      "slotKind": "archmelee",
+      "category": "g",
+      "maxRank": 3,
+      "drain": 2,
+      "rarity": "common",
+      "polarity": "-",
+      "stats": [
+        {
+          "key": "heat",
+          "stat": "elemental:heat",
+          "bucket": "elemental",
+          "unit": "percent",
+          "kind": "normal",
+          "levelValues": [
+            0,
+            20,
+            40,
+            60
+          ]
+        },
+        {
+          "key": "sc",
+          "stat": "statusChance",
+          "bucket": "statusChance",
+          "unit": "percent",
+          "kind": "normal",
+          "levelValues": [
+            0,
+            20,
+            40,
+            60
+          ]
+        }
+      ],
+      "conditions": [],
+      "descriptionEn": "+X% Heat +X% Status Chance",
+      "official": {
+        "uniqueName": "/Lotus/Upgrades/Mods/Archwing/Melee/ArchwingEventFireStatusMeleeMod",
+        "name": "/Lotus/Language/Items/ArchwingFireEventMeleeMod",
+        "rarity": "RARE",
+        "baseDrain": 4,
+        "fusionLimit": 3,
+        "type": "ARCH-MELEE",
+        "compatName": "Archmelee"
+      }
+    },
+    {
+      "id": "sudden_impact",
+      "name": {
+        "en": "Sudden Impact",
+        "zh": "瞬间冲击"
+      },
+      "slotKind": "archmelee",
+      "category": "g",
+      "maxRank": 5,
+      "drain": 2,
+      "rarity": "common",
+      "polarity": "-",
+      "stats": [
+        {
+          "key": "sc",
+          "stat": "statusChance",
+          "bucket": "statusChance",
+          "unit": "percent",
+          "kind": "normal",
+          "levelValues": [
+            0,
+            12,
+            24,
+            36,
+            48,
+            60
+          ]
+        }
+      ],
+      "conditions": [],
+      "descriptionEn": "+X% Status Chance",
+      "official": {
+        "uniqueName": "/Lotus/Upgrades/Mods/Archwing/Melee/ArchwingMeleeStatusChanceMod",
+        "name": "/Lotus/Language/Items/ArchwingMeleeStatusChanceMod",
+        "rarity": "COMMON",
+        "baseDrain": 4,
+        "fusionLimit": 5,
+        "type": "ARCH-MELEE",
+        "compatName": "Archmelee"
+      }
+    },
+    {
+      "id": "tempered_blade",
+      "name": {
+        "en": "Tempered Blade",
+        "zh": "强化刀片"
+      },
+      "slotKind": "archmelee",
+      "category": "g",
+      "maxRank": 5,
+      "drain": 2,
+      "rarity": "common",
+      "polarity": "-",
+      "stats": [
+        {
+          "key": "cc",
+          "stat": "critChance",
+          "bucket": "critChance",
+          "unit": "percent",
+          "kind": "normal",
+          "levelValues": [
+            0,
+            30,
+            60,
+            90,
+            120,
+            150
+          ]
+        }
+      ],
+      "conditions": [],
+      "descriptionEn": "+X% Critical Chance",
+      "official": {
+        "uniqueName": "/Lotus/Upgrades/Mods/Archwing/Melee/ArchwingMeleeCritChanceMod",
+        "name": "/Lotus/Language/Items/ArchwingMeleeCritChanceMod",
+        "rarity": "COMMON",
+        "baseDrain": 4,
+        "fusionLimit": 5,
+        "type": "ARCH-MELEE",
+        "compatName": "Archmelee"
+      }
+    },
+    {
+      "id": "target_acquired",
+      "name": {
+        "en": "Target Acquired",
+        "zh": "锁定目标"
+      },
+      "slotKind": "sniper",
+      "category": "g",
+      "maxRank": 5,
+      "drain": 4,
+      "rarity": "uncommon",
+      "polarity": "-",
+      "stats": [
+        {
+          "key": "weak",
+          "stat": "weakpointDamage",
+          "bucket": null,
+          "unit": "percent",
+          "kind": "conditional",
+          "levelValues": [
+            0,
+            12,
+            24,
+            36,
+            48,
+            60
+          ],
+          "note": "对弱点伤害，按第 3.2 节爆头倍率结算，不进总和"
+        }
+      ],
+      "conditions": [],
+      "descriptionEn": "+X% to Headshot Multiplier",
+      "official": {
+        "uniqueName": "/Lotus/Upgrades/Mods/Rifle/SniperHeadshotMultiplierMod",
+        "name": "/Lotus/Language/Mods/SniperHeadshotMultiplier",
+        "rarity": "RARE",
+        "baseDrain": 6,
+        "fusionLimit": 5,
+        "type": "PRIMARY",
+        "compatName": "Sniper"
+      }
+    },
+    {
+      "id": "no_return",
+      "name": {
+        "en": "No Return",
+        "zh": "有去无回"
+      },
+      "slotKind": "pistol",
+      "category": "g",
+      "maxRank": 5,
+      "drain": 4,
+      "rarity": "uncommon",
+      "polarity": "-",
+      "stats": [
+        {
+          "key": "puncture",
+          "stat": "physical:puncture",
+          "bucket": "physical",
+          "unit": "percent",
+          "kind": "normal",
+          "levelValues": [
+            0,
+            18,
+            36,
+            54,
+            72,
+            90
+          ],
+          "note": "加量基数是该类型自身面板值"
+        }
+      ],
+      "conditions": [],
+      "descriptionEn": "+X% Puncture",
+      "official": {
+        "uniqueName": "/Lotus/Upgrades/Mods/Pistol/WeaponArmorPiercingDamageMod",
+        "name": "/Lotus/Language/Items/PistolModArmorPiercing",
+        "rarity": "UNCOMMON",
+        "baseDrain": 2,
+        "fusionLimit": 5,
+        "type": "SECONDARY",
+        "compatName": "Pistol"
+      }
+    },
+    {
+      "id": "primed_electrified_barrel",
+      "name": {
+        "en": "Primed Electrified Barrel",
+        "zh": "带电枪管 Prime"
+      },
+      "slotKind": "archgun",
+      "category": "g",
+      "maxRank": 10,
+      "drain": 4,
+      "rarity": "legendary",
+      "polarity": "-",
+      "stats": [
+        {
+          "key": "electric",
+          "stat": "elemental:electric",
+          "bucket": "elemental",
+          "unit": "percent",
+          "kind": "normal",
+          "levelValues": [
+            0,
+            18.7,
+            37.4,
+            56.1,
+            74.8,
+            93.5,
+            112.2,
+            130.9,
+            149.6,
+            168.3,
+            187
+          ]
+        }
+      ],
+      "conditions": [],
+      "descriptionEn": "+X% Electricity",
+      "official": {
+        "uniqueName": "/Lotus/Upgrades/Mods/Archwing/Rifle/Expert/ArchwingWeaponElectricityDamageModExpert",
+        "name": "/Lotus/Language/Mods/ArchwingWeaponElectricityDamageModExpert",
+        "rarity": "LEGENDARY",
+        "baseDrain": 4,
+        "fusionLimit": 10,
+        "type": "ARCH-GUN",
+        "compatName": "Archgun"
+      }
+    },
+    {
+      "id": "boreals_contempt",
+      "name": {
+        "en": "Boreal's Contempt",
+        "zh": "诡文枭主之鄙"
+      },
+      "slotKind": "polearm",
+      "category": "g",
+      "maxRank": 5,
+      "drain": 4,
+      "rarity": "uncommon",
+      "polarity": "-",
+      "stats": [
+        {
+          "key": "dmg",
+          "stat": "baseDamage",
+          "bucket": "baseDamage",
+          "unit": "percent",
+          "kind": "normal",
+          "levelValues": [
+            0,
+            18,
+            36,
+            54,
+            72,
+            90
+          ],
+          "note": "基伤，不限槽位全部相加（第 2.1 节）"
+        },
+        {
+          "key": "statusDmg",
+          "stat": "statusDamage",
+          "bucket": "baseDamage",
+          "unit": "percent",
+          "kind": "normal",
+          "levelValues": [
+            0,
+            12,
+            24,
+            36,
+            48,
+            60
+          ],
+          "note": "异常状态伤害 +X%（第 6.3 节）"
+        }
+      ],
+      "conditions": [],
+      "descriptionEn": "+X% Melee Damage +X% Status Damage",
+      "official": {
+        "uniqueName": "/Lotus/Upgrades/Mods/Sets/Boreal/BorealMeleeMod",
+        "name": "/Lotus/Language/Mods/BorealMeleeMod",
+        "rarity": "RARE",
+        "baseDrain": 4,
+        "fusionLimit": 5,
+        "type": "MELEE",
+        "compatName": "Polearms"
+      }
+    },
+    {
+      "id": "niras_contempt",
+      "name": {
+        "en": "Nira's Contempt",
+        "zh": "混沌蛇主之鄙"
+      },
+      "slotKind": "whip",
+      "category": "g",
+      "maxRank": 5,
+      "drain": 4,
+      "rarity": "uncommon",
+      "polarity": "-",
+      "stats": [
+        {
+          "key": "dmg",
+          "stat": "baseDamage",
+          "bucket": "baseDamage",
+          "unit": "percent",
+          "kind": "normal",
+          "levelValues": [
+            0,
+            18,
+            36,
+            54,
+            72,
+            90
+          ],
+          "note": "基伤，不限槽位全部相加（第 2.1 节）"
+        },
+        {
+          "key": "sc",
+          "stat": "statusChance",
+          "bucket": "statusChance",
+          "unit": "percent",
+          "kind": "normal",
+          "levelValues": [
+            0,
+            12,
+            24,
+            36,
+            48,
+            60
+          ]
+        }
+      ],
+      "conditions": [],
+      "descriptionEn": "+X% Melee Damage +X% Status Chance",
+      "official": {
+        "uniqueName": "/Lotus/Upgrades/Mods/Sets/Nira/NiraMeleeMod",
+        "name": "/Lotus/Language/Mods/NiraMeleeMod",
+        "rarity": "RARE",
+        "baseDrain": 4,
+        "fusionLimit": 5,
+        "type": "MELEE",
+        "compatName": "Whips"
+      }
+    },
+    {
+      "id": "covert_lethality",
+      "name": {
+        "en": "Covert Lethality",
+        "zh": "致命匿杀"
+      },
+      "slotKind": "dagger",
+      "category": "g",
+      "maxRank": 3,
+      "drain": 4,
+      "rarity": "uncommon",
+      "polarity": "-",
+      "stats": [
+        {
+          "key": "finisher",
+          "stat": "finisherDamage",
+          "bucket": "baseDamage",
+          "unit": "percent",
+          "kind": "conditional",
+          "levelValues": [
+            0,
+            33.3333,
+            66.6667,
+            100
+          ],
+          "note": "处决伤害：进**独立的处决伤害乘区**（需求方 2026-11-13），不做攻击类型判定"
+        }
+      ],
+      "conditions": [],
+      "descriptionEn": "+X% Finisher Damage",
+      "official": {
+        "uniqueName": "/Lotus/Upgrades/Mods/Melee/WeaponMeleeStealthLethalMod",
+        "name": "/Lotus/Language/Items/MeleeModStealthLethal",
+        "rarity": "RARE",
+        "baseDrain": 10,
+        "fusionLimit": 3,
+        "type": "MELEE",
+        "compatName": "Daggers"
+      }
     }
   ]
 }

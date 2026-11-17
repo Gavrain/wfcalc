@@ -18,6 +18,7 @@ import {
   UNBOUNDED_STACK_MODS,
   FACTION_BY_MOD_ID,
   GENERIC_COMPAT,
+  COMPAT_CLASS_TO_SPECIFIC,
 } from './manual/mods.ts';
 import {
   ARCANE_STAT_OVERRIDES,
@@ -399,12 +400,29 @@ export interface WeaponLike {
   id: string;
   name?: string;
   nameZh?: string;
+  /** 武器槽位上的近战细类（`weapon-slots.json` 的 `slots.specific`，如 dagger / polearm） */
+  specifics?: readonly string[];
 }
 
+/**
+ * 这件 Mod 能不能装到这把武器上。
+ *
+ * 依据：核心事实 §11（可装判定只读数据给的字段）。
+ * 取值顺序：
+ * 1. `compatName` 是**通用类别**（Rifle / Primary / Shotgun …）→ 都能装；
+ * 2. `compatName` 是**武器类别**（Daggers / Polearms / Whips …）→ 比对武器的槽位细类；
+ * 3. 否则视为**具体武器名** → 与 name / nameZh / id 比对（大小写不敏感、去空格）。
+ */
 export function isModCompatibleWithWeapon(mod: ModRecord, weapon: WeaponLike): boolean {
   const compat = (mod.official as { compatName?: string } | undefined)?.compatName;
   if (!compat) return true; // 缺字段不误杀
   if (GENERIC_COMPAT.has(compat.toUpperCase())) return true;
+  // 武器类别（如 Daggers）→ 武器的槽位细类里有对应的一项才算能装
+  const classes = COMPAT_CLASS_TO_SPECIFIC[compat];
+  if (classes) {
+    const specifics = weapon.specifics ?? [];
+    return classes.some((c) => specifics.includes(c));
+  }
   // 具体武器名：与武器的 name / nameZh 比对（大小写不敏感、去空格）
   const norm = (s: string) => s.toLowerCase().replace(/[\s_-]/g, '');
   const target = norm(compat);
