@@ -1267,16 +1267,16 @@ function setNoteOf(mod) {
   if (!eff) return null;
   const label = SET_LABELS[set] || set;
   if (eff.kind === 'scaleOwnMods') {
-    return label + '套装：本套 Mod 数值 ×' + eff.value;
+    return label + '套装：Mod 数值 ×' + eff.value;
   }
   if (eff.kind === 'critChanceFlat') {
-    return label + '套装：每张 +' + eff.value + '% 几率强化主武器暴击';
+    return label + '套装：+' + eff.value + '% 几率强化主武器暴击';
   }
   if (eff.kind === 'slamDamage') {
-    return label + '套装：每张 +' + eff.value + '% 震地攻击伤害';
+    return label + '套装：+' + eff.value + '% 震地攻击伤害';
   }
   if (eff.kind === 'critChancePerCombo') {
-    return label + '套装：每张 +' + eff.value + '% × 连击倍率';
+    return label + '套装：+' + eff.value + '% × 连击倍率';
   }
   return null;
 }
