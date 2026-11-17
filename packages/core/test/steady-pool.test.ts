@@ -32,14 +32,19 @@ describe('A5：稳态层数池（到期清除、装填期间照样掉）', () =>
     assert.ok(b.output.steadyDotDps < (a.output.steadyDotDps as number) * 2, '循环里含装填，不应线性翻倍');
   });
 
-  it('毒 / 电 / 切割：稳态异常 ≤ 「层数永不到期」的旧算法（到期清除会砍掉尾巴）', () => {
+  it('毒 / 电 / 切割：每秒都跳，层数到期才掉（需求方 2026-11-18）', () => {
     const w = weapon();
     const res: any = core.compute(w as any, mode({ slash: 100 }) as any, [], {});
     const seg: any = res.segments[0];
     const tick = seg.dotTicks.find((t: any) => t.type === 'slash').tick as number;
-    // 旧算法 = 层/秒 × 开火段时长 × 每拍 ÷ 循环（= 105）
-    const old = (res.output.stacksPerType.slash as number) * 3 * tick / 5;
-    assert.ok(res.output.steadyDotDps <= old + 1e-9, `${res.output.steadyDotDps} > ${old}`);
+    const perSecond = (res.output.stacksPerType.slash as number) * tick;
+    // 以前把毒 / 电 / 切割当成「每层只跳一拍」，稳态只结算一次（= 层/秒 × 每拍）。
+    // 现在每秒都跳：循环内叠上去的层会持续跳满持续时间，稳态必然**高于**只跳一次。
+    const oneTickOnly = perSecond;
+    assert.ok(
+      res.output.steadyDotDps > oneTickOnly,
+      `每秒都跳时稳态应高于「每层只跳一次」：${res.output.steadyDotDps} vs ${oneTickOnly}`,
+    );
   });
 
   it('毒 / 电 / 切割：射速翻倍时稳态单调上升，但不超过「层数无上限累加」的旧算法', () => {

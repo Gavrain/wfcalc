@@ -353,6 +353,7 @@ function contribStatOf(stat: string, key: string, raw: ModRecord): string | null
     case 'critMultiplier':
     case 'statusChance':
     case 'statusDamage':
+    case 'statusDuration':
     case 'fireRate':
     case 'reloadSpeed':
     case 'magazine':

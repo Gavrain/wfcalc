@@ -81,22 +81,44 @@ export function dotSixSecondCurve(
   window = 6,
   firing?: (second: number) => boolean | number,
   stacksPerShot = 0,
+  /**
+   * DoT **持续时间**（秒），默认 6。
+   * 依据：核心事实 §6.3（异常状态持续时间）——`6 × (1 + Σ异常状态持续%)`。
+   *
+   * 需求方 2026-11-18：每层独立计时、到期就掉；窗口内的层活得更久 → 同时在跳的层更多。
+   * 只影响**非火焰**类型：火焰是「刷新时长 + 叠加灼烧量」，在窗口内不会自然结束。
+   */
+  duration = POOL_DURATION,
 ): number {
   const cap = DOT_MAX_STOCKS_FIX(t);
   const isHeat = t === 'heat';
   // 火焰专用的"累计基础值层数"（单调累加，不清零）
   let heatAccum = 0;
-  // 非火焰的当场层数（只增不减）
-  let stacks = 0;
+  /**
+   * 非火焰的**存活记载**：每一项 = 那一秒叠上的层（`at` = 叠上时的秒数）。
+   * 依据：核心事实 §6.3 —— 每层独立计时，活满 `duration` 秒就掉。
+   */
+  const alive: { at: number; layers: number }[] = [];
   let total = 0;
+
+  /** 当前存活层数（到期的不算）。@param tNow 本拍的秒数 */
+  const aliveLayers = (tNow: number): number => {
+    let sum = 0;
+    for (let i = alive.length - 1; i >= 0; i--) {
+      const e = alive[i]!;
+      if (tNow - e.at > duration + POOL_EPS) alive.splice(i, 1);
+      else sum += e.layers;
+    }
+    return sum;
+  };
 
   // ── D-059：电击 / 毒气在 0 秒立即跳一拍，层数取"首发" ──
   // 这一拍额外计入 N 秒之外（故窗口内共 N+1 拍）。
   if (IMMEDIATE_TICK.has(t) && stacksPerShot > 0 && window > 0) {
     const firstTick = cap === null ? stacksPerShot : Math.min(stacksPerShot, cap);
     total += perStackPerSecond * firstTick;
-    // 这一层已经跳过了，进入 t=1 时不要重复计入 → 记为已存在
-    stacks = firstTick;
+    // 这一层已经跳过了，进入 t=1 时不要重复计入 → 记为已存在（第 0 秒出生）
+    if (!isHeat) alive.push({ at: 0, layers: firstTick });
   }
 
   for (let sec = 1; sec <= window; sec++) {
@@ -108,7 +130,7 @@ export function dotSixSecondCurve(
     if (isHeat) {
       heatAccum += added;
     } else {
-      stacks += added;
+      alive.push({ at: sec, layers: added });
     }
 
     // ⚠ 装填期间**不叠层**，但**已有的 DoT 仍在跳伤害**（D-058）。
@@ -116,9 +138,13 @@ export function dotSixSecondCurve(
     if (isHeat) {
       // 火焰按整数秒把这一秒叠加的基础值计入 → 每跳 = 单层 × 累计层数
       total += perStackPerSecond * heatAccum;
-    } else if (stacks > 0) {
-      const capped = cap === null ? stacks : Math.min(stacks, cap);
-      total += perStackPerSecond * capped;
+    } else {
+      // 非火焰：本拍按**仍然存活**的层数结算（装填期间不再叠新层，但旧层照跳）
+      const layers = aliveLayers(sec);
+      if (layers > 0) {
+        const capped = cap === null ? layers : Math.min(layers, cap);
+        total += perStackPerSecond * capped;
+      }
     }
   }
   return total;
@@ -226,8 +252,14 @@ export function dotStackPool(
 ): number[] {
   const duration = options.duration ?? POOL_DURATION;
   const cap = DOT_MAX_STOCKS_FIX(t);
-  // 火焰 / 毒气是持续伤害（每拍都跳）；毒 / 电 / 切割是每层只跳一拍
-  const persistent = t === 'heat' || t === 'gas';
+  /**
+   * 依据：核心事实 §6.3（DoT 层数）。需求方 2026-11-18：
+   *   · **所有 DoT 每秒都跳一次**（区别只在起跳时机：毒气 / 电击第 0 秒先跳，其余第 1 秒起）；
+   *   · **每层独立计时**，活满「持续时间」就掉——装填期间不再叠新层，但已叠的层照常跳；
+   *   · 只有火焰特殊：新火焰**刷新时长并叠加灼烧量**（见 `heatAccum`）。
+   * 以前毒 / 电 / 切割被当成"每层只跳一拍"，等于只结算一次，是错的。
+   */
+  const persistent = true;
   /** 队列按触发时刻升序（先到先删） */
   const pool: PoolEntry[] = [];
   const out: number[] = [];
@@ -324,17 +356,24 @@ export function steadyDotPerSecond(
   intervalsOf: (sec: number) => readonly [number, number][],
   /** 第 sec 秒里**落在 `[0, 循环长度)` 内**的开火区间（timeline.firingIntervalsWithin） */
   withinCycle?: (sec: number) => readonly [number, number][],
+  /**
+   * 该类型的 DoT **持续时间**（秒）。默认 6。
+   * 依据：核心事实 §6.3（异常状态持续时间）——`6 × (1 + Σ异常状态持续%)`。
+   */
+  durationOf?: (t: DoTType) => number,
 ): number {
   const cycle = Math.max(0, cycleSeconds);
   if (!(cycle > 0)) return 0;
-  /** 窗口 = 循环 + 持续时间：这之后的拍属于下一圈，不算进来 */
-  const window = Math.ceil(cycle + POOL_DURATION);
   let sum = 0;
   for (const it of types) {
     if (!(it.perStackPerSecond > 0)) continue;
+    const duration = durationOf ? durationOf(it.type) : POOL_DURATION;
+    /** 窗口 = 循环 + 持续时间：这之后的拍属于下一圈，不算进来 */
+    const window = Math.ceil(cycle + duration);
     const series = dotStackPool(it.type, it.stacksPerSecond, it.perStackPerSecond, window, intervalsOf, {
       immediateFirst: it.immediateFirst,
       stacksPerShot: it.stacksPerShot,
+      duration,
     });
     const whole = Math.floor(cycle);
     let acc = 0;
