@@ -45,7 +45,9 @@ export async function loadModules() {
   const compute = await import(pathToFileURL(join(PUBLIC, 'app-compute.js')).href);
   const riven = await import(pathToFileURL(join(PUBLIC, 'app-riven.js')).href);
   const editor = await import(pathToFileURL(join(PUBLIC, 'ui-editor.js')).href);
-  return { core, adapter, rivenData, manualMods, picker, override, store, data, compute, riven, editor, transpile };
+  const uiDom = await import(pathToFileURL(join(PUBLIC, 'ui-dom.js')).href);
+  const uiRiven = await import(pathToFileURL(join(PUBLIC, 'ui-riven.js')).href);
+  return { core, adapter, rivenData, manualMods, picker, override, store, data, compute, riven, editor, uiDom, uiRiven, transpile };
 }
 
 /**
@@ -67,6 +69,8 @@ export function inlineImports(src, ns) {
     [/\/app-compute\.js$/, 'ns.compute'],
     [/\/app-riven\.js$/, 'ns.riven'],
     [/\/ui-editor\.js$/, 'ns.editor'],
+    [/\/ui-dom\.js$/, 'ns.uiDom'],
+    [/\/ui-riven\.js$/, 'ns.uiRiven'],
   ];
 
   const unresolved = [];
@@ -163,6 +167,8 @@ export async function loadPage(opts = {}) {
     compute: modules.compute,
     riven: modules.riven,
     editor: modules.editor,
+    uiDom: modules.uiDom,
+    uiRiven: modules.uiRiven,
   });
   // 把私有的 `async function boot()` 暴露成返回值，供 invokeBoot() 二次启动
   src += '\n;return { boot: boot };\n';
