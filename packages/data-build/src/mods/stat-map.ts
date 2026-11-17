@@ -224,7 +224,7 @@ const TABLE: Record<string, StatMapping> = {
   // 需求方 2026-11-13：「生命偷取那些也当无效果，不影响伤害」
   lifesteal: m('lifeSteal', null, 'percent', 'skip', '生命偷取：不影响伤害，需求方定为无效果'),
   healProc: m('healthPerHit', null, 'flat', 'skip', '每异常回血：不影响伤害，需求方定为无效果'),
-  parryFin: m('finisherDamage', null, 'percent', 'special', '招架后开启处决'),
+  parryFin: m('finisherDamage', null, 'percent', 'skip', '招架后开启处决：只给处决机会，不加处决伤害（需求方 2026-11-18）'),
   nullifier: m('baseDamage', null, 'percent', 'special', '击破 Nullifier 护盾发生器'),
   orbDrop: m('baseDamage', null, 'percent', 'special', '死亡掉落球体'),
   allyBuff: m('baseDamage', null, 'percent', 'special', '给队友的增益'),

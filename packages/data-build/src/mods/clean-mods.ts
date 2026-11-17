@@ -216,7 +216,9 @@ export function cleanMod(raw: ModRecord, official?: CleanMod['official']): Clean
       levelValues: values,
     };
     // 内核认的键：生成阶段就算好（需求方 2026-11-17「不可能每次启动都算一遍表格」）
-    const cs = contribStatOf(map.stat, key, raw);
+    // `skip` 一律不派键：它只是借了个属性类型名（能量导引 / 自激奇点记在 `baseDamage`，
+    // 招架记在 `finisherDamage`），实际不进任何伤害乘区（需求方 2026-11-18）。
+    const cs = map.kind === 'skip' ? null : contribStatOf(map.stat, key, raw);
     if (cs !== null) base.contribStat = cs;
     if (map.note !== undefined) base.note = map.note;
     // D-155：只有「暴击率」这一条会被重击 ×2；同卡上的其它属性（暴伤 / 派系伤害）不乘
