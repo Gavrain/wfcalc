@@ -184,7 +184,10 @@ const TABLE: Record<string, StatMapping> = {
   // 光束距离：`+Xm Beam Range`（凶恶延伸 / 毁灭扩展 / 延烧数列）。
   // 需求方 2026-11-13 复核：这三张不能再按近战范围算。
   beamRange: m('beamRange', 'utility', 'flat', 'functional', '光束距离（米）'),
-  hrel: m('reloadSpeed', 'utility', 'percent', 'functional', '收起武器时的换弹速度'),
+  // 需求方 2026-11-18：卡面是「+X% Magazine Reloaded/s when Holstered」——
+  // **收起时按弹匣百分比每秒回填**（弹匣置换 / 机动装填 / 填弹上膛），不是换弹速度加成。
+  // 这个机制不建模，只留卡面描述。
+  hrel: m('reloadSpeed', 'utility', 'percent', 'skip', '收起时按弹匣每秒回填，不是换弹速度（需求方 2026-11-18）'),
   aradius: m('explosionRadius', null, 'percent', 'functional', 'AoE 半径；衰减参数本版不建模'),
   movesp: m('movementSpeed', null, 'percent', 'special', '移动速度，不影响伤害'),
 

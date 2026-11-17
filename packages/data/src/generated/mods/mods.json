@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-17T16:37:00.534Z",
+  "generatedAt": "2026-11-17T16:44:40.014Z",
   "source": "mods/baseline.json（Mod 数值基线） + ExportUpgrades（元数据交叉校验）",
   "note": "levelValues 为 0 级到满级的逐级数值；bucket 对应核心事实里的乘区口径",
   "count": 503,
@@ -2147,15 +2147,14 @@
           "stat": "reloadSpeed",
           "bucket": "utility",
           "unit": "percent",
-          "kind": "functional",
+          "kind": "skip",
           "levelValues": [
             0,
             6.6667,
             13.3333,
             20
           ],
-          "contribStat": "reloadSpeed",
-          "note": "收起武器时的换弹速度"
+          "note": "收起时按弹匣每秒回填，不是换弹速度（需求方 2026-11-18）"
         }
       ],
       "conditions": [],
@@ -8137,15 +8136,14 @@
           "stat": "reloadSpeed",
           "bucket": "utility",
           "unit": "percent",
-          "kind": "functional",
+          "kind": "skip",
           "levelValues": [
             0,
             6.6667,
             13.3333,
             20
           ],
-          "contribStat": "reloadSpeed",
-          "note": "收起武器时的换弹速度"
+          "note": "收起时按弹匣每秒回填，不是换弹速度（需求方 2026-11-18）"
         }
       ],
       "conditions": [],
@@ -20954,15 +20952,14 @@
           "stat": "reloadSpeed",
           "bucket": "utility",
           "unit": "percent",
-          "kind": "functional",
+          "kind": "skip",
           "levelValues": [
             0,
             6.6667,
             13.3333,
             20
           ],
-          "contribStat": "reloadSpeed",
-          "note": "收起武器时的换弹速度"
+          "note": "收起时按弹匣每秒回填，不是换弹速度（需求方 2026-11-18）"
         }
       ],
       "conditions": [],

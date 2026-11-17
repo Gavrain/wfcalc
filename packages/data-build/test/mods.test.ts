@@ -169,6 +169,14 @@ describe('Mod 清洗', () => {
     assert.equal(mod.stats[0]!.contribStat, undefined);
   });
 
+  it('收起时按弹匣回填的卡不派键（弹匣置换 / 机动装填 / 填弹上膛，需求方 2026-11-18）', () => {
+    // 卡面：`+X% Magazine Reloaded/s when Holstered`——不是换弹速度，以前被错当 +20% 算进换弹
+    const { mod } = cleanMod(zk({ i: 'eject_magazine', n: 'Eject Magazine', p: [['hrel', 20]], f: 3 }));
+    assert.equal(mod.stats[0]!.stat, 'reloadSpeed');
+    assert.equal(mod.stats[0]!.kind, 'skip');
+    assert.equal(mod.stats[0]!.contribStat, undefined);
+  });
+
   it('等级上限的已知笔误被修正（Amanata Pressure：f 写 1，实为 6 级）', () => {
     assert.equal(effectiveMaxRank({ i: 'amanata_pressure', f: 1 }), 5);
     assert.equal(effectiveMaxRank({ i: 'serration', f: 10 }), 10);

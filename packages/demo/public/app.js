@@ -2023,7 +2023,11 @@ function candidateCard(row) {
   const statText = [];
   for (let i = 0; i < mod.stats.length; i++) {
     const s = mod.stats[i];
-    if (!s.bucket) continue;
+    // 卡面只显示**会影响结算**的属性：判据是内核键 `contribStat`（不是 `bucket`）。
+    // 状态持续（statusDuration）不属于任何伤害乘区（bucket 为 null），但它影响
+    // DoT 的存活时长，必须显示——以前按 bucket 判会把它当成「无伤害加成」。
+    // 依据：核心事实 §6.3（异常状态持续时间）
+    if (!s.bucket && !s.contribStat) continue;
     const max = s.levelValues[s.levelValues.length - 1] * modStackFactor(mod.id);
     statText.push(statLabel(s.stat) + ' ' + modStatText(s, max, mod.descriptionEn));
   }
