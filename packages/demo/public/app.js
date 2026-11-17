@@ -19,7 +19,8 @@
  */
 /** 连击倍率上限（需求方 2026-11-13：带凯旋之爪满层为 13x） */
 const MAX_COMBO_MULTIPLIER = 13;
-import { bladeShadowGain, critAverage, critTiers, DEFAULT_DOT_WINDOW_SECONDS, DOT_TYPES, DOT_WINDOW_MAX_SECONDS, DOT_WINDOW_MIN_SECONDS, firstTierCritChance, isKuvaFamily, METRIC_OPTIONS, metricOptionsFor, NON_DAMAGE_STATUS_TYPES, totalProcChance } from '../../core/src/index.ts';
+import {
+  bladeShadowGain, critAverage, critTiers, DEFAULT_DOT_WINDOW_SECONDS, DOT_TYPES, DOT_WINDOW_MAX_SECONDS, DOT_WINDOW_MIN_SECONDS, firstTierCritChance, isKuvaFamily, METRIC_OPTIONS, metricOptionsFor, NON_DAMAGE_STATUS_TYPES, totalProcChance } from '../../core/src/index.ts';
 import { WEAPON_GROUPS, groupWeapons, searchWeapons, FIRE_STYLE_OPTIONS, filterByStyle, weaponLabel, weaponGroupId, locateWeapon, weaponMatchesStyle } from './weapon-picker.js';
 import { OVERRIDE_WEAPON_FIELDS as OVERRIDE_FIELDS, mergeWeaponOverride as applyWeaponOverride } from './weapon-override.js';
 import { arcaneDisplayStats, arcaneToContributions, DEFAULT_BURST_STACKS, isConditionOverloadMod, MAX_BURST_STACKS, modStackFactor, modToContributions } from '../../data/src/adapter.ts';
@@ -39,7 +40,7 @@ import {
   RIVEN_COMBOS, RIVEN_SCOPE_LABEL, rivenDisplayUnit,
 } from '../../data/src/manual/riven.ts';
 import {
-  coDefaults, coInfo, coModGain, currentContributions, dotGainForCandidate, dotMetricRoleOf, effectiveModeFor,
+  coDefaults, coInfo, coModGain, currentContributions, gainOfPair, dotGainForCandidate, dotMetricRoleOf, effectiveModeFor,
   freezeInfo, gainOf, INFINITE_GAIN, isDotMetric, isTotalLikeMetric, metricValueOf, ratioGainOf, runCompute,
   rivenCandidateGain, rivenEntryGain, rivenGain, trialSlotNow,
 } from './app-compute.js';
@@ -238,31 +239,9 @@ function isDotWindowMetric() {
  * @param baseRes  当前配装的计算结果
  */
 function candidateWindowGain(base, next, own, baseRes) {
-  const curRes = baseRes ?? runCompute(base);
-  const aftRes = runCompute(next);
-  const steady = state.metric === 'steadyDps';
-  // 分母：直击 = 不带这张卡；DoT 部分 = 不带这张卡（元素没形成 DoT 的元素卡改成"只带元素"）
-  let denomBase = lineValue(curRes, 'sustainedDps');
-  let denomDot = steady ? lineValue(curRes, 'steadyDps') - denomBase : lineValue(curRes, 'dot6s');
-  if (isDotWindowMetricDetailRoleIsSplit(own, next)) {
-    const keepElement = base.concat(own.filter(function (c) { return c.stat !== 'statusChance'; }));
-    const ke = runCompute(keepElement);
-    denomDot = steady ? lineValue(ke, 'steadyDps') - denomBase : lineValue(ke, 'dot6s');
-  }
-  const window = steady ? 0 : (store.ui.dotWindowSeconds ?? 0);
-  // 需求方 2026-11-18：N 秒总伤**直接取内核那一行 `totalInWindow`**，不要自己拼
-  // `sustainedDps × N + dot6s`——自己拼的值和内核那一行不一定相等，
-  // 会让备选区与已装卡显示出两个不同的增幅。
-  if (!steady) {
-    const denomTotal = lineValue(curRes, 'totalInWindow');
-    const afterTotal = lineValue(aftRes, 'totalInWindow');
-    if (!(denomTotal > 0)) return null;
-    return ratioGainOf(denomTotal, afterTotal);
-  }
-  const denom = denomBase + denomDot;
-  const after = lineValue(aftRes, 'steadyDps');
-  if (!(denom > 0)) return null;
-  return ratioGainOf(denom, after);
+  // 需求方 2026-11-18：分母/分子的构造与"已装卡"共用同一份实现（见 app-compute 的 gainOfPair）。
+  // 以前这里自己拼 `sustainedDps × N + dot6s`，与内核的 totalInWindow 不等，两处会给出不同的增幅。
+  return gainOfPair(base, next, 'candidate');
 }
 
 /** 这张卡是不是"元素没形成 DoT、但带触发率"的元素卡（D-177 的分母构造要用）。

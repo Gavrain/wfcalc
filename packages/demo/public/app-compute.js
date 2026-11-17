@@ -735,6 +735,41 @@ export function windowGainForSource(contribs, sourceId) {
 }
 
 /**
+ * **统一的增幅入口**（需求方 2026-11-18：「分母是一样的」）。
+ *
+ * 已装卡、备选卡、裂罅词条三处原来各写一套，结果同一张卡
+ * 「装上 ÷ 不装」和「装着 ÷ 拿掉」给出两个不同的数。现在只有这一套：
+ * 调用方只负责**给出对照配装**与**方向**，增幅怎么算全在这里。
+ *
+ * | 调用方 | `variant`（对照配装） | `direction` |
+ * |---|---|---|
+ * | 已装卡 / 赋能 | **拿掉**该来源之后的贡献 | `'installed'` |
+ * | 备选卡 | **装上**这张卡之后的贡献 | `'candidate'` |
+ * | 裂罅词条 | **换掉**该词条之后的贡献 | `'installed'` |
+ *
+ * 分母一律取**内核算好的那一行**（`totalInWindow` / `steadyDps` / 当前口径），
+ * 不自己拼 `sustainedDps × N + dot6s`——自己拼的值与内核那一行不相等，
+ * 正是两个数打架的根源。
+ *
+ * @param current   当前配装的全部贡献
+ * @param variant   对照配装的全部贡献
+ * @param direction `'installed'` = 当前是"有它"、variant 是"没它"；
+ *                  `'candidate'` = 当前是"没它"、variant 是"有它"
+ */
+export function gainOfPair(current, variant, direction) {
+  const cur = lineValueForMetric(runCompute(current));
+  const alt = lineValueForMetric(runCompute(variant));
+  const denom = direction === 'installed' ? alt : cur;
+  const numer = direction === 'installed' ? cur : alt;
+  return ratioGainOf(denom, numer);
+}
+
+/** 当前口径在这一份结果里的值（自总伤口径起都用内核算好的那一行） */
+function lineValueForMetric(res) {
+  return lineValueOf(res, store.ui.metric);
+}
+
+/**
  * 「N 秒总伤」的**分母**（= "拿掉这张卡之后"的总伤，D-177）。
  *
  * ```
