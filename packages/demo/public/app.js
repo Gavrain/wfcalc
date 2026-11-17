@@ -19,6 +19,9 @@
  */
 /** 连击倍率上限（需求方 2026-11-13：带凯旋之爪满层为 13x） */
 const MAX_COMBO_MULTIPLIER = 13;
+import { clearDetailTarget, renderDetail, renderDotDetail, selectDetail, wireDetailDeps } from './ui-detail.js';
+import { collapsibleBlock, dotRow } from './ui-parts.js';
+import { modLockNotes, modStatText, setNoteOf, statLabel } from './ui-labels.js';
 import { renderRiven, wireRivenDeps } from './ui-riven.js';
 import {
   bladeShadowGain, critAverage, critTiers, DEFAULT_DOT_WINDOW_SECONDS, DOT_TYPES, DOT_WINDOW_MAX_SECONDS, DOT_WINDOW_MIN_SECONDS, firstTierCritChance, isKuvaFamily, METRIC_OPTIONS, metricOptionsFor, NON_DAMAGE_STATUS_TYPES, totalProcChance } from '../../core/src/index.ts';
@@ -78,76 +81,8 @@ const WEAPON_ID = 'KuvaKarak';
 // 常量
 // ─────────────────────────────────────────────────────────────
 
-const STAT_LABEL = {
-  accuracy: '精准度',
-  ammoEfficiency: '弹药效率',
-  ammoMax: '弹药上限',
-  baseDamage: '伤害',
-  bladeShadow: '刃影追加攻击',
-  critChance: '暴击几率',
-  critMultiplier: '暴击伤害',
-  explosionRadius: '爆炸范围',
-  faction: '派系伤害',
-  fireRate: '射速',
-  impactToSlash: '冲击转切割',
-  magazine: '弹匣容量',
-  meleeRange: '攻击范围',
-  movementSpeed: '移动速度',
-  multishot: '多重射击',
-  projectileSpeed: '弹速',
-  punchThrough: '穿透',
-  recoil: '后坐力',
-  reloadSpeed: '装填速度',
-  slashOnCrit: '暴击时触发切割',
-  statusChance: '触发几率',
-  statusDamage: '异常状态伤害',
-  statusDuration: '异常状态持续时间',
-  weakpointCritChance: '弱点暴击几率',
-  weakpointDamage: '弱点伤害',
-  zoom: '变焦',
-  healthPerHit: '每次命中回复生命',
-};
 
-/** 词条名 → 中文；元素/物理类型走 ELEMENT_LABEL */
-function statLabel(stat) {
-  if (stat.indexOf('elemental:') === 0) return ELEMENT_LABEL[stat.slice(10)] || stat.slice(10);
-  if (stat.indexOf('physical:') === 0) return ELEMENT_LABEL[stat.slice(9)] || stat.slice(9);
-  if (stat.indexOf('faction:') === 0) return '派系伤害';
-  return STAT_LABEL[stat] || stat;
-}
 
-/**
- * 一条**普通 Mod** 词条在卡面上的文本（需求方 2026-11-14：**按卡面描述区分**）：
- *
- * ```
- * 描述里带 X%      → 百分比       膛线 +165%、重口径 −55% 精准度、过激真相 +X% 真言
- * 描述里是 +X 米   → 米           合金钻头 +2.1m、剑风 +1.5m
- * 描述里是 +Xs     → 秒           邪恶蓄力 −0.5s（原文 `-50% Combo Duration` 与 wiki 表一致，存的是 −0.5 秒）
- * 描述里是 +X 发   → 只写数       过激真相 +40 弹匣容量
- * 描述里是 +X 连击 → 次           邪恶蓄力 +30 Initial Combo
- * ```
- *
- * 判据是数据层给的 `unit` + 这张卡的 `descriptionEn`，**不是**按属性名一刀切
- * （弹匣容量在裂罅上是百分比、在过激真相上是固定 40 发，靠属性名分不出来）。
- *
- * ⚠ 只影响**显示**：内核读的是 `unit` 与数值本身，这一层不改任何计算。
- */
-function modStatText(s, value, descriptionEn) {
-  const desc = String(descriptionEn || '');
-  const sign = value > 0 ? '+' : value < 0 ? '−' : '+';
-  const num = String(Math.round(Math.abs(value) * 100) / 100);
-  const body = sign + num;
-  const says = function (re) { return re.test(desc); };
-  if (s.unit === 'flat') {
-    if (says(/Xm\b|X\s*m\b/)) return body + 'm';
-    if (says(/Xs\b/)) return body + 's';
-    if (s.stat === 'comboInitial') return body + ' 连击';
-    return body;
-  }
-  // 数据层标成 percent、但描述写的其实是「米」（目前没有此类，留个兜底）
-  if (says(/\+Xm\b/)) return body + 'm';
-  return body + '%';
-}
 // ─────────────────────────────────────────────────────────────
 // 状态（D-105：真实状态在 app-store.js 的 store 里，这里只取常用别名）
 // ─────────────────────────────────────────────────────────────
@@ -845,162 +780,13 @@ function renderOutputs(res) {
   renderSplashDamage(res);
 }
 
-/**
- * 异常状态明细：**按攻击方式分段显示**（需求方 2026-11-12）。
- *
- * 每段有自己的命中分布 → 触发池与每跳伤害都不同，所以不能合并成一个数。
- *
- * **需求方 2026-11-12（续）**：
- * > 「把非伤害性异常也加上去，标上 xx 层/秒就行，不需要后面那个伤害。」
- * > 「复合元素在前，然后冰，然后冲击穿刺。」
- * > 「折叠起来以后只是内部项隐藏，标题还是要展示出来，不然没地方展开了。」
- * > 「折叠状态能保存到浏览器储存里面吗，可以就存。」
- *
- * 所以每段分两组：**会掉血的**（DoT 五种，带 /层/秒 伤害）和
- * **不掉血的**（只有 xx 层/秒）。两组的标题都可点折叠，状态存 `localStorage`。
- */
-/**
- * 异常状态明细：**按攻击方式分段显示**（需求方 2026-11-12）。
- *
- * 每段有自己的命中分布 → 触发池与每跳伤害都不同，所以不能合并成一个数。
- *
- * **需求方 2026-11-12（续）**：
- * > 「把非伤害性异常也加上去，标上 xx 层/秒就行，不需要后面那个伤害。」
- * > 「用会掉血的和不会掉血的也太土了吧，叫伤害型异常和非伤害型异常啊。」
- * > 「没有对应类型的时候就隐藏。」
- * > 「外面的异常状态我觉得可以去掉，不要这一层，就里面两层单独折叠就好了。」
- *
- * 所以每个攻击方式下只有**两组**，各自可折叠，**没有外层"异常状态"标题**：
- *   · 伤害型异常：DoT 五种 + 爆炸，带 /层/秒 伤害；
- *   · 非伤害型异常：只有 xx 层/秒。
- * 某一组没有任何类型时**整组不画**（标题也不画）。
- */
-function renderDotDetail(res) {
-  const dotBox = $('#dot-detail');
-  dotBox.innerHTML = '';
 
-  const m = effectiveMode();
-  const picked = selectedVariantIdx();
-  const variants = m && m.variants ? picked.map(function (i) { return m.variants[i]; }).filter(Boolean) : [];
-  const segDetails = res.output.dotBySegment || [];
-
-  // 每段占 `segments` 的哪一截（与伤害分布表同一套游标）
-  const starts = [];
-  {
-    let cursor = 0;
-    for (const v of variants) {
-      starts.push(cursor);
-      cursor += (v.segments || []).length;
-    }
-  }
-
-  // 先把每段的两组行都算出来，再按组包进可折叠的块
-  const blocks = [];
-  for (let vi = 0; vi < variants.length; vi++) {
-    const v = variants[vi];
-    const segCount = (v.segments || []).length;
-    const from = starts[vi];
-    const dmgRows = [];
-    const nonDmgRows = [];
-    for (let k = from; k < from + segCount; k++) {
-      const d = segDetails[k];
-      if (!d) continue;
-      for (let i = 0; i < DOT_TYPES.length; i++) {
-        const t = DOT_TYPES[i];
-        const per = d.dotPerType[t] || 0;
-        const stacks = d.stacksPerType[t] || 0;
-        if (per <= 0 && stacks <= 0) continue;
-        dmgRows.push({ type: t, per, stacks, unit: ' /层/秒' });
-      }
-      // 爆炸单独算（D-031）：它是独立机制，perStack 是「每层结算伤害」，不是每秒
-      const b = d.blast;
-      if (b && b.stacksPerSecond > 0) {
-        dmgRows.push({ type: 'blast', per: b.perStack, stacks: b.stacksPerSecond, unit: ' /层' });
-      }
-      // 非伤害型异常：只标层/秒，没有后面的伤害数
-      const nd = d.nonDamageStacks || {};
-      for (let i = 0; i < NON_DAMAGE_STATUS_TYPES.length; i++) {
-        const t = NON_DAMAGE_STATUS_TYPES[i];
-        const stacks = nd[t] || 0;
-        if (stacks <= 0) continue;
-        nonDmgRows.push({ type: t, stacks });
-      }
-    }
-    // 两组都空就不画这一段
-    if (dmgRows.length === 0 && nonDmgRows.length === 0) continue;
-
-    // 分段标题：只有一种攻击方式时不显示（免得啰嗦）
-    const segLabel = variants.length > 1 ? (v.label || '伤害') : null;
-    blocks.push({ segLabel, dmgRows, nonDmgRows });
-  }
-
-  if (blocks.length === 0) {
-    dotBox.append(el('div', 'muted', '无伤害型异常'));
-    return;
-  }
-
-  const multiSeg = blocks.some(function (b) { return b.segLabel; });
-  for (const blk of blocks) {
-    if (blk.segLabel) dotBox.append(el('div', 'dot-seg-title', blk.segLabel));
-
-    // 伤害型异常：默认展开；没有就不画
-    if (blk.dmgRows.length > 0) {
-      dotBox.append(collapsibleBlock('dot-dmg', '伤害型异常', blk.dmgRows.length, function (body) {
-        for (const r of blk.dmgRows) body.append(dotRow(r, true));
-      }, multiSeg ? blk.segLabel : null));
-    }
-
-    // 非伤害型异常：默认收起；没有就不画（需求方 2026-11-12：「没有对应类型的时候就隐藏」）
-    if (blk.nonDmgRows.length > 0) {
-      dotBox.append(collapsibleBlock('dot-nondmg', '非伤害型异常', blk.nonDmgRows.length, function (body) {
-        for (const r of blk.nonDmgRows) body.append(dotRow(r, false));
-      }, multiSeg ? blk.segLabel : null));
-    }
-  }
-}
-
-/** 一行异常状态：色点 + 名称 + 层/秒 +（伤害型才有）伤害数 */
-function dotRow(r, withValue) {
-  const row = el('div', 'dot-row');
-  const dot = el('span', 'dt-dot');
-  dot.style.background = ELEMENT_COLOR[r.type] || '#888';
-  row.append(dot, el('span', 'dot-name', ELEMENT_LABEL[r.type] || r.type),
-    el('span', 'dot-stacks', r.stacks.toFixed(2) + ' 层/秒'));
-  // 需求方 2026-11-12：非伤害型异常「不需要后面那个伤害」
-  if (withValue) row.append(el('span', 'dot-val', fmt(r.per) + r.unit));
-  return row;
-}
 
 // ─────────────────────────────────────────────────────────────
 // 折叠块（需求方 2026-11-12：「折叠起来以后只是内部项隐藏，标题还是要展示出来」）
 // ─────────────────────────────────────────────────────────────
 
-const COLLAPSE_STORE_KEY = 'wfcalc.collapse.v1';
 
-/**
- * 折叠状态（`localStorage`）。
- *
- * 需求方 2026-11-12：「折叠状态能保存到浏览器储存里面吗，可以就存」。
- * 只存「哪个块展开 / 收起」，与武器、配装无关，所以换枪也保持。
- * 读失败（隐私模式 / 存储被禁）时退回默认值，不影响页面。
- *
- * ⚠ 老版本存的 `dot-detail`（外层"异常状态"那一层）已随外层标题一起去掉，
- * 这里不再读它——旧存档里多出来的键会被忽略。
- */
-function readCollapse() {
-  const def = { 'dot-dmg': true, 'dot-nondmg': false };
-  try {
-    const raw = window.localStorage.getItem(COLLAPSE_STORE_KEY);
-    if (!raw) return def;
-    const saved = JSON.parse(raw);
-    for (const k of Object.keys(def)) {
-      if (typeof saved[k] === 'boolean') def[k] = saved[k];
-    }
-    return def;
-  } catch (e) {
-    return def;
-  }
-}
 
 function writeCollapse(state) {
   try {
@@ -1010,45 +796,7 @@ function writeCollapse(state) {
   }
 }
 
-/** 切换一个块的展开状态并持久化 */
-function toggleCollapse(key) {
-  const state = readCollapse();
-  state[key] = !state[key];
-  writeCollapse(state);
-}
 
-/**
- * 可折叠块：**标题永远显示**，收起只隐藏内部项。
- *
- * @param key      折叠状态的键（存 `localStorage`）
- * @param title    标题文字
- * @param count    内部项数量（显示在标题右边）
- * @param fill     (bodyEl) => void，往内部容器里填内容
- * @param suffix   可选后缀（多段武器时带上段名，免得三段的重名块分不清）
- */
-function collapsibleBlock(key, title, count, fill, suffix) {
-  const wrap = el('div', 'collapse-block');
-  const open = readCollapse()[key] !== false;
-  if (!open) wrap.classList.add('collapsed');
-
-  const head = el('button', 'collapse-head');
-  head.type = 'button';
-  const caret = el('span', 'collapse-caret', open ? '▾' : '▸');
-  head.append(caret);
-  head.append(el('span', 'collapse-title', suffix ? (suffix + ' · ' + title) : title));
-  head.append(el('span', 'collapse-count', count > 0 ? String(count) : '无'));
-  head.addEventListener('click', function () {
-    toggleCollapse(key);
-    // 只切本块的显示，不重算整页（避免重算时滚动位置跳动）
-    const collapsed = wrap.classList.toggle('collapsed');
-    caret.textContent = collapsed ? '▸' : '▾';
-  });
-
-  const body = el('div', 'collapse-body');
-  fill(body);
-  wrap.append(head, body);
-  return wrap;
-}
 
 /**
  * 范围伤害（D-031 修订）：仅当配置含爆炸元素时显示。
@@ -1224,20 +972,6 @@ function statChips(mod) {
   return wrap;
 }
 
-/**
- * 卡面上的「限制」说明（需求方 2026-11-13：「多重无法修改\射速无法修改。这样才叫简洁！」）。
- *
- * | Mod | 卡面文字 |
- * |---|---|
- * | 半自动炮轰系列（Semi-*-Cannonade） | 射速无法修改 |
- * | 敏锐主武 / 敏锐手枪 | 多重无法修改 |
- */
-function modLockNotes(mod) {
-  if (!mod) return [];
-  if (mod.id === 'semi_pistol_cannonade' || mod.id === 'semi_rifle_cannonade' || mod.id === 'semi_shotgun_cannonade') return ['射速无法修改'];
-  if (mod.id === 'primary_acuity' || mod.id === 'pistol_acuity') return ['多重无法修改'];
-  return [];
-}
 
 /**
  * 卡面上的**套装提示**（需求方 2026-11-18）。
@@ -1247,28 +981,7 @@ function modLockNotes(mod) {
  *
  * 依据：核心事实 §11（套装效果属于数据结构化事实）。
  */
-const SET_LABELS = { sacrifice: '牺牲', vigilante: '私法', nira: '混沌', gladiator: '角斗士' };
 
-function setNoteOf(mod) {
-  const set = mod && mod.set;
-  if (!set) return null;
-  const eff = SET_BONUS_EFFECTS[set];
-  if (!eff) return null;
-  const label = SET_LABELS[set] || set;
-  if (eff.kind === 'scaleOwnMods') {
-    return label + '套装：Mod 数值 ×' + eff.value;
-  }
-  if (eff.kind === 'critChanceFlat') {
-    return label + '套装：+' + eff.value + '% 几率强化主武器暴击';
-  }
-  if (eff.kind === 'slamDamage') {
-    return label + '套装：+' + eff.value + '% 震地攻击伤害';
-  }
-  if (eff.kind === 'critChancePerCombo') {
-    return label + '套装：+' + eff.value + '% × 连击倍率';
-  }
-  return null;
-}
 
 /**
  * 卸下所有 Mod（含劣化槽）。赋能不受影响。
@@ -2087,196 +1800,11 @@ function candidateCard(row) {
   return card;
 }
 
-const DETAIL_PLACEHOLDER = '点击备选 Mod 或赋能查看拆解';
 
-/**
- * 当前拆解的对象（D-128）。
- *
- * ⚠ 以前拆解是"点一下算一次、算完就固定在 DOM 里"：之后任何**输出变化**
- * （调敌人异况层数 / 叠层 / 玄骸元素 / 暴击基准 / 装别的卡 / 换枪）都不会让它重算，
- * 右边停着的是旧配置下的数。
- *
- * 现在只记住"拆解的是谁"（稳定的定位信息，不是行对象——那一行下次渲染就没了），
- * 拆解本身挂在 `renderAll()` 的最后重算一次，所以它总是跟着当前配装走。
- * 这就是"收益变动监听"的位置：绑在**渲染末尾**（所有状态变化的唯一汇合点），
- * 而不是绑在某个控件上。
- */
-let detailTarget = null;
 
-/** 记下要点开拆解的对象 */
-function selectDetail(target) {
-  detailTarget = target;
-  renderDetail();
-}
 
-/** 按当前配装重算拆解；没有选中对象就显示提示 */
-function renderDetail() {
-  const box = $('#detail');
-  if (!box) return;
-  box.innerHTML = '';
-  if (!detailTarget) {
-    box.append(el('div', 'muted', DETAIL_PLACEHOLDER));
-    return;
-  }
-  const row = resolveDetailTarget(detailTarget);
-  if (!row) {
-    detailTarget = null;
-    box.append(el('div', 'muted', DETAIL_PLACEHOLDER));
-    return;
-  }
-  paintDetail(box, row);
-}
 
-/**
- * 把"拆解对象"还原成当前配装下的那一行。
- *   · Mod：按 id 从当前武器的可装列表里重新取（换枪后取不到 → 自动清空拆解）；
- *   · 赋能：按 key 从当前武器的赋能列表里取。
- */
-function resolveDetailTarget(target) {
-  if (target.kind === 'arcane') {
-    const arc = store.data && store.data.arcaneByKey ? store.data.arcaneByKey.get(target.key) : null;
-    return arc ? { kind: 'arcane', arc: arc, key: target.key } : null;
-  }
-  const mod = store.data && store.data.modById ? store.data.modById.get(target.id) : null;
-  if (!mod) return null;
-  return { kind: 'mod', mod: mod, id: target.id, exilus: target.exilus };
-}
 
-function paintDetail(box, row) {
-  const isArcane = row.kind === 'arcane';
-  const mod = isArcane ? null : row.mod;
-  const arc = isArcane ? row.arc : null;
-  const name = isArcane ? (arc.name.zh || arc.name.en) : modName(mod);
-  box.append(el('h3', '', name));
-
-  // ── 词条列表：只列真正参与计算的（与内核贡献同源） ──
-  const ul = el('ul', 'detail-list');
-  if (isArcane) {
-    const stats = arcaneDisplayStats(arc);
-    for (let i = 0; i < stats.length; i++) {
-      ul.append(el('li', '', statLabel(stats[i].stat) + ' +' + (Math.round(stats[i].amount * 100) / 100) + '%'));
-    }
-    if (!stats.length) ul.append(el('li', 'muted', '无伤害词条（不参与伤害计算）'));
-  } else {
-    for (let i = 0; i < mod.stats.length; i++) {
-      const s = mod.stats[i];
-      const max = s.levelValues[s.levelValues.length - 1];
-      ul.append(el('li', '', statLabel(s.stat) + '：' + modStatText(s, max, mod.descriptionEn)));
-    }
-    // 需求方 2026-11-13：锁射速 / 锁多重的限制写进详情（原文就这两句）
-    for (const note of modLockNotes(mod)) ul.append(el('li', 'muted', note));
-  }
-  box.append(ul);
-  // 需求方 2026-11-13：没有伤害词条的赋能**写明原因**，不留空白让人猜
-  if (isArcane) {
-    const reason = arcaneZeroReason(arc);
-    if (reason) box.append(el('div', 'detail-note', '不参与伤害计算：' + reason));
-  }
-
-  // ── 当前 / 装备后 ──
-  const curContribs = currentContributions();
-  const cur = runCompute(curContribs);
-  let next = null;
-  let nextContribs = null;
-  if (isArcane) {
-    const extra = arcaneToContributions(arc);
-    // 与卡上收益同一口径：没装镀层卡时，镀层类贡献要连带层次数一起模拟
-    nextContribs = curContribs.concat(extra);
-    next = runCompute(nextContribs);
-  } else {
-    // 用与备选区一致的模拟方式（装到空位，不顶掉已有 Mod）
-    nextContribs = simulateEquip(mod, row.exilus);
-    if (!nextContribs) {
-      box.append(el('div', 'muted', '当前配置已满，无法装备这张 Mod'));
-      return;
-    }
-    next = runCompute(nextContribs);
-  }
-
-  const out = el('table', 'detail-table');
-  const oh = el('tr');
-  ['输出口径', '当前', '装备后', '增幅'].forEach(function (h) { oh.append(el('th', '', h)); });
-  out.append(oh);
-  for (let i = 0; i < cur.output.lines.length; i++) {
-    const c = cur.output.lines[i];
-    const n = next.output.lines[i];
-    const g = c.value === 0 ? null : n.value / c.value - 1;
-    const tr = el('tr');
-    if (c.id === state.metric) tr.classList.add('highlight');
-    tr.append(el('td', '', c.label));
-    tr.append(el('td', '', fmt(c.value)));
-    tr.append(el('td', '', fmt(n.value)));
-    tr.append(el('td', g === null ? '' : g >= 0 ? 'pos' : 'neg', fmtPct(g)));
-    out.append(tr);
-  }
-  box.append(out);
-
-  // ── 面板（D-130 / D-132）：一张表，行按「依赖顺序」排：
-  //   暴击几率 → 暴击伤害 → 平均暴击倍率 → 触发几率 → 多重 → 射速 → 弹匣 → 装填。
-  //   以前暴击几率/暴击伤害既在「面板」表里、又在「暴击」表里出现一次（D-132：合到一张表）。
-  //   只列**真的会变**的行；没变化的行不出现（拆解本身就是"装上它之后"）。
-  //   需求方 2026-11-15（A6）：弹匣那一行已经是**等效弹匣**，不再单列「等效弹匣」行。
-  {
-    const cn = cur.state && cur.state.computed;
-    const nn = next.state && next.state.computed;
-    const curSeg = cur.segments[0];
-    const seg = next.segments[0];
-    const pairs = [
-      ['暴击几率', curSeg.critChance, seg.critChance, 'pct'],
-      ['暴击伤害', curSeg.critDamage, seg.critDamage, 'x'],
-      ['平均暴击倍率', critAverage(1, curSeg.critChance, curSeg.critDamage), critAverage(1, seg.critChance, seg.critDamage), 'x'],
-      ['触发几率', cur.panelPairs.statusChance.after, next.panelPairs.statusChance.after, 'pct'],
-      ['多重射击', cur.panelPairs.multishot.after, next.panelPairs.multishot.after, 'num3'],
-      ['射速', cur.panelPairs.fireRate.after, next.panelPairs.fireRate.after, 'num3'],
-      ['弹匣容量', cur.panelPairs.magazineSize.after, next.panelPairs.magazineSize.after, 'num2'],
-      ['装填时间', cur.panelPairs.reloadTime.after, next.panelPairs.reloadTime.after, 'num3'],
-    ];
-    const show = function (v, kind) {
-      if (!Number.isFinite(v)) return '—';
-      if (kind === 'pct') return (v * 100).toFixed(2) + '%';
-      if (kind === 'x') return '×' + v.toFixed(2);
-      return v.toFixed(kind === 'num2' ? 2 : 3);
-    };
-    const rows = [];
-    for (const [label, a, b, kind] of pairs) {
-      if (!Number.isFinite(b) || Math.abs(b - a) <= 1e-9) continue;
-      rows.push([label, a, b, kind]);
-    }
-    if (rows.length) {
-      const pbox = el('div', 'merge-box');
-      pbox.append(el('div', 'section-title', '面板'));
-      const pt = el('table', 'detail-table');
-      const ph = el('tr');
-      ['', '当前', '装备后', '增幅'].forEach(function (h) { ph.append(el('th', '', h)); });
-      pt.append(ph);
-      for (const [label, a, b, kind] of rows) {
-        const tr = el('tr');
-        tr.append(el('td', '', label));
-        tr.append(el('td', '', show(a, kind)));
-        tr.append(el('td', '', show(b, kind)));
-        const g = a > 0 ? b / a - 1 : null;
-        tr.append(el('td', g === null ? '' : g >= 0 ? 'pos' : 'neg', fmtPct(g)));
-        pt.append(tr);
-      }
-      pbox.append(pt);
-      box.append(pbox);
-    }
-    // 显式读一遍 `cn`，避免"当前状态"在将来被误用来算变化率（口径见 D-084）
-    void cn;
-  }
-
-  // 暴击分档（D-033 / D-038）：按**装上它之后**的暴击参数重新分档。
-  // （D-132：暴击几率/暴击伤害已并进上面的「面板」表，这里只剩分档。）
-  const nextSeg = next.segments[0];
-  const ct = critTiers(nextSeg.critChance, nextSeg.critDamage);
-  const tierBox = el('div', 'merge-box');
-  tierBox.append(el('div', 'section-title', '暴击分档'));
-  tierBox.append(el('div', 'merge-src', ct.map(function (t) {
-    return '等级 ' + t.k + '：' + (t.prob * 100).toFixed(1) + '% × ' + t.mul.toFixed(2);
-  }).join('　')));
-  tierBox.append(el('div', 'merge-src', '平均 ' + critAverage(1, nextSeg.critChance, nextSeg.critDamage).toFixed(3) + ' 倍'));
-  box.append(tierBox);
-}
 
 // ─────────────────────────────────────────────────────────────
 // 控件
@@ -2776,34 +2304,6 @@ function arcaneStatChips(arc) {
   return out;
 }
 
-/**
- * 赋能**为什么没有伤害词条**（需求方 2026-11-13：「0 收益的必须写明原因」）。
- *
- * 只写一句话，依据是 `adapter.ts` 的 `ARCANE_STAT_OVERRIDES` 里那张"明确不生效"表。
- */
-function arcaneZeroReason(arc) {
-  const REASONS = {
-    SecondaryOnStatusProcBonusDamage: '触发异常时额外造成 750 点伤害，是附加伤害，不是武器加成',
-    ConvergeRadialAttackOnAim: '需要知道爆炸半径才能算，目前不实现',
-    PrimaryPlatedRound: '按弹匣长度换算的加成，待确认',
-    SplitStatusProcsOnStackedStatusHit: '「追加基本异常」的概率，不是触发几率',
-    PrimaryJamEnemyWeaponsOnMagneticProc: '干扰半径（米），不是触发几率',
-    SecondaryColdOnPuncture: '施加冰冻层数，不是触发几率',
-    SecondaryOnRollCritChanceOnHeadshot: '+300% 暴率仅对弱点命中生效',
-    ExtraProcOnProc: '二次触发的概率，不是触发几率',
-    PrimaryEnergyRegenOnImpactProc: '能量回复，不影响武器伤害',
-    StatusTriggerRadialDamage: '需求方定为无效果',
-    GroundSlamPull: '拉拽敌人到近战范围，是控制效果',
-    MeleeArcaneProjectileOnJump: '产生额外投射物，未建模',
-    MeleeArcaneShockwaveOnJump: '产生额外冲击波，未建模',
-    SeekerProjOnHeadshotKill: '产生额外飞射物，未建模',
-    BurningCystOnKill: '触发物伤害，不是武器加成',
-    IceMistOnKill: '触发物伤害，不是武器加成',
-    LightningStrikeOnKill: '触发物伤害，不是武器加成',
-    ToxicBloodOnKill: '触发物伤害，不是武器加成',
-  };
-  return REASONS[arc.key] || '';
-}
 
 /**
  * 叠加类赋能的「满层」说明（需求方 2026-11-13：「叠加类赋能不再只显示单层，要显示满层」）。
@@ -2846,6 +2346,12 @@ function arcanePreviewGain(arc) {
 async function boot() {
   // 把外壳能力注入裂罅模块（避免互相 import 成环）
   wireRivenDeps({ rerender: renderAll, makeDraggable: makeDraggable, simulateEquip: simulateEquip });
+  wireDetailDeps({
+    rerender: renderAll,
+    effectiveMode: effectiveMode,
+    selectedVariantIdx: selectedVariantIdx,
+    simulateEquip: simulateEquip,
+  });
   // D-093：所有类别的武器都加载进来，供切换用（当前只有"主要"可选）
   // 取数细节在 app-data.js 的 loadAllWeapons()
   setDataAll(await loadAllWeapons(groupWeapons));
@@ -3210,7 +2716,7 @@ async function switchWeapon(weaponId) {
   // 换枪后右侧拆解必须回到提示文案：`detailTarget` 记的是**上一把枪**上的那张卡，
   // 不清掉会继续显示旧武器的「输出口径」表（本次重跑数据暴露出来的既有缺陷）。
   // 只重置目标、不改渲染逻辑——拆解区本来就靠 `detailTarget === null` 显示占位文案。
-  detailTarget = null;
+  clearDetailTarget();
 
   await loadWeapon(weaponId);
   // D-157：换到这把枪 → 换到**它自己的**配卡；从没存过就是空配卡

@@ -47,7 +47,10 @@ export async function loadModules() {
   const editor = await import(pathToFileURL(join(PUBLIC, 'ui-editor.js')).href);
   const uiDom = await import(pathToFileURL(join(PUBLIC, 'ui-dom.js')).href);
   const uiRiven = await import(pathToFileURL(join(PUBLIC, 'ui-riven.js')).href);
-  return { core, adapter, rivenData, manualMods, picker, override, store, data, compute, riven, editor, uiDom, uiRiven, transpile };
+  const uiLabels = await import(pathToFileURL(join(PUBLIC, 'ui-labels.js')).href);
+  const uiParts = await import(pathToFileURL(join(PUBLIC, 'ui-parts.js')).href);
+  const uiDetail = await import(pathToFileURL(join(PUBLIC, 'ui-detail.js')).href);
+  return { core, adapter, rivenData, manualMods, picker, override, store, data, compute, riven, editor, uiDom, uiRiven, uiLabels, uiParts, uiDetail, transpile };
 }
 
 /**
@@ -71,6 +74,9 @@ export function inlineImports(src, ns) {
     [/\/ui-editor\.js$/, 'ns.editor'],
     [/\/ui-dom\.js$/, 'ns.uiDom'],
     [/\/ui-riven\.js$/, 'ns.uiRiven'],
+    [/\/ui-labels\.js$/, 'ns.uiLabels'],
+    [/\/ui-parts\.js$/, 'ns.uiParts'],
+    [/\/ui-detail\.js$/, 'ns.uiDetail'],
   ];
 
   const unresolved = [];
@@ -169,6 +175,9 @@ export async function loadPage(opts = {}) {
     editor: modules.editor,
     uiDom: modules.uiDom,
     uiRiven: modules.uiRiven,
+    uiLabels: modules.uiLabels,
+    uiParts: modules.uiParts,
+    uiDetail: modules.uiDetail,
   });
   // 把私有的 `async function boot()` 暴露成返回值，供 invokeBoot() 二次启动
   src += '\n;return { boot: boot };\n';
