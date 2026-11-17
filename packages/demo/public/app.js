@@ -1864,7 +1864,9 @@ function filterKeysOf(mod) {
     const stat = s.stat;
     if (stat === 'baseDamage' || s.key === 'co') keys.add('damage');
     else if (stat === 'multishot') keys.add('multishot');
-    else if (stat === 'critChance' || stat === 'critMultiplier') keys.add('crit');
+    // 弱点暴击率（敏锐主武 / 敏锐手枪）：开爆头时并进暴击率乘区，所以算「暴击」类
+    // 依据：核心事实 §3.2（弱点暴击率与普通暴击率同一个乘区）
+    else if (stat === 'critChance' || stat === 'critMultiplier' || stat === 'weakpointCritChance') keys.add('crit');
     else if (stat.indexOf('elemental:') === 0) keys.add('element');
     else if (stat.indexOf('physical:') === 0) keys.add('physical');
     else if (stat === 'fireRate') keys.add('fireRate');
