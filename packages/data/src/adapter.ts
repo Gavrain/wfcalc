@@ -4,7 +4,7 @@
  * 数据层产出（`packages/data/src/generated/`）是"流水线形状"，内核用的是"贡献表形状"；
  * 这一层只做**形状转换 + 口径归一化**，不引入任何新口径。
  *
- * 归一化规则（`docs/伤害公式.md` §1.1）：
+ * 归一化规则（依据：核心事实）：
  *   · 武器的 `critChance` / `statusChance` 是 0~1 小数 → 直接用
  *   · `mods.json` 的 `levelValues` 是 0~100 百分数 → 转成内核的百分比口径（原样即可，内核 percent 用 165 表示 +165%）
  *   · 属性键 → `ContribStat`：`elemental:heat` / `physical:impact` / `faction:grineer` …

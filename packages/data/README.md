@@ -114,7 +114,7 @@ Mod  side : mods.json → slotKind
 |---|---|---|
 | **私法 Vigilante** | X% 几率强化主武器暴击 | **critChance（固定加算区）** |
 | 角斗士 Gladiator | 每层连击倍率 +X% 近战暴率 | critChance |
-| 牺牲 Sacrifice / Umbra | 增强本套 Mod 自身数值 | **未建模**（见 data-todo，D-002） |
+| 牺牲 Sacrifice / Umbra | 增强本套 Mod 自身数值 | **未建模**（本版未建模） |
 | Nira | 震地攻击伤害 | baseDamage |
 | 其余 14 个 | 同伴/生存/控制/区域伤害 | 不进伤害汇总 |
 

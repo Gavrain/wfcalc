@@ -15,13 +15,13 @@ import type { AttackMode, DamageSegment, ModeVariant, Weapon } from './weapon.ts
 import { allSegments, panelStats } from './weapon.ts';
 import type { Contribution } from './contributions.ts';
 import { addSpread } from './elements.ts';
-import { bucketDetail } from './buckets.ts';
+import { bucketDetail, passiveBaseDamageOf } from './buckets.ts';
 import type { WeaponState } from './weapon-state.ts';
 import { buildWeaponState } from './weapon-state.ts';
 import type { Ctx, CtxOptions } from './ctx.ts';
 import { buildContext } from './ctx.ts';
 import type { SegmentResult } from './segment.ts';
-import { passiveBaseDamageOf, resolveSegment } from './segment.ts';
+import { resolveSegment } from './segment.ts';
 import type { OutputBreakdown } from './output.ts';
 import { buildOutput } from './output.ts';
 

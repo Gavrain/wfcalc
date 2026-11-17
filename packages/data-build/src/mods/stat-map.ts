@@ -2,7 +2,7 @@
  * Mod 基线属性键 → 本项目的「属性 / 乘区」映射。
  *
  * 背景：基线的属性键（`dmg` / `ms` / `cc` / `heat` …）沿用了社区通用的简写命名，
- * 而 `docs/乘区归属表.md` 定义的是本项目的乘区口径。两边必须显式对一次，
+ * 而 `docs/specs/核心事实.md` 定义的是本项目的乘区口径。两边必须显式对一次，
  * 不能靠名字猜——名字相近但口径不同的最容易被错配，例如：
  *   · `sd`   = 异常状态伤害 +X%（不是状态持续时间）
  *   · `co`   = 镀层/条件过载类「每个异常状态 +X% 伤害」
@@ -21,7 +21,7 @@
 import type { DamageType } from '../../../core/src/damage-types.ts';
 import type { BucketId } from '../../../core/src/buckets.ts';
 
-/** 本项目可被 Mod 影响的属性（乘区归属表口径） */
+/** 本项目可被 Mod 影响的属性（核心事实口径） */
 export type ModStatId =
   | 'baseDamage'
   | 'multishot'
@@ -185,7 +185,7 @@ const TABLE: Record<string, StatMapping> = {
   // 需求方 2026-11-13 复核：这三张不能再按近战范围算。
   beamRange: m('beamRange', 'utility', 'flat', 'functional', '光束距离（米）'),
   hrel: m('reloadSpeed', 'utility', 'percent', 'functional', '收起武器时的换弹速度'),
-  aradius: m('explosionRadius', null, 'percent', 'functional', 'AoE 半径；衰减参数仍需人工补（data-todo 第 1 节）'),
+  aradius: m('explosionRadius', null, 'percent', 'functional', 'AoE 半径；衰减参数本版不建模'),
   movesp: m('movementSpeed', null, 'percent', 'special', '移动速度，不影响伤害'),
 
   // ======== 明确不参与伤害计算 ========

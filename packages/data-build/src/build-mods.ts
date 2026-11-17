@@ -607,7 +607,7 @@ async function main(): Promise<number> {
   console.log(`      武器 ${Object.keys(weaponSlots).length} 把`);
   console.log(`      槽位无法判定 ${unresolvedWeapons.length} 把`);
 
-  // 近战细类待办（docs/decisions.md D-004：需求方确认"全部列为 todo，暂不关心"）。
+  // 近战细类待办（需求方确认"全部列为 todo，暂不关心"）。
   // 这些武器维持"只有宽类 melee、没有细类"，不补推断值；显式统计出来方便以后回看。
   const meleeMissingSpecific = Object.entries(weaponSlots)
     .filter(([, w]) => w.slots.broad === 'melee' && w.slots.specific.length === 0 && !w.slots.unresolved)
@@ -713,7 +713,7 @@ async function main(): Promise<number> {
       {
         generatedAt: new Date().toISOString(),
         source: 'mods/baseline.json（Mod 数值基线） + ExportUpgrades（元数据交叉校验）',
-        note: 'levelValues 为 0 级到满级的逐级数值；bucket 对应 docs/乘区归属表.md 的乘区',
+        note: 'levelValues 为 0 级到满级的逐级数值；bucket 对应核心事实里的乘区口径',
         count: cleaned.length,
         mods: cleaned,
       },
@@ -742,7 +742,7 @@ async function main(): Promise<number> {
       {
         generatedAt: new Date().toISOString(),
         source: 'ExportArcanes.json（官方结构化逐级数值）+ dict.zh/en 渲染描述',
-        note: 'levels[].values 为各级的数值槽（路径 → 数值）；bucket 对应 docs/乘区归属表.md',
+        note: 'levels[].values 为各级的数值槽（路径 → 数值）；bucket 对应核心事实里的乘区口径',
         scope: '仅收录武器可用赋能（主要·/次要·/近战·/神威·/和平·/残差·/弓箭·/霰弹·/双枪·/瀑流·/联结·/分形·）',
         count: cleanArcanes.length,
         skipped: arcaneSkipped,

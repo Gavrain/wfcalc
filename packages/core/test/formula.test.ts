@@ -1,5 +1,5 @@
 /**
- * 结算链测试 —— 直接对应 `docs/伤害公式.md` §11 的校验例 1~7。
+ * 结算链测试 —— 直接对应 依据：核心事实 的校验例 1~7。
  * 测试名带文档小节号，改代码前先看文档。
  */
 import { describe, it } from 'node:test';
@@ -27,12 +27,12 @@ const pct = (stat: Contribution['stat'], percent: number, slot?: number): Contri
 
 const HIT = { kind: 'impact' as const };
 
-describe('§11 校验例（来自乘区归属表与需求方裁定）', () => {
+describe('§B 校验例（来自核心事实与需求方裁定）', () => {
   it('例 1（4.1 / A-14 = 口径 A）：面板 100 冲 + 100 切，+100% 冲、+100% 毒 → 200/100/200', () => {
     // 元素 % 的基数 = ①玄骸 + ②基伤（**不含物理 %Mod**）：100 + 100 = 200
     //   ⇒ 毒加量 = 200 × 100% = 200
-    // ⚠ 与 `伤害公式.md` §11 旧写法「毒 300」不同；「200」与乘区归属表 4.1 校验例一致。
-    //    待确认见 `docs/decisions.md` D-022。
+    // 「毒 200」（不是「毒 300」），依据：核心事实 §6。
+    //    待确认见 依据：核心事实。
     const contribs = [pct('elemental:toxin', 100), pct('physical:impact', 100)];
     const base = applyBaseDamage({ impact: 100, slash: 100 }, HIT, contribs);
     const r = applyElements(base, contribs, 'hit').v;

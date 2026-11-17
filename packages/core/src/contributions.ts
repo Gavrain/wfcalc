@@ -1,7 +1,7 @@
 /**
  * 贡献（Contribution）：把 Mod / 赋能 / 自定义加成**全部摊成同一张表**。
  *
- * 口径来源：`docs/伤害公式.md` 第 1 节与第 8 节。
+ * 口径来源：依据：核心事实 第 1 节与第 8 节。
  *   · `form`：三种输入形态（D-019 三选一）——
  *       'pct'  百分比加算   （+165% 基伤）
  *       'flat' 绝对值加算   （暴率 +5 点，私法套装即此类）
@@ -12,7 +12,7 @@
 import type { DamageType } from './damage-types.ts';
 
 /**
- * 派系（`docs/乘区归属表.md` 第 5 节）。
+ * 派系（依据：核心事实 第 5 节）。
  *
  * 放在本文件而非 `main.ts`：`ContribStat` 的 `faction:<Faction>` 分支要引用它，
  * 而 `main.ts` 已 import 本文件——写在 main.ts 里会形成类型层的环依赖。

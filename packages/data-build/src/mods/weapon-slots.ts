@@ -72,7 +72,7 @@ export type ModSlotKind = (typeof MOD_SLOT_KINDS)[number];
 /**
  * 近战细类（`melee` 之下再分）。
  *
- * 需求方确认（2026-11-05，见 docs/decisions.md D-001）：**近战必须区分类型**，
+ * 需求方确认（2026-11-05）：**近战必须区分类型**，
  * 因为近战专属 Mod 只能装在对应类型的近战武器上（如尼卡纳 Mod 不能装到剑上）。
  *
  * 归到 `melee` 宽类的通用 Mod 仍然对所有近战合法——两件事分开判断，见 `canEquipMod`。
@@ -423,7 +423,7 @@ export interface SlotResolution {
   /**
    * 细类（决定专属模组能不能装），没有则为空数组。
    *
-   * 需求方确认（2026-11-05，见 docs/decisions.md D-001）：
+   * 需求方确认（2026-11-05）：
    * **近战必须区分类型**——近战专属 Mod 不能用于所有近战武器。
    * 判定规则见 `usableModKinds`：宽类 `melee` 模组对所有近战合法，细类模组只对同名细类合法。
    */

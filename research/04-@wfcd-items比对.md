@@ -7,10 +7,10 @@
 >
 > 但它有两个**现成的补缺**价值：
 > 1. **AoE 距离衰减**（`falloff{start,end,reduction}`）——本地 126 把带 AoE 的武器里 123 把有值，
->    正好补 `data-todo` 第 1 节；
-> 2. **多模式 / 灵化模式的面板数值**（暴率 / 暴伤 / 触发 / 射速）——补 `data-todo` 第 2 节。
+>    正好补当时的爆炸范围待补表（原 `data-todo/`，已删除）；
+> 2. **多模式 / 灵化模式的面板数值**（暴率 / 暴伤 / 触发 / 射速）——补当时的灵化面板待填表（原 `data-todo/`，已删除）。
 >
-> 是否引入见 [`docs/decisions.md`](../docs/decisions.md) 的 **D-069（待确认）**，本文不替需求方拍板。
+> 是否引入见 `docs/requirements/`（原决策台账已并入），本文不替需求方拍板。
 
 验证环境：Windows / Node v24.10.0 / `@wfcd/items` **1.1276.47**（npm 发布时间 2026-11-01，MIT）。
 本机 GitHub 域名被 TLS 中间人拦截，改从 npmmirror 取 tarball 解包比对；
@@ -43,7 +43,7 @@ flowchart LR
 | `name` / `nameZh` | 语言包 `dict.en/zh.json`，键 = 导出的 `name` 语言键 | |
 | `fireRate`（个别） | **人工** `manual/overrides.ts`（目前只有 `Railgun`，导出射速为 0） | 带 `_manual` |
 
-**注意**：`data-todo/README.md` 说的"官方导出不给 AoE 半径/衰减"是对的——导出里只有近战的
+**注意**：当时的待补数据清单（原 `data-todo/`，已删除）说的"官方导出不给 AoE 半径/衰减"是对的——导出里只有近战的
 `slamRadius` / `heavySlamRadius`，`explosiveAttack` 只有伤害与 `procChance`。
 
 ### 1.2 Mod / 赋能 / 套装（`packages/data/src/generated/mods/`）
@@ -156,18 +156,18 @@ Rocket Explosion shot_type=AoE         {slash 155, puncture 183, blast 349} ← 
 | 项 | 本地 | WFCD |
 |---|---|---|
 | 带 AoE 段的武器 | 126 把 | — |
-| 有 `falloff` | 0（只要 data-todo 手填） | **123 / 126**（缺 `CrpSentAmlgSniper`、`GrnGorgSniperRifle`、`ExaltedArtilleryWeapon`） |
-| 字段形态 | data-todo 期望 `radius / falloffStart / falloffEnd / minMultiplier / damageFactorAtCenter` | `{start, end, reduction}` |
+| 有 `falloff` | 0（只要 人工填写） | **123 / 126**（缺 `CrpSentAmlgSniper`、`GrnGorgSniperRifle`、`ExaltedArtilleryWeapon`） |
+| 字段形态 | 当时期望 `radius / falloffStart / falloffEnd / minMultiplier / damageFactorAtCenter` | `{start, end, reduction}` |
 | `radius` | 需要 | **推不出来**（`reduction` 是边缘伤害倍率的补数，不含半径） |
 
 例：`KuvaOgris → Rocket Explosion → falloff {start: 0, end: 7.9, reduction: 0.5}`。
 
-> ⚠ `reduction` 与 data-todo 的 `minMultiplier` 是否同一口径（`minMultiplier = 1 − reduction`？）
+> ⚠ `reduction` 与 当时手填表的 `minMultiplier` 是否同一口径（`minMultiplier = 1 − reduction`？）
 > **未经实测确认**，不能直接落库。这属于"填补缺失"，按 D-069 走确认。
 
 ### 3.6 灵化 / 多模式的面板数值（第二个补缺）
 
-data-todo 第 2 节列了 8 把武器要手填灵化形态的暴率 / 暴伤 / 触发。WFCD 的 `attacks[]`
+当时的手填表列了 8 把武器要手填灵化形态的暴率 / 暴伤 / 触发。WFCD 的 `attacks[]`
 **每个模式自带** `crit_chance` / `crit_mult` / `status_chance` / `speed`：
 
 ```json
@@ -207,7 +207,7 @@ Paris Prime  → [{name:"Uncharged Shot",       cc:45, cm:2,   sc:20},
 | 四类伤害段（命中/飞行体/爆炸/嵌入） | 官方 behaviours ✓ | **不能**（被压平成 `attacks[]`） |
 | 段级 `procChance` | 逐段保留 ✓ | **不能**（只有模式级） |
 | 多模式 / 灵化模式面板差异 | 只有伤害，暴击/触发待手填 | **能补**，但需先定模式对齐规则 |
-| AoE 半径 + 距离衰减 | 缺（data-todo 手填） | **能补衰减**，半径仍缺 |
+| AoE 半径 + 距离衰减 | 缺（人工填写） | **能补衰减**，半径仍缺 |
 | 玄骸 / 变体判定 | 官方 `variantType` + `compatibilityTags` | **不能** |
 | 武器 → 可装 Mod | `weapon-slots.json` | **不能** |
 | Mod 逐级数值 | ZKMODS ✓ | **不能**（文本） |

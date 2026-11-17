@@ -2,7 +2,7 @@
  * 伤害类型：与官方导出 `DT_*` 键一一对应的语义化别名。
  *
  * 注意：物理三元素（impact/puncture/slash）与 11 种元素伤害在模型里地位不同——
- * 前者参与复合元素组合的"来源"，后者部分参与组合。详见 docs/ 下的乘区归属表。
+ * 前者参与复合元素组合的"来源"，后者部分参与组合。详见 docs/ 下的核心事实。
  */
 export const DAMAGE_TYPES = [
   // 物理
@@ -95,7 +95,7 @@ export function spreadTotal(s: DamageSpread): number {
 /**
  * 只合并**伤害分布**的加量（物理 + 元素）。
  *
- * 调用前置条件（口径见 `docs/伤害公式.md` §5 与 `docs/decisions.md` D-017）：
+ * 调用前置条件（口径见 依据：核心事实 与 依据：核心事实）：
  *   · 玄骸加成**不**在 `spread` 里，也不在 `physical` / `elemental` 里 ——
  *   · 把玄骸混进 `spread` 会被当成"面板伤害"，导致元素 %Mod 的基数被重复计算。
  *

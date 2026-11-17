@@ -10,7 +10,7 @@
  * · `INDEX_EXPORTS`：拆前 `core/src/index.ts` 的导出集合（= 全部模块 `export *` 的结果）；
  * · `MAIN_EXPORTS`：拆前 `main.ts` 自己的导出集合（少数文件是从 `main.ts` 直接导入的）。
  *
- * 以后**有意**新增/删除导出时，同步改这里，并在 `docs/decisions.md` 记一笔。
+ * 以后**有意**新增/删除导出时，同步改这里，并在 依据：核心事实 记一笔。
  */
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';

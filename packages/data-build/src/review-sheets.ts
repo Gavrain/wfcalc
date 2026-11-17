@@ -1,7 +1,7 @@
 /**
  * 生成 @wfcd/items 补缺的**人工复核表**（D-069 C 方案）。
  *
- * 只读：读 generated/weapons + .cache 里解包的 @wfcd/items，写文件到 data-todo/。
+ * 只读：读 generated/weapons + .cache 里解包的 @wfcd/items，写文件到 范围与衰减参数/。
  * 不写 generated/，不改 manual/，不跑流水线。
  *
  * 用法：
@@ -13,8 +13,8 @@
  *   3. CSV 只列**边界规则覆盖不到**的行。
  *
  * 产出：
- *   data-todo/aoe-falloff.auto.json  AoE 衰减（自动解析，已确定）
- *   data-todo/wfcd-confirm.csv       待确认：AoE 半径无法推断 / 爆炸段对不上 / 面板数值冲突
+ *   （范围与衰减参数）  AoE 衰减（自动解析，已确定）
+ *   （面板确认表）       待确认：AoE 半径无法推断 / 爆炸段对不上 / 面板数值冲突
  */
 import { mkdirSync, readFileSync, writeFileSync, renameSync, existsSync } from 'node:fs';
 import { join, resolve } from 'node:path';
@@ -23,7 +23,7 @@ import type { AttackMode } from '../../core/src/weapon.ts';
 const repoRoot = resolve(import.meta.dirname, '../../..');
 const WEAPON_DIR = join(repoRoot, 'packages/data/src/generated/weapons');
 const WFCD_DIR = join(repoRoot, '.cache/wfcd-items-pkg/package/data/json');
-const OUT_DIR = join(repoRoot, 'data-todo');
+const OUT_DIR = join(repoRoot, 'review-sheets');
 
 const CATEGORIES = ['primary', 'secondary', 'melee', 'archgun', 'archmelee', 'companion'] as const;
 const WFCD_FILES = ['Primary', 'Secondary', 'Melee', 'Arch-Gun', 'Arch-Melee', 'SentinelWeapons'];
@@ -397,7 +397,7 @@ writeFileSync(
   ) + '\n',
   'utf8',
 );
-console.log(`  写入 data-todo/aoe-falloff.auto.json（${Object.keys(aoe.auto).length} 段）`);
+console.log(`  写入 review-sheets/aoe-falloff.auto.json（${Object.keys(aoe.auto).length} 段）`);
 
 console.log('\n[2/2] 面板');
 const panels = panelRows(weapons, wfcd);

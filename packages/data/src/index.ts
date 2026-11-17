@@ -22,7 +22,7 @@ export interface CoverageNote {
   itemId: string;
   layer: string;
   status: ManualLayerStatus;
-  /** 缺失的具体字段，对应 data-todo 里的条目 */
+  /** 缺失的具体字段，对应 范围与衰减参数 里的条目 */
   missingFields: string[];
 }
 

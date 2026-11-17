@@ -1,5 +1,5 @@
 /**
- * 导出「变量依赖图」的数据：直接读 `compute().state`，**不再自己重算**。
+ * 导出计算链数据：直接读 `compute().state`，**不再自己重算**。
  *   node packages/demo/src/gen-graph.mjs <weaponId> [--kuva <elem>] [--mods a,b,c]
  *
  * 依赖的 state 结构见 `packages/core/src/weapon-state.ts`：

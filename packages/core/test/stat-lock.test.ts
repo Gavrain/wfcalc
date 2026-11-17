@@ -3,7 +3,7 @@
  *
  * 口径来源：
  *   · 锁射速：D-091 半自动炮轰系列「Fire Rate cannot be modified」；
- *   · 锁多重：`docs/decisions/core.md` D-182 敏锐主武 / 敏锐手枪「Multishot cannot be modified」。
+ *   · 锁多重：依据：核心事实 敏锐主武 / 敏锐手枪「Multishot cannot be modified」。
  *
  * 两条规则同构：装上带标记的卡后，该属性的**所有**来源（正的和负的）都不生效，
  * 恒等于面板值。

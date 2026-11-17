@@ -43,7 +43,7 @@ describe('Mod 等级数值换算', () => {
   });
 });
 
-describe('属性键 → 乘区映射（对照乘区归属表）', () => {
+describe('属性键 → 乘区映射（对照核心事实 §1）', () => {
   it('基伤与多重是两个独立乘区', () => {
     const dmg = lookupStat('dmg');
     const ms = lookupStat('ms');

@@ -16,7 +16,7 @@ node --experimental-strip-types packages/data-build/src/review-sheets.ts
 
 | 产出 | 内容 |
 |---|---|
-| `data-todo/aoe-falloff.auto.json` | 46 段 AoE 的 `start / end / reduction / radius`，全部确定 |
+| 当时的产物 `aoe-falloff.auto.json`（原 `data-todo/`，已删除） | 46 段 AoE 的 `start / end / reduction / radius`，全部确定 |
 
 规则：
 
@@ -38,7 +38,7 @@ falloffEnd   = max(end)
 
 ---
 
-## 2. 要你填的（`data-todo/wfcd-confirm.csv`，81 行）
+## 2. 要你填的（当时的确认表，81 行；原 `data-todo/`，已删除）
 
 列：`类别 / row_key / 武器 / 模式 / 本地现值 / WFCD 参考 / 要填的列 / 填写 / 说明`。
 **只填「填写」这一列**，其它别动（`row_key` 是回填时定位用的）。
@@ -66,7 +66,7 @@ WFCD 只给了**一种**衰减终点，说明这把武器只有一个尺寸的�
 > 其余灵化/多模式武器的面板：**WFCD 只有一条攻击的，说明它和本地本来就一致，没进表**；
 > `role=incarnon` 的 7 把（帕里斯系、恐惧、连弩、弹弓系）WFCD 给了不同数值，
 > 但那属于"WFCD 的 wiki 口径 vs 你确认过的本地口径"之争，不在这份表里，
-> 需要时再单独开（见 `data-todo/README.md` 第 2 节）。
+> 需要时再单独开（见当时的待补数据清单，原 `data-todo/`，已删除）。
 
 ---
 
