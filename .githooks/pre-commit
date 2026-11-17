@@ -1,0 +1,26 @@
+#!/bin/sh
+# 提交前检查（需求方 2026-11-17 确认）
+#   跑：typecheck + 单元测试；不过就不让提交。
+#   不跑：页面校对脚本（很慢，按规矩等需求方验收后再跑）。
+# 安装：git config core.hooksPath .githooks
+#
+# ⚠ 本机沙箱限制：git 启动的 /bin/sh 子进程可能起不来（Win32 error 5）。
+#   那种情况下钩子会被跳过，不代表检查通过——提交前请手动跑一次 npm run check。
+
+echo "[pre-commit] typecheck ..."
+if ! npm run typecheck; then
+  echo ""
+  echo "[pre-commit] ✖ 类型检查失败：见上面报错的文件与行号。"
+  echo "[pre-commit]   修好后再提交（临时跳过可用 git commit --no-verify）。"
+  exit 1
+fi
+
+echo "[pre-commit] 单元测试 ..."
+npm run test:unit || {
+  echo ""
+  echo "[pre-commit] ✖ 单元测试失败：见上面失败的用例名。"
+  exit 1
+}
+
+echo "[pre-commit] ✔ typecheck 与单元测试通过"
+exit 0

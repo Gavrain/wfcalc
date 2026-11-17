@@ -29,10 +29,10 @@ research/           研究记录
 ## 常用命令
 
 ```bash
-npm run typecheck
-node --test --experimental-strip-types --test-isolation=none "packages/*/test/**/*.test.ts"
+npm run check         # 类型检查 + 单元测试（改完一段就跑，约 2 秒）
+npm run check:smoke   # 再加界面冒烟（碰了界面时跑）
 npm run demo          # http://127.0.0.1:5178
 npm run build:offline # 离线单文件 dist/wfcalc-standalone.html
 ```
 
-> 默认的 `npm test` 在本机沙箱里会因 spawn EPERM 失败，用上面带 `--test-isolation=none` 的命令。
+> 提交钩子：`git config core.hooksPath .githooks` 一次即生效，详见 [CONTRIBUTING.md](CONTRIBUTING.md) 第 8 条。

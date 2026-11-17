@@ -34,7 +34,7 @@ docs/          文档（见下）
 
 ```bash
 npm install
-npm run typecheck
+npm run check          # 类型检查 + 单元测试
 node --test --experimental-strip-types --test-isolation=none "packages/*/test/**/*.test.ts"
 npm run demo              # http://127.0.0.1:5178
 npm run build:offline     # 生成可双击打开的离线单文件 dist/wfcalc-standalone.html
@@ -43,3 +43,7 @@ npm run build:mods        # 重新生成 Mod 数据
 ```
 
 需要 **Node ≥ 20**。
+
+## 许可证
+
+[MIT](LICENSE) © 2026 Gavrain
