@@ -19,6 +19,8 @@
  */
 /** 连击倍率上限（需求方 2026-11-13：带凯旋之爪满层为 13x） */
 const MAX_COMBO_MULTIPLIER = 13;
+import { makeDraggable, makeDropTarget, renderSlots, slotAcceptsMod, wireSlotsDeps } from './ui-slots.js';
+import { arcaneStatChips, coSlotGain, gainBadge, rivenSlotChips, statChips, wireChipsDeps } from './ui-chips.js';
 import { wirePanelDeps, currentMode, effectiveMode, renderPageTitle, renderPanel, renderPendingPanel, selectedVariantIdx } from './ui-panel.js';
 import { clearDetailTarget, renderDetail, renderDotDetail, selectDetail, wireDetailDeps } from './ui-detail.js';
 import { collapsibleBlock, dotRow } from './ui-parts.js';
@@ -135,24 +137,6 @@ function fmtGain(g) {
   return sign + pct.toFixed(1) + '%';
 }
 
-/**
- * 一张卡上的「贡献」标签。
- *
- * 在 DoT 相关口径（异常加权单层秒伤 / 六秒异常总伤）下，数值后面跟一个 `to dot` 小字，
- * 说明这是「对异常伤害」的口径（D-171）；`∞` 表示这张卡让该异常从无到有。
- *
- * @param gain 提升比例；null = 无贡献（不显示）
- */
-function gainBadge(gain) {
-  if (gain === null || gain === undefined) return null;
-  const cls = gain > 0.0005 ? 'up' : gain < -0.0005 ? 'down' : 'flat';
-  const wrap = el('div', 'slot-gain');
-  wrap.append(el('span', 'slot-gain-val ' + cls, fmtGain(gain)));
-  if (isDotMetric()) wrap.append(el('span', 'gain-to-dot', 'to dot'));
-  // D-175：N 秒总伤下的增幅是「续航 / 异常」加权拼出来的，标个小字说明来源
-  else if (isTotalLikeMetric()) wrap.append(el('span', 'gain-to-dot', 'to total'));
-  return wrap;
-}
 
 /** 当前指标是不是「N 秒异常总伤」（D-176 的拆法只在这一个口径生效） */
 function isDotWindowMetric() {
@@ -452,64 +436,8 @@ function writeCollapse(state) {
 // 槽位（Mod / 劣化 / 赋能），全部可拖拽
 // ─────────────────────────────────────────────────────────────
 
-function renderSlots() {
-  const grid = $('#slot-grid');
-  grid.innerHTML = '';
-  for (let i = 0; i < SLOT_COUNT; i++) grid.append(modSlotCard(i));
 
-  const side = $('#side-slots');
-  side.innerHTML = '';
-  side.append(exilusSlotCard());
 
-  const arcBox = $('#arcane-slots');
-  arcBox.innerHTML = '';
-  arcBox.append(arcaneSlotCard());
-}
-
-/** 让任意卡片既能作为拖出源，也能作为放置目标（不接受时显示禁止符号） */
-function makeDropTarget(card, accepts, onDrop) {
-  card.addEventListener('dragover', function (e) {
-    const ok = Boolean(store.dragPayload) && accepts(store.dragPayload);
-    // 不接受时**不** preventDefault → 浏览器显示禁止符号，drop 也不会触发（回位）
-    if (!ok) {
-      card.classList.remove('drop-target');
-      return;
-    }
-    e.preventDefault();
-    if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
-    card.classList.add('drop-target');
-  });
-  card.addEventListener('dragleave', function () { card.classList.remove('drop-target'); });
-  card.addEventListener('drop', function (e) {
-    if (!store.dragPayload || !accepts(store.dragPayload)) return;
-    e.preventDefault();
-    card.classList.remove('drop-target');
-    dropHappened = true; // 成功放进配置区，dragend 时不再卸下
-    onDrop(store.dragPayload);
-    store.dragPayload = null;
-  });
-}
-
-function makeDraggable(card, payload) {
-  card.draggable = true;
-  card.addEventListener('dragstart', function (e) {
-    store.dragPayload = payload;
-    dropHappened = false;
-    card.classList.add('dragging');
-    if (e.dataTransfer) e.dataTransfer.setData('text/plain', payload.id || payload.key || '');
-  });
-  card.addEventListener('dragend', function () {
-    card.classList.remove('dragging');
-    const p = store.dragPayload;
-    store.dragPayload = null;
-    // D-040：没能放进配置区 → 视为卸下（拖出配置区 / 拖到备选区 都算）
-    // 裂罅：从待选区（'riven-list'）拖出来的不卸下；从裂罅词条槽（'riven-slot'）拖出去 = 卸下
-    if (p && !dropHappened && p.from !== 'list' && p.from !== 'slot-picker' && p.from !== 'riven-list') {
-      removeByPayload(p);
-    }
-    dropHappened = false;
-  });
-}
 
 /** 按拖动载荷卸下对应内容 */
 function removeByPayload(p) {
@@ -535,30 +463,6 @@ function removeByPayload(p) {
   if (p.kind === 'arcane') { store.arcaneKey = null; renderAll(); }
 }
 
-/**
- * 卡面上的词条小标签。
- *
- * 需求方 2026-11-13：**弹匣容量 / 换弹速度也要显示**——它们影响「续航秒伤」，不是功能卡，
- * 以前因为 `bucket === 'utility'` 被整行跳过，于是「装了野火只看得到 +60% 火焰」，
- * 看起来像只算了一条。
- */
-function statChips(mod) {
-  // D-116：无限叠层类（弹能过继等）的值按「每层 × 满层」显示，与内核取的值一致
-  const stacks = modStackFactor(mod.id);
-  const wrap = el('div', 'slot-stats');
-  for (let i = 0; i < mod.stats.length; i++) {
-    const s = mod.stats[i];
-    if (!s.bucket) continue;
-    const max = s.levelValues[s.levelValues.length - 1] * stacks;
-    wrap.append(el('span', 'slot-stat', statLabel(s.stat) + ' ' + modStatText(s, max, mod.descriptionEn)));
-  }
-  // 需求方 2026-11-13：锁射速 / 锁多重写进卡面（原文就是这两句）
-  for (const note of modLockNotes(mod)) wrap.append(el('span', 'slot-stat slot-lock', note));
-  // 套装提示：只标本卡所属那一套（需求方 2026-11-18）
-  const setNote = setNoteOf(mod);
-  if (setNote) wrap.append(el('span', 'slot-stat slot-set', setNote));
-  return wrap;
-}
 
 
 /**
@@ -778,118 +682,9 @@ function restoreRiven(saved) {
  */
 let dropHappened = false;
 
-/**
- * 已装卡上的贡献徽标（D-117）。
- *
- * 普通卡：`gainOf`（拿掉它重算）。镀层类卡：拿掉后「异况数 × 层数」也没了，
- * 边距贡献的定义依然成立，但 `gainOf` 在"拿掉后指标为 0"时返回 null（界面不显示），
- * 而镀层卡恰恰是唯一能带来"全部基伤"的卡之一——改用 `coModGain` 的口径（装上 vs 当前）。
- */
-function coSlotGain(mod) {
-  if (mod && isConditionOverloadMod(mod)) {
-    const g = coModGain(mod);
-    if (g !== null) return g;
-  }
-  return gainOf(mod ? mod.id : null);
-}
 
-/**
- * 普通 Mod 槽：放 Mod，或作为已有 Mod 的换位/插入目标。
- *
- * 槽里也可能是**裂罅**（D-162）：槽里存占位 id {@link RIVEN_SLOT_ID}，
- * 显示成紫色卡，整张卡只显示一条「整卡收益」，词条小标签也走裂罅的紫色样式。
- */
-function modSlotCard(index) {
-  const card = el('div', 'slot');
-  card.append(el('div', 'slot-title', '槽位 ' + (index + 1)));
-  const body = el('div', 'slot-body');
-  const id = modSlots[index];
 
-  if (id === RIVEN_SLOT_ID) {
-    // ── 裂罅卡（D-162）──
-    card.className += ' riven';
-    const rivenChips = rivenSlotChips();
-    body.append(el('div', 'slot-name', '裂罅 Mod'));
-    if (rivenChips.length) {
-      const wrap = el('div', 'slot-stats');
-      for (const c of rivenChips) wrap.append(c);
-      body.append(wrap);
-    }
-    const g = gainBadge(rivenGain());
-    if (g) body.append(g);
-    // 拖出槽位 = 卸下（D-040）；下方裂罅区那张也随之可以再拖上去
-    makeDraggable(card, { kind: 'riven', from: 'slot', index: index });
-  } else if (id) {
-    const mod = store.data.modById.get(id);
-    body.append(el('div', 'slot-name', modName(mod)));
-    // 需求方 2026-11-13：「劣化 mod 有单独的 tag」——可进劣化槽的卡在普通槽里也标出来
-    if (mod && mod.exilus === true) body.append(el('span', 'tag', '劣化'));
-    body.append(statChips(mod));
-    // 需求方 2026-11-06：显示这张卡相对「不上它」时当前指标的提升
-    // D-117：镀层类卡单独处理——拿掉它连「异况数 × 层数」一起没了，
-    //   而 `gainOf` 在"拿掉后指标为 0"时返回 null（界面上就不显示增长了），所以改用同一套推演
-    const g = gainBadge(coSlotGain(mod));
-    if (g) body.append(g);
-    // D-040：去掉「卸下」按钮，改为把卡片拖出 Mod 配置区即卸下
-    makeDraggable(card, { kind: 'mod', id: id, from: 'slot', index: index });
-  } else {
-    body.append(el('div', 'slot-empty', '空'));
-  }
-  card.append(body);
 
-  makeDropTarget(card, function (p) { return slotAcceptsMod(p, index); }, function (p) { dropOnSlot(p, index); });
-  return card;
-}
-
-/** 裂罅卡上的词条小标签（紫色样式，与普通 Mod 的 `slot-stat` 区分） */
-function rivenSlotChips() {
-  const out = [];
-  const table = rivenTableNow();
-  const r = store.riven;
-  if (!table || !r) return out;
-  const combo = rivenComboNow();
-  for (let i = 0; i < r.entries.length; i++) {
-    const e = r.entries[i];
-    if (!e || !e.key) continue;
-    const def = rivenDefOf(table, e.key);
-    if (!def) continue;
-    const kind = i < combo.pos ? 'pos' : 'neg';
-    out.push(el('span', 'slot-stat riven-stat', def.label + ' ' + formatRivenValue(def, kind, rivenValueFor(def, kind, e.value))));
-  }
-  return out;
-}
-
-/** 劣化槽：只接受功能类 Mod（D-127：与普通 Mod 槽同尺寸，槽名写在卡片右上角） */
-function exilusSlotCard() {
-  const card = el('div', 'slot exilus');
-  card.append(el('span', 'slot-chip', '劣化槽'));
-  const body = el('div', 'slot-body');
-
-  if (store.exilusModId) {
-    const mod = store.data.modById.get(store.exilusModId);
-    body.append(el('div', 'slot-name', modName(mod)));
-    const g = gainBadge(gainOf(store.exilusModId));
-    if (g) body.append(g);
-    // D-040：去掉「卸下」按钮，改为拖出配置区即卸下
-    makeDraggable(card, { kind: 'mod', id: store.exilusModId, exilus: true, from: 'exilus' });
-  } else {
-    body.append(el('div', 'slot-empty', '拖入功能 Mod'));
-  }
-  card.append(body);
-
-  /**
-   * 劣化槽的**劣化槽内**位置：功能 Mod 从备选区拖进来。
-   *   · 劣化槽为空 → 放进去；
-   *   · 劣化槽已有卡 → 互换（D-115）：原来那张回备选区，新卡占位。
-   * 功能类 Mod 只能出现在劣化槽，所以不会有"槽位之间互换"这一路。
-   */
-  makeDropTarget(
-    card,
-    function (p) { return p.kind === 'mod' && p.exilus; },
-    function (p) { dropOnExilus(p); },
-  );
-  return card;
-}
 
 /**
  * 放到劣化槽。D-115：劣化槽已有卡时**互换**（那张回备选区），不再静默顶掉。
@@ -905,59 +700,6 @@ function dropOnExilus(payload) {
   renderAll();
 }
 
-/** 赋能槽（D-127：与普通 Mod 槽同尺寸，槽名写在卡片右上角） */
-function arcaneSlotCard() {
-  const card = el('div', 'slot arcane');
-  card.append(el('span', 'slot-chip', '赋能'));
-  const body = el('div', 'slot-body');
-
-  // 需求方 2026-11-12：「守护武器的赋能槽禁用掉」→ 槽留着占位，灰掉、不收拖拽、不给装
-  // ⚠ 判定必须在上面的空卡判断**之前**：空卡会走 `return card`，
-  //   把禁用分支放到后面就永远走不到（页面 shim 没有 CSS，`className` 要直接写）。
-  if (arcanesDisabled()) {
-    card.className += ' disabled';
-    body.append(el('div', 'slot-empty', '不可装赋能'));
-    card.append(body);
-    return card;
-  }
-
-  if (store.arcaneKey) {
-    const arc = store.data.arcaneByKey.get(store.arcaneKey);
-    body.append(el('div', 'slot-name', arc.name.zh || arc.name.en));
-    // D-116：装备区同样要显示词条（D-127：与普通 Mod 槽一样用 slot-stats 包一层）
-    const arcChips = arcaneStatChips(arc);
-    if (arcChips.length) {
-      const wrap = el('div', 'slot-stats');
-      for (const st of arcChips) wrap.append(st);
-      body.append(wrap);
-    }
-    // 赋能同样显示边际贡献（source 用 arcane.key）
-    // ⚠ 原来这里误用了不存在的变量 `arcane.key`，有赋能在槽里时每次重渲染都 ReferenceError（D-115 发现）
-    const g = gainBadge(gainOf(store.arcaneKey));
-    if (g) body.append(g);
-    // D-040：赋能同样拖出配置区即卸下
-    makeDraggable(card, { kind: 'arcane', key: store.arcaneKey, from: 'arcane' });
-  } else {
-    body.append(el('div', 'slot-empty', '拖入赋能'));
-  }
-  card.append(body);
-
-  // ── 赋能槽（D-115 / D-134）：与 Mod 槽 / 劣化槽同一套处理 ——
-  //   · 拖「正在算的这把武器所属大类」的赋能进来：空槽就放、已有赋能就**互换**（旧的回列表）；
-  //   · 拖别的大类的赋能进来（例如近战赋能拖到主要武器上）：**不接受**（禁止符号），
-  //     以前这里只看 `p.kind === 'arcane'`，会静默把槽里那张顶掉并换上不属于本大类的赋能。
-  const targetKey = store.arcaneKey;
-  const targetArc = targetKey ? store.data.arcaneByKey.get(targetKey) : null;
-  const targetPayload = targetKey
-    ? { kind: 'arcane', key: targetKey, category: targetArc ? targetArc.category : undefined }
-    : null;
-  makeDropTarget(
-    card,
-    function (p) { return arcaneSlotAccepts(p, targetPayload); },
-    function (p) { dropOnArcane(p); },
-  );
-  return card;
-}
 
 /**
  * 赋能槽是否接受这次拖拽（D-134）——规则与 Mod 槽一致：
@@ -975,24 +717,6 @@ function arcaneSlotAccepts(payload, targetPayload) {
   return true;
 }
 
-/**
- * 放到赋能槽（D-134）：空槽直接放；已有赋能则**互换**（旧赋能回列表，与劣化槽一致）。
- */
-function dropOnArcane(payload) {
-  const arc = store.data.arcaneByKey.get(payload.key);
-  if (!arc) return;
-  if (arcanesDisabled()) {
-    flash('守护 / 同伴武器不能装赋能');
-    return;
-  }
-  // 本武器能装的赋能（D-138，与 `.slot-wrap` 的禁止符号判定同一套规则）
-  if (!isArcaneUsableOn(arc, store.data.weapon, store.data.slotEntry)) {
-    flash('这个赋能不能装在本武器上');
-    return;
-  }
-  store.arcaneKey = payload.key;
-  renderAll();
-}
 
 /** 赋能大类 → 中文（报错文案用） */
 const ARCANE_CATEGORY_LABEL = {
@@ -1004,86 +728,7 @@ const ARCANE_CATEGORY_LABEL = {
   kitgun: '组合枪',
 };
 
-/**
- * 槽位是否接受这次拖拽（决定"允许放置"还是"禁止符号"）。D-115：占用不再一律拒绝。
- *
- * | 拖拽       | 目标空槽 | 目标已占用                          |
- * |------------|----------|-------------------------------------|
- * | 备选区 Mod | 接受     | **互换**（被替换的那张回备选区）     |
- * | 槽位 Mod   | 接受     | **两个槽位互换**                     |
- *
- * 功能类（劣化）Mod 永远只能进劣化槽，普通槽对它一律不接受。
- */
-function slotAcceptsMod(payload, targetIndex) {
-  // 裂罅（D-162）：已经装进某个槽时，**不允许再从下方拖上去**——它是同一个实体，
-  // 再拖一次没有意义（需求方：「下面拖上去以后下方的实体就不允许拖动上去了」）。
-  // 允许在槽位之间挪动（从槽 A 拖到槽 B），等价于换位置。
-  if (payload.kind === 'riven') {
-    if (payload.from === 'slot') return payload.index !== targetIndex;
-    // from 'riven'（下方裂罅区拖来的）：已经装了就不收
-    return !isRivenInstalled();
-  }
-  // 赋能不能进 Mod 槽
-  if (payload.kind !== 'mod') return false;
-  // 功能类只能进劣化槽（D-034）
-  if (payload.exilus) return false;
-  return true;
-}
 
-/**
- * 把 Mod 放到目标槽。D-115：**落到哪张卡上就和那张卡互换**。
- *
- * ```
- * · 从其它槽拖来   → 两个槽位直接互换（源槽拿走目标槽原来的那张）；
- * · 从备选区拖来   → 目标槽原来那张退回备选区，新 Mod 占位；
- * · 目标槽是空的   → 直接放进去，其他槽一律不动（D-035，不做自动紧凑）；
- * · 拖的就是目标槽 → 什么都不做（不卸载、不动）。
- * ```
- */
-function dropOnSlot(payload, targetIndex) {
-  // ── 裂罅（D-162）──
-  if (payload.kind === 'riven') {
-    if (payload.from === 'slot') {
-      if (payload.index === targetIndex) return;
-      swapSlots(payload.index, targetIndex);
-      renderAll();
-      return;
-    }
-    // 从下方裂罅区拖上去：已经装了就不收（同一个实体）
-    if (isRivenInstalled()) {
-      flash('裂罅只能装一张：先把槽位里那张卸下');
-      return;
-    }
-    if (!store.riven) {
-      flash('先在下方裂罅区拼一条词条');
-      return;
-    }
-    insertAt(RIVEN_SLOT_ID, targetIndex);
-    renderAll();
-    return;
-  }
-
-  const mod = store.data.modById.get(payload.id);
-  if (!mod) return;
-  // D-091：武器不满足装备条件
-  if (!isModAllowedOnWeapon(mod)) {
-    flash('半自动炮轰系列只能装在只有半自动射击模式的武器上');
-    return;
-  }
-  if (isExilusMod(mod)) {
-    flash('该 Mod 只能放入劣化槽');
-    return;
-  }
-
-  // 槽里原来是裂罅：被普通 Mod 顶掉 = 裂罅卸下（它回到下方裂罅区，仍可再拖上去）
-  if (payload.from === 'slot' && typeof payload.index === 'number') {
-    if (payload.index === targetIndex) return; // 拖回原位：不动
-    swapSlots(payload.index, targetIndex);
-  } else {
-    insertAt(payload.id, targetIndex);
-  }
-  renderAll();
-}
 
 /**
  * 两个槽位直接交换（D-035 槽位间移动 / D-115 拖到已占用槽 = 互换，共用这一份）。
@@ -1825,23 +1470,6 @@ function arcaneCard(arc, gain) {
   return card;
 }
 
-/**
- * 赋能 → 卡片上的词条小标签（D-116）。**只列真正参与伤害计算的词条**，
- * 与内核拿到的贡献同一份来源（`arcaneDisplayStats`），所以"显示的"就是"算的"。
- */
-function arcaneStatChips(arc) {
-  const out = [];
-  const stats = arcaneDisplayStats(arc);
-  for (let i = 0; i < stats.length; i++) {
-    const st = stats[i];
-    out.push(el('span', 'slot-stat', statLabel(st.stat) + ' +' + (Math.round(st.amount * 100) / 100) + '%'));
-  }
-  // 需求方 2026-11-13：叠加类赋能不再只显示「每层值」——
-  // 卡面上写满层值，数值与计算一致（霜冻 / 毒侵 / 电压 / 耀炎）。
-  const stacks = arcaneStackLabel(arc);
-  if (stacks) out.push(el('span', 'slot-stat slot-stack', stacks));
-  return out;
-}
 
 
 /**
@@ -1885,6 +1513,16 @@ function arcanePreviewGain(arc) {
 async function boot() {
   // 把外壳能力注入裂罅模块（避免互相 import 成环）
   wireRivenDeps({ rerender: renderAll, makeDraggable: makeDraggable, simulateEquip: simulateEquip });
+  wireSlotsDeps({
+    arcaneSlotAccepts: arcaneSlotAccepts,
+    arcanesDisabled: arcanesDisabled,
+    dropOnExilus: dropOnExilus,
+    insertAt: insertAt,
+    removeByPayload: removeByPayload,
+    renderAll: renderAll,
+    swapSlots: swapSlots,
+  });
+  wireChipsDeps({ arcaneStackLabel: arcaneStackLabel });
   wirePanelDeps({ rerender: renderAll, flash: flash });
   wireDetailDeps({
     rerender: renderAll,
