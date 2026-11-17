@@ -224,7 +224,6 @@ export function applyBaseDamage(
   const g: number = Math.max(0, 1 + sumPct(contribs, 'baseDamage'));
   const isAoe: boolean = seg.kind === 'explosiveAttack';
   // 类镀层（冷颤，D-086）：**固定满层**，不吃 AoE。
-  // ⚠ 以前这一项只写在 `weapon-state.ts` 那份手写实现里，`applyBaseDamage` 一直没吃它——
   //   于是"面板显示的基伤"和"实际结算的基伤"对不上。现在两条路共用本函数的判定。
   const freezeCo: number = isAoe ? 0 : overForElement(contribs, 'coFreeze', FROZEN_FULL_STACKS);
   // 普通那一路：非 AoE 才吃镀层 / 冷颤

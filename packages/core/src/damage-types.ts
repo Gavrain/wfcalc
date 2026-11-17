@@ -97,7 +97,6 @@ export function spreadTotal(s: DamageSpread): number {
  *
  * 调用前置条件（口径见 `docs/伤害公式.md` §5 与 `docs/decisions.md` D-017）：
  *   · 玄骸加成**不**在 `spread` 里，也不在 `physical` / `elemental` 里 ——
- *     它必须在基伤之前单独算（`applyKuvaBonus`：面板总伤 × 比例），并随后被基伤括号放大；
  *   · 把玄骸混进 `spread` 会被当成"面板伤害"，导致元素 %Mod 的基数被重复计算。
  *
  * 正确顺序：玄骸 ∈ 面板基伤 → 乘基伤 → 本函数求新面板总伤 → 用它算元素加量 → 再两两合成。

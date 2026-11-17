@@ -1,10 +1,8 @@
 /**
  * 单段结算：L0 面板切段 → ① 玄骸 → ② 基伤 → ③④⑤ 元素 → L3 暴击/爆头 → DoT 基础值。
  *
- * 执行顺序（**玄骸在基伤之前**，D-017）：
  * ```
  * L0 面板切段           buildVectors
- * ① 玄骸加成            applyKuvaBonus        ← 在基伤之前
  * ② 基伤 / 多重         applyBaseDamage / multishot
  * ③④ 物理% / 元素%      applyElements        （实现见 elements.ts）
  * ⑤ 两两合成            mergePairwise        （实现见 elements.ts）
@@ -118,7 +116,6 @@ export interface SegmentResult {
    * 该段是否射线。
    *
    * ⚠ **按段判**（需求方 2026-11-12），不是按模式：模式扳机 `held` + 该段自己的 `beam` 标记。
-   * 以前这里是 `ctx.beam`（整个模式一个开关），量子切割器改成一模式多段后，
    * 方块弹 / 引爆 / 换弹那几段会被一起当成射线（DoT 每跳也乘多重），是错的。
    */
   beam: boolean;
@@ -134,8 +131,7 @@ export interface SegmentResult {
   finalHit: DamageSpread;
   /** 物理/元素 = 合成前的槽位 */
   elementDetail: ApplyElementsResult;
-  /** DoT / 爆炸的基础分布（不含元素加量；已乘期望倍率 / 派系 / 射线多重）。
-   *  需求方 2026-11-14 收敛：以前 `dotBase` 与 `tickBaseScaled` 是同一值的两个名字，现合并 */
+  /** DoT / 爆炸的基础分布（不含元素加量；已乘期望倍率 / 派系 / 射线多重）。 */
   tickBaseScaled: DamageSpread;
   /** 暴率 / 暴伤（已含 Mod） */
   critChance: number;
@@ -174,7 +170,6 @@ export function resolveSegment(
    * 这一段所属攻击方式的面板 override（C2，需求方 2026-11-15）。
    *
    * 暴率 / 暴伤 / 触发率都要按「变体 override → 模式 override → 武器级」取——
-   * 以前 `critChanceTotal` / `critDamageTotal` 只传了 `ctx.mode`，**变体级 override 被忽略**，
    * 于是「爆炸段自己有不同暴率」的武器，段面板和结算都不对。
    */
   const panelMode: AttackMode = upstream?.variant?.override
@@ -205,7 +200,6 @@ export function resolveSegment(
    */
   const msMul: number = isBeam ? multishot(contribs, weapon, mode) : 1;
 
-  // ① 玄骸（在基伤之前，D-017）
   // ② 基伤
   //   上游给过就直接取 computed，避免重复计算（数值同一份）
   //
@@ -243,7 +237,6 @@ export function resolveSegment(
   const finalHitWithSpecial: DamageSpread = specialMul === 1 ? finalHit : scaleSpread(finalHit, specialMul);
 
   /**
-   * 命中分布**剔除元素/物理 Mod 加量**后的样子（= 玄骸 + 基伤 之后、合成之前）。
    *
    * 需求方 2026-11-06（Q6 定案）：「暴击后不加元素的命中基础值……元素 mod 的作用不对，
    * 火加毒确实是会合成毒气，但是他仍然是火焰加成，不会对毒气 dot 加成。」
@@ -255,7 +248,6 @@ export function resolveSegment(
    * 每跳用的「基础命中值」（D-107 / Q6 定案，需求方 2026-11-12 定为**口径 B**）：
    * **不含元素/物理 Mod 加量**的命中分布，含处决 / 震地 / 身体。
    *
-   * 需求方 2026-11-14：以前这里还有一份叫 `dotBase` 的中间变量，它与本变量**逐字相同**，
    * 却被各自乘一遍、算成两个名字不同、值相同的东西。现在只保留这一条，
    * 乘期望倍率 / 派系 / 多重之后得到 `tickBaseScaled`——DoT 每跳与爆炸基础值共用。
    *
@@ -265,11 +257,9 @@ export function resolveSegment(
 
   // L3 暴击 + 爆头
   // 需求方 2026-11-15：弱点暴击率与普通暴击率是**同一乘区里的 Σ%**，已在 `critChanceTotal` 内部并入，
-  // 这里不能再单独加一次（以前加在括号外面，+350% 被当成暴率 +3.5）。
   const cc = critChanceTotal(weapon, contribs, panelMode, ctx.headshot.enabled);
   const cd = critDamageTotal(weapon, contribs, panelMode);
   const hsMul = headshotMultiplier(contribs, ctx.headshot.multiplier);
-  // 派系（D-013：命中结算前一次）。D-135：这一项以前只进了 DoT，命中伤害完全没乘，
   // 所以上了「对 Grineer +55%」这类卡，命中伤害/爆发/持续都不动，只有 DoT 变了。
   const factionPct = factionFor(ctx.faction, contribs);
   const factionMul = 1 + factionPct;
@@ -318,7 +308,6 @@ export function resolveSegment(
    * D-136：派系必须**在这里**乘进去（§5.2「命中结算前一次」）——上一轮（D-135）把派系只加到了
    * 命中分行 `damageLine()` 上，DoT 的基础值里没有它，于是"命中吃、DoT 不吃"。
    *
-   * 需求方 2026-11-14：这就是**唯一的** DoT 基础值。以前它有两个名字（`dotBase` /
    * `tickBaseScaled`），值相同却各算一遍；现在只有这一个，`dotTicks` 与爆炸基础值共用。
    */
   const tickBaseScaled: DamageSpread = scaleSpread(
@@ -349,7 +338,6 @@ export function resolveSegment(
      * DoT / 爆炸的基础分布（需求方 2026-11-14 收敛后的**唯一**一份）：
      * = 不含元素加量的命中 × 处决/震地/身体 × 期望倍率 × 派系 × 多重（射线）。
      *
-     * 以前这里有三个名字：`dotBase`、`tickBase`、`tickBaseScaled`。
      * `dotBase` 与 `tickBaseScaled` 是同一个值；`tickBase` 只服务于测试里的自证式断言
      * （用未乘的那份再乘回去比结果），没有独立信息——需求方指出后一并删除，
      * 测试改为直接拿**面板数字**断言。

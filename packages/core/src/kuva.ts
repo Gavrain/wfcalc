@@ -12,7 +12,6 @@
  * D-026（2026-11-05 需求方确认）：「玄骸加成类型为冰火毒电磁力辐射冲击」。
  * 依据 `乘区归属表.md` §4.4：加成类型 ∈ { 冰、火、毒、电、**磁力**、**辐射**、冲击 }。
  *
- * ⚠ 之前这里写成了 `impact/puncture/slash/heat/cold/electric/toxin`——
  *   多了穿刺、切割，少了磁力、辐射。修正为下面 7 种。
  */
 export const KUVA_ELEMENT_TYPES = ['cold', 'heat', 'toxin', 'electric', 'magnetic', 'radiation', 'impact'];

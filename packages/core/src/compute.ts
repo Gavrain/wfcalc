@@ -107,7 +107,6 @@ function resolveVariantSelection(
   const all = mode.variants ?? [];
   if (selection === undefined) return undefined;
 
-  // 兼容旧调用：第 5 个参数以前是 `beam: boolean`，老代码可能还传着 false/true。
   // 布尔值一律视为"没指定"，让全部变体参与（否则 false 会被当成下标 0、true 当成 1）。
   if (typeof selection === 'boolean') return undefined;
 
@@ -132,7 +131,6 @@ function resolveVariantSelection(
  *   **需求方 2026-11-12**：界面上每种攻击方式（弹头命中 / 爆炸 / 射线 / 蓄力）各有复选框，
  *   用户勾选哪些就只算哪些，全部勾上即"各段相加"。
  *   · 不传 → 模式内**全部**变体都参与（等价于全选）；
- *   · 传下标 `number` → 只算这一个（兼容旧调用，D-120）；
  *   · 传下标数组 `number[]` → 只算选中的这几个。
  *   选空数组表示一种都不算，结果全为 0。
  */
@@ -197,7 +195,6 @@ export function compute(
   const variantOfIndex = (i: number): ModeVariant | undefined => scopedMode.variants[variantIndex[i] ?? -1];
 
   // ── 每段的上游 computed 只算一次；逐段结算与 state 共用这一份（D-075）──
-  // 之前 `resolveSegment()` 与 state 各算一遍玄骸→基伤，
   // 主段被计算两次，且 state 只覆盖第一段（60 把多段武器受影响）。
   const ups = segs.map((seg, i) => segmentUpstream(weapon, scopedMode, contribs, ctx, seg, variantOfIndex(i)));
   const segments: SegmentResult[] = segs.map((seg, i) => {
@@ -230,7 +227,6 @@ export function compute(
   }
 
   // ⚠ 需求方 2026-11-12：「走完元素合成啥的，到最后计算 dps 才把各自的统计口径加起来」。
-  //   以前这里只传 `segments[0]`，多段武器的第二段起**完全没进 DPS**
   //   （巴什穆电击+火焰只算电击 44.85，实际 66.70）。现在把全部段传进去，
   //   `buildOutput` 逐段算 DoT / 爆炸，再把各段统计口径相加。
   const output: OutputBreakdown = buildOutput(weapon, scopedMode, contribs, segments, ctx);
@@ -246,7 +242,6 @@ export function compute(
   // `panelPairs` 只反映主段。这里逐段给出 `{ index, kind, base, after }`。
   //
   // ⚠ 取值顺序必须是「变体 override → 模式 override → 武器级」（`panelStats` 的第三参）：
-  //    以前 `buildWeaponState` 没把变体传进去，段级 override 在面板这一侧被忽略，
   //    所有段看起来都用模式面板（实测 179 个多段模式、0 个"有差异"，就是因此）。
   const segmentPanelPairs = segments.map((segRes, i) => {
     const st = perSegment[i]!;

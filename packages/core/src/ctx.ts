@@ -17,7 +17,6 @@ export interface HeadshotOptions {
 }
 
 export interface CtxOptions {
-  /** 玄骸元素与加成比例（25%~60%）。D-017：在基伤之前并入面板 */
   kuva?: { type: DamageType; ratio: number };
   /** 派系加成只对目标派系生效（D-013）；'none' 表示不计派系 */
   faction?: Faction;
@@ -46,7 +45,6 @@ export interface CtxOptions {
   /**
    * 「N 秒异常总伤 / N 秒总伤」的窗口长度（秒，D-171，需求方 2026-11-13）。
    *
-   * 以前写死 6 秒；现在界面上可以选 1~6 秒。缺省 = 6（行为与以前一致）。
    * 只有整数秒：曲线是**逐秒累加**的，小数秒怎么切分尚未确认，不收。
    */
   dotWindowSeconds?: number;
@@ -79,7 +77,6 @@ export interface Ctx {
   /**
    * 射线标记。**由模式自己决定**（D-148）：取 `mode.beam`。
    *
-   * 以前是调用方传的布尔值（D-010 人工表），现已改为数据层按扳机 + `shot_type` 判好写在模式上，
    * 所以同一个武器的不同模式可以有各自的取值（幻离子的射线主模式 vs 子母弹副模式）。
    */
   beam: boolean;

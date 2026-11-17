@@ -23,7 +23,6 @@ import { contributionsFor, sumPct } from './contributions.ts';
 /**
  * 复合元素配对表（表 4.3）。
  *
- * ⚠ 之前这里写的是字面键（`'heat+cold'`），而 `pairOf` 用 `[a, b].sort()` 拼 key ——
  *   `'cold'.localeCompare('heat') < 0`，所以 `heat + cold` 实际会拼成 `'cold+heat'`，
  *   **整个表一条都对不上**（六种复合元素全部失效，实测火 + 冰不会合成爆炸）。
  *   现在改为：**表里直接写"配对 → 结果"的有序对，匹配时双向都查**，不再依赖排序结果。
@@ -37,7 +36,6 @@ const PAIR_LIST: readonly [DamageType, DamageType, DamageType][] = [
   ['toxin', 'electric', 'corrosive'],
 ];
 
-/** 兼容旧导出：`'a+b'` 正序键 → 复合元素（正反对都登记） */
 export const PAIRS: Readonly<Record<string, DamageType>> = (() => {
   const out: Record<string, DamageType> = {};
   for (const [a, b, result] of PAIR_LIST) {
@@ -92,7 +90,6 @@ export interface ApplyElementsResult {
  * [9..]  自带四种基础元素 + 玄骸元素，按实际有几个顺延
  * ```
  *
- * · 真 Mod 与试算卡都排在自带 / 玄骸元素**之前**——它们先参与配对；
  * · 只有冰 / 火 / 毒 / 电参与融合；**复合元素（自带或玄骸）不占融合槽位、不参与配对**。
  */
 export const TRIAL_SLOT_ORDER = 8;
@@ -178,7 +175,6 @@ export function applyElements(
   //   ```
   //   · 只有冰 / 火 / 毒 / 电四种基础元素参与融合；
   //   · **复合元素（自带或玄骸）一律不参与融合**，不占融合槽位；
-  //   · 真 Mod 槽 0~7 与试算槽 8 都在自带 / 玄骸元素**之前**（需求方 2026-11-15 最终确认）：
   //     自带 / 玄骸从 **9** 开始顺延。
   const PANEL_ELEMENT_PRIORITY: readonly DamageType[] = ['heat', 'cold', 'electric', 'toxin'];
   let panelOrder: number = PANEL_START_ORDER; // 0~7 Mod + 8 试算槽，自带 / 玄骸从 9 开始

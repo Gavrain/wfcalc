@@ -205,7 +205,6 @@ export function ammoEfficiencyMultiplier(contribs: readonly Contribution[]): num
  * 等效弹匣 = bucket(面板弹匣) × 1/(1 − 弹药效率)     ← 弹药效率夹在 [0, 0.75]
  * ```
  *
- * 为什么统一：以前面板「弹匣容量」显示的是没乘弹药效率的桶值，
  * 「等效弹匣」单列一行，而续航秒伤公式里又自己乘了一遍弹药效率——
  * 三处各有各的算法。现在面板 / 拆解 / 续航秒伤都读它。
  */
@@ -255,7 +254,6 @@ function panelValueOf(stat: BucketableStat, ps: ReturnType<typeof panelStats>): 
  * ⚠ 这里做「把输入算成 computed」，包括 `元素槽位` / `命中分布` ——
  * 元素合成调的是 `elements.ts` 的 `applyElements()`（与结算链共用同一个实现）。
  *
- * > D-102：之前这一段由调用方（`main.ts` 的 `buildState()`）在返回后补填，
  * > 造成 `main ↔ weapon-state` 双向依赖；现在依赖方向是 `weapon-state → elements`，单向。
  */
 export function buildWeaponState(
@@ -277,7 +275,6 @@ export function buildWeaponState(
   },
 ): { state: WeaponState } {
   // C2（需求方 2026-11-15）：面板取值顺序「变体 override → 模式 override → 武器级」。
-// 以前这里只传 (weapon, mode)，**变体级 override 被忽略**，多段武器每段的面板全都一样。
 const ps = panelStats(weapon, mode, opts.variant);
 
   // ── 输入层 ──
@@ -292,7 +289,6 @@ const ps = panelStats(weapon, mode, opts.variant);
   // 锁定射速（D-091）/ 锁定多重（需求方 2026-11-13）：
   // 这里的 pct/flat/mul 是**输入层快照**，供界面展示"这条贡献原本是多少"，
   // 不做任何过滤——「锁没锁、锁了按 0 计」统一由乘区入口 `bucketDetail()` 判定。
-  // ⚠ 以前这里手工清空过射速/多重的 pct/flat/mul，又在下面过滤 `contribs` 后喂给乘区表，
   //   等于同一件事在两处各判一次：快照显示 0、伤害路径却拿到原始加成，两边对不上
   //   （锁射速时装射速卡，连发秒伤照样涨）。现在只留 `bucketDetail()` 一处。
 
@@ -350,7 +346,6 @@ const ps = panelStats(weapon, mode, opts.variant);
   // **直接调用真正的基伤乘区 `applyBaseDamage()`**（需求方 2026-11-14：
   // 「这两个肯定应该是一样的，伤害分布不是应该直接调用基伤和其他的乘区吗」）。
   //
-  // 以前这里是**手写的第二份**：自己算 `1+Σ基伤%` + 镀层 + 冷颤，还额外加了
   // 「灵化模式不吃冷颤」的判断。那份与 `applyBaseDamage()` 已经分叉——
   // 它按"整个模式是不是灵化"整段关掉冷颤，而口径是"只有被动基伤那一路不吃"，
   // 面板基伤那一路照样该吃。分叉还会让面板展示与实际结算对不上。

@@ -55,9 +55,7 @@ export interface BlastDetail {
   splashOnTrigger: number;
   /** 是否已触发范围伤害（满层或击杀） */
   splashActive: boolean;
-  /** 兼容旧字段：对主目标的窗口合计（= {@link totalInWindow}） */
   total6s: number;
-  /** 兼容旧字段：范围伤害的窗口合计（= {@link splashOnTrigger}） */
   splash6s: number;
 }
 

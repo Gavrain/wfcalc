@@ -78,7 +78,6 @@ export function critBucketContribs(
  * 暴率 = (面板暴率 × (1 + Σ普通暴率% + Σ弱点暴率%) + Σ固定暴击率) × Π额外乘区
  * ```
  * 弱点暴击率**只在开启爆头时**计入（它对非弱点命中不生效）。
- * 以前它是加在括号**外面**的（`bucket(面板) + Σ弱点%`），+350% 被当成暴率 +3.5，是错的。
  */
 function critChanceRaw(
   weapon: Weapon,
@@ -100,7 +99,6 @@ function critChanceRaw(
  * 只在开启爆头（打弱点）时计入；关闭爆头时整条不生效。
  *
  * 本函数保留给需要单独展示「弱点暴击率贡献了多少」的调用方，**不参与暴率计算**。
- * ⚠ 以前它被加在括号外面（+350% = 暴率 +3.5），是错的。
  */
 export function weakpointCritChanceAdd(contribs: readonly Contribution[], headshotEnabled: boolean): number {
   if (!headshotEnabled) return 0;

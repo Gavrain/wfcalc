@@ -102,7 +102,6 @@ export function firingIntervalsWithin(
 }
 
 /**
- * 兼容旧签名（D-058）：第 sec 秒是否**整秒都在开火**。
  * 新代码请用 {@link firingFraction}（毫秒精度的占比，D-067）。
  */
 export function buildFiringTimeline(mag: number, fr: number, reload: number, window = 6): (sec: number) => boolean {

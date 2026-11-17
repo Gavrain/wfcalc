@@ -8,7 +8,6 @@
  * ```
  *
  * **D-171（需求方 2026-11-13）**：窗口从写死的 6 秒改成可选的 N 秒（1~6），
- * 算法本身不变，`window` 参数一直就在那里，只是以前调用点写死成 6。
  *
  * ⚠ 文件名仍是 `six-second.ts`（历史名）：函数体对任意 N 都成立，
  *   改文件名会让 `main.ts` 的 re-export 与所有旧导入路径一起失效，收益不抵成本。
@@ -73,7 +72,6 @@ export function hasDotElement(spread: DamageSpread, t: DoTType): boolean {
  * @param perStackPerSecond 单层每秒伤害（= `tick.tick`）
  * @param window 窗口长度（秒，默认 6；D-171 起由界面选择，取值 1~6）
  * @param firing 每秒的开火占比（0~1，由弹匣/射速/装填推出），默认全程开火。
- *   兼容旧的布尔签名：`true` 视为 1、`false` 视为 0（见下方 `frac` 归一化）。
  * @param stacksPerShot 单发期望层数（D-059：电击/毒气第 0 拍用它）
  */
 export function dotSixSecondCurve(
@@ -102,7 +100,6 @@ export function dotSixSecondCurve(
   }
 
   for (let sec = 1; sec <= window; sec++) {
-    // D-067：开火占比（0~1，毫秒精度）。老调用方传布尔值也能用（true→1 / false→0）。
     const raw = firing ? (firing as (s: number) => boolean | number)(sec) : true;
     const frac = raw === true ? 1 : raw === false ? 0 : Math.max(0, Math.min(1, Number(raw) || 0));
 
@@ -154,7 +151,6 @@ export function stacksInWindow(
 }
 
 /**
- * 兼容旧签名（D-057 引入）：供测试直接调用。
  * @deprecated 用 {@link dotSixSecondCurve}
  */
 export function sixSecondTotal(

@@ -141,7 +141,6 @@ export interface OutputBreakdown {
   steadyDps: number;
   /** 稳态秒伤里的**异常部分**（DoT 五类，不含直击） — 需求方 2026-11-15（A5） */
   steadyDotDps: number;
-  /** 稳态秒伤里的**爆炸主目标**部分 — 需求方 2026-11-15（A4：以前完全没算） */
   steadyBlastDps: number;
   /** 每个 DoT 类型的每秒输出（期望层数 × 每跳）——**各段合并**后的合计 */
   dotPerType: Partial<Record<DoTType, number>>;
@@ -210,7 +209,6 @@ export function fireRateFinal(weapon: Weapon, contribs: readonly Contribution[],
  *       异常与爆炸类口径把各段的**每秒叠层与每跳**各自累加后统一积分
  * ```
  *
- * ⚠ 修掉的 bug：以前 `compute()` 只把 `segments[0]` 传进来，
  *   多段武器（巴什穆的电击+火焰、伯斯顿 Prime 灵化的命中+爆炸、幻离子的子母弹…）
  *   的第二段起**完全没进 DPS**。巴什穆因此少算一半（44.85 而实际 66.70）。
  *
@@ -222,7 +220,6 @@ export function fireRateFinal(weapon: Weapon, contribs: readonly Contribution[],
  * 「走完元素合成啥的，到最后计算 dps 才把各自的统计口径加起来」——
  * 所以每段**各自**跑一遍 DoT 每跳与爆炸异常，再在 `buildOutput` 里把各段结果相加。
  *
- * 这一段逻辑以前写在 `buildOutput` 里、只对 `segments[0]` 生效，
  * 多段武器（巴什穆电击+火焰、伯斯顿 Prime 灵化命中+爆炸）因此漏算后面的段。
  */
 /**
@@ -235,10 +232,8 @@ export function fireRateFinal(weapon: Weapon, contribs: readonly Contribution[],
  * 循环 = 打空弹匣（弹匣 ÷ 射速）+ 装填
  * 异常 = 逐秒推进层数池（层数会到期清除，装填期间虽然不新增、但照样掉）
  *       循环内逐秒伤害之和 ÷ 循环时长
- * 爆炸 = 每层恒定 0.3，层数同样按逐秒池结算，再按循环摊平        ← A4：以前完全没算
  * ```
  *
- * ⚠ 以前这里是「层/秒 × 开火段时长 ÷ 循环」，等价于**层数永不到期**，
  * 高射速、大弹匣的武器会被算得虚高。
  */
 function steadyStateDot(
@@ -288,7 +283,6 @@ function steadyStateDot(
       intervalsOf,
       (sec: number) => firingIntervalsWithin(mag, fr, reload, sec, cycle),
     );
-    // A4：爆炸主目标（每层 0.3，层数不封顶）同样按逐秒池结算
     const blastSps = seg.blast.stacksPerSecond;
     if (blastSps > 0 && seg.blast.perStack > 0) {
       const series = dotStackPool('blast', blastSps, seg.blast.perStack, Math.ceil(cycle) + 6, intervalsOf, {
@@ -427,7 +421,6 @@ function segmentDotAndBlast(
   //   （火+冰、火+电），那里根本没有 blast 这一项 → 恒为 0。
   //   按 §6.2 ①，DoT 基础值是「**全类型之和**」，爆炸同样适用。
   //
-  // 需求方 2026-11-14：以前这里读的是 `res.dotBase`——它与 `tickBaseScaled` 是同一个值，
   // 收敛后统一读 `tickBaseScaled`（DoT 每跳与爆炸基础值本来就是同一份）。
   const blastBase = hasDotElement(res.finalHit, 'blast') ? spreadTotal(res.tickBaseScaled) : 0;
   // D-189：爆炸叠层同样乘刃影倍率（每层基础值 `blastBase` 不动）
@@ -497,7 +490,6 @@ export function buildOutput(
   //   · `reloadSpeed` 是**装填速度**的加法 %，装填**时间** = 面板时间 ÷ (1 + Σ装填速度%)；
   //   · **弹药效率**（D-084 / D-123）：每发实际只消耗 `1-x`，
   //     打空同一份弹药能开 `1/(1-x)` 次 → 续航秒伤里的弹匣要乘这个倍数
-  //     （之前只写进了 `state.computed.等效弹匣`，`sustainedDps` 根本没有读它，
   //      所以主要·准星 / 次要·妨害 / 头盔射击这类弹药效率词条"看起来没生效"）。
   //   这些词条都直接影响"续航秒伤"口径，所以它们不算纯功能类 Mod。
   //   面板值同样取该模式的（D-050）。
@@ -517,7 +509,6 @@ export function buildOutput(
    * ```
    *
    * 弹匣 0 的武器（魔典等）在游戏里是「弹匣内无限子弹」，没有装填这回事。
-   * 以前这里直接算成 0，于是续航秒伤那一栏恒为 0，
    * 连带弹药效率类赋能在它上面也恒为 0 收益（需求方：「直接等于连发秒伤」）。
    */
   const sustained: number = mag > 0 && fr > 0 ? (perShot * mag) / (mag / fr + reload) : hitDps;
@@ -650,7 +641,6 @@ export function buildOutput(
   //
   // > 「需要把 n 秒总伤的直击部分也一样改为计算装填窗口，射击窗口使用爆发伤害」
   //
-  // 以前是 `续航秒伤 × N` —— 那是"每个循环都摊装填"的长期平均，窗口短于一个循环时会多扣装填。
   // 现在与异常用**同一条** `firingFraction` 时间线：
   //   窗口内直击 = 连发秒伤 × Σ 每秒开火占比     （发射即命中，装填期间不产生新伤害）
   let firingSecondsInWindow = 0;
