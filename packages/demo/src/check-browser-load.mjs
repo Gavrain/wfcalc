@@ -45,6 +45,7 @@ const TS_FILES = [
   'packages/core/src/main.ts',
   'packages/core/src/analysis.ts',
   'packages/core/src/index.ts',
+  'packages/core/src/input/riven.ts',
   'packages/data/src/adapter.ts',
   // adapter 现在从人工数据层取表，这两份也要一起剥类型
   'packages/data/src/manual/mods.ts',

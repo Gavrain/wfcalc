@@ -13,6 +13,7 @@
  *
  * ⚠ 本文件是**纯 JS**（浏览器直接跑，不经过剥类型）：类型信息见 `app-riven.d.ts`。
  */
+import { rivenToContributions as coreRivenToContributions } from '../../core/src/input/riven.ts';
 import {
   RIVEN_DISPOSITION,
   rivenComboOf,
@@ -409,33 +410,21 @@ export function rivenToContributions(slot) {
   const r = store.riven;
   const table = rivenTableNow();
   if (!r || !table) return [];
-  const out = [];
-  // 有效条目（填了词条的）总数，用于把界面顺序换算成「从下到上」的槽位号
+  // 换算在内核（core/src/input/riven.ts）；这里只把「界面状态」翻译成它要的形状：
+  //   · 界面第 i 条（0 = 最上）对应槽位基位 + (total-1-i)，保持"从下到上"的槽号；
+  //   · 词条值存的是**幅度**（正负由 kind 决定），派系是百分比口径；
+  //   · 显示文本（×1.45 / −128.3%）仍由本文件的 formatRivenValue 决定，不搬进内核。
   const total = r.entries.length;
+  const entries = [];
   for (let i = 0; i < total; i++) {
     const e = r.entries[i];
-    if (!e || !e.key) continue;
+    if (!e || !e.key) { entries.push(null); continue; }
     const def = rivenDefOf(table, e.key);
-    if (!def) continue;
-    const kind = rivenSlotKind(i);
-    const sign = kind === 'neg' ? -1 : 1;
-    // 派系：内核口径是百分比加算（+45 = +45%），这里原样传百分比幅度
-    const amount = sign * e.value;
-    // 从下到上：界面上第 i 条（0 = 最上）对应槽位基位 + (total-1-i)
-    const innerOrder = total - 1 - i;
-    const slotNo = slot !== undefined ? slot + innerOrder : innerOrder;
-    // 展示标签：方向与单位交给 `formatRivenValue`（后坐力正面显示成「降低」的负号）
-    const displayText = formatRivenValue(def, kind, Math.abs(amount));
-    out.push({
-      stat: def.stat,
-      form: 'pct',
-      amount,
-      source: RIVEN_SLOT,
-      slot: slotNo,
-      label: '裂罅 ' + def.label + ' ' + displayText,
-    });
+    if (!def) { entries.push(null); continue; }
+    entries.push({ key: def.label || e.key, stat: def.stat, value: e.value, kind: rivenSlotKind(i) });
   }
-  return out;
+  if (!entries.length) return [];
+  return coreRivenToContributions(entries, RIVEN_SLOT, slot);
 }
 
 /** 拿一件"候选词条"装进这张裂罅（不改变原状态），用于算单条增幅 */
