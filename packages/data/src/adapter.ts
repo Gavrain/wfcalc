@@ -11,6 +11,24 @@
  */
 import type { DamageType } from '../../core/src/damage-types.ts';
 import type { Contribution, ContribStat, Faction } from '../../core/src/contributions.ts';
+import {
+  SEMI_CANNONADE_MODS,
+  LOCKS_MULTISHOT_MODS,
+  COMBO_SCALED_STATS,
+  UNBOUNDED_STACK_MODS,
+  FACTION_BY_MOD_ID,
+  GENERIC_COMPAT,
+} from './manual/mods.ts';
+import {
+  ARCANE_STAT_OVERRIDES,
+  ARCANE_BONUS_STATS,
+  ARCANE_MULTI_STATS,
+  ARCANE_TOTAL_OVERRIDES,
+  ARCANE_STACK_OVERRIDES,
+  ARCANE_NO_STACKS,
+  ARCANE_IGNORED,
+  ARCANE_NON_STAT_NAMES,
+} from './manual/arcanes.ts';
 
 export interface ModStat {
   key: string;
@@ -37,24 +55,6 @@ export interface ModRecord {
   descriptionEn?: string;
   official?: { compatName?: string; uniqueName?: string };
 }
-
-const FACTION_BY_MOD_ID: Readonly<Record<string, Faction>> = {
-  bane_of_corpus: 'corpus',
-  primed_bane_of_corpus: 'corpus',
-  bane_of_grineer: 'grineer',
-  primed_bane_of_grineer: 'grineer',
-  bane_of_infested: 'infested',
-  primed_bane_of_infested: 'infested',
-  bane_of_orokin: 'orokin',
-  primed_bane_of_orokin: 'orokin',
-  bane_of_the_murmur: 'murmur',
-  primed_bane_of_the_murmur: 'murmur',
-  // D-163：1999 势力的派系歧视 Mod（需求方 2026-11-12：「对应的派系歧视mod是存在的」）
-  bane_of_techrot: 'techrot',
-  primed_bane_of_techrot: 'techrot',
-  bane_of_scaldra: 'scaldra',
-  primed_bane_of_scaldra: 'scaldra',
-};
 
 export function factionOfMod(modId: string): Faction | null {
   return FACTION_BY_MOD_ID[modId] ?? null;
@@ -139,51 +139,13 @@ export function modToContributions(mod: ModRecord, rank = mod.maxRank, slot?: nu
   return out;
 }
 
-/**
- * 半自动炮轰系列（D-091）：Semi-Pistol / Semi-Rifle / Semi-Shotgun Cannonade。
- *
- * 两条规则来自 Mod 描述 `Only compatible with Semi-Auto Trigger. Fire Rate cannot be modified.`：
- *   1. **射速锁定**：所有射速来源（含负射速）都不生效 → `Contribution.locksFireRate`；
- *   2. **只能装在纯半自动武器上**：武器本身只有 1 个射击模式、且该模式是 semi。
- */
-export const SEMI_CANNONADE_MODS: ReadonlySet<string> = new Set([
-  'semi_pistol_cannonade',
-  'semi_rifle_cannonade',
-  'semi_shotgun_cannonade',
-]);
+// 表本身在 manual/mods.ts，这里重导出以保持既有导入路径可用
+export { SEMI_CANNONADE_MODS, LOCKS_MULTISHOT_MODS } from './manual/mods.ts';
 
-/** 该 Mod 是否属于"只能装纯半自动武器"的半自动炮轰系列 */
 export function isSemiCannonade(mod: { id: string }): boolean {
   return SEMI_CANNONADE_MODS.has(mod.id);
 }
 
-/**
- * **锁多重**的 Mod（需求方 2026-11-13）。
- *
- * 原文：`+X% Weak Point Damage +X% Weak Point Critical Chance. Multishot cannot be modified.`
- * ——与半自动炮轰系列的「射速无法被修改」同构，装上后所有多重来源都不生效。
- */
-export const LOCKS_MULTISHOT_MODS: ReadonlySet<string> = new Set(['primary_acuity', 'pistol_acuity']);
-
-/** 判定所需的武器射击模式（只取需求方关心的字段） */
-export interface TriggerModeLike {
-  trigger: string;
-  /** 灵化模式（`role === 'incarnon'`）不参与判定 */
-  role?: string;
-}
-
-/**
- * 半自动炮轰系列的可装备性：**只考虑武器本身的射击模式**。
- *
- * 需求方 2026-11-06：
- * > 「半自动系列 mod 只能装备在只有一个射击模式，且该射击模式为半自动的武器上。
- * > 注意，只考虑武器本身的射击模式，不考虑灵化模式的射击模式，因为灵化模式是后面附加到武器上的。」
- *
- * 所以先把 `role === 'incarnon'` 的模式**剔掉**，剩下的必须**恰好 1 个**且 `trigger === 'semi'`。
- *
- * 例：Paris（普通/蓄力/灵化）→ 剔掉灵化后仍有 2 个 → 不能装；
- *     Torid（semi + unknown）→ 2 个 → 不能装；Rubico（只有 1 个 semi）→ 能装。
- */
 export function isSemiAutoOnlyWeapon(modes: readonly TriggerModeLike[] | undefined): boolean {
   if (!modes) return false;
   const own = modes.filter((m) => m.role !== 'incarnon');
@@ -218,22 +180,6 @@ export function conditionOverloadMaxStacks(mod: ModRecord): number | null {
 
 const COMPOUND_SET = new Set(['blast', 'gas', 'magnetic', 'radiation', 'corrosive', 'viral']);
 
-/**
- * **按连击倍率**加成的词条（需求方 2026-11-13）。
- *
- * | 数据 stat | Mod | 换算 |
- * |---|---|---|
- * | `critChancePerCombo` | 急进猛突 +40%/层 | 暴率 += 40% × 连击倍率 |
- * | `statusChancePerCombo` | 创口溃烂 +40%/层 | 触发 += 40% × 连击倍率 |
- *
- * 连击倍率来自 `setComboMultiplier()`，界面默认 12x（近战武器始终显示该配置框）。
- */
-const COMBO_SCALED_STATS: Readonly<Record<string, 'critChance' | 'statusChance'>> = {
-  critChancePerCombo: 'critChance',
-  statusChancePerCombo: 'statusChance',
-};
-
-/** 连击倍率默认值（需求方：「默认 12x」；带凯旋之爪满层为 13x） */
 export const DEFAULT_COMBO_MULTIPLIER = 12;
 
 let comboMultiplier = DEFAULT_COMBO_MULTIPLIER;
@@ -394,21 +340,6 @@ export function isSyndicateEffectStat(s: ModStat): boolean {
   return s.key === 'syndRadial';
 }
 
-/**
- * **无限叠层**的武器专属 Mod：数据里的 `levelValues` 是**每层值**，
- * 而描述写的是「每层 X%……无硬性层数上限」（只有弹能过继写了 Max 15 stacks）。
- *
- * 需求方 2026-11-06 定：「固定取满级满层极限」。这里的 `stacks` 是**满级可叠到的层数**：
- *   · 描述里写了上限的，上限 ÷ 每层值（弹能过继 15 × 15% = 225%）；
- *   · 没写上限但给了「Capped at N%」的，满级值就是 N%，所以 = 1（数据里的满级值本身就是极限）。
- *
- * 命中这些 Mod 时，按 `每层值 × stacks` 传入内核（**不是**再乘一次数据里的满级值）。
- */
-const UNBOUNDED_STACK_MODS: Readonly<Record<string, number>> = {
-  clip_delegation: 15, // 弹能过继：每层 15%（满级） × 15 层 = +225% 触发 / +225% 多重
-};
-
-/** 一张 Mod 的叠层倍数（默认 1 = 原样使用数据值） */
 export function modStackFactor(modId: string): number {
   return UNBOUNDED_STACK_MODS[modId] ?? 1;
 }
@@ -456,33 +387,18 @@ export function modKindsFor(slotEntry: { modKinds: string[] } | undefined, slots
 // 武器专属 Mod 过滤（D-029）
 // ─────────────────────────────────────────────────────────────
 
-/**
- * 该 Mod 能否装在这把武器上。
- *
- * 数据依据：`mods.json` 每条 `official.compatName`。实测取值分布（步枪池 122 张）：
- *   · `Rifle`    —— 通用步枪，任何步枪都能装（72 张）
- *   · `PRIMARY`  —— 通用主武器（含弓/狙击等，10 张）
- *   · 具体武器名 —— **专属 Mod**，只能装在该武器上（如 `Grakata`、`Soma Prime`、`Ogris`）
- *
- * 需求方 2026-11-05：「有的武器限定 Mod 不应该在这把武器上出现」。
- *
- * 判定规则（不按名字猜，只用数据）：
- *   1. `compatName` 是通用类别（Rifle / PRIMARY / Shotgun / Pistol / MELEE …）→ 允许；
- *   2. `compatName` 是具体武器名 → 与武器名（`name` / `nameZh`）匹配才允许；
- *   3. 缺 `compatName` → 允许（保守，不误杀）。
- */
-const GENERIC_COMPAT = new Set([
-  'RIFLE', 'PRIMARY', 'SHOTGUN', 'PISTOL', 'SECONDARY', 'MELEE', 'WARFRAME',
-  'ARCHWING', 'ARCH-GUN', 'ARCHGUN', 'ARCH-MELEE', 'ARCHMELEE', 'SENTINEL', 'COMPANION',
-  'KITGUN', 'RAILJACK', 'NECRAMECH', 'PLEXUS', 'AURA', 'EXILUS',
-]);
+/** 判定所需的武器射击模式（只取关心的字段） */
+export interface TriggerModeLike {
+  trigger: string;
+  /** 灵化模式（`role === 'incarnon'`）不参与判定 */
+  role?: string;
+}
 
+/** 判定所需的武器字段 */
 export interface WeaponLike {
   id: string;
   name?: string;
   nameZh?: string;
-  /** 导出里的唯一名，形如 `/Lotus/Weapons/Tenno/Rifle/Rifle` */
-  uniqueName?: string;
 }
 
 export function isModCompatibleWithWeapon(mod: ModRecord, weapon: WeaponLike): boolean {
@@ -616,36 +532,11 @@ export function arcaneToContributions(arcane: ArcaneRecord, rank = arcane.maxRan
 }
 
 /**
- * **导出的数值槽本身不是加成值**的赋能 → 真实满级值（D-123）。
- *
- * 导出的 `GIVE_STAT` / `GIVE_STAT_MAX` / `HAVE_STAT_MIN` 是「每点护甲 +1%、上限 500%」
- * 「能量 ≥90% 时给最大能量的 35%、层数上限 350%」这类**规则参数**，
- * `statForArcaneKey` 却按词条名把它们当成「每层加成」喂给了内核。
- * 需求方 2026-11-06：「堡垒和过载的收益还是不对」—— 这里按描述给出**满级满层值**，
- * 并且界面显示直接读它（`arcaneDisplayStats` 不再单独缩放），保证「显示的 = 算的」。
- *
- * | 赋能 | 导出 | 满级值 |
- * |---|---|---|
- | 主要·堡垒 | `GIVE_STAT:1` `GIVE_STAT_MAX:500` | 基伤 **+500%**（满护甲封顶） |
- * | 主要·过载 | `HAVE_STAT_MIN:90` `GIVE_STAT:35` `GIVE_STAT_CAP:350` | 多重 **+350%**（35% × 10 层） |
- * | 主要·死首 | `[1].val:30`（与基伤共用 3 层） | 弱点伤害 **+30%**（D-118：不随层数叠加） |
- */
-const ARCANE_TOTAL_OVERRIDES: Readonly<Record<string, Readonly<Record<string, number>>>> = {
-  DamageForBonusArmour: { baseDamage: 500 },
-  MultishotForMaxEnergy: { multishot: 350 },
-  PrimaryDamageOnNoMelee: { weakpointDamage: 30 },
-  SecondaryDamageOnNoMelee: { weakpointDamage: 30 }, // D-138：与主要·死首同口径
-};
-
 /**
- * 赋能**在界面上显示的词条**（D-116 / D-123：待选区与装备区都要有词条）。
+ * **导出的数值槽本身不是加成值**的赋能 → 真实满级值。
  *
- * ⚠ D-123 修正：以前这里用一张显示缩放表显示**上限**（堡垒 500、过载 350），
- *   而真正喂给内核的仍是导出里的第一个数（1、35）——「描述改对了，收益还是不对」。
- *   现在数值合并在 `arcaneToContributions` 里完成，这里只是同一份结果的透传，
- *   所以**卡上显示的就是算进内核的**；「明确不生效」的赋能返回空数组，卡上不写任何提示。
- *
- * @returns `[{ stat, amount, label }]`，`amount` 为百分比口径
+ * 依据：核心事实 §11（赋能：数据层给出每层值与层数上限）。
+ * 换算表在 `manual/arcanes.ts` 的 `ARCANE_TOTAL_OVERRIDES`。
  */
 export function arcaneDisplayStats(arcane: ArcaneRecord, rank = arcane.maxRank): { stat: ContribStat; amount: number; label: string | undefined }[] {
   return arcaneToContributions(arcane, rank).map((c) => ({
@@ -655,157 +546,6 @@ export function arcaneDisplayStats(arcane: ArcaneRecord, rank = arcane.maxRank):
   }));
 }
 
-/**
- * `BONUS1` / `BONUS2` 这类**无语义槽名**的赋能 → 每个 BONUS 对应的内核属性。
- *
- * 官方导出的槽名只编号、不带词条含义，必须按 Mod 描述人工对齐（需求方要求
- * 「确认其他赋能是否正期生效所有词条」后逐条核对过）：
- *
- * | 赋能 | BONUS1 | BONUS2 |
- * |---|---|---|
- * | 主要·霜冻 PrimaryCritDmgAndMultishotOnColdProc | 暴伤 | 多重 |
- * | 主要·毒侵 PrimaryHeadshotCritMultOnHeadshot | 暴伤 | 多重 |
- * | 联结·电压 SecondaryReloadSpeedAndMultishotOnElectricProc | 装填速度 | 多重 |
- * | 霰弹·仇杀 ShotgunMultishotAndReloadSpeedOnCloseKill | 多重 | 装填速度 |
- * | 近战·同化 HeavyAttackDamageAndShieldOnShieldBreak | 基伤 | 护盾（不影响伤害） |
- *
- * 注意：**不能按 `bucket` 推断**。霜冻的 `bucket` 是 `multishot`，
- * 若照此推断，+3% 暴伤那条会被错算成多重（旧实现的 bug）。
- */
-const ARCANE_BONUS_STATS: Readonly<Record<string, readonly (ContribStat | null)[]>> = {
-  PrimaryCritDmgAndMultishotOnColdProc: ['critMultiplier', 'multishot'],
-  PrimaryHeadshotCritMultOnHeadshot: ['critMultiplier', 'multishot'],
-  SecondaryReloadSpeedAndMultishotOnElectricProc: ['reloadSpeed', 'multishot'],
-  ShotgunMultishotAndReloadSpeedOnCloseKill: ['multishot', 'reloadSpeed'],
-  HeavyAttackDamageAndShieldOnShieldBreak: ['baseDamage', null],
-};
-
-/**
- * **数值槽本身没有词条名**、但描述里其实有**多条加成**的赋能（D-138）。
- *
- * | 赋能 | 导出槽 | 描述 | 处理 |
- * |---|---|---|---|
- * | 次要·爆发 `MultishotForCombo` | `STAT_VALUE:20`（单槽） | 每层消耗的连击倍率 **+20% 暴击几率 和 暴击伤害** | 拆成暴率 +20 / 暴伤 +20 两条 |
- *
- * 之前只有 `bucket = critMultiplier` 兜底，暴率那一条整条丢了。
- * 两条都从同一个导出值取（描述里两个百分比相同）。
- */
-const ARCANE_MULTI_STATS: Readonly<Record<string, readonly ContribStat[]>> = {
-  MultishotForCombo: ['critChance', 'critMultiplier'],
-};
-
-/**
- * **词条名 → 内核属性**的显式覆盖（按赋能 id + 词条名）。
- *
- * 用于两种情况，两种情况都必须按 Mod 描述人工判定：
- * 1. 词条名没有语义（`VAL` 被过滤掉了，只能用 bucket），而 **bucket 是错的**；
- * 2. 词条名有语义但代码认不出（`AMOUNT` / `STAT1` / `CHANCE` …）。
- *
- * | 赋能 | 实际问题 | 处理 |
- * |---|---|---|
- * | 瀑流·耀炎 | 词条是 `BONUS`（基伤），流水线 `bucket` 写成 `statusChance` | 基伤 |
- * | 瀑流·精准 | `BONUS` = +300% **Crit Chance on Weakpoint Hits**，不是全局暴率 | 现无 weakpoint 暴率通路，**不生效** |
- * | 次要·妨害 | `BONUS` 是"二次触发的概率"，不是状态触发率词条 | **不生效** |
- * | 主要·激昂 | `BONUS` 是能量回复，不是状态触发率 | **不生效** |
- * | 次要·冷颤 | 裸 `.val` = "敌人多受 45% 伤害"，是独立终伤倍率 | **不生效**（等待其乘区确认） |
- * | 瀑流·强化 | `[BONUS,AMOUNT]` = +750 固定附加伤害（不是百分比） | **不生效** |
- * | 弓箭·利矢 | `BONUS.DAMAGE`，只作用于"下一发" | 基伤（上限口径已简化） |
- *
- * **D-116（需求方 2026-11-06）**：官方导出的数值槽里混着「条件 / 上限 / 层数 / 概率」，
- * 被 `statForArcaneKey` 按词条名一律当成了**每层加成**，于是算出了下面这些明显错的数：
- *
- * | 赋能 | 导出值 | 旧结果 | 现状 |
- * |---|---|---|---|
- * | 主要·堡垒 `DamageForBonusArmour` | `GIVE_STAT:1` `GIVE_STAT_MAX:500` | 基伤 +1 | **基伤 +500**（需求方：「应该是 500」） |
- * | 主要·过载 `MultishotForMaxEnergy` | `HAVE_STAT_MIN:90` `GIVE_STAT:35` `GIVE_STAT_CAP:350` | 多重 +90 | 多重 +350（35% × 10 层，需求方：按描述满层取） |
- * | 主要·衰弱 `SplitStatusProcsOnStackedStatusHit` | `CHANCE:100` | 触发 +1000 | **不生效**（追加异常的概率，不是触发率词条） |
- * | 主要·滞阻 `PrimaryJamEnemyWeaponsOnMagneticProc` | `JAM_RANGE:15` | 触发 +15 | **不生效**（干扰范围，不是触发率） |
- * | 主要·压缩 `ConvergeRadialAttackOnAim` | `RADIUS:0.2` `STAT1:100` `STAT2:5.5` | 无 | **不生效**（D-123：它会改爆炸范围、并按损失的半径加伤害/弹药效率，涉及半径数据，需求方明确「目前不实现」） |
- * | 主要·镀金弹头 `PrimaryDamagePerAmmoOnReload` | 只有 `DURATION` | 无 | **不生效**（每发弹药的加成按弹匣长度换算，待确认） |
- * | 主要·死首 `PrimaryDamageOnNoMelee` | `[1].val:30` `[2].val:-50` | 无 | 弱点伤害 +30（不随层数叠加，D-118；-50 后坐力仍忽略） |
- */
-const ARCANE_STAT_OVERRIDES: Readonly<Record<string, Readonly<Record<string, ContribStat | null>>>> = {
-  // ── bucket 标错、词条其实是基伤 ──
-  SecondaryDamageOnHeatProc: { BONUS: 'baseDamage' },
-  // ── D-116：上限 / 条件 / 概率被当成加成 ──
-  // 主要·堡垒：每点护甲 +1%，上限 +500% —— 满护甲时就是 500%（需求方 2026-11-06）
-  DamageForBonusArmour: { GIVE_STAT: 'baseDamage', GIVE_STAT_MAX: null },
-  // 主要·过载：能量 ≥90% 时「最大能量的 35%」作为多重，上限 350% —— 按满层取 350%
-  MultishotForMaxEnergy: { HAVE_STAT_MIN: null, GIVE_STAT: 'multishot', GIVE_STAT_CAP: null },
-  // 主要·衰弱：100% 是「追加基本异常」的概率，不是触发几率
-  SplitStatusProcsOnStackedStatusHit: { CHANCE: null },
-  // 主要·滞阻：15 是干扰半径（米），不是触发几率
-  PrimaryJamEnemyWeaponsOnMagneticProc: { JAM_RANGE: null },
-  // 主要·压缩（D-123 需求方：「记下他改变爆炸范围增加伤害和弹药效率这件事，
-  //   但是由于这个赋能过于复杂，涉及爆炸范围，目前不实现」）：
-  //   描述 = 瞄准时爆炸半径 ×0.2，**每损失 1 米** +100% 伤害、+5.5% 弹药效率。
-  //   要算它必须知道该武器的爆炸半径与"损失了多少米"，而半径目前不在内核里 → 整条不生效。
-  ConvergeRadialAttackOnAim: { RADIUS: null, STAT1: null, STAT2: null },
-  // 主要·镀金弹头：数值槽里没有任何加成值，只有持续时间
-  PrimaryPlatedRound: { DURATION: null },
-  // 主要·死首：裸 .val 放行后按顺序对齐 —— [1] **弱点伤害** +30%（D-118：不随层数叠加），[2] 后坐力 -50%
-  // D-138：次要·死首同样登记（以前只登记了主要版，次要版这 30% 被当"裸 val"丢掉）。
-  //   需求方 2026-11-06：「现版本游戏，弱点==爆头，请全部改为弱点描述」
-  PrimaryDamageOnNoMelee: { VAL: 'weakpointDamage', VAL2: null },
-  SecondaryDamageOnNoMelee: { VAL: 'weakpointDamage', VAL2: null },
-  // 次要·低温：NUM_PROCS 是"施加 3 层冰冻异常"的层数，不是触发几率（D-138：不生效）
-  SecondaryColdOnPuncture: { NUM_PROCS: null },
-  // ── 不是伤害词条 / 没有对应通路 → 明确不生效（null 覆盖 bucket 推断，避免误算） ──
-  SecondaryOnRollCritChanceOnHeadshot: { BONUS: null }, // +300% 暴率**仅对弱点命中**生效
-  ExtraProcOnProc: { BONUS: null }, // +24% 是"二次触发的概率"，不是状态触发率词条
-  PrimaryEnergyRegenOnImpactProc: { BONUS: null }, // 能量回复
-  // 次要·冷颤：类镀层加成，**只对冰冻层数生效**（需求方 2026-11-06）
-  SecondaryExtraDamagePerFreezeStack: { VAL: 'coFreeze' },
-  // ── 近战·刃影（D-189，需求方 2026-11-13）：`[0].CHANCE` = 25/40/55/70/85/100
-  //   是「基础暴击命中时追加一次攻击」的**概率**，不是状态触发几率。
-  //   ⚠ 不要登记 `STACKS`——它没有层数槽，`arcaneStackCount` 会自然回落到 1，
-  //     按等级直接取 CHANCE 就是满值（满级 100）。
-  ReplayLightCritHits: { CHANCE: 'bladeShadow' },
-  // ── 词条名可识别，但指向的乘区要人工确认 ──
-  LongbowDamageOnHeadshot: { DAMAGE: 'baseDamage' }, // "下一发"+300%
-  StatusTriggerRadialDamage: { CHANCE: null, STAT1: null, RANGE: null }, // 需求方：设置成无效果
-  BurningCystOnKill: { CHANCE: null, DAMAGE: null }, // DAMAGE 是触发物伤害，不是武器加成
-  IceMistOnKill: { CHANCE: null, DAMAGE: null },
-  LightningStrikeOnKill: { CHANCE: null, DAMAGE: null },
-  ToxicBloodOnKill: { CHANCE: null, DAMAGE: null },
-  // 需求方 2026-11-13：瀑流·强化的 750 是「触发异常时额外造成 750 伤害」——**附加伤害**，
-  // 不是加成词条。以前整张被 `ARCANE_IGNORED` 屏蔽（等于不存在），现在放行，
-  // 但数值不当作武器加成（null），界面上会显示「不参与增伤计算」。
-  SecondaryOnStatusProcBonusDamage: { AMOUNT: null },
-};
-
-/**
- * 整个赋能**不参与伤害计算**的清单（数值根本不是武器伤害词条）。
- * 用整表排除，避免"第一个词条走 bucket 兜底"又把它们算进去。
- */
-/**
- * **官方 \`STACKS\` 槽不可信**时的层数覆写（赋能 id → 真实层数）。
- *
- * 瀑流·耀炎（瀑流·耀炎）的导出是 \`[0].STACKS = 480\`，和描述 \`Stacks up to 480%\` 同源——
- * 那是**累加上限**（每层 12% → 40 层），不是层数。需求方 2026-11-06 确认：「耀炎是 480」
- * 指的就是那个 480%（40 层 × 12%）。
- */
-const ARCANE_STACK_OVERRIDES: Readonly<Record<string, number>> = {
-  SecondaryDamageOnHeatProc: 40, // 每层 12% × 40 = 480%
-};
-/**
- * **没有层数槽**的赋能 → 层数恒为 1（需求方 2026-11-13 核对）。
- *
- * 霰弹·仇杀 / 近战·同化的官方原文**没有 STACKS**（数值槽只有 BONUS1 / BONUS2 / DURATION），
- * 但旧实现按"每层值 × 40"在乘，等于多算了 40 倍：
- * ```
- * 霰弹·仇杀   多重 +180% / 装填 +75%（原文就是这么多，不是每层值）
- * 近战·同化   重击伤害 +150% / 护盾 +30%
- * ```
- */
-const ARCANE_NO_STACKS: ReadonlySet<string> = new Set([
-  'ShotgunMultishotAndReloadSpeedOnCloseKill',
-  'HeavyAttackDamageAndShieldOnShieldBreak',
-]);
-
-const ARCANE_IGNORED = new Set<string>([]);
-
-/** 解析单个赋能的某个词条 → 内核属性（null = 不参与伤害计算） */
 function resolveArcaneStatKey(
   arcane: ArcaneRecord,
   statKey: string,
@@ -873,10 +613,6 @@ export function arcanePerStackValues(
   return out;
 }
 
-/** 数值槽里"不是词条"的名字 */
-const ARCANE_NON_STAT_NAMES = new Set(['STACKS', 'MAX_STACKS', 'DURATION', 'MAX', 'TIME', 'RANGE', 'RADIUS', 'COOLDOWN']);
-
-/** 赋能的数值槽名 → 内核属性（认不出返回 null） */
 function statForArcaneKey(key: string): ContribStat | null | undefined {
   switch (key.toUpperCase()) {
     case 'BONUS':
