@@ -143,7 +143,7 @@ check('备选区已渲染', registry['#candidate-list'].children.length > 50);
 {
   const before = slotNames();
   check('8 槽已满（前置条件）', before.filter(Boolean).length === 8);
-  // 满槽时要测的是**普通 Mod**（功能 Mod 只能进劣化槽，普通槽一律拒绝，那是对的另一件事）
+  // 满槽时测普通 Mod 的互换；劣化卡也能进普通槽（需求方 2026-11-18 确认），但这里不掺进来，保持用例单一
   const card = registry['#candidate-list'].children.find((c) => !hasExilusTag(c));
   const newName = candName(card);
   check('满槽时备选区仍有未装备的卡', Boolean(newName));

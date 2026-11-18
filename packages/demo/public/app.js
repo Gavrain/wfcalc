@@ -483,7 +483,12 @@ function restoreLoadout(saved) {
   if (typeof ui.headshot === 'boolean') state.headshot = ui.headshot;
   state.headshotMult = 3;
   if ([1, 2, 3].indexOf(Number(ui.headshotMult)) >= 0) state.headshotMult = Number(ui.headshotMult);
-  state.kuvaType = 'none';
+  // 玄骸武器默认带**火**（需求方 2026-11-18：功能页打开玄骸武器时显示 none）。
+  // ⚠ 这里先回默认是对的（避免沿用上一把枪的值），但默认值不能一律是 'none'：
+  //   玄骸武器本身自带一个元素加成，打开时就该是火，而不是"无"。
+  //   存档里有合法值仍然优先。
+  const isKuvaWeapon = Boolean(w && w.kuva);
+  state.kuvaType = isKuvaWeapon ? 'heat' : 'none';
   if (KUVA_ELEMENTS.indexOf(ui.kuvaType) >= 0) state.kuvaType = ui.kuvaType;
   // 玄骸滑条有上下限（25%~60%），默认取中间值 60%
   state.kuvaRatio = 0.6;
@@ -579,6 +584,11 @@ function restoreRiven(saved) {
 function dropOnExilus(payload) {
   const mod = store.data.modById.get(payload.id);
   if (!mod) return;
+  // 普通卡进不了劣化槽（反过来可以：劣化卡能装普通槽，需求方 2026-11-18 确认）
+  if (mod.exilus !== true) {
+    flash('只有劣化 Mod 能装进劣化槽');
+    return;
+  }
   if (!isModAllowedOnWeapon(mod)) {
     flash('半自动炮轰系列只能装在只有半自动射击模式的武器上');
     return;

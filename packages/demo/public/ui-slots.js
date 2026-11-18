@@ -69,8 +69,8 @@ export function slotAcceptsMod(payload, targetIndex) {
   }
   // 赋能不能进 Mod 槽
   if (payload.kind !== 'mod') return false;
-  // 功能类只能进劣化槽（D-034）
-  if (payload.exilus) return false;
+  // 劣化卡**可以**进普通槽（需求方 2026-11-18 确认：游戏内如此）；
+  // 反过来不行——普通卡进不了劣化槽，由 dropOnExilus / arcaneSlotAccepts 一侧把关。
   return true;
 }
 

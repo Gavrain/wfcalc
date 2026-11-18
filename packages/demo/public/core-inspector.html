@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>内核素材池验证</title>
+</head>
+<body>
+<header>
+  <h1>内核素材池验证</h1>
+  <label>武器 <select id="weapon"></select></label>
+  <label>模式 <select id="mode"></select></label>
+  <label title="默认 = 当前命中分布里有伤害的类型个数">异况种类 a
+    <input id="statusTypes" type="number" min="0" max="20"></label>
+  <label title="留空 = 满层（各卡自己的叠层上限）">镀层叠层 y
+    <input id="coStacks" type="number" min="0" max="20"></label>
+  <label title="仅近战有意义">连击倍率
+    <input id="combo" type="number" min="1" max="13"></label>
+  <span id="hint" class="muted"></span>
+</header>
+
+<main>
+  <!-- 左：配装 -->
+  <section>
+    <h2>配装 <button id="unequipAll" class="mini">全部卸下</button></h2>
+    <div id="slotGrid" class="slots"></div>
+    <div id="exilusRow" class="exilus-row"></div>
+    <div id="arcaneRow" class="arcane-row"></div>
+  </section>
+
+  <!-- 中：备选区（上 Mod、下赋能，同一列上下叠） -->
+  <div class="stack">
+    <section>
+      <h2>Mod</h2>
+      <input id="modSearch" placeholder="搜索…" style="width:100%;margin-bottom:6px">
+      <div id="filters" class="filters"></div>
+      <div id="mods" class="grid"></div>
+    </section>
+
+    <section>
+      <h2>赋能</h2>
+      <div id="arcanes" class="grid grid-arcanes"></div>
+    </section>
+  </div>
+
+  <!-- 右：素材池 -->
+  <section>
+    <h2>素材池（按乘区键分组）</h2>
+    <div id="summary"></div>
+    <div id="buckets" class="buckets"></div>
+  </section>
+</main>
+
+<script type="module" src="/packages/demo/public/core-inspector.js"></script>
+</body>
+</html>

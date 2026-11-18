@@ -9,6 +9,7 @@
  * ```
  * 下游（UI、报告脚本、增幅分析）一律读 `state` / `perSegment`，不要自己从面板 + Mod 重算。
  */
+import { collectMaterials, statusTypeCount, type MaterialPool } from './material.ts';
 import type { DamageSpread } from './damage-types.ts';
 import { spreadTotal } from './damage-types.ts';
 import type { AttackMode, DamageSegment, ModeVariant, Weapon } from './weapon.ts';
@@ -48,6 +49,16 @@ export interface ComputeResult {
    * 单段武器时 `perSegment[0] === state` 的等价内容。
    */
   perSegment: WeaponState[];
+  /**
+   * 素材池快照（v2 第一步，只服务展示）：把输入的贡献按乘区键分组并汇总。
+   * 计算本身**不读**它——现有计算路径仍直接用 `contribs`。
+   */
+  materials: MaterialPool;
+  /**
+   * 主段命中分布里**有伤害的类型个数**（= 敌人在该武器下最多能有几种异况）。
+   * 供界面做「镀层异况种类数」的默认值。
+   */
+  statusTypes: number;
   /** 主段（第一个段）的输出口径 */
   output: OutputBreakdown;
   /** 面板 → 加成后面板 的对照 */
@@ -257,6 +268,8 @@ export function compute(
   return {
     ctx,
     segments,
+    materials: collectMaterials(contribs),
+    statusTypes: statusTypeCount(totalSpread as Record<string, number | undefined>),
     output,
     state,
     perSegment,
