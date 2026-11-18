@@ -175,13 +175,41 @@ export function isContribActive(c: Contribution, scope?: 'hit' | 'dot'): boolean
   return s === 'both' || s === scope;
 }
 
+/**
+ * 按属性取数的**索引**：属性 → 该属性的全部贡献。
+ *
+ * 建索引是 O(n)，之后每次取数是 O(1)，不再是每取一个属性就扫一遍全表。
+ * 用 `WeakMap` 挂在贡献数组上：数组本身是配装不可变快照，同一份数组反复取数时
+ * 索引自动复用；数组被换掉（换配装）时旧索引随之回收，不会串味。
+ */
+const indexByContribs = new WeakMap<readonly Contribution[], Map<string, Contribution[]>>();
+
+/** 取（必要时建立）某份贡献数组的属性索引 */
+function indexOf(contribs: readonly Contribution[]): Map<string, Contribution[]> {
+  let idx = indexByContribs.get(contribs);
+  if (idx) return idx;
+  idx = new Map();
+  for (const c of contribs) {
+    let list = idx.get(c.stat);
+    if (!list) { list = []; idx.set(c.stat, list); }
+    list.push(c);
+  }
+  indexByContribs.set(contribs, idx);
+  return idx;
+}
+
 /** 按属性精确取生效贡献 */
 export function contributionsFor(
   contribs: readonly Contribution[],
   stat: ContribStat,
   filter: ContributionFilter = {},
 ): Contribution[] {
-  return contribs.filter((c) => c.stat === stat && isContribActive(c, filter.scope));
+  // 走索引取该属性的条子集，再按作用范围过滤。
+  // ⚠ 保持**原有顺序**：元素两两合成要按 `slot` 排，顺序乱了会合成错。
+  const all = indexOf(contribs).get(stat);
+  if (!all) return [];
+  if (!filter.scope) return all.filter((c) => isContribActive(c));
+  return all.filter((c) => isContribActive(c, filter.scope));
 }
 
 /** Σ pct（返回值是**小数**：165 → 1.65） */
