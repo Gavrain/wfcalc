@@ -33,6 +33,8 @@ export interface MaterialEntry {
   label?: string;
   /** 条件类是否生效；`false` = 不参与计算（该条仍列出，便于核对） */
   active?: boolean;
+  /** 作用范围：命中 / 异常 / 两者。与 `isContribActive` 同义 */
+  scope?: 'hit' | 'dot' | 'both';
   /** 重击时 ×2（数据给的结构化标记） */
   heavyX2?: boolean;
 }
@@ -121,6 +123,8 @@ function isActive(c: Contribution): boolean {
 export function collectMaterials(
   contribs: readonly Contribution[],
   input: InputLayer = {},
+  /** 只汇总作用范围匹配的素材（缺省 = 全都要） */
+  scope?: 'hit' | 'dot',
 ): MaterialPool {
   const map = new Map<string, MaterialEntry[]>();
   // 锁：任一贡献带标记 → 该属性整桶失效（正的负的都不算）
@@ -142,6 +146,7 @@ export function collectMaterials(
     if (c.label !== undefined) entry.label = c.label;
     if (c.active === false) entry.active = false;
     if (c.heavyX2 === true) entry.heavyX2 = true;
+    if (c.scope !== undefined) entry.scope = c.scope;
 
     let list = map.get(c.stat);
     if (!list) { list = []; map.set(c.stat, list); }
@@ -156,6 +161,7 @@ export function collectMaterials(
     const total: MaterialTotal = { pct: 0, flat: 0, mul: 1, count: 0 };
     for (const e of entries) {
       if (e.active === false) continue;
+      if (scope && (e.scope ?? 'both') !== 'both' && e.scope !== scope) continue;
       total.count++;
       if (e.form === 'pct') total.pct += e.value;
       else if (e.form === 'flat') total.flat += e.value;
@@ -165,6 +171,7 @@ export function collectMaterials(
     let rePct = 0, reFlat = 0, reMul = 1;
     for (const e of entries) {
       if (e.active === false) continue;
+      if (scope && (e.scope ?? 'both') !== 'both' && e.scope !== scope) continue;
       if (e.form === 'pct') rePct += e.value;
       else if (e.form === 'flat') reFlat += e.value;
       else reMul *= e.value;
