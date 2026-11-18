@@ -8,7 +8,8 @@
  *
  * 不碰 DOM。原来这些函数都在 `app.js` 里，与渲染混在一起。
  */
-import { compute } from '../../core/src/index.ts';
+import {
+  setBonusContributions as setBonusFromCore, compute } from '../../core/src/index.ts';
 import {
   arcaneToContributions,
   isConditionOverloadMod,
@@ -16,7 +17,6 @@ import {
   setBurstStacks,
   setComboMultiplier,
 } from '../../data/src/adapter.ts';
-import { SET_BONUS_EFFECTS } from '../../data/src/manual/mods.ts';
 import { modName } from './app-data.js';
 import { EXILUS_INDEX, MAX_SLOTS, RIVEN_SLOT_ID, SLOT_COUNT, store } from './app-store.js';
 import { previewWithEntry, rivenComboNow, rivenDefOf, rivenInstalledSlot, rivenRawValueFor, rivenTableNow, rivenToContributions } from './app-riven.js';
@@ -84,76 +84,39 @@ export function currentContributions() {
 }
 
 /**
- * 套装效果产生的贡献。
+ * 套装效果（实现只在 `core`，见 `core/src/set-bonus.ts`）。
  *
- * 只看**武器槽里**的 Mod（战甲卡不在本配装范围内），按已装件数套用。
+ * 这里只负责**数件数**：内核要的是「套名 → 张数」这个纯数据，
+ * 它不认识 Mod 记录，也不碰界面状态。
  */
 function setBonusContributions() {
-  const out = [];
-  if (!store.data || !store.data.modById) return out;
+  if (!store.data || !store.data.modById) return [];
   const installed = store.modSlots.filter(Boolean);
   if (store.exilusModId) installed.push(store.exilusModId);
-  /** 套装 id → 已装件数 */
-  const count = new Map();
+  const counts = {};
+  const installedIds = [];
   for (const id of installed) {
     if (id === RIVEN_SLOT_ID) continue;
     const mod = store.data.modById.get(id);
     const set = mod && mod.set;
     if (!set) continue;
-    count.set(set, (count.get(set) || 0) + 1);
+    counts[set] = (counts[set] || 0) + 1;
+    installedIds.push(id);
   }
-  const combo = Math.max(0, Number(store.ui.comboMultiplier || 1) - 1);
-  for (const [setId, n] of count) {
-    const eff = SET_BONUS_EFFECTS[setId];
-    if (!eff) continue;
-    const usable = Math.min(n, eff.weaponMods); // 战甲卡不计入，最多武器上限
-    if (usable <= 0) continue;
-    if (eff.kind === 'scaleOwnMods') {
-      // ×1.25 一次：只放大本套 Mod 自己的数值，等价于给它们补一份增量
-      const extra = eff.value - 1;
-      for (const id of installed) {
-        if (id === RIVEN_SLOT_ID) continue;
+  return setBonusFromCore({
+    counts,
+    comboMultiplier: store.ui.comboMultiplier,
+    // 牺牲要放大**本套卡自己的数值**，所以把它们的贡献给内核
+    contributionsOfSet: function (setId) {
+      const out = [];
+      for (const id of installedIds) {
         const mod = store.data.modById.get(id);
         if (!mod || mod.set !== setId) continue;
-        for (const c of modToContributions(mod, mod.maxRank, modSlotIndexOf(id))) {
-          out.push({
-            stat: c.stat,
-            form: c.form,
-            amount: c.amount * extra,
-            source: setId,
-            ...(c.slot !== undefined ? { slot: c.slot } : {}),
-            label: '牺牲套装 ×1.25',
-          });
-        }
+        out.push(...modToContributions(mod, mod.maxRank, modSlotIndexOf(id)));
       }
-    } else if (eff.kind === 'critChanceFlat') {
-      out.push({
-        stat: 'critChance',
-        form: 'flat',
-        amount: (eff.value / 100) * usable, // 每件 +5% 固定暴击率（小数口径）
-        source: setId,
-        label: `${SET_LABELS[setId] || setId}套装 ${usable} 件：+${eff.value * usable}% 固定暴击率`,
-      });
-    } else if (eff.kind === 'slamDamage') {
-      out.push({
-        stat: 'slamDamage',
-        form: 'pct',
-        amount: eff.value * usable,
-        source: setId,
-        label: `${SET_LABELS[setId] || setId}套装 ${usable} 件：+${eff.value * usable}% 震地伤害`,
-      });
-    } else if (eff.kind === 'critChancePerCombo') {
-      if (combo <= 0) continue; // 1x 不加
-      out.push({
-        stat: 'critChance',
-        form: 'pct',
-        amount: eff.value * usable * combo,
-        source: setId,
-        label: `${SET_LABELS[setId] || setId}套装 ${usable} 件：+${eff.value * usable}% × 连击倍率系数 ${combo}`,
-      });
-    }
-  }
-  return out;
+      return out;
+    },
+  });
 }
 
 /** 该 Mod 在配装里的槽位下标（找不到返回 undefined） */
@@ -165,7 +128,6 @@ function modSlotIndexOf(id) {
 }
 
 /** 套装中文名（只用于界面显示的来源标签） */
-const SET_LABELS = { sacrifice: '牺牲', vigilante: '私法', nira: '混沌', gladiator: '角斗士' };
 /**
  * 镀层类的可用性。
  *

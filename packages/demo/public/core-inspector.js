@@ -10,8 +10,7 @@
  *
  * 访问：`npm run demo` 后打开 `/packages/demo/public/core-inspector.html`
  */
-import { compute } from '../../core/src/index.ts';
-import { SET_BONUS_EFFECTS } from '../../data/src/manual/mods.ts';
+import { compute, setBonusContributions } from '../../core/src/index.ts';
 import {
   arcaneDisplayStats, arcaneStackCount, arcaneToContributions, isModCompatibleWithWeapon,
   modKindsFor, modToContributions,
@@ -192,37 +191,31 @@ function currentContributions() {
     const arc = all.arcaneById.get(state.arcaneKey);
     if (arc) out.push(...arcaneToContributions(arc));
   }
-  // 套装效果（与主界面同一套规则）
-  const counts = new Map();
-  for (const id of [...state.slots.filter(Boolean), state.exilusId].filter(Boolean)) {
+  // 套装效果：与主界面**同一份实现**（内核 set-bonus.ts）。
+  //   这里只负责数件数——内核要的是「套名 → 张数」这个纯数据。
+  const installedIds = [...state.slots.filter(Boolean), state.exilusId].filter(Boolean);
+  const counts = {};
+  for (const id of installedIds) {
     const m = modById(id);
-    if (!m || !m.set) continue;
-    counts.set(m.set, (counts.get(m.set) || 0) + 1);
+    const set = m && m.set;
+    if (!set) continue;
+    counts[set] = (counts[set] || 0) + 1;
   }
-  for (const [setId, n] of counts) {
-    const eff = SET_BONUS_EFFECTS[setId];
-    if (!eff) continue;
-    const usable = Math.min(n, eff.weaponMods);
-    if (usable <= 0) continue;
-    if (eff.kind === 'scaleOwnMods') {
-      const extra = eff.value - 1;
-      for (const id of state.slots.filter(Boolean)) {
+  out.push(...setBonusContributions({
+    counts,
+    comboMultiplier: state.combo ?? 12,
+    // 牺牲要放大本套卡自己的数值，把它们的贡献交给内核
+    contributionsOfSet: function (setId) {
+      const list = [];
+      installedIds.forEach((id, i) => {
         const m = modById(id);
-        if (!m || m.set !== setId) continue;
-        for (const c of modToContributions(m, m.maxRank, state.slots.indexOf(id))) {
-          out.push({ ...c, amount: c.amount * extra, source: setId + '·套装', label: setId + '套装 ×' + eff.value });
-        }
-      }
-    } else if (eff.kind === 'critChanceFlat') {
-      out.push({ stat: 'critChance', form: 'flat', amount: (eff.value / 100) * usable, source: setId + '·套装' });
-    } else if (eff.kind === 'slamDamage') {
-      out.push({ stat: 'slamDamage', form: 'pct', amount: eff.value * usable, source: setId + '·套装' });
-    } else if (eff.kind === 'critChancePerCombo' && state.combo) {
-      const c = Math.max(0, state.combo - 1);
-      if (c > 0) out.push({ stat: 'critChance', form: 'pct', amount: eff.value * usable * c, source: setId + '·套装' });
-    }
-  }
-  return out;
+        if (!m || m.set !== setId) return;
+        list.push(...modToContributions(m, m.maxRank, i));
+      });
+      return list;
+    },
+  }));
+return out;
 }
 
 // ── 渲染：页头 ──
