@@ -13,3 +13,6 @@ export * from './material.ts';
 
 // 套装效果（唯一实现，主界面与验证页共用）
 export * from './set-bonus.ts';
+
+// 增幅（两遍计算法）
+export * from './gain.ts';

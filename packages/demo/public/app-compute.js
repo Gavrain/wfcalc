@@ -9,6 +9,7 @@
  * 不碰 DOM。原来这些函数都在 `app.js` 里，与渲染混在一起。
  */
 import {
+  ratioGainOf as coreRatioGainOf, removeSource as coreRemoveSource,
   setBonusContributions as setBonusFromCore, compute } from '../../core/src/index.ts';
 import {
   arcaneToContributions,
@@ -635,8 +636,8 @@ function lineValueOf(res, id) {
  */
 export function ratioGainOf(before, after) {
   // 「当前 ÷ 拿掉后 − 1」：第一个参数是**拿掉后**（分母），第二个是**当前**
-  if (!(before > 0)) return after > 0 ? INFINITE_GAIN : null;
-  return after / before - 1;
+  // 规则在内核 `core/src/gain.ts`（唯一实现），这里只保留旧名字给内部调用
+  return coreRatioGainOf(before, after);
 }
 
 /**
@@ -888,13 +889,9 @@ export function dotGainForCandidate(own, next, baseRes) {
  * @returns `fn(去掉后的贡献)`；该来源压根没产出贡献时返回 `null`（调用方据此显示"—"）
  */
 export function withSourceRemoved(contribs, sourceId, fn) {
-  const rest = [];
-  let removed = false;
-  for (let i = 0; i < contribs.length; i++) {
-    if (contribs[i].source === sourceId) { removed = true; continue; }
-    rest.push(contribs[i]);
-  }
-  if (!removed) return null;
+  // 去掉来源的规则在内核（`core/src/gain.ts` 的 `removeSource`）
+  const rest = coreRemoveSource(contribs, sourceId);
+  if (rest === null) return null;
   return fn(rest);
 }
 

@@ -118,6 +118,13 @@ export function windowLabel(seconds: number): string {
   return `${seconds}秒`;
 }
 
+/**
+ * "从无到有"的增幅：拿掉该来源后指标为 0，而当前 > 0。
+ *
+ * 需求方 2026-11-12：「在单火 mod 下，它对异常的贡献就是 +∞」。
+ */
+export const INFINITE_GAIN = Number.POSITIVE_INFINITY;
+
 export interface OutputBreakdown {
   lines: OutputLine[];
   /** 单弹头命中（期望，含暴击） */
