@@ -101,6 +101,8 @@ export interface ComputeResult {
   segmentPanelPairs: {
     index: number;
     kind: string;
+    /** 段名（所属攻击方式名；同攻击方式有多段时再拼段类型），界面直接显示 */
+    label: string;
     critChance: { base: number; after: number };
     statusChance: { base: number; after: number };
   }[];
@@ -289,9 +291,15 @@ export function compute(
   const segmentPanelPairs = segments.map((segRes, i) => {
     const st = perSegment[i]!;
     const ps = panelStats(weapon, scopedMode, variantOfIndex(i));
+    // 段名给界面用（需求方 2026-11-19：「怎么会用第一第二呢，用对应的段名啊」）：
+    // 先取所在**攻击方式**的名字（直接命中 / 范围伤害 / 冷场…），同一攻击方式里有多段时再拼上段类型。
+    const variant = variantOfIndex(i);
+    const sameVariantSegs = variant ? variant.segments.length : 0;
+    const segLabel = sameVariantSegs > 1 ? variant!.label + ' · ' + String(segRes.kind) : (variant ? variant.label : String(segRes.kind));
     return {
       index: i,
       kind: String(segRes.kind),
+      label: segLabel,
       critChance: { base: ps.critChance, after: segRes.critChance },
       statusChance: { base: ps.statusChance, after: st.computed.当前触发率 },
     };

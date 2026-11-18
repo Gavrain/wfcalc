@@ -251,7 +251,7 @@ function renderSegmentPanels(res) {
     const p = pairs[i];
     const row = el('div', 'panel-row');
     row.style.gridTemplateColumns = colTemplate(3);
-    row.append(el('span', 'c-name', '第 ' + (p.index + 1) + ' 段 · ' + p.kind));
+    row.append(el('span', 'c-name', p.label || ('第 ' + (p.index + 1) + ' 段 · ' + p.kind)));
     row.append(el('span', 'c-val',
       (p.critChance.base * 100).toFixed(2) + '% / ' + (p.critChance.after * 100).toFixed(2) + '%'));
     row.append(el('span', 'c-val',
