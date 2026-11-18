@@ -70,7 +70,11 @@ export type OutputId =
   | 'dotPerSecond'
   | 'dot6s'
   | 'totalInWindow'
-  | 'steadyDps';
+  | 'steadyDps'
+  /** 单次震地伤害（只有震地模式有值） */
+  | 'slamHit'
+  /** 震地 DoT 潜力（只有震地模式有值） */
+  | 'slamDotPotential';
 
 /**
  * 口径 id 里「六秒」那个名字（D-171）。
@@ -103,6 +107,8 @@ export const OUTPUT_IDS: readonly OutputId[] = [
   'dot6s', // N 秒异常总伤（字段名沿用旧的 dot6s，显示名随窗口秒数变）
   'totalInWindow', // N 秒总伤（D-179：窗口内直击 + 窗口内异常）
   'steadyDps', // 稳态秒伤（D-180）
+  'slamHit', // 单次震地伤害（只震地模式有值）
+  'slamDotPotential', // 震地 DoT 潜力（只震地模式有值）
 ];
 
 /**
@@ -536,6 +542,12 @@ export function buildOutput(
 
   // D-171：窗口长度由需求方选（1~6 秒），缺省 6 秒。
   const window = ctx.dotWindowSeconds ?? DEFAULT_DOT_WINDOW_SECONDS;
+  /**
+   * 震地类模式（普通震地 / 重击震地）：不产生弹丸、没有攻速概念，
+   * 所以**不展示**爆发 / 续航 / N 秒这些按时间摊的口径（需求方 2026-11-18）。
+   */
+  const isSlam = Boolean(mode._slam);
+
 
   const seg = firstSegment(mode)!;
   const dotPerType: Partial<Record<DoTType, number>> = {};
@@ -676,12 +688,25 @@ export function buildOutput(
   const steadyParts = steadyStateDot(segmentResults, contribs, ms, fr, mag, reload, window);
   // 稳态秒伤 = 直击（续航秒伤，已含装填摊薄）+ 异常稳态（DoT + 爆炸）
   const steady = sustained + steadyParts.dot + steadyParts.blast;
+  /**
+   * 震地 DoT 潜力：这一下能挂上的异况，其 DoT 合计。
+   * 震地的伤害类型（冲击 / 爆炸）都**没有 DoT**，所以潜力恒为 0——
+   * 如实反映，不编造一个"可能"出来。
+   */
+  const slamDotPotential = isSlam ? dotPerSecond : 0;
   const win = windowLabel(window);
+  /**
+   * 近战没有"射击"这个概念（需求方 2026-11-18：「近战情况下把射击改成攻击」）。
+   * 口径的**数值**不变，只换显示名与单位。
+   */
+  const isMelee = String(weapon.category) === 'melee';
+  const L_ = (melee: string, ranged: string): string => (isMelee ? melee : ranged);
+  const U_ = (melee: string, ranged: string): string => (isMelee ? melee : ranged);
   const lines: OutputLine[] = [
-    { id: 'pelletPerHit', label: '单弹头', description: '合成后总伤 × 暴击期望 × 爆头开关', unit: '/弹头', value: pelletPerHit },
-    { id: 'perShot', label: '单次射击', description: '单弹头 × 多重', unit: '/发', value: perShot },
-    { id: 'hitDps', label: '连发秒伤', description: '单次射击 × 射速（不含装填）', unit: '/秒', value: hitDps },
-    { id: 'sustainedDps', label: '续航秒伤', description: '单次射击 × 弹匣 ÷ (弹匣÷射速 + 装填)', unit: '/秒', value: sustained },
+    { id: 'pelletPerHit', label: L_('单击', '单弹头'), description: '合成后总伤 × 暴击期望 × 爆头开关', unit: U_('/击', '/弹头'), value: pelletPerHit },
+    { id: 'perShot', label: L_('单次攻击', '单次射击'), description: '单弹头 × 多重', unit: U_('/次', '/发'), value: perShot },
+    { id: 'hitDps', label: L_('每秒伤害', '连发秒伤'), description: '单次射击 × 射速（不含装填）', unit: '/秒', value: hitDps },
+    { id: 'sustainedDps', label: L_('持续秒伤', '续航秒伤'), description: '单次射击 × 弹匣 ÷ (弹匣÷射速 + 装填)', unit: '/秒', value: sustained },
     { id: 'dotPerSecond', label: '异常加权单层秒伤', description: '单层 DoT 每秒伤害 × 该类型触发占比（爆炸不计入）', unit: '/层/秒', value: dotPerSecond },
     {
       id: 'dot6s',
@@ -703,6 +728,20 @@ export function buildOutput(
       description: '长期平均：续航秒伤 + 各异常按「一个循环内能叠的层数」折算',
       unit: '/秒',
       value: steady,
+    },
+    {
+      id: 'slamHit',
+      label: '单次震地伤害',
+      description: '单次震地的期望伤害（含暴击 / 爆头 / 派系）；震地不产生弹丸，不乘多重',
+      unit: '',
+      value: isSlam ? pelletPerHit : 0,
+    },
+    {
+      id: 'slamDotPotential',
+      label: '震地 DoT 潜力',
+      description: '震地这一下能挂上的异况，其 DoT 合计（按当前配装）',
+      unit: '',
+      value: isSlam ? slamDotPotential : 0,
     },
   ];
 

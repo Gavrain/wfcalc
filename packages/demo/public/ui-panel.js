@@ -381,7 +381,14 @@ function renderOutputs(res) {
   // 左栏只读展示每种口径的数值与单位；单选框移到 Mod 槽位上方
   const box = $('#output-list');
   box.innerHTML = '';
-  const lines = res.output.lines;
+  // 震地类模式：不产生弹丸、没有攻速概念，所以**不展示**按时间摊的口径
+  //（爆发 / 续航 / N 秒这些对震地没有意义），只留震地自己的两项。
+  // 依据：需求方 2026-11-18
+  const isSlam = Boolean((effectiveMode() || {})._slam);
+  const SLAM_ONLY = ['slamHit', 'slamDotPotential'];
+  const lines = isSlam
+    ? res.output.lines.filter((l) => SLAM_ONLY.indexOf(l.id) >= 0)
+    : res.output.lines.filter((l) => SLAM_ONLY.indexOf(l.id) < 0);
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
     const row = el('div', 'output-row');

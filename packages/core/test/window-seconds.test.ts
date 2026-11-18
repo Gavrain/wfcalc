@@ -1,4 +1,4 @@
-﻿/**
+/**
  * D-171：窗口从写死的 6 秒改成可选的 N 秒（1~6），并新增「N 秒总伤」。
  *
  *   ① 窗口秒数经 `CtxOptions.dotWindowSeconds` 传进来，归一到 1~6；
@@ -94,11 +94,9 @@ describe('D-171 选择秒数改变异常总伤的窗口', () => {
   it('结果含「N 秒总伤」与「稳态秒伤」两行，顺序在异常总伤之后', () => {
     const res = compute(rifle, rifle.modes[0], [], {});
     const ids = res.output.lines.map((l: any) => l.id);
-    // D-180：新增「稳态秒伤」
-    assert.equal(ids.length, 8);
-    assert.equal(ids[ids.length - 3], 'dot6s');
-    assert.equal(ids[ids.length - 2], 'totalInWindow');
-    assert.equal(ids[ids.length - 1], 'steadyDps');
+    // 关键顺序：异常总伤 → 窗口总伤 → 稳态秒伤（震地两项排在其后，只在震地模式有值）
+    assert.ok(ids.indexOf('dot6s') < ids.indexOf('totalInWindow'));
+    assert.ok(ids.indexOf('totalInWindow') < ids.indexOf('steadyDps'));
     near(res.output.steadyDps, lineOf(res, 'steadyDps').value);
   });
 });
