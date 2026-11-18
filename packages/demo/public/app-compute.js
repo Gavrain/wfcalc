@@ -9,6 +9,7 @@
  * 不碰 DOM。原来这些函数都在 `app.js` 里，与渲染混在一起。
  */
 import {
+  dotMetricRoleOf as coreDotMetricRoleOf,
   dotFactorOfCard as coreDotFactorOfCard,
   ratioGainOf as coreRatioGainOf, removeSource as coreRemoveSource,
   setBonusContributions as setBonusFromCore, compute } from '../../core/src/index.ts';
@@ -477,29 +478,8 @@ export function isDot6sMetric() {
  *   元素那部分是 0，只算触发率那部分
  */
 export function dotMetricRoleOf(own, contribs) {
-  if (!isDotMetric()) return { kind: 'normal' };
-  if (!own.length) return { kind: 'normal' };
-
-  const hasElement = own.some(function (c) { return /^elemental:/.test(c.stat) || c.stat === 'physical:slash'; });
-  const hasRate = own.some(function (c) { return c.stat === 'statusChance'; });
-
-  // ── ① 单层口径：触发几率不影响"每层伤害" ──
-  // （需求方：「在单层口径下，触发率无贡献，所以白霜弹头显示 0」）
-  if (isPerStackMetric() && !hasElement && hasRate) return { kind: 'zero' };
-
-  // ── ② 非元素卡（触发率 / 异常状态伤害 / 基伤…）→ 照常算 ──
-  if (!hasElement) return { kind: 'normal', feedsDot: false };
-
-  // ── ③ 元素卡：它给某个伤害型 DoT 提供了**该 DoT 自己的元素**吗 ──
-  //
-  // 需求方 2026-11-18 的模型：每个 DoT 只吃自己的元素 %（切割 DoT 谁都不吃），
-  // 所以「火 + 毒 → 毒气」时火和毒都不给毒气提供元素。判据在 `feedsDamageDot`。
-  //
-  //   有 → 正常重算；**拿掉后为 0 时由调用方显示 ∞**（这张卡让该异常从无到有）
-  //   没有 → 元素部分 0；带触发率时只算触发率那部分（D-176），否则 0
-  if (feedsDamageDot(own, contribs)) return { kind: 'normal', feedsDot: true };
-  if (isPerStackMetric()) return { kind: 'zero', feedsDot: false };
-  return hasRate ? { kind: 'split', feedsDot: false } : { kind: 'zero', feedsDot: false };
+  // 判定规则在内核 `core/src/dot-role.ts`；口径显式传参，不再临时改 store.ui.metric
+  return coreDotMetricRoleOf(own, contribs, store.ui.metric, feedsDamageDot);
 }
 
 /**
@@ -731,13 +711,8 @@ function windowDenominator(contribs, own, curRes) {
  * （总伤口径用它判断"这张卡是不是元素没形成 DoT 的元素卡"，不受当前指标影响）。
  */
 function dotRoleForWindow(own, contribs) {
-  const saved = store.ui.metric;
-  store.ui.metric = DOT_WINDOW_METRIC;
-  try {
-    return dotMetricRoleOf(own, contribs);
-  } finally {
-    store.ui.metric = saved;
-  }
+  // 用「N 秒异常总伤」口径判定；显式传，不改全局
+  return coreDotMetricRoleOf(own, contribs, DOT_WINDOW_METRIC, feedsDamageDot);
 }
 
 /**

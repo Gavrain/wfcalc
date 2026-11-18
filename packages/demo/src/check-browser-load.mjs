@@ -39,6 +39,7 @@ const TS_FILES = [
   'packages/core/src/blast.ts',
   'packages/core/src/timeline.ts',
   'packages/core/src/six-second.ts',
+  'packages/core/src/dot-role.ts',
   'packages/core/src/gain.ts',
   'packages/core/src/gain-rules.ts',
   'packages/core/src/material.ts',
