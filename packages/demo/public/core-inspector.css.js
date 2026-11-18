@@ -21,6 +21,8 @@ export const STYLE = `
   }
   input[type=number] { width: 58px; }
   label { color: var(--muted); display: inline-flex; align-items: center; gap: 4px; }
+  #kuva { color: var(--muted); }
+  #kuva:empty { display: none; }
   main {
     display: grid; grid-template-columns: 260px 1fr 360px;
     gap: 10px; padding: 10px 14px; align-items: start;

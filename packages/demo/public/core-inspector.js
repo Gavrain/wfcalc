@@ -219,6 +219,19 @@ return out;
 }
 
 // ── 渲染：页头 ──
+/** 玄骸加成一行（页面顶部的 `#kuva`）：玄骸武器显示「玄骸 <元素> <比例>」，其余武器整体隐藏 */
+function renderKuvaChip(w) {
+  const box = $('#kuva');
+  if (!box) return;
+  box.innerHTML = '';
+  if (!w || !w.kuva) return;
+  const chip = document.createElement('span');
+  chip.textContent = '玄骸 ' + (ELEM_ZH[state.kuvaType] || state.kuvaType) + ' ' + Math.round(state.kuvaRatio * 100) + '%';
+  chip.title = '玄骸加成：元素 ' + (ELEM_ZH[state.kuvaType] || state.kuvaType)
+    + '，比例 ' + Math.round(state.kuvaRatio * 100) + '%（玄骸武器默认火 60%）';
+  box.append(chip);
+}
+
 function renderWeaponSelect() {
   const sel = $('#weapon');
   sel.innerHTML = '';
@@ -235,6 +248,10 @@ function renderWeaponSelect() {
 
 function renderModeSelect() {
   const w = all.weaponById.get(state.weaponId);
+  // 玄骸加成：这个页面原来没有元素控件，只能按内核默认（火）算，界面上却**一个数字都不显示**——
+  // 需求方 2026-11-18：「我看了很多玄骸武器，还是没有选择默认元素」。
+  // 主页面在「面板」标题下已有「玄骸加成」输入层卡片；这里照同一口径补一块。
+  renderKuvaChip(w);
   const sel = $('#mode');
   sel.innerHTML = '';
   (w.modes || []).forEach((m, i) => {
