@@ -2,7 +2,7 @@
 
 Warframe 伤害模拟器（`wfcalc`）。核心诉求：**每个乘区都能复算、可拆解**。
 
-**完整流程与纪律见 [`CONTRIBUTING.md`](CONTRIBUTING.md)。本文件只列红线，每次动手前扫一眼。**
+**完整流程与纪律见 [`CONTRIBUTING.md`](CONTRIBUTING.md)；现在做到哪了见 [`docs/progress.md`](docs/progress.md)。本文件只列红线，每次动手前扫一眼。**
 
 ## 红线
 
@@ -25,6 +25,7 @@ packages/demo/      本地配装页面
 docs/specs/         口径与设计（结论）
 docs/requirements/  需求（来龙去脉）
 docs/releases/      发布记录
+docs/progress.md    当前进度（在做什么、卡在哪、下一步）
 research/           研究记录
 ```
 

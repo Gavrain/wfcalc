@@ -6,7 +6,7 @@ Warframe 武器伤害模拟器（`wfcalc`）。核心诉求：**每个乘区都�
 战甲 / 队友等武器之外的加成一律走「自定义加成」入口，不内建战甲模型。
 不做敌人类型克制、护甲 / 护盾结算：本项目衡量的是**武器自身的输出能力**。
 
-当前版本：**v1.0.0**（见 [`docs/releases/v1.0.0.md`](docs/releases/v1.0.0.md)）。
+当前版本：**v1.3.0**（见 [`docs/releases/v1.3.0.md`](docs/releases/v1.3.0.md)）。
 
 ## 仓库结构
 
@@ -24,6 +24,7 @@ docs/          文档（见下）
 
 | 想看什么 | 去哪 |
 |---|---|
+| **现在做到哪了** | [`docs/progress.md`](docs/progress.md) |
 | 现在按什么算 | [`docs/specs/核心事实.md`](docs/specs/核心事实.md) |
 | 架构设计 | [`docs/specs/架构设计/`](docs/specs/架构设计/) |
 | 需求怎么来的 | [`docs/requirements/`](docs/requirements/README.md) |
