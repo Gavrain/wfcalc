@@ -311,7 +311,7 @@ function rivenSlotAccepts(payload, kind) {
  * 已经选进左栏的词条仍然显示（灰掉），但它就是「已装备」，不能再拖。
  * 同时保留点击作为「放进第一个同类空槽」的快捷方式。
  */
-function renderRivenCandidates(table) {
+export function renderRivenCandidates(table) {
   const box = $('#riven-candidates');
   if (!box) return;
   box.innerHTML = '';
@@ -392,7 +392,7 @@ function renderRivenCandidates(table) {
 }
 
 /** 第一个同类空槽位下标（正面只看正面槽，负面只看负面槽）；没有返回 -1 */
-function rivenFirstFreeSlot(kind) {
+export function rivenFirstFreeSlot(kind) {
   const combo = rivenComboNow();
   const slots = combo.pos + combo.neg;
   for (let i = 0; i < slots; i++) {
