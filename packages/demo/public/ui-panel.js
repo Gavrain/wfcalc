@@ -199,14 +199,12 @@ function modeSegments(m) {
   return out;
 }
 
-/** 删掉上次画的「逐段面板」表（任何一次重算前都要先清，否则每算一次多一张） */
+/** 删掉上次画的「逐段面板」表（保险：正常重算时 `fillRows` 已经清空了） */
 function removeSegmentPanels() {
   const host = $('#panel-table');
   if (!host) return;
-  // 先清自己的直挂子节点，再递归清（测试 shim 里 `#panel-table` 没有父节点，挂不到外面去）
   for (const old of [...host.children]) {
     if (old.className && String(old.className).indexOf('segment-panels') >= 0) old.remove();
-    else if (old.querySelectorAll) old.querySelectorAll('.segment-panels').forEach((x) => x.remove());
   }
 }
 
@@ -261,8 +259,10 @@ function renderSegmentPanels(res) {
     table.append(row);
   }
   wrap.append(table);
-  const host = $('#panel-table');
-  (host.parentElement || host).append(wrap);
+  // ⚠ 表写在 `#panel-table` **里面**（它是 `fillRows` 清空的那一层）。
+  //   以前挂在父节点上，靠 `removeSegmentPanels` 手动清；只要有一处重算路径不经过这里就会叠加。
+  //   改为放进来之后，任何一次重算都会随 `fillRows` 的 `innerHTML=''` 一起消失，天然不叠。
+  $('#panel-table').append(wrap);
 }
 
 /** 造一张伤害分布小表；`title` 用作第一列表头（攻击方式名） */
