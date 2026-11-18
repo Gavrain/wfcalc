@@ -9,7 +9,7 @@
  * ```
  * 下游（UI、报告脚本、增幅分析）一律读 `state` / `perSegment`，不要自己从面板 + Mod 重算。
  */
-import { collectMaterials, statusTypeCount, type MaterialPool } from './material.ts';
+import { collectMaterials, statusTypeCount, type ExtraMaterial, type MaterialPool } from './material.ts';
 import type { DamageSpread } from './damage-types.ts';
 import { spreadTotal } from './damage-types.ts';
 import type { AttackMode, DamageSegment, ModeVariant, Weapon } from './weapon.ts';
@@ -145,6 +145,40 @@ function resolveVariantSelection(
  *   · 传下标数组 `number[]` → 只算选中的这几个。
  *   选空数组表示一种都不算，结果全为 0。
  */
+/**
+ * 玄骸元素加成作为**素材**列进池子。
+ *
+ * 它不进 `Contribution[]`：公式是「该段**面板**总伤 × 比例」，与 Mod 的
+ * pct/flat/mul 完全不同（`segment.ts` 的 `applyKuvaBonus`）。
+ * 但它是某个乘区实打实的一条输入，所以单独造一条素材，让验证页能看见。
+ *
+ * 多段武器每段各有一份加成，按段汇总成一条（来源写清哪种元素）。
+ */
+function kuvaMaterials(
+  segments: readonly SegmentResult[],
+  ctx: Ctx,
+): ExtraMaterial[] {
+  const kuva = ctx.options.kuva;
+  if (!kuva || !(kuva.ratio > 0)) return [];
+  let augment = 0;
+  let n = 0;
+  for (const seg of segments) {
+    // `panelWithKuva` 是计算链里**已经算好**的玄骸加成后面板，直接求和即可，
+    // 不要另起一套公式重算（那样素材与真值会对不上）。
+    if (!seg.panelWithKuva) continue;
+    augment += spreadTotal(seg.panelWithKuva) * kuva.ratio;
+    n++;
+  }
+  if (!(augment > 0)) return [];
+  return [{
+    stat: 'elemental:' + kuva.type,
+    amount: Math.round((augment / Math.max(1, n)) * 1000) / 1000,
+    form: 'pct',
+    source: 'kuva·玄骸',
+    label: '玄骸 ' + kuva.type + ' +' + Math.round(kuva.ratio * 100) + '%',
+  }];
+}
+
 export function compute(
   weapon: Weapon,
   mode: AttackMode,
@@ -268,7 +302,7 @@ export function compute(
   return {
     ctx,
     segments,
-    materials: collectMaterials(contribs),
+    materials: collectMaterials(contribs, kuvaMaterials(segments, ctx)),
     statusTypes: statusTypeCount(totalSpread as Record<string, number | undefined>),
     output,
     state,
