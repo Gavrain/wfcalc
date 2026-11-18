@@ -236,11 +236,17 @@ const TRIGGER_NAMES: readonly RegExp[] = [
  *
  * ⚠ 它们的 `shot_type` 是 `AoE`，**不能**靠「独立弹道」分支（要求非 AoE）拆，只能按名字。
  * ⚠ 滑行攻击（`Stormpath Slide Attack`）需求方明确「现在没人用了，可以忽略」，不收。
+ *
+ * 投掷 / 蓄力投掷 / 悬停攻击（需求方 2026-11-18）：战刃类「显然是不同的攻击模式」，
+ * 和普攻、震地一样各成一个模式；它们自己的 `Throw Bounce Explosion` 等子段跟着进组。
  */
 const MELEE_ATTACK_NAMES: readonly RegExp[] = [
   /^Slam Attack$/i,
   /^Heavy Slam Attack$/i,
   /^Ranged Attack$/i,
+  /^Throw$/i,
+  /^Charged Throw$/i,
+  /^Hover Attack$/i,
 ];
 
 /**
@@ -440,6 +446,156 @@ const THROW_SWITCH = /^(Partial Reload|Reload From Empty)\b/i;
 const matchesAny = (name: string, list: readonly RegExp[]): boolean => list.some((re) => re.test(name));
 
 /**
+ * 「速射」：不蓄满也能直接打出去的那一发（弓的未蓄力射击、夸塔克 / 兰卡的部分蓄力）。
+ *
+ * 需求方 2026-11-18：「玄骸武器普通射击模式应该在最前面」。
+ * 判据只看名字——带 Uncharged / Quick / Partially 的都是速射，哪怕官方给了 `charge_time`
+ * （大久和弓的 `Quick Shot` 就有 0.3 秒的蓄力时间，但它并不需要蓄满才能发射）。
+ */
+const NORMAL_SHOT_NAMES: readonly RegExp[] = [
+  /^(Uncharged|Quick|QuickShot)\b/i,
+  /Partially Charged/i,
+  /^Normal Shot$/i,
+];
+
+/** 满蓄力射击（Bramma / Chakkhurr 这种「只能蓄满打」的武器，这一发就是它的普通射击） */
+const CHARGED_SHOT_NAMES: readonly RegExp[] = [/^Full(ly)? Charged\b/i, /^Charged (Shot|Horizontal\/Vertical Shot)/i];
+
+/**
+ * 导出只给一条 `Charged Shot`、但游戏里其实**一直都能速射**的弓（需求方 2026-11-18 对照导入名字）。
+ *
+ * 大久和（Dajjyu）：导入名字是 `Dajjyu`，WFCD 只给了 `Charged Shot` 225/225/300。
+ * 这和 Cernos 满蓄力 342/19/19 的关系一样（普攻 ≈ 满蓄力的 2/3），所以它那一发就是速射。
+ * 导出没有速射条目 → 这份速射面板**取不到**，类别按普攻归，数值仍是导出的那一发（不编造）。
+ */
+const ALWAYS_RAPID_SHOT: readonly RegExp[] = [/^Dajjyu$/i];
+
+/** 名字有没有满蓄力词（不含「未蓄力」「部分蓄力」这类否定说法） */
+const hasChargedWord = (name: string): boolean => {
+  const rest = String(name ?? '').replace(/\b(Uncharged|Quick Shot|Partially Charged)\b/gi, ' ');
+  return /charge/i.test(rest);
+};
+
+/**
+ * 名字里带「蓄力」但**不是蓄力射击**的：近战的蓄力攻击、投掷 / 回旋刃的蓄力、弓的近战击退。
+ *
+ * 需求方 2026-11-18 确认：这些只决定「怎么排」，不改变模式本身——
+ * 回旋刃的普攻模式不能因为名字里有 `Charge` 就变成蓄力模式（每把回旋刃都会多出一条假蓄力）。
+ */
+const NON_SHOOTING_CHARGE: readonly RegExp[] = [
+  /^Heavy Attack/i,
+  /Charge Attack/i,
+  /Heavy Charged Attack/i,
+  /Charge Throw/i,
+  /Charged Throw/i,
+  /Melee\b/i,
+  /Arrow Melee/i,
+];
+
+/**
+ * 一个模式的类别（需求方 2026-11-18 确认的口径）：
+ *
+ * ```
+ *   role    normal | charged | incarnon   ← 落到数据里的模式类别（界面与计算按它分场景）
+ *   shot    charged | rapid | other        ← 排序用：这一组是不是速射 / 满蓄力
+ * ```
+ *
+ * 「连弓」（导出只给一条 `Charged Shot`、但一直能速射，见 `ALWAYS_RAPID_SHOT`）：
+ * `role` 记 `normal`（它就是普攻），`shot` 记 `rapid`（排序时按速射对待）。
+ */
+function classifyMode(
+  groupName: string,
+  attacks: readonly { name?: string | undefined; charge_time?: number | undefined }[],
+): { role: ModeRole; shot: 'charged' | 'rapid' | 'other' } {
+  if (/^\s*Incarnon\s/i.test(groupName)) return { role: 'incarnon', shot: 'other' };
+  const names = attacks.length > 0 ? attacks.map((a) => String(a.name ?? '')) : [groupName];
+  const any = (list: readonly RegExp[]): boolean => names.some((n) => matchesAny(n, list));
+  // ① 速射：哪怕带蓄力时间，也是打一下就打出去的那一发
+  if (any(NORMAL_SHOT_NAMES)) return { role: 'normal', shot: 'rapid' };
+  // ② 其余带蓄力词的（满蓄力 / 完美蓄力 / 蓄力射击）都是蓄力射击；
+  //    近战 / 投掷 / 回旋刃的蓄力不算（它们不是射击模式）
+  const chargedName = names.some((n) => hasChargedWord(n) && !matchesAny(n, NON_SHOOTING_CHARGE));
+  if (any(CHARGED_SHOT_NAMES) || chargedName) return { role: 'charged', shot: 'charged' };
+  // ③ 连弓：导出没给速射那一发，但它就在这个模式里打速射 —— 归普攻，排序按速射
+  if (attacks.some((a) => matchesAny(String(a.name ?? ''), ALWAYS_RAPID_SHOT))) {
+    return { role: 'normal', shot: 'rapid' };
+  }
+  // ④ 脉冲 / 全自动 / 点射 / 鱼叉 / 方块弹 → 普通射击
+  //    ⚠ 光矛的矛（`Quill` / `Poison Quill`…）也要算普通：光矛的普通版就是只有矛，
+  //      不这么算的话普通版只剩灵化一个模式，直接消失了。
+  return { role: 'normal', shot: 'other' };
+}
+
+/**
+ * 模式顺序：**按导出元数据的攻击顺序**（需求方 2026-11-18：「这应该符合导出元数据的顺序」）。
+ *
+ * 只有两条强制的：
+ *   1. **灵化永远最后**（弓炮的 `Incarnon Form` 在导出里排在未蓄力 / 满蓄力之间）；
+ *   2. **普通射击排在蓄力之前**，只有一个例外：弓炮的「满蓄力」比普攻更有代表性
+ *      （大久和弓 / 雷米利亚）。
+ *
+ * 例外按名字判（`NON_HEAVY_BOW`）：这些弓有「一直按着拉满」的玩法，测的是满蓄力那一发。
+ * 其余「先满蓄力、再有速射」的武器——雷米利亚之外的大久和、机械道场类（Ferrox / Nunchasa）、
+ * 霰弹（Epitaph / Opticor）——普通射击排前面。
+ */
+interface ModeOrderInfo {
+  role: ModeRole;
+  order: number;
+  /** 该模式是「蓄力」还是「无蓄力的普通射击」（与 `role` 分开记，普通模式里也分这两类） */
+  shot: 'charged' | 'rapid' | 'other';
+}
+
+/** 满蓄力排在速射之前的弓 / 炮（见 `orderModes`） */
+const HEAVY_BOW_NAMES: readonly RegExp[] = [
+  /^(Cernos|Rakta Cernos|Dread|Paris|Mk1-Paris|Mutalist Cernos|Cinta|Nataruk|Evensong|Miter|Corvas|Velocitus|ThanoTechLongGun)\b/i,
+];
+
+// 出岔，换回 map。别改回去。
+function orderModes<T extends ModeOrderInfo>(entries: T[], weaponName = ''): T[] {
+  const heaviest = HEAVY_BOW_NAMES.some((re) => re.test(weaponName));
+  // 需求方 2026-11-18：「普通射击排最前」；弓炮例外，满蓄力那一发排最前。
+  // ⚠ 用三个并列的 sort 分档、不写 `rank()` 函数：这台机器上 strip-types 擦除类型时，
+  //   跨函数传下去的判断会出岔（实测排出来的顺序反了），写法越简单越稳。
+  const isIncarnon = (m: T): boolean => m.role === 'incarnon';
+  const chargedAsNormal = (m: T): boolean => m.role === 'normal' && m.shot === 'charged';
+  const isChargedShot = (m: T): boolean => m.shot === 'charged';
+  const list = entries.slice();
+  // ⚠ 不要用 `sort` / `toSorted` 排：这台机器上它在**函数内的局部数组**上给出反序
+  //   （同样的比较器在顶层数组上正确）。改成逐档 pick，最稳。
+  const ordered: T[] = [];
+  const remaining = list.slice();
+  const tiers = heaviest ? (['bowCharged', 'normal', 'incarnon'] as const) : (['normal', 'charged', 'incarnon'] as const);
+  for (const t of tiers) {
+    for (const m of remaining.slice()) {
+      const hit = t === 'incarnon' ? isIncarnon(m) : !isIncarnon(m) && (t === 'charged' ? isChargedShot(m) : !isChargedShot(m) || chargedAsNormal(m));
+      if (!hit) continue;
+      ordered.push(m);
+      remaining.splice(remaining.indexOf(m), 1);
+    }
+  }
+  for (const m of remaining) ordered.push(m);
+  return ordered;
+}
+
+/** 排序后统一模式 id：第一个普通模式叫 `primary`（配装存档按 id 记模式，其余保持建组时的 `modeN`） */
+function renumberModes(modes: AttackMode[]): void {
+  const firstNormal = modes.find((m) => m.role !== 'incarnon') ?? modes[0];
+  if (!firstNormal) return;
+  firstNormal.id = 'primary';
+  // 灵化按原惯例叫 `incarnon`（D-110：灵化可能有多个，之后 `incarnon2` / `incarnon3` …
+  // 但 `groupAttacks` 已经把灵化合成一个模式，这里只留兜底）。
+  // ⚠ 其余模式沿用建组时给的 `modeN`（N = 导出里的组序），**不按新位置重排**——
+  //   模式 id 是配装存档的键，顺序调整不该把老存档里的模式对错号。
+  let incNo = 0;
+  for (const m of modes) {
+    if (m.role === 'incarnon') {
+      incNo += 1;
+      m.id = incNo === 1 ? 'incarnon' : `incarnon${incNo}`;
+    }
+  }
+}
+
+/**
  * WFCD 攻击名 → 中文名（需求方：界面一律中文）。
  *
  * 两个用途（D-150）：
@@ -518,6 +674,27 @@ const ZH_OF: Readonly<Record<string, string>> = {
   'second heavy attack - toxic spines': '重击 II·毒刺',
   'first heavy attack - ethereal daggers': '重击 I·以太匕首',
   'second heavy attack - ethereal daggers': '重击 II·以太匕首',
+  // ── 需求方 2026-11-18 直接给出的中文名（界面不再出现英文原名）──
+  'cluster bomb contact': '散射榴弹撞击',
+  'slug': '子弹',
+  'arrow impact': '箭矢撞击',
+  'plasma bomb impact': '等离子炸弹撞击',
+  'mid-flight detonation': '飞行中爆炸',
+  'orb launch': '球体发射',
+  'blob embed': '泡沫附着',
+  'direct hit': '直击伤害',
+  'active attack': '次要射击',
+  // 蕈菇（Arbucep）：每次射击换一种元素面板，模式名就用该模式的元素（需求方 2026-11-18）
+  '1st attack': '爆炸',
+  '2nd attack': '腐蚀',
+  '3rd attack': '毒气',
+  '4th attack': '磁力',
+  '5th attack': '辐射',
+  '6th attack': '病毒',
+  // 战刃类投掷各成一个模式（需求方 2026-11-18）
+  'throw': '投掷',
+  'charged throw': '蓄力投掷',
+  'hover attack': '悬停攻击',
 };
 
 /** 攻击名主干 → 稳定 id（`Partial Reload` → `copartialreload`） */
@@ -1158,6 +1335,10 @@ export function cleanWfcdWeapons(raw: readonly WfcdWeapon[]): WfcdCleanResult {
     const grouped = groupAttacks(attacks);
     const modes: AttackMode[] = [];
     const beamModeIds: string[] = [];
+    /** 是射线的模式（排序与重编号之后才能换成 id） */
+    const beams = new Set<AttackMode>();
+    /** 每个模式的类别与导出顺序（需求方 2026-11-18：排序按导出元数据，见 `orderModes`） */
+    const modeOrder = new Map<AttackMode, ModeOrderInfo>();
 
     for (const [gi, g] of grouped.entries()) {
       // ── 该模式内的「攻击方式」（变体）──
@@ -1248,23 +1429,11 @@ export function cleanWfcdWeapons(raw: readonly WfcdWeapon[]): WfcdCleanResult {
       if (variants.length === 0) continue;
 
       const isIncarnon = isIncarnonMode;
-      const role: ModeRole = isIncarnon
-        ? 'incarnon'
-        : /^(Charged Shot|Quick Shot|Uncharged Shot|Charge|Uncharged Horizontal\/Vertical Shot|Perfect Shot)$/i.test(g.name)
-          ? 'charged'
-          : 'normal';
-      // 模式 id：灵化固定 `incarnon`（**灵化永远只有一个模式**，其下多种攻击方式都在 variants 里）；
-      // 其余 primary / charged / mode2 / mode3…
-      let id: string;
-      if (isIncarnon) {
-        id = 'incarnon';
-      } else if (gi === 0) {
-        id = 'primary';
-      } else if (role === 'charged' && modes.every((m) => m.role !== 'charged')) {
-        id = 'charged';
-      } else {
-        id = `mode${modes.length + 1}`;
-      }
+      // 类别与导出顺序在**建组循环结束后**统一判定与排序（`modeRoleOf` / `orderModes`）：
+      // 速射与满蓄力的区分只看名字，排序还要知道整把武器有没有速射那一发。
+      // 这里先占位，后面会被改写。
+      const role: ModeRole = isIncarnon ? 'incarnon' : 'normal';
+      const id = isIncarnon ? 'incarnon' : `mode${gi + 1}`;
 
       // 灵化没有弹匣/装填概念（充能弹药不建模）；其余模式共用武器级弹匣/装填。
       const firstOverride = attackOverride(g.attacks[0]!, w);
@@ -1388,7 +1557,8 @@ export function cleanWfcdWeapons(raw: readonly WfcdWeapon[]): WfcdCleanResult {
         ...(matchesAny(String(g.attacks[0]?.name ?? ''), SLAM_MELEE_NAMES) ? { _slam: true } : {}),
       };
       modes.push(mode);
-      if (isBeam) beamModeIds.push(id);
+      if (isBeam) beams.add(mode);
+      modeOrder.set(mode, { ...classifyMode(g.name, g.attacks), order: gi });
     }
 
     if (modes.length === 0) {
@@ -1397,11 +1567,22 @@ export function cleanWfcdWeapons(raw: readonly WfcdWeapon[]): WfcdCleanResult {
       continue;
     }
 
-    // 主模式排最前（灵化/蓄力排在后面）。
-    // ⚠ 必须**稳定排序**：量子切割器 / 异化者的副模式与主模式同为 `normal`，
-    //   若顺序被打乱，「模式1 = 射线」就会变成「模式1 = 次要射击」。
-    const order: Record<ModeRole, number> = { normal: 0, charged: 1, incarnon: 2 };
-    modes.sort((a, b) => order[a.role] - order[b.role]);
+    // ── 模式顺序（需求方 2026-11-18）──
+    //
+    // 「普通射击模式应该在最前面」→ 按导出元数据的攻击顺序排（`groupAttacks` 就是按导出顺序开的组），
+    // 只有「灵化永远最后」和「弓炮满蓄力在普攻前」两条硬规则，见 `orderModes`。
+    // 排序前先把类别落到模式上（界面与计算都按 `role` 分场景，见核心事实 §12）。
+    for (const m of modes) {
+      m.role = modeOrder.get(m)!.role;
+    }
+    const ordered = orderModes(modes.map((m) => ({ ...modeOrder.get(m)!, mode: m })), String(w.name ?? ''));
+    modes.length = 0;
+    for (const e of ordered) modes.push(e.mode);
+    // ⚠ 必须在排序之前把射线标记换成模式**对象**——排序把主模式换到别的位置后，
+    //   原来记的 id 就指错了；重编号时再按对象取新 id。
+    renumberModes(modes);
+    beamModeIds.length = 0;
+    for (const m of modes) if (beams.has(m)) beamModeIds.push(m.id);
 
     if (modes.length > 1) stats.multiMode++;
     stats.beamModes += beamModeIds.length;

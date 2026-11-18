@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-13T13:45:23.359Z",
+  "generatedAt": "2026-11-18T15:59:33.103Z",
   "source": "WFCD/warframe-items (MIT)",
   "category": "companion",
   "count": 24,
@@ -72,7 +72,7 @@
           "variants": [
             {
               "id": "direct",
-              "label": "Direct Hit",
+              "label": "直击伤害",
               "segments": [
                 {
                   "kind": "attack",
@@ -110,7 +110,7 @@
           "override": {
             "critMultiplier": 1.8
           },
-          "_label": "Direct Hit"
+          "_label": "直击伤害"
         }
       ]
     },

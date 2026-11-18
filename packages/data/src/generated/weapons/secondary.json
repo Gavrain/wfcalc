@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-13T13:45:23.349Z",
+  "generatedAt": "2026-11-18T15:59:33.095Z",
   "source": "WFCD/warframe-items (MIT)",
   "category": "secondary",
   "count": 148,
@@ -613,7 +613,7 @@
               ]
             }
           ],
-          "_label": "Slug"
+          "_label": "子弹"
         },
         {
           "id": "mode2",
@@ -698,7 +698,7 @@
           }
         },
         {
-          "id": "charged",
+          "id": "mode2",
           "role": "charged",
           "trigger": "charge",
           "bullets": 1,
@@ -1888,6 +1888,21 @@
       "name": "Tenet Cycron",
       "nameZh": "信条·循环离子枪",
       "category": "secondary",
+      "kuva": {
+        "bonusRange": [
+          0.25,
+          0.6
+        ],
+        "elements": [
+          "cold",
+          "heat",
+          "toxin",
+          "electric",
+          "magnetic",
+          "radiation",
+          "impact"
+        ]
+      },
       "critChance": 0.2,
       "critMultiplier": 1.8,
       "statusChance": 0.4,
@@ -1927,6 +1942,21 @@
       "name": "Tenet Detron",
       "nameZh": "信条·德特昂",
       "category": "secondary",
+      "kuva": {
+        "bonusRange": [
+          0.25,
+          0.6
+        ],
+        "elements": [
+          "cold",
+          "heat",
+          "toxin",
+          "electric",
+          "magnetic",
+          "radiation",
+          "impact"
+        ]
+      },
       "critChance": 0.18,
       "critMultiplier": 2,
       "statusChance": 0.1,
@@ -1994,6 +2024,21 @@
       "name": "Tenet Plinx",
       "nameZh": "信条·漫射者",
       "category": "secondary",
+      "kuva": {
+        "bonusRange": [
+          0.25,
+          0.6
+        ],
+        "elements": [
+          "cold",
+          "heat",
+          "toxin",
+          "electric",
+          "magnetic",
+          "radiation",
+          "impact"
+        ]
+      },
       "critChance": 0.44,
       "critMultiplier": 3,
       "statusChance": 0.12,
@@ -2137,6 +2182,21 @@
       "name": "Tenet Diplos",
       "nameZh": "信条·纵横双枪",
       "category": "secondary",
+      "kuva": {
+        "bonusRange": [
+          0.25,
+          0.6
+        ],
+        "elements": [
+          "cold",
+          "heat",
+          "toxin",
+          "electric",
+          "magnetic",
+          "radiation",
+          "impact"
+        ]
+      },
       "critChance": 0.36,
       "critMultiplier": 2.2,
       "statusChance": 0.14,
@@ -2344,6 +2404,21 @@
       "name": "Tenet Spirex",
       "nameZh": "信条·斯派克斯",
       "category": "secondary",
+      "kuva": {
+        "bonusRange": [
+          0.25,
+          0.6
+        ],
+        "elements": [
+          "cold",
+          "heat",
+          "toxin",
+          "electric",
+          "magnetic",
+          "radiation",
+          "impact"
+        ]
+      },
       "critChance": 0.26,
       "critMultiplier": 2.4,
       "statusChance": 0.4,
@@ -3161,7 +3236,7 @@
           "variants": [
             {
               "id": "direct",
-              "label": "范围伤害（Blob Embed）",
+              "label": "范围伤害（泡沫附着）",
               "segments": [
                 {
                   "kind": "explosiveAttack",
@@ -3197,7 +3272,7 @@
           "override": {
             "statusChance": 0.1
           },
-          "_label": "Blob Embed"
+          "_label": "泡沫附着"
         },
         {
           "id": "incarnon",
@@ -4050,7 +4125,7 @@
               }
             }
           ],
-          "_label": "Direct Hit"
+          "_label": "直击伤害"
         }
       ]
     },
@@ -5681,7 +5756,7 @@
               }
             }
           ],
-          "_label": "Mid-Flight Detonation"
+          "_label": "飞行中爆炸"
         }
       ]
     },
@@ -6245,7 +6320,7 @@
           "_label": "Normal Shot"
         },
         {
-          "id": "charged",
+          "id": "mode2",
           "role": "charged",
           "trigger": "charge",
           "bullets": 1,
@@ -6328,7 +6403,7 @@
       "reloadTime": 0.6,
       "modes": [
         {
-          "id": "mode2",
+          "id": "primary",
           "role": "normal",
           "trigger": "charge",
           "bullets": 1,
@@ -6377,7 +6452,7 @@
           "_label": "未蓄力直击"
         },
         {
-          "id": "primary",
+          "id": "mode1",
           "role": "charged",
           "trigger": "charge",
           "bullets": 1,
@@ -7406,7 +7481,7 @@
           }
         },
         {
-          "id": "charged",
+          "id": "mode2",
           "role": "charged",
           "trigger": "charge",
           "bullets": 1,
@@ -7803,7 +7878,7 @@
               ]
             }
           ],
-          "_label": "Mid-Flight Detonation"
+          "_label": "飞行中爆炸"
         }
       ]
     },
@@ -8324,7 +8399,7 @@
           "override": {
             "fireRate": 1
           },
-          "_label": "Active Attack"
+          "_label": "次要射击"
         }
       ],
       "_manual": "bible",
@@ -8619,7 +8694,7 @@
       "reloadTime": 0.6,
       "modes": [
         {
-          "id": "mode2",
+          "id": "primary",
           "role": "normal",
           "trigger": "charge",
           "bullets": 1,
@@ -8668,7 +8743,7 @@
           "_label": "未蓄力直击"
         },
         {
-          "id": "primary",
+          "id": "mode1",
           "role": "charged",
           "trigger": "charge",
           "bullets": 1,
@@ -8864,7 +8939,7 @@
           "variants": [
             {
               "id": "direct",
-              "label": "范围伤害（Mid-Flight Detonation）",
+              "label": "范围伤害（飞行中爆炸）",
               "segments": [
                 {
                   "kind": "explosiveAttack",
@@ -8894,7 +8969,7 @@
               }
             }
           ],
-          "_label": "Mid-Flight Detonation"
+          "_label": "飞行中爆炸"
         }
       ]
     },

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-13T13:45:23.345Z",
+  "generatedAt": "2026-11-18T15:59:33.091Z",
   "source": "WFCD/warframe-items (MIT)",
   "category": "primary",
   "count": 196,
@@ -10,6 +10,21 @@
       "name": "Coda Bassocyst",
       "nameZh": "终幕·低音爆囊",
       "category": "primary",
+      "kuva": {
+        "bonusRange": [
+          0.25,
+          0.6
+        ],
+        "elements": [
+          "cold",
+          "heat",
+          "toxin",
+          "electric",
+          "magnetic",
+          "radiation",
+          "impact"
+        ]
+      },
       "critChance": 0.18,
       "critMultiplier": 2.2,
       "statusChance": 0.4,
@@ -165,7 +180,7 @@
       "modes": [
         {
           "id": "primary",
-          "role": "charged",
+          "role": "normal",
           "trigger": "charge",
           "bullets": 1,
           "multishot": 1,
@@ -698,7 +713,7 @@
           "variants": [
             {
               "id": "direct",
-              "label": "Orb Launch",
+              "label": "球体发射",
               "segments": [
                 {
                   "kind": "attack",
@@ -769,7 +784,7 @@
             "critMultiplier": 1,
             "statusChance": 0
           },
-          "_label": "Orb Launch"
+          "_label": "球体发射"
         }
       ]
     },
@@ -896,7 +911,7 @@
               ]
             }
           ],
-          "_label": "Orb Launch"
+          "_label": "球体发射"
         }
       ]
     },
@@ -1245,7 +1260,7 @@
       "reloadTime": 1.8,
       "modes": [
         {
-          "id": "mode2",
+          "id": "primary",
           "role": "normal",
           "trigger": "charge",
           "bullets": 1,
@@ -1302,7 +1317,7 @@
           }
         },
         {
-          "id": "primary",
+          "id": "mode1",
           "role": "charged",
           "trigger": "charge",
           "bullets": 1,
@@ -1424,7 +1439,7 @@
           ]
         },
         {
-          "id": "charged",
+          "id": "mode2",
           "role": "charged",
           "trigger": "auto",
           "bullets": 1,
@@ -1484,6 +1499,21 @@
       "name": "Tenet Arca Plasmor",
       "nameZh": "信条·弧电离子枪",
       "category": "primary",
+      "kuva": {
+        "bonusRange": [
+          0.25,
+          0.6
+        ],
+        "elements": [
+          "cold",
+          "heat",
+          "toxin",
+          "electric",
+          "magnetic",
+          "radiation",
+          "impact"
+        ]
+      },
       "critChance": 0.22,
       "critMultiplier": 2,
       "statusChance": 0.34,
@@ -1522,6 +1552,21 @@
       "name": "Tenet Ferrox",
       "nameZh": "信条·铁晶磁轨炮",
       "category": "primary",
+      "kuva": {
+        "bonusRange": [
+          0.25,
+          0.6
+        ],
+        "elements": [
+          "cold",
+          "heat",
+          "toxin",
+          "electric",
+          "magnetic",
+          "radiation",
+          "impact"
+        ]
+      },
       "critChance": 0.34,
       "critMultiplier": 3,
       "statusChance": 0.26,
@@ -1530,7 +1575,7 @@
       "reloadTime": 1.8,
       "modes": [
         {
-          "id": "mode2",
+          "id": "primary",
           "role": "normal",
           "trigger": "charge",
           "bullets": 1,
@@ -1587,7 +1632,7 @@
           }
         },
         {
-          "id": "primary",
+          "id": "mode1",
           "role": "charged",
           "trigger": "charge",
           "bullets": 1,
@@ -1641,6 +1686,21 @@
       "name": "Tenet Flux Rifle",
       "nameZh": "信条·通量步枪",
       "category": "primary",
+      "kuva": {
+        "bonusRange": [
+          0.25,
+          0.6
+        ],
+        "elements": [
+          "cold",
+          "heat",
+          "toxin",
+          "electric",
+          "magnetic",
+          "radiation",
+          "impact"
+        ]
+      },
       "critChance": 0.2,
       "critMultiplier": 1.8,
       "statusChance": 0.26,
@@ -1680,6 +1740,21 @@
       "name": "Tenet Glaxion",
       "nameZh": "信条·冷冻光束步枪",
       "category": "primary",
+      "kuva": {
+        "bonusRange": [
+          0.25,
+          0.6
+        ],
+        "elements": [
+          "cold",
+          "heat",
+          "toxin",
+          "electric",
+          "magnetic",
+          "radiation",
+          "impact"
+        ]
+      },
       "critChance": 0.2,
       "critMultiplier": 2.2,
       "statusChance": 0.4,
@@ -1719,6 +1794,21 @@
       "name": "Tenet Quanta",
       "nameZh": "信条·量子切割器",
       "category": "primary",
+      "kuva": {
+        "bonusRange": [
+          0.25,
+          0.6
+        ],
+        "elements": [
+          "cold",
+          "heat",
+          "toxin",
+          "electric",
+          "magnetic",
+          "radiation",
+          "impact"
+        ]
+      },
       "critChance": 0.31,
       "critMultiplier": 2.5,
       "statusChance": 0.26,
@@ -1832,6 +1922,21 @@
       "name": "Tenet Tetra",
       "nameZh": "信条·特拉",
       "category": "primary",
+      "kuva": {
+        "bonusRange": [
+          0.25,
+          0.6
+        ],
+        "elements": [
+          "cold",
+          "heat",
+          "toxin",
+          "electric",
+          "magnetic",
+          "radiation",
+          "impact"
+        ]
+      },
       "critChance": 0.28,
       "critMultiplier": 2.2,
       "statusChance": 0.3,
@@ -1928,6 +2033,45 @@
       "modes": [
         {
           "id": "primary",
+          "role": "normal",
+          "trigger": "charge",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
+            {
+              "id": "direct",
+              "label": "直接命中",
+              "segments": [
+                {
+                  "kind": "attack",
+                  "aoe": false,
+                  "damage": {
+                    "impact": 50,
+                    "puncture": 425,
+                    "slash": 25
+                  },
+                  "procChance": 0.2
+                }
+              ]
+            },
+            {
+              "id": "blast",
+              "label": "范围伤害",
+              "segments": [
+                {
+                  "kind": "explosiveAttack",
+                  "aoe": true,
+                  "damage": {
+                    "magnetic": 200
+                  },
+                  "procChance": 0.2
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "mode1",
           "role": "charged",
           "trigger": "charge",
           "bullets": 1,
@@ -1972,45 +2116,6 @@
           "override": {
             "fireRate": 0.5
           }
-        },
-        {
-          "id": "mode2",
-          "role": "charged",
-          "trigger": "charge",
-          "bullets": 1,
-          "multishot": 1,
-          "variants": [
-            {
-              "id": "direct",
-              "label": "直接命中",
-              "segments": [
-                {
-                  "kind": "attack",
-                  "aoe": false,
-                  "damage": {
-                    "impact": 50,
-                    "puncture": 425,
-                    "slash": 25
-                  },
-                  "procChance": 0.2
-                }
-              ]
-            },
-            {
-              "id": "blast",
-              "label": "范围伤害",
-              "segments": [
-                {
-                  "kind": "explosiveAttack",
-                  "aoe": true,
-                  "damage": {
-                    "magnetic": 200
-                  },
-                  "procChance": 0.2
-                }
-              ]
-            }
-          ]
         }
       ]
     },
@@ -2097,6 +2202,21 @@
       "name": "Tenet Envoy",
       "nameZh": "信条·典客",
       "category": "primary",
+      "kuva": {
+        "bonusRange": [
+          0.25,
+          0.6
+        ],
+        "elements": [
+          "cold",
+          "heat",
+          "toxin",
+          "electric",
+          "magnetic",
+          "radiation",
+          "impact"
+        ]
+      },
       "critChance": 0.28,
       "critMultiplier": 2.6,
       "statusChance": 0.24,
@@ -2874,7 +2994,7 @@
       "modes": [
         {
           "id": "primary",
-          "role": "charged",
+          "role": "normal",
           "trigger": "charge",
           "bullets": 1,
           "multishot": 1,
@@ -2900,6 +3020,37 @@
           ],
           "override": {
             "statusChance": 0.3
+          }
+        },
+        {
+          "id": "mode3",
+          "role": "normal",
+          "trigger": "charge",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
+            {
+              "id": "direct",
+              "label": "直接命中",
+              "segments": [
+                {
+                  "kind": "attack",
+                  "aoe": false,
+                  "damage": {
+                    "heat": 600
+                  },
+                  "procChance": 0.34
+                }
+              ],
+              "override": {
+                "statusChance": 0.34,
+                "fireRate": 0.9091
+              }
+            }
+          ],
+          "override": {
+            "statusChance": 0.34,
+            "fireRate": 0.9091
           }
         },
         {
@@ -2935,37 +3086,6 @@
             "critChance": 0.36,
             "critMultiplier": 3,
             "fireRate": 0.6667
-          }
-        },
-        {
-          "id": "mode3",
-          "role": "charged",
-          "trigger": "charge",
-          "bullets": 1,
-          "multishot": 1,
-          "variants": [
-            {
-              "id": "direct",
-              "label": "直接命中",
-              "segments": [
-                {
-                  "kind": "attack",
-                  "aoe": false,
-                  "damage": {
-                    "heat": 600
-                  },
-                  "procChance": 0.34
-                }
-              ],
-              "override": {
-                "statusChance": 0.34,
-                "fireRate": 0.9091
-              }
-            }
-          ],
-          "override": {
-            "statusChance": 0.34,
-            "fireRate": 0.9091
           }
         }
       ]
@@ -3316,7 +3436,7 @@
       "reloadTime": 0.6,
       "modes": [
         {
-          "id": "mode2",
+          "id": "primary",
           "role": "normal",
           "trigger": "charge",
           "bullets": 1,
@@ -3353,7 +3473,7 @@
           }
         },
         {
-          "id": "primary",
+          "id": "mode1",
           "role": "charged",
           "trigger": "charge",
           "bullets": 1,
@@ -3519,7 +3639,7 @@
       "modes": [
         {
           "id": "primary",
-          "role": "charged",
+          "role": "normal",
           "trigger": "charge",
           "bullets": 1,
           "multishot": 10,
@@ -3982,6 +4102,21 @@
       "name": "Kuva Bramma",
       "nameZh": "赤毒·布拉玛",
       "category": "primary",
+      "kuva": {
+        "bonusRange": [
+          0.25,
+          0.6
+        ],
+        "elements": [
+          "cold",
+          "heat",
+          "toxin",
+          "electric",
+          "magnetic",
+          "radiation",
+          "impact"
+        ]
+      },
       "critChance": 0.35,
       "critMultiplier": 2.1,
       "statusChance": 0.21,
@@ -3990,7 +4125,7 @@
       "reloadTime": 0.6,
       "modes": [
         {
-          "id": "mode2",
+          "id": "primary",
           "role": "normal",
           "trigger": "charge",
           "bullets": 1,
@@ -4034,10 +4169,10 @@
           "override": {
             "fireRate": 2.5
           },
-          "_label": "Cluster Bomb Contact"
+          "_label": "散射榴弹撞击"
         },
         {
-          "id": "primary",
+          "id": "mode1",
           "role": "charged",
           "trigger": "charge",
           "bullets": 1,
@@ -4659,6 +4794,21 @@
       "name": "Kuva Chakkhurr",
       "nameZh": "赤毒·邪眼",
       "category": "primary",
+      "kuva": {
+        "bonusRange": [
+          0.25,
+          0.6
+        ],
+        "elements": [
+          "cold",
+          "heat",
+          "toxin",
+          "electric",
+          "magnetic",
+          "radiation",
+          "impact"
+        ]
+      },
       "critChance": 0.5,
       "critMultiplier": 2.3,
       "statusChance": 0.27,
@@ -5121,7 +5271,7 @@
       "modes": [
         {
           "id": "primary",
-          "role": "charged",
+          "role": "normal",
           "trigger": "charge",
           "bullets": 1,
           "multishot": 1,
@@ -5143,38 +5293,6 @@
               ]
             }
           ]
-        },
-        {
-          "id": "mode2",
-          "role": "charged",
-          "trigger": "charge",
-          "bullets": 1,
-          "multishot": 1,
-          "variants": [
-            {
-              "id": "direct",
-              "label": "直接命中",
-              "trigger": "charge",
-              "segments": [
-                {
-                  "kind": "attack",
-                  "aoe": false,
-                  "damage": {
-                    "impact": 16,
-                    "puncture": 256,
-                    "slash": 48
-                  },
-                  "procChance": 0.1
-                }
-              ],
-              "override": {
-                "fireRate": 2
-              }
-            }
-          ],
-          "override": {
-            "fireRate": 2
-          }
         },
         {
           "id": "incarnon",
@@ -5213,6 +5331,38 @@
             "magazineSize": 0,
             "reloadTime": 0,
             "fireRate": 1.25
+          }
+        },
+        {
+          "id": "mode2",
+          "role": "charged",
+          "trigger": "charge",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
+            {
+              "id": "direct",
+              "label": "直接命中",
+              "trigger": "charge",
+              "segments": [
+                {
+                  "kind": "attack",
+                  "aoe": false,
+                  "damage": {
+                    "impact": 16,
+                    "puncture": 256,
+                    "slash": 48
+                  },
+                  "procChance": 0.1
+                }
+              ],
+              "override": {
+                "fireRate": 2
+              }
+            }
+          ],
+          "override": {
+            "fireRate": 2
           }
         }
       ]
@@ -5326,7 +5476,7 @@
       "modes": [
         {
           "id": "primary",
-          "role": "charged",
+          "role": "normal",
           "trigger": "charge",
           "bullets": 1,
           "multishot": 1,
@@ -5813,7 +5963,7 @@
       "modes": [
         {
           "id": "primary",
-          "role": "charged",
+          "role": "normal",
           "trigger": "charge",
           "bullets": 1,
           "multishot": 10,
@@ -6966,7 +7116,7 @@
       "modes": [
         {
           "id": "primary",
-          "role": "charged",
+          "role": "normal",
           "trigger": "charge",
           "bullets": 1,
           "multishot": 1,
@@ -6988,38 +7138,6 @@
               ]
             }
           ]
-        },
-        {
-          "id": "mode2",
-          "role": "charged",
-          "trigger": "charge",
-          "bullets": 1,
-          "multishot": 1,
-          "variants": [
-            {
-              "id": "direct",
-              "label": "直接命中",
-              "trigger": "charge",
-              "segments": [
-                {
-                  "kind": "attack",
-                  "aoe": false,
-                  "damage": {
-                    "impact": 11.5,
-                    "puncture": 184,
-                    "slash": 34.5
-                  },
-                  "procChance": 0.15
-                }
-              ],
-              "override": {
-                "fireRate": 2
-              }
-            }
-          ],
-          "override": {
-            "fireRate": 2
-          }
         },
         {
           "id": "incarnon",
@@ -7058,6 +7176,38 @@
             "magazineSize": 0,
             "reloadTime": 0,
             "fireRate": 1.25
+          }
+        },
+        {
+          "id": "mode2",
+          "role": "charged",
+          "trigger": "charge",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
+            {
+              "id": "direct",
+              "label": "直接命中",
+              "trigger": "charge",
+              "segments": [
+                {
+                  "kind": "attack",
+                  "aoe": false,
+                  "damage": {
+                    "impact": 11.5,
+                    "puncture": 184,
+                    "slash": 34.5
+                  },
+                  "procChance": 0.15
+                }
+              ],
+              "override": {
+                "fireRate": 2
+              }
+            }
+          ],
+          "override": {
+            "fireRate": 2
           }
         }
       ]
@@ -7215,7 +7365,7 @@
       "modes": [
         {
           "id": "primary",
-          "role": "charged",
+          "role": "normal",
           "trigger": "charge",
           "bullets": 1,
           "multishot": 1,
@@ -7241,6 +7391,40 @@
           ],
           "override": {
             "statusChance": 0.3
+          }
+        },
+        {
+          "id": "mode3",
+          "role": "normal",
+          "trigger": "charge",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
+            {
+              "id": "direct",
+              "label": "直接命中",
+              "segments": [
+                {
+                  "kind": "attack",
+                  "aoe": false,
+                  "damage": {
+                    "puncture": 648,
+                    "slash": 252
+                  },
+                  "procChance": 0.5
+                }
+              ],
+              "override": {
+                "critChance": 0.6,
+                "critMultiplier": 2.4,
+                "fireRate": 1.4286
+              }
+            }
+          ],
+          "override": {
+            "critChance": 0.6,
+            "critMultiplier": 2.4,
+            "fireRate": 1.4286
           }
         },
         {
@@ -7276,40 +7460,6 @@
             "critChance": 0.5,
             "critMultiplier": 2.2,
             "fireRate": 1
-          }
-        },
-        {
-          "id": "mode3",
-          "role": "charged",
-          "trigger": "charge",
-          "bullets": 1,
-          "multishot": 1,
-          "variants": [
-            {
-              "id": "direct",
-              "label": "直接命中",
-              "segments": [
-                {
-                  "kind": "attack",
-                  "aoe": false,
-                  "damage": {
-                    "puncture": 648,
-                    "slash": 252
-                  },
-                  "procChance": 0.5
-                }
-              ],
-              "override": {
-                "critChance": 0.6,
-                "critMultiplier": 2.4,
-                "fireRate": 1.4286
-              }
-            }
-          ],
-          "override": {
-            "critChance": 0.6,
-            "critMultiplier": 2.4,
-            "fireRate": 1.4286
           }
         }
       ],
@@ -7499,7 +7649,7 @@
             "statusChance": 0.37,
             "fireRate": 1
           },
-          "_label": "Plasma Bomb Impact"
+          "_label": "等离子炸弹撞击"
         },
         {
           "id": "mode3",
@@ -8233,8 +8383,33 @@
       "reloadTime": 0.65,
       "modes": [
         {
-          "id": "mode2",
+          "id": "primary",
           "role": "normal",
+          "trigger": "charge",
+          "bullets": 1,
+          "multishot": 3,
+          "variants": [
+            {
+              "id": "direct",
+              "label": "直接命中",
+              "segments": [
+                {
+                  "kind": "attack",
+                  "aoe": false,
+                  "damage": {
+                    "impact": 82.8,
+                    "puncture": 4.6,
+                    "slash": 4.6
+                  },
+                  "procChance": 0.3
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "mode2",
+          "role": "charged",
           "trigger": "charge",
           "bullets": 1,
           "multishot": 3,
@@ -8263,31 +8438,6 @@
           "override": {
             "fireRate": 2
           }
-        },
-        {
-          "id": "primary",
-          "role": "charged",
-          "trigger": "charge",
-          "bullets": 1,
-          "multishot": 3,
-          "variants": [
-            {
-              "id": "direct",
-              "label": "直接命中",
-              "segments": [
-                {
-                  "kind": "attack",
-                  "aoe": false,
-                  "damage": {
-                    "impact": 82.8,
-                    "puncture": 4.6,
-                    "slash": 4.6
-                  },
-                  "procChance": 0.3
-                }
-              ]
-            }
-          ]
         }
       ]
     },
@@ -8400,7 +8550,7 @@
       "modes": [
         {
           "id": "primary",
-          "role": "charged",
+          "role": "normal",
           "trigger": "charge",
           "bullets": 1,
           "multishot": 1,
@@ -8551,7 +8701,7 @@
       "modes": [
         {
           "id": "primary",
-          "role": "charged",
+          "role": "normal",
           "trigger": "charge",
           "bullets": 1,
           "multishot": 1,
@@ -8573,38 +8723,6 @@
               ]
             }
           ]
-        },
-        {
-          "id": "mode2",
-          "role": "charged",
-          "trigger": "charge",
-          "bullets": 1,
-          "multishot": 1,
-          "variants": [
-            {
-              "id": "direct",
-              "label": "直接命中",
-              "trigger": "charge",
-              "segments": [
-                {
-                  "kind": "attack",
-                  "aoe": false,
-                  "damage": {
-                    "impact": 9,
-                    "puncture": 288,
-                    "slash": 63
-                  },
-                  "procChance": 0.2
-                }
-              ],
-              "override": {
-                "fireRate": 2
-              }
-            }
-          ],
-          "override": {
-            "fireRate": 2
-          }
         },
         {
           "id": "incarnon",
@@ -8641,6 +8759,38 @@
             "magazineSize": 0,
             "reloadTime": 0,
             "fireRate": 1.25
+          }
+        },
+        {
+          "id": "mode2",
+          "role": "charged",
+          "trigger": "charge",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
+            {
+              "id": "direct",
+              "label": "直接命中",
+              "trigger": "charge",
+              "segments": [
+                {
+                  "kind": "attack",
+                  "aoe": false,
+                  "damage": {
+                    "impact": 9,
+                    "puncture": 288,
+                    "slash": 63
+                  },
+                  "procChance": 0.2
+                }
+              ],
+              "override": {
+                "fireRate": 2
+              }
+            }
+          ],
+          "override": {
+            "fireRate": 2
           }
         }
       ]
@@ -9798,7 +9948,7 @@
               ]
             }
           ],
-          "_label": "Arrow Impact"
+          "_label": "箭矢撞击"
         }
       ]
     },
@@ -10168,7 +10318,7 @@
       "modes": [
         {
           "id": "primary",
-          "role": "charged",
+          "role": "normal",
           "trigger": "charge",
           "bullets": 1,
           "multishot": 1,
@@ -10269,7 +10419,7 @@
           "_label": "Partially Charged Shot"
         },
         {
-          "id": "charged",
+          "id": "mode2",
           "role": "charged",
           "trigger": "charge",
           "bullets": 1,
@@ -10503,7 +10653,7 @@
             "statusChance": 0.37,
             "fireRate": 1
           },
-          "_label": "Plasma Bomb Impact"
+          "_label": "等离子炸弹撞击"
         },
         {
           "id": "mode3",
@@ -10861,7 +11011,7 @@
       "modes": [
         {
           "id": "primary",
-          "role": "charged",
+          "role": "normal",
           "trigger": "charge",
           "bullets": 1,
           "multishot": 1,
@@ -10888,40 +11038,6 @@
           ],
           "override": {
             "statusChance": 0.2
-          }
-        },
-        {
-          "id": "mode2",
-          "role": "charged",
-          "trigger": "charge",
-          "bullets": 1,
-          "multishot": 1,
-          "variants": [
-            {
-              "id": "direct",
-              "label": "直接命中",
-              "trigger": "charge",
-              "segments": [
-                {
-                  "kind": "attack",
-                  "aoe": false,
-                  "damage": {
-                    "impact": 25,
-                    "puncture": 25,
-                    "slash": 450
-                  },
-                  "procChance": 0.5
-                }
-              ],
-              "override": {
-                "critChance": 0.1,
-                "fireRate": 1.25
-              }
-            }
-          ],
-          "override": {
-            "critChance": 0.1,
-            "fireRate": 1.25
           }
         },
         {
@@ -10981,6 +11097,40 @@
             "fireRate": 3.33,
             "magazineSize": 0,
             "reloadTime": 0
+          }
+        },
+        {
+          "id": "mode2",
+          "role": "charged",
+          "trigger": "charge",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
+            {
+              "id": "direct",
+              "label": "直接命中",
+              "trigger": "charge",
+              "segments": [
+                {
+                  "kind": "attack",
+                  "aoe": false,
+                  "damage": {
+                    "impact": 25,
+                    "puncture": 25,
+                    "slash": 450
+                  },
+                  "procChance": 0.5
+                }
+              ],
+              "override": {
+                "critChance": 0.1,
+                "fireRate": 1.25
+              }
+            }
+          ],
+          "override": {
+            "critChance": 0.1,
+            "fireRate": 1.25
           }
         }
       ]
@@ -11535,7 +11685,7 @@
           }
         },
         {
-          "id": "charged",
+          "id": "mode2",
           "role": "charged",
           "trigger": "burst",
           "bullets": 1,
@@ -11620,7 +11770,7 @@
       "modes": [
         {
           "id": "primary",
-          "role": "charged",
+          "role": "normal",
           "trigger": "charge",
           "bullets": 1,
           "multishot": 1,
@@ -11642,38 +11792,6 @@
               ]
             }
           ]
-        },
-        {
-          "id": "mode2",
-          "role": "charged",
-          "trigger": "charge",
-          "bullets": 1,
-          "multishot": 1,
-          "variants": [
-            {
-              "id": "direct",
-              "label": "直接命中",
-              "trigger": "charge",
-              "segments": [
-                {
-                  "kind": "attack",
-                  "aoe": false,
-                  "damage": {
-                    "impact": 16.8,
-                    "puncture": 16.8,
-                    "slash": 302.4
-                  },
-                  "procChance": 0.2
-                }
-              ],
-              "override": {
-                "fireRate": 2
-              }
-            }
-          ],
-          "override": {
-            "fireRate": 2
-          }
         },
         {
           "id": "incarnon",
@@ -11711,6 +11829,38 @@
             "fireRate": 1.6667,
             "magazineSize": 0,
             "reloadTime": 0
+          }
+        },
+        {
+          "id": "mode2",
+          "role": "charged",
+          "trigger": "charge",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
+            {
+              "id": "direct",
+              "label": "直接命中",
+              "trigger": "charge",
+              "segments": [
+                {
+                  "kind": "attack",
+                  "aoe": false,
+                  "damage": {
+                    "impact": 16.8,
+                    "puncture": 16.8,
+                    "slash": 302.4
+                  },
+                  "procChance": 0.2
+                }
+              ],
+              "override": {
+                "fireRate": 2
+              }
+            }
+          ],
+          "override": {
+            "fireRate": 2
           }
         }
       ]
@@ -12309,7 +12459,7 @@
         },
         {
           "id": "mode2",
-          "role": "normal",
+          "role": "charged",
           "trigger": "auto",
           "bullets": 1,
           "multishot": 1,
@@ -12587,7 +12737,7 @@
         },
         {
           "id": "mode2",
-          "role": "normal",
+          "role": "charged",
           "trigger": "auto",
           "bullets": 1,
           "multishot": 1,
@@ -12719,7 +12869,7 @@
       "modes": [
         {
           "id": "primary",
-          "role": "charged",
+          "role": "normal",
           "trigger": "charge",
           "bullets": 1,
           "multishot": 1,
@@ -14016,6 +14166,45 @@
       "modes": [
         {
           "id": "primary",
+          "role": "normal",
+          "trigger": "charge",
+          "bullets": 1,
+          "multishot": 1,
+          "variants": [
+            {
+              "id": "direct",
+              "label": "直接命中",
+              "segments": [
+                {
+                  "kind": "attack",
+                  "aoe": false,
+                  "damage": {
+                    "impact": 20,
+                    "puncture": 140,
+                    "slash": 40
+                  },
+                  "procChance": 0.3
+                }
+              ]
+            },
+            {
+              "id": "blast",
+              "label": "范围伤害",
+              "segments": [
+                {
+                  "kind": "explosiveAttack",
+                  "aoe": true,
+                  "damage": {
+                    "magnetic": 100
+                  },
+                  "procChance": 0.3
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "mode1",
           "role": "charged",
           "trigger": "charge",
           "bullets": 1,
@@ -14060,45 +14249,6 @@
           "override": {
             "fireRate": 1.6667
           }
-        },
-        {
-          "id": "mode2",
-          "role": "charged",
-          "trigger": "charge",
-          "bullets": 1,
-          "multishot": 1,
-          "variants": [
-            {
-              "id": "direct",
-              "label": "直接命中",
-              "segments": [
-                {
-                  "kind": "attack",
-                  "aoe": false,
-                  "damage": {
-                    "impact": 20,
-                    "puncture": 140,
-                    "slash": 40
-                  },
-                  "procChance": 0.3
-                }
-              ]
-            },
-            {
-              "id": "blast",
-              "label": "范围伤害",
-              "segments": [
-                {
-                  "kind": "explosiveAttack",
-                  "aoe": true,
-                  "damage": {
-                    "magnetic": 100
-                  },
-                  "procChance": 0.3
-                }
-              ]
-            }
-          ]
         }
       ]
     },

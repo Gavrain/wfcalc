@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-13T13:45:23.358Z",
+  "generatedAt": "2026-11-18T15:59:33.102Z",
   "source": "WFCD/warframe-items (MIT)",
   "category": "archgun",
   "count": 20,
@@ -65,7 +65,7 @@
       "modes": [
         {
           "id": "primary",
-          "role": "charged",
+          "role": "normal",
           "trigger": "charge",
           "bullets": 1,
           "multishot": 1,
@@ -356,7 +356,7 @@
       "modes": [
         {
           "id": "primary",
-          "role": "charged",
+          "role": "normal",
           "trigger": "charge",
           "bullets": 1,
           "multishot": 1,
@@ -464,6 +464,21 @@
       "name": "Kuva Ayanga",
       "nameZh": "赤毒·怒雷",
       "category": "archgun",
+      "kuva": {
+        "bonusRange": [
+          0.25,
+          0.6
+        ],
+        "elements": [
+          "cold",
+          "heat",
+          "toxin",
+          "electric",
+          "magnetic",
+          "radiation",
+          "impact"
+        ]
+      },
       "critChance": 0.35,
       "critMultiplier": 2,
       "statusChance": 0.2,
@@ -628,7 +643,7 @@
               ]
             }
           ],
-          "_label": "1st Attack"
+          "_label": "爆炸"
         },
         {
           "id": "mode2",
@@ -666,7 +681,7 @@
               ]
             }
           ],
-          "_label": "2nd Attack"
+          "_label": "腐蚀"
         },
         {
           "id": "mode3",
@@ -704,7 +719,7 @@
               ]
             }
           ],
-          "_label": "3rd Attack"
+          "_label": "毒气"
         },
         {
           "id": "mode4",
@@ -742,7 +757,7 @@
               ]
             }
           ],
-          "_label": "4th Attack"
+          "_label": "磁力"
         },
         {
           "id": "mode5",
@@ -780,7 +795,7 @@
               ]
             }
           ],
-          "_label": "5th Attack"
+          "_label": "辐射"
         },
         {
           "id": "mode6",
@@ -818,7 +833,7 @@
               ]
             }
           ],
-          "_label": "6th Attack"
+          "_label": "病毒"
         }
       ]
     },
@@ -836,7 +851,7 @@
       "modes": [
         {
           "id": "primary",
-          "role": "charged",
+          "role": "normal",
           "trigger": "charge",
           "bullets": 1,
           "multishot": 1,
@@ -1192,7 +1207,7 @@
           }
         },
         {
-          "id": "charged",
+          "id": "mode2",
           "role": "charged",
           "trigger": "burst",
           "bullets": 1,
@@ -1267,7 +1282,7 @@
       "modes": [
         {
           "id": "primary",
-          "role": "normal",
+          "role": "charged",
           "trigger": "auto",
           "bullets": 1,
           "multishot": 1,
@@ -1392,7 +1407,7 @@
           ]
         },
         {
-          "id": "charged",
+          "id": "mode2",
           "role": "charged",
           "trigger": "charge",
           "bullets": 1,
