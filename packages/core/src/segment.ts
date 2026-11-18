@@ -28,7 +28,7 @@ import type { DamageLine } from './crit.ts';
 import {
   critChanceTotal,
   critDamageTotal,
-  bladeShadowMultiplier,
+  bladeShadowMultishot,
   damageLine,
   expectedHitMultiplier,
   headshotMultiplier,
@@ -289,7 +289,7 @@ export function resolveSegment(
    *   · **DoT / 爆炸的每跳基础值不放大**——需求方：「不放大 dot 基础值。只放大叠层」，
    *     叠层那一侧在 `output.ts` 的 `bladeShadowMultiplier` 里处理。
    */
-  const bladeMul: number = bladeShadowMultiplier(cc, sumPct(contribs, 'bladeShadow'));
+  const bladeMul: number = bladeShadowMultishot(cc, sumPct(contribs, 'bladeShadow'));
   if (bladeMul !== 1) line.average *= bladeMul;
 
   /**

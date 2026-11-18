@@ -385,7 +385,7 @@ function renderOutputs(res) {
   //（爆发 / 续航 / N 秒这些对震地没有意义），只留震地自己的两项。
   // 依据：需求方 2026-11-18
   const isSlam = Boolean((effectiveMode() || {})._slam);
-  const SLAM_ONLY = ['slamHit', 'slamDotPotential'];
+  const SLAM_ONLY = ['slamDotPotential'];
   const lines = isSlam
     ? res.output.lines.filter((l) => SLAM_ONLY.indexOf(l.id) >= 0)
     : res.output.lines.filter((l) => SLAM_ONLY.indexOf(l.id) < 0);

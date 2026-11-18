@@ -204,6 +204,24 @@ export function bladeShadowMultiplier(cc: number, w: number): number {
   return 1 + bladeShadowGain(cc, w);
 }
 
+/**
+ * **刃影 = 实弹的一个额外「攻击次数」**（需求方 2026-11-18）。
+ *
+ * ```
+ * 攻击次数 = 1 + w × P1(cc)      ← 与"基础多重 1 + Σ多重%"同形
+ * ```
+ *
+ * 所以它在数值上当"实弹多重"用：
+ *   · **放大命中期望**与**叠层数**（弹丸多了，异常层数也多）
+ *   · **不放大 DoT 每跳基础值**——这点与实弹多重一致（射线的多重才进基础值）
+ *
+ * 与真正的多重唯一的差别是**系数来源**：多重来自 Mod 的固定百分比，
+ * 刃影来自一级暴击概率 `P1(cc)`，所以 cc 在 0→1 时上升、1→2 时下降、≥2 恒为 0。
+ *
+ * 名字点明它当"多重"用，调用点读起来更清楚。
+ */
+export const bladeShadowMultishot = bladeShadowMultiplier;
+
 /** §3.1：上下限分档（暴率 150% → k=1，50% 概率 2 档、50% 概率 3 档） */
 export function critTiers(cc: number, cd: number): CritTier[] {
   const k = Math.floor(cc);

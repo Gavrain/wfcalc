@@ -18,7 +18,7 @@ import { firstSegment, panelStats } from './weapon.ts';
 import type { Contribution } from './contributions.ts';
 import { sumPct } from './contributions.ts';
 import { bucket } from './buckets.ts';
-import { bladeShadowMultiplier } from './crit.ts';
+import { bladeShadowMultishot } from './crit.ts';
 import { spreadTotal } from './damage-types.ts';
 import type { Ctx } from './ctx.ts';
 import type { SegmentResult } from './segment.ts';
@@ -71,8 +71,6 @@ export type OutputId =
   | 'dot6s'
   | 'totalInWindow'
   | 'steadyDps'
-  /** 单次震地伤害（只有震地模式有值） */
-  | 'slamHit'
   /** 震地 DoT 潜力（只有震地模式有值） */
   | 'slamDotPotential';
 
@@ -107,7 +105,6 @@ export const OUTPUT_IDS: readonly OutputId[] = [
   'dot6s', // N 秒异常总伤（字段名沿用旧的 dot6s，显示名随窗口秒数变）
   'totalInWindow', // N 秒总伤（D-179：窗口内直击 + 窗口内异常）
   'steadyDps', // 稳态秒伤（D-180）
-  'slamHit', // 单次震地伤害（只震地模式有值）
   'slamDotPotential', // 震地 DoT 潜力（只震地模式有值）
 ];
 
@@ -354,7 +351,7 @@ function segmentDotAndBlast(
    * ```
    * 倍率由这一段自己的暴率 `res.critChance` 算（`P1 = 一级暴击概率`）。
    */
-  const bladeMul = bladeShadowMultiplier(res.critChance, sumPct(contribs, 'bladeShadow'));
+  const bladeMul = bladeShadowMultishot(res.critChance, sumPct(contribs, 'bladeShadow'));
 
   // D-109（需求方 2026-11-06）：**该异常是否存在，只看「当前面板」里有没有这个元素**。
   //
@@ -729,13 +726,7 @@ export function buildOutput(
       unit: '/秒',
       value: steady,
     },
-    {
-      id: 'slamHit',
-      label: '单次震地伤害',
-      description: '单次震地的期望伤害（含暴击 / 爆头 / 派系）；震地不产生弹丸，不乘多重',
-      unit: '',
-      value: isSlam ? pelletPerHit : 0,
-    },
+
     {
       id: 'slamDotPotential',
       label: '震地 DoT 潜力',
