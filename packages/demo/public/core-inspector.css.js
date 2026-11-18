@@ -105,6 +105,9 @@ export const STYLE = `
   .meta { color: var(--muted); font-size: 11px; margin-bottom: 8px; }
   .buckets { display: flex; flex-direction: column; gap: 6px; max-height: 72vh; overflow: auto; }
   .bucket { border: 1px solid var(--line); border-radius: 5px; overflow: hidden; }
+  /* 输入层：与乘区区分开，它在面板阶段生效 */
+  .input-layer { border-color: #5a4a20; margin-bottom: 8px; }
+  .input-layer .bucket-head { background: #2a2414; }
   .bucket-head {
     display: flex; justify-content: space-between; align-items: baseline;
     padding: 4px 9px; background: #191c22; border-bottom: 1px solid var(--line);

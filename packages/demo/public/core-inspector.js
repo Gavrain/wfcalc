@@ -714,6 +714,26 @@ function renderBuckets() {
       + (ck.badBuckets.length ? '；对不上的乘区（' + ck.badBuckets.join(', ') + '）' : '');
   box.append(banner);
 
+  // 输入层：发生在所有乘区**之前**的改动（玄骸元素加成）
+  const kuvaIn = res.materials.input && res.materials.input.kuva;
+  if (kuvaIn) {
+    const card = document.createElement('div');
+    card.className = 'bucket input-layer';
+    const head = document.createElement('div');
+    head.className = 'bucket-head';
+    const key = document.createElement('span');
+    key.className = 'bucket-key';
+    key.textContent = '玄骸加成';
+    const sum = document.createElement('span');
+    sum.className = 'sum';
+    sum.innerHTML = '<span class="muted">' + statZh('elemental:' + kuvaIn.type) + ' </span>'
+      + '<b>+' + fmtNum(kuvaIn.amount) + '</b>'
+      + '<span class="muted">（' + Math.round(kuvaIn.ratio * 100) + '%）</span>';
+    head.append(key, sum);
+    card.append(head);
+    box.append(card);
+  }
+
   const meta = document.createElement('div');
   meta.className = 'meta';
   meta.textContent =

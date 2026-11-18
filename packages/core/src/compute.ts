@@ -9,7 +9,7 @@
  * ```
  * 下游（UI、报告脚本、增幅分析）一律读 `state` / `perSegment`，不要自己从面板 + Mod 重算。
  */
-import { collectMaterials, statusTypeCount, type ExtraMaterial, type MaterialPool } from './material.ts';
+import { collectMaterials, statusTypeCount, type InputLayer, type MaterialPool } from './material.ts';
 import type { DamageSpread } from './damage-types.ts';
 import { spreadTotal } from './damage-types.ts';
 import type { AttackMode, DamageSegment, ModeVariant, Weapon } from './weapon.ts';
@@ -154,29 +154,27 @@ function resolveVariantSelection(
  *
  * 多段武器每段各有一份加成，按段汇总成一条（来源写清哪种元素）。
  */
-function kuvaMaterials(
-  segments: readonly SegmentResult[],
-  ctx: Ctx,
-): ExtraMaterial[] {
+function kuvaInput(segments: readonly SegmentResult[], ctx: Ctx): InputLayer {
   const kuva = ctx.options.kuva;
-  if (!kuva || !(kuva.ratio > 0)) return [];
+  if (!kuva || !(kuva.ratio > 0)) return {};
   let augment = 0;
   let n = 0;
   for (const seg of segments) {
-    // `panelWithKuva` 是计算链里**已经算好**的玄骸加成后面板，直接求和即可，
+    // `panelWithKuva` 是计算链里已经算好的"玄骸加成后面板"，直接取用，
     // 不要另起一套公式重算（那样素材与真值会对不上）。
     if (!seg.panelWithKuva) continue;
     augment += spreadTotal(seg.panelWithKuva) * kuva.ratio;
     n++;
   }
-  if (!(augment > 0)) return [];
-  return [{
-    stat: 'elemental:' + kuva.type,
-    amount: Math.round((augment / Math.max(1, n)) * 1000) / 1000,
-    form: 'pct',
-    source: 'kuva·玄骸',
-    label: '玄骸 ' + kuva.type + ' +' + Math.round(kuva.ratio * 100) + '%',
-  }];
+  if (!(augment > 0)) return {};
+  return {
+    kuva: {
+      type: String(kuva.type),
+      ratio: kuva.ratio,
+      amount: Math.round((augment / Math.max(1, n)) * 1000) / 1000,
+      segments: n,
+    },
+  };
 }
 
 export function compute(
@@ -302,7 +300,7 @@ export function compute(
   return {
     ctx,
     segments,
-    materials: collectMaterials(contribs, kuvaMaterials(segments, ctx)),
+    materials: collectMaterials(contribs, kuvaInput(segments, ctx)),
     statusTypes: statusTypeCount(totalSpread as Record<string, number | undefined>),
     output,
     state,

@@ -62,12 +62,35 @@ export interface MaterialBucket {
   total: MaterialTotal;
 }
 
+/** 输入层（乘区之前） */
+export interface InputLayer {
+  /** 玄骸元素加成；没有玄骸武器时缺省 */
+  kuva?: {
+    /** 加成的元素 */
+    type: string;
+    /** 加成比例（0.25~0.6） */
+    ratio: number;
+    /** 实际加到面板上的伤害量（**不是百分比**） */
+    amount: number;
+    /** 参与计算的段数 */
+    segments: number;
+  };
+}
+
 /** 素材池快照 */
 export interface MaterialPool {
   /** 按键的素材池（顺序按键名升序，便于比对） */
   buckets: MaterialBucket[];
   /** 参与分组的总条数 */
   totalEntries: number;
+  /**
+   * **输入层**：发生在所有乘区**之前**的改动。
+   *
+   * 目前只有玄骸元素加成——它改的是"面板"本身（`加量 = 面板总伤 × 比例`），
+   * 之后所有乘区的 pct/flat/mul 都建立在加成后的面板上。
+   * 所以它**不是某个乘区的一条素材**，不能混进 `elemental:heat` 那样的桶里。
+   */
+  input: InputLayer;
   /**
    * 自检：**逐个乘区**核对——每个桶的汇总值必须等于该桶各素材之和。
    *
@@ -95,21 +118,9 @@ function isActive(c: Contribution): boolean {
  *
  * @param contribs 全部贡献（通常就是 `compute()` 收到的那个数组）
  */
-/** 不属于 Mod 贡献、但确实进了某个乘区的素材（目前只有玄骸元素加成） */
-export interface ExtraMaterial {
-  /** 属性键（如 `elemental:heat`） */
-  stat: string;
-  /** 数值 */
-  amount: number;
-  form: 'pct' | 'flat' | 'mul';
-  /** 来源说明 */
-  source: string;
-  label?: string;
-}
-
 export function collectMaterials(
   contribs: readonly Contribution[],
-  extras: readonly ExtraMaterial[] = [],
+  input: InputLayer = {},
 ): MaterialPool {
   const map = new Map<string, MaterialEntry[]>();
   // 锁：任一贡献带标记 → 该属性整桶失效（正的负的都不算）
@@ -135,16 +146,6 @@ export function collectMaterials(
     let list = map.get(c.stat);
     if (!list) { list = []; map.set(c.stat, list); }
     list.push(entry);
-    totalEntries++;
-  }
-
-  // 非贡献类素材（玄骸元素加成）先进池，算法与贡献完全一致
-  for (const x of extras) {
-    let list = map.get(x.stat);
-    if (!list) { list = []; map.set(x.stat, list); }
-    const e: MaterialEntry = { value: x.amount, form: x.form, source: x.source };
-    if (x.label !== undefined) e.label = x.label;
-    list.push(e);
     totalEntries++;
   }
 
@@ -194,6 +195,7 @@ export function collectMaterials(
   return {
     buckets,
     totalEntries,
+    input,
     check: { ok, inputCount: contribs.length, bucketedCount: totalEntries, badBuckets },
   };
 }
