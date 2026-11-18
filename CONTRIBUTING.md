@@ -65,6 +65,14 @@
 
 - 用大白话，不甩编号与术语；每个选项讲清"你会看到什么变化、代价是什么"；
 - 明确推荐一个，并给一句人话理由。
+- **游戏内物品的中文名一律查表，不许自己造**（需求方 2026-11-18）：
+  查不到就用英文原文，或直接问需求方，不能用"差不多"的译名去跟需求方沟通。
+  查表来源（按优先级）：
+  1. 游戏语言包 `langZh.json`（官方简体中文，武器 / Mod / 赋能名都在里面）；
+  2. [Warframe 中文维基的术语表模块](https://warframe.huijiwiki.com/wiki/%E6%A8%A1%E5%9D%97:WeaponsCY/terms)
+     与[中英名称对照](https://warframe.huijiwiki.com/wiki/Project:%E4%B8%AD%E8%8B%B1%E5%90%8D%E7%A7%B0%E5%AF%B9%E7%85%A7)
+     （含 `Rocket Impact` → 飞弹撞击、`Cluster Bombs` → 散射榴弹 这类攻击名）；
+  3. 维基对应武器页上的模式表头（例：[赤毒布拉玛](https://warframe.huijiwiki.com/wiki/%E8%B5%A4%E6%AF%92%E5%B8%83%E6%8B%89%E7%8E%9B) 的「散射榴弹撞击」）。
 
 ## 8. 校验：什么时候跑什么（需求方 2026-11-17 定）
 
