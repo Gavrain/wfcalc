@@ -913,12 +913,14 @@ export function cleanWeapons(exportWeapons: ExportWeapons): CleanResult {
 
       if (hasNormal) {
         modes.push({
-          id: `mode${modes.length + 1}`, role: 'normal', ...base,
+          id: `mode${modes.length + 1}`, // 临时 id，下面统一重编；复用 `charged` 会让同武器两个蓄力撞 id
+          role: 'normal', ...base,
           variants: toVariants(normalSegs),
         });
       }
 
-      // 蓄力投射与普通不同 → 单独成为一个模式
+      // 蓄力投射与普通不同 → 单独成为一个模式。
+      // 需求方 2026-11-18：普通射击排在蓄力之前（弓炮「满蓄力」是另一路 WFCD 清洗的，见 wfcd-clean.ts）。
       if (b.chargedProjectile && !sameProjectile(b.projectile, b.chargedProjectile) && hasCharged) {
         modes.push({
           id: `mode${modes.length + 1}`, role: 'charged', ...base,
@@ -934,20 +936,28 @@ export function cleanWeapons(exportWeapons: ExportWeapons): CleanResult {
       }
     });
 
-    // 模式 id 规范化：第一个普通模式叫 primary，其余按顺序编号
+    // 模式顺序与 id（需求方 2026-11-18）
     //
-    // D-110：灵化模式**可能不止一个**（奏凯的直击/范围、赘骨的连射/蓄力），
-    // 所以这里不能一律改成 `incarnon`——那样两个模式会撞 id。
-    // 规则：第一个叫 `incarnon`，之后 `incarnon2` / `incarnon3` …
+    // 顺序：普通射击在上、蓄力射击在下、灵化最后（与 wfcd-clean.ts 的 `orderModes` 同一口径；
+    // 这条路上有没有普通射击取决于 behaviour 结构，建组时蓄力模式可能先入列，所以排序是必须的）。
+    // id：第一个普通模式叫 `primary`，灵化叫 `incarnon` / `incarnon2`…（D-110：灵化可能不止一个），
+    // 其余按位置叫 `modeN`——**排序之后**再编号，免得出现两个 `primary` 或重号。
     {
+      const rank = (m: (typeof modes)[number]): number => (m.role === 'incarnon' ? 2 : m.role === 'charged' ? 1 : 0);
+      modes.sort((a, b) => rank(a) - rank(b)); // 稳定排序：同档保持导出的 behaviour 顺序
+      for (const m of modes) m.id = 'pending';
+      const firstNormal = modes.find((m) => m.role !== 'incarnon') ?? modes[0];
+      if (firstNormal) firstNormal.id = 'primary';
       let incNo = 0;
       modes.forEach((m, i) => {
         if (m.role === 'incarnon') {
           incNo += 1;
           m.id = incNo === 1 ? 'incarnon' : `incarnon${incNo}`;
-        } else if (i === 0) m.id = 'primary';
-        else if (m.role === 'charged') m.id = 'charged';
-        else m.id = `mode${i + 1}`;
+          return;
+        }
+        // 蓄力射击沿用 `charged`（这条路上同武器最多只有一个蓄力模式），其余按位置编号
+        if (m.role === 'charged') m.id = 'charged';
+        else if (m !== firstNormal) m.id = `mode${i + 1}`;
       });
     }
 
