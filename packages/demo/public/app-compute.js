@@ -876,11 +876,33 @@ export function dotGainForCandidate(own, next, baseRes) {
  * @param sourceId 要剔除的装备来源 id（`Contribution.source`）
  * @returns 提升比例（0.25 = +25%）；无法计算时返回 null
  */
-export function marginalGainOf(contribs, current, sourceId) {
+/**
+ * **两遍计算法**的统一入口（设计见 `docs/specs/架构设计/core-v2-架构设计.md` §8）。
+ *
+ * 界面上的"这张卡值多少"都是同一个问法：**去掉它之后会怎样**。
+ * 这里把"去掉 → 重算 → 交给你比"收成一条，各调用点只管比较口径。
+ *
+ * @param contribs 当前全部贡献
+ * @param sourceId 要去掉的来源（mod id / arcane key / 套装 id）
+ * @param fn 拿到"去掉该来源之后"的贡献数组，返回任意值（通常是算出来的指标）
+ * @returns `fn(去掉后的贡献)`；该来源压根没产出贡献时返回 `null`（调用方据此显示"—"）
+ */
+export function withSourceRemoved(contribs, sourceId, fn) {
   const rest = [];
-  for (let i = 0; i < contribs.length; i++) if (contribs[i].source !== sourceId) rest.push(contribs[i]);
-  if (rest.length === contribs.length) return null; // 该装备没有产出任何贡献
-  const without = metricValueOf(runCompute(rest));
+  let removed = false;
+  for (let i = 0; i < contribs.length; i++) {
+    if (contribs[i].source === sourceId) { removed = true; continue; }
+    rest.push(contribs[i]);
+  }
+  if (!removed) return null;
+  return fn(rest);
+}
+
+export function marginalGainOf(contribs, current, sourceId) {
+  const without = withSourceRemoved(contribs, sourceId, function (rest) {
+    return metricValueOf(runCompute(rest));
+  });
+  if (without === null) return null; // 该装备没有产出任何贡献
   // 拿掉后为 0 而当前 > 0 → 这张卡让该指标「从无到有」，增幅是 +∞
   // （需求方 2026-11-12：「在单火 mod 下，它对异常的贡献就是 +∞」）
   if (!(without > 0)) return current > 0 ? INFINITE_GAIN : null;
@@ -948,10 +970,11 @@ export function rivenGain() {
   // D-177：总量类口径下整张裂罅按一个来源算
   if (isTotalLikeMetric() && installed) return windowGainForSource(ctx.contribs, RIVEN_SLOT_ID);
   if (installed) {
-    // 已装：拿掉裂罅后的指标
-    const rest = ctx.contribs.filter(function (c) { return c.source !== RIVEN_SLOT_ID; });
-    const without = metricValueOf(runCompute(rest));
-    if (!(without > 0)) return null;
+    // 已装：拿掉裂罅后的指标（走统一入口 withSourceRemoved）
+    const without = withSourceRemoved(ctx.contribs, RIVEN_SLOT_ID, function (rest) {
+      return metricValueOf(runCompute(rest));
+    });
+    if (without === null || !(without > 0)) return null;
     return ctx.current / without - 1;
   }
   // 没装：临时算"装上之后"
@@ -1002,7 +1025,8 @@ export function rivenEntryGain(index) {
   // 装了就用它的真实槽位（D-174）；没装就用虚位槽 9，**绝不传 undefined**
   //（undefined 会退化成 0、1、2，跟真实 Mod 槽撞号并改写元素合成顺序）
   const slotBase = slot >= 0 ? slot : trialSlotNow();
-  const rest = ctx.contribs.filter(function (c) { return c.source !== RIVEN_SLOT_ID; });
+  // 先拿"去掉裂罅"的贡献（统一入口），再把词条组重新拼上去试算
+  const rest = withSourceRemoved(ctx.contribs, RIVEN_SLOT_ID, function (r) { return r; }) || ctx.contribs;
 
   // ── 当前：这张裂罅的全部词条都在 ──
   const withAll = rivenToContributions(slotBase);
@@ -1130,7 +1154,8 @@ export function rivenCandidateGain(def, kind) {
   if (existing >= 0) return rivenEntryGain(existing);
 
   // 1) 配装里除裂罅以外的所有贡献
-  const base = ctx.contribs.filter(function (c) { return c.source !== RIVEN_SLOT_ID; });
+  // 同 rivenEntryGain：统一入口取"去掉裂罅"的贡献
+  const base = withSourceRemoved(ctx.contribs, RIVEN_SLOT_ID, function (r) { return r; }) || ctx.contribs;
 
   // 2) 分母：配装 + 组合区已填的裂罅
   const trialSlot = trialSlotNow();
