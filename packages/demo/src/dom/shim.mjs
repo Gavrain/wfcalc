@@ -76,6 +76,8 @@ export class Node {
     return n;
   }
   remove() { if (this.parentNode) this.parentNode.removeChild(this); }
+  /** 真实浏览器里 `parentElement` 对元素是父节点、对 `<html>` 是 null；shim 只模拟元素的情况 */
+  get parentElement() { return this.parentNode instanceof Node ? this.parentNode : null; }
   setAttribute(k, v) { this[k] = v; if (k === 'class') this.className = String(v); }
   getAttribute(k) { return this[k] ?? null; }
 

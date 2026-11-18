@@ -199,6 +199,17 @@ function modeSegments(m) {
   return out;
 }
 
+/** 删掉上次画的「逐段面板」表（任何一次重算前都要先清，否则每算一次多一张） */
+function removeSegmentPanels() {
+  const host = $('#panel-table');
+  if (!host) return;
+  // 先清自己的直挂子节点，再递归清（测试 shim 里 `#panel-table` 没有父节点，挂不到外面去）
+  for (const old of [...host.children]) {
+    if (old.className && String(old.className).indexOf('segment-panels') >= 0) old.remove();
+    else if (old.querySelectorAll) old.querySelectorAll('.segment-panels').forEach((x) => x.remove());
+  }
+}
+
 /**
  * 逐段的面板对照（需求方 2026-11-15，C2）。
  *
@@ -222,9 +233,16 @@ function renderSegmentPanels(res) {
       || Math.abs(p.statusChance.base - main.statusChance.base) > 1e-9
       || Math.abs(p.statusChance.after - main.statusChance.after) > 1e-9;
   });
-  if (!differs) return;
+  if (!differs) {
+    removeSegmentPanels();
+    return;
+  }
 
+  // ⚠ 这张表挂在 `#panel-table` 的父节点上，重算时 `fillRows` 只清 `#panel-table` 自己，
+  //   不在重算前先删旧表的话，每次重算都会再追加一张（需求方 2026-11-18：左下角无限叠加）。
+  removeSegmentPanels();
   const wrap = el('div', 'dmg-table');
+  wrap.className = 'dmg-table segment-panels';
   const table = el('div', 'panel-table');
   const head = el('div', 'panel-row panel-head');
   head.style.gridTemplateColumns = colTemplate(3);
