@@ -39,6 +39,8 @@ const TS_FILES = [
   'packages/core/src/blast.ts',
   'packages/core/src/timeline.ts',
   'packages/core/src/six-second.ts',
+  'packages/core/src/material.ts',
+  'packages/core/src/set-bonus.ts',
   'packages/core/src/segment.ts',
   'packages/core/src/output.ts',
   'packages/core/src/compute.ts',
