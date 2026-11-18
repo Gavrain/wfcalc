@@ -229,41 +229,40 @@ body {
    现在按钮行独占一行且**高度固定**（没有按钮时留 .mode-btn 的 padding 那么高），
    单模式 / 多模式切换时整块高度不变。 */
 .mode-row-slot {
-  display: flex; align-items: center; justify-content: flex-start;
+  display: flex; align-items: flex-start; justify-content: flex-start;
   min-height: 21px; margin-bottom: 2px;
+  /* 按钮多到换行时整块变高，这里不再靠固定高度撑住（需求方 2026-11-18） */
 }
 .mode-row-slot .section-title { margin: 0 0 6px; }
-/* 按钮行内部禁止折行；模式 + 攻击方式排成一行 */
+/* 模式 + 攻击方式排成一行；**放不下就换行**（需求方 2026-11-18：模式多了会溢出被挡住）。
+   模式按钮与攻击方式在同一容器里，自然折行后攻击方式会落到下一行；容器本身占满左栏宽度。 */
 .mode-switch {
-  display: inline-flex; flex-direction: row; align-items: center;
-  gap: 4px; flex-wrap: nowrap; min-width: 0;
+  display: flex; flex-direction: row; align-items: center;
+  gap: 4px; flex-wrap: wrap; min-width: 0; width: 100%;
 }
 .mode-switch:empty { display: none; }
 .mode-switch > .mode-row {
-  display: inline-flex; align-items: stretch;
-  border: 1px solid var(--line); border-radius: 6px; overflow: hidden;
-  flex-wrap: nowrap;
+  display: flex; align-items: center; gap: 2px;
+  flex-wrap: wrap; max-width: 100%;
+  /* 没有外框（需求方 2026-11-18：「把外面的那个边框去掉」）；
+     模式与攻击方式之间用柔性分隔，折行时不会留一条孤立的竖线 */
 }
 /* 单排模式（未包 .mode-row 时）也保持原样式 */
-.mode-switch > .mode-btn { border: 1px solid var(--line); border-radius: 0; }
-.mode-switch > .mode-btn:first-child { border-radius: 6px 0 0 6px; }
-.mode-switch > .mode-btn:last-child { border-radius: 0 6px 6px 0; }
+.mode-switch > .mode-btn { border: 1px solid var(--line); border-radius: 5px; }
 .mode-btn {
-  appearance: none; border: 0; border-right: 1px solid var(--line);
+  appearance: none; border: 1px solid var(--line); border-radius: 5px;
   background: var(--panel-2); color: var(--muted);
   font: inherit; font-size: 11px; padding: 3px 7px; cursor: pointer;
   white-space: nowrap; flex: none; line-height: 1.35;
   transition: background 0.12s, color 0.12s;
 }
-.mode-btn:last-child { border-right: 0; }
 .mode-btn:hover { background: var(--panel-3); color: var(--text); }
 .mode-btn.active { background: var(--accent); color: #10141a; font-weight: 600; }
 
-/* 攻击方式多选（需求方 2026-11-12）：与模式按钮同一种扁平胶囊，排在同一行。
-   复选框本身做小、贴左；选中的整颗胶囊高亮（与模式选中同款）。 */
+/* 模式与攻击方式之间留一条缝；只占 1px，太窄不值得画线 */
 .mode-row .mode-sep {
-  width: 1px; align-self: stretch; margin: 0 4px; flex: none;
-  background: var(--line);
+  width: 1px; align-self: center; height: 14px; margin: 0 2px; flex: none;
+  background: transparent;
 }
 .mode-btn.variant-btn { cursor: pointer; user-select: none; gap: 4px; }
 /* 复选框：自绘的对勾样式（原生方框太丑，需求方 2026-11-12） */
