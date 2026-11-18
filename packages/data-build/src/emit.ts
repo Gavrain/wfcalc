@@ -24,6 +24,14 @@ import type { DamageSpread } from '../../core/src/damage-types.ts';
 import { isKuvaFamily, KUVA_BONUS_MIN, KUVA_BONUS_MAX, KUVA_ELEMENT_TYPES } from '../../core/src/kuva.ts';
 import type { AppliedOverride } from './overrides.ts';
 
+/**
+ * 玄骸是否成立：看数据里的显示名（需求方 2026-11-18：赤毒·布拉玛等 21 把 Tenet / Coda / Kuva
+ * 武器的内部 id 不带前缀，只按 id 判会漏标，界面就只剩「无」）。
+ * 判据集中在 `isKuvaFamily`，这里只负责把**名字**传进去。
+ * 依据：核心事实 §6（玄骸加成类型与并入面板）。
+ */
+const kuvaWeapon = (w: Weapon, variantType?: string): boolean => isKuvaFamily(w.id, variantType, w.name);
+
 export interface EmitSegment {
   /** D-078：`embedDeathAttack` 已剔除，只剩三种真实伤害段 */
   kind: SegmentKind;
@@ -190,7 +198,7 @@ export function toEmitWeapon(
   // Prime / variant 标记：去掉 VT_ 前缀，只保留有意义的变体
   const rawVariant = meta.variantType ?? '';
   const variant = rawVariant.startsWith('VT_') ? rawVariant.slice(3).toLowerCase() : undefined;
-  const isKuva = isKuvaFamily(w.id, meta.variantType);
+  const isKuva = kuvaWeapon(w, meta.variantType);
 
   return {
     id: w.id,
