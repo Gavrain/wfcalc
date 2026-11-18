@@ -12,7 +12,7 @@ import { $, el, fmtGain } from './ui-dom.js';
 import { isExilusMod, isModAllowedOnWeapon, modName } from './app-data.js';
 import { modStackFactor, modToContributions } from '../../data/src/adapter.ts';
 import {
-  coModGain, currentContributions, dotGainForCandidate, isDotMetric, isPerStackMetric,
+  coModGain, currentContributions, dotGainForCandidate, INFINITE_GAIN, isDotMetric, isPerStackMetric,
   isTotalLikeMetric, metricValueOf, runCompute, trialSlotNow,
 } from './app-compute.js';
 import { modLockNotes, modStatText, setNoteOf, statLabel } from './ui-labels.js';
