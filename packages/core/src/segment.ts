@@ -207,9 +207,23 @@ export function resolveSegment(
   // 需求方 2026-11-14：武器级被动「+N 基础伤害」走基伤的**第二路**
   //（只吃 Σ基伤%，不吃镀层 / 冷颤），分布已按本段原始面板平摊好（`seg.passiveBaseDamage`）。
   const panelWithKuva: DamageSpread = upstream ? upstream.新面板 : applyKuvaBonus(panel, ctx.options.kuva);
-  const baseAfterBaseDamage: DamageSpread = upstream
+  /**
+   * **连击倍率对重击的倍数**（需求方 2026-11-18）。
+   *
+   * 依据：核心事实 §6。近战的连击倍率（那个 ×N）**只乘重击伤害**：
+   *   12x 连击时，重击（含重击震地）打 12 倍伤害。
+   *
+   * ⚠ 乘在**基伤源头**、只乘一次：命中与 DoT 基础值都是从它派生的，
+   *   两边各乘一次会重复计算（需求方：「连击增加单次攻击的伤害，也就增加了 dotbase」）。
+   * 连击对 Mod 层数的影响是另一回事（急进猛突那类，在数据层换算），两者都算。
+   */
+  const heavyMul: number =
+    mode._heavy === true ? Math.max(1, Number(ctx.options.comboMultiplier ?? 1)) : 1;
+  const baseAfterBaseDamageRaw: DamageSpread = upstream
     ? upstream.基伤面板
     : applyBaseDamage(panelWithKuva, seg, contribs, ctx.coStacks, ctx.coStatusTypes, seg.passiveBaseDamage);
+  const baseAfterBaseDamage: DamageSpread =
+    heavyMul === 1 ? baseAfterBaseDamageRaw : scaleSpread(baseAfterBaseDamageRaw, heavyMul);
 
   // ③④⑤⑥ 元素 / 物理加量
   const elementResult: ApplyElementsResult = applyElements(baseAfterBaseDamage, contribs, 'hit');
@@ -275,19 +289,9 @@ export function resolveSegment(
    * 不会再出现"命中没吃多重、DoT 吃了"或反过来的错配。
    * 实弹：`msMul` 恒为 1，行为与改动前完全一致。
    */
-  /**
-   * **连击倍率对重击的倍数**（需求方 2026-11-18）。
-   *
-   * 依据：核心事实 §6。近战的连击倍率（那个 ×N）**只乘重击伤害**：
-   *   12x 连击时，重击（含重击震地）打 12 倍伤害。
-   * 连击对 Mod 层数的影响是另一回事（急进猛突那类，在数据层换算），两者都算。
-   *
-   * 重击的判据是模式上的 `_heavy` 标记——数据层把"重型震地攻击"标成重击。
-   */
-  const heavyMul: number =
-    mode._heavy === true ? Math.max(1, Number(ctx.options.comboMultiplier ?? 1)) : 1;
 
-  const line: DamageLine = damageLine(vTotal * msMul * heavyMul, cc, cd, ctx.headshot.enabled, hsMul, factionMul);
+
+  const line: DamageLine = damageLine(vTotal * msMul, cc, cd, ctx.headshot.enabled, hsMul, factionMul);
   /**
    * **D-189：近战·刃影**（需求方 2026-11-13）。
    *
@@ -326,7 +330,7 @@ export function resolveSegment(
   // 重击倍率同样进 DoT 基础值：重击震地打 12 倍伤害，它挂的异常也该是 12 倍
   const tickBaseScaled: DamageSpread = scaleSpread(
     tickBaseRaw,
-    expectedHitMultiplier(cc, cd, ctx.headshot.enabled, hsMul) * factionMul * msMul * heavyMul,
+    expectedHitMultiplier(cc, cd, ctx.headshot.enabled, hsMul) * factionMul * msMul,
   );
 
   // 单弹头分布（供"加成后面板"与触发占比展示）：元素加量已含，暴击单列。
