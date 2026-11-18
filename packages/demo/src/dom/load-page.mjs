@@ -53,7 +53,8 @@ export async function loadModules() {
   const uiPanel = await import(pathToFileURL(join(PUBLIC, 'ui-panel.js')).href);
   const uiChips = await import(pathToFileURL(join(PUBLIC, 'ui-chips.js')).href);
   const uiSlots = await import(pathToFileURL(join(PUBLIC, 'ui-slots.js')).href);
-  return { core, adapter, rivenData, manualMods, picker, override, store, data, compute, riven, editor, uiDom, uiRiven, uiLabels, uiParts, uiDetail, uiPanel, uiChips, uiSlots, transpile };
+  const uiCandidates = await import(pathToFileURL(join(PUBLIC, 'ui-candidates.js')).href);
+  return { core, adapter, rivenData, manualMods, picker, override, store, data, compute, riven, editor, uiDom, uiRiven, uiLabels, uiParts, uiDetail, uiPanel, uiChips, uiSlots, uiCandidates, transpile };
 }
 
 /**
@@ -83,6 +84,7 @@ export function inlineImports(src, ns) {
     [/\/ui-panel\.js$/, 'ns.uiPanel'],
     [/\/ui-chips\.js$/, 'ns.uiChips'],
     [/\/ui-slots\.js$/, 'ns.uiSlots'],
+    [/\/ui-candidates\.js$/, 'ns.uiCandidates'],
   ];
 
   const unresolved = [];
@@ -187,6 +189,7 @@ export async function loadPage(opts = {}) {
     uiPanel: modules.uiPanel,
     uiChips: modules.uiChips,
     uiSlots: modules.uiSlots,
+    uiCandidates: modules.uiCandidates,
   });
   // 把私有的 `async function boot()` 暴露成返回值，供 invokeBoot() 二次启动
   src += '\n;return { boot: boot };\n';

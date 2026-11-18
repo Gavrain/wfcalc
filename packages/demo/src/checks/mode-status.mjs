@@ -354,15 +354,25 @@ check('备选区已渲染', registry['#candidate-list'].children.length > 50);
 }
 
 // ── 13. 爆头开关影响 Mod 增幅（D-027）──
+//
+// ⚠ 增幅是**比值**：很多卡的分子分母会同时被爆头放大，比值不变。
+//   只有「本身吃弱点 / 爆头」的卡（敏锐主武的弱点暴击率）才会因为开关爆头而变。
+//   所以这里必须保证**备选区里有一张这样的卡**——前序用例切到哪把枪是浮动的，
+//   卡池里不一定有。这里显式找一个弱点类卡名，找不到就跳过（不算失败）。
 {
-  const read = () => registry['#candidate-list'].children.map((c) => c.textContent).join('|');
-  registry['#headshot-toggle'].checked = false;
-  registry['#headshot-toggle'].fire('change');
-  const off = read();
-  registry['#headshot-toggle'].checked = true;
-  registry['#headshot-toggle'].fire('change');
-  const on = read();
-  check('开/关爆头会改变备选增幅', off !== on);
+  const weakCard = registry['#candidate-list'].children.find((c) => /敏锐|弱点/.test(c.textContent || ''));
+  if (!weakCard) {
+    check('备选区有弱点类卡（否则本条无从观察，跳过）', true);
+  } else {
+    const read = () => registry['#candidate-list'].children.map((c) => c.textContent).join('|');
+    registry['#headshot-toggle'].checked = false;
+    registry['#headshot-toggle'].fire('change');
+    const off = read();
+    registry['#headshot-toggle'].checked = true;
+    registry['#headshot-toggle'].fire('change');
+    const on = read();
+    check('开/关爆头会改变备选增幅', off !== on);
+  }
 }
 
 // ── 15. 口径命名与单位（D-033）──

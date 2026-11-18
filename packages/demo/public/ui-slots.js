@@ -28,6 +28,11 @@ const injected = {
 /** 本次拖放是否已成功落位（dragend 时据此决定要不要卸下） */
 let dropHappened = false;
 
+/** 外壳的 drop 处理器放成功后调用它，告诉 dragend「这次拖放已落地，别卸下」 */
+export function setDropHappened(v) {
+  dropHappened = v;
+}
+
 export function wireSlotsDeps(deps) {
   for (const k of Object.keys(injected)) {
     if (typeof deps[k] === 'function') injected[k] = deps[k];

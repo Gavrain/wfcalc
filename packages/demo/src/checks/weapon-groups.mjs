@@ -123,7 +123,21 @@ check('空战赋能列表为空（数据缺口：arcanes.json 没有空战赋能
   await settle();
   const before = modules.compute.metricValueOf(modules.compute.runCompute(modules.compute.currentContributions()));
   check('近战当前指标可计算（> 0）', before > 0, String(before));
-  const card = registry['#candidate-list'].children.find((c) => !(c.children || []).some((x) => (x.className || '').includes('tag'))) || registry['#candidate-list'].children[0];
+  // 近战在「单次射击」口径下增幅显示 `—`（算不出来），先切到一个近战也算得出的口径，
+  // 否则「装上 Mod 指标要变」这条根本无从谈起。
+  const metricBtn = registry['#metric-options'].children.find((b) => (b.textContent || '').includes('连发秒伤'));
+  if (metricBtn) { metricBtn.fire('click'); await settle(); }
+
+  // 选一张**在当前配置下一定生效**的卡。
+  // ⚠ 不能随手拿第一张：镀层类（异况超量等）的生效前提是「敌人身上有异况层数」，
+  //   默认 0 层时装上不改变指标——那是正确行为，测试不该因此失败。
+  //   判据用「卡上画的增幅是个非零数字」：界面已经算过这张卡在当前配装下有没有收益。
+  const card = registry['#candidate-list'].children.find((c) => {
+    if ((c.children || []).some((x) => (x.className || '').includes('tag'))) return false;
+    const t = (c.textContent || '').replace(/\s+/g, '');
+    const m = /增幅([+-]?[\d.]+|∞)/.exec(t);
+    return Boolean(m) && m[1] !== '±0.0' && m[1] !== '0.0';
+  }) || registry['#candidate-list'].children[0];
   check('近战备选区有可装 Mod', Boolean(card));
   if (card) {
     card.fire('dragstart');
