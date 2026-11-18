@@ -16,3 +16,4 @@ export * from './set-bonus.ts';
 
 // 增幅（两遍计算法）
 export * from './gain.ts';
+export * from './gain-rules.ts';

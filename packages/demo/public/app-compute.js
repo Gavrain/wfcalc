@@ -9,6 +9,7 @@
  * 不碰 DOM。原来这些函数都在 `app.js` 里，与渲染混在一起。
  */
 import {
+  dotFactorOfCard as coreDotFactorOfCard,
   ratioGainOf as coreRatioGainOf, removeSource as coreRemoveSource,
   setBonusContributions as setBonusFromCore, compute } from '../../core/src/index.ts';
 import {
@@ -549,41 +550,14 @@ export function dotMetricRoleOf(own, contribs) {
  * @param withCard   装上这张卡之后的全部贡献
  */
 export function dotFactorOfCard(own, beforeRes, withCard) {
-  const el = own.filter(function (c) { return /^elemental:/.test(c.stat) || c.stat === 'physical:slash'; });
-  const rate = own.filter(function (c) { return c.stat === 'statusChance'; });
-  // 只保留 keep 那几条贡献（其余原样，位置不变 → 元素合成顺序不变）
-  const withoutOthers = function (keep) {
-    const out = [];
-    for (let i = 0; i < withCard.length; i++) {
-      const c = withCard[i];
-      const at = own.indexOf(c);
-      if (at < 0) out.push(c);
-      else if (keep.indexOf(own[at]) >= 0) out.push(c);
-    }
-    return out;
-  };
-  // ⚠ 基准 = 「只保留元素词条」（去掉触发率词条）：它代表**元素本身**带来的异常，
-  //   永远不会因为去掉触发率而变成 0，两个增益都以它为分母才量得准。
-  //   （拿"当前配装"或"只留触发率"当分母会撞上 0 或元素结构变化的坑：
-  //    病毒火里只有毒时异常是 0 → 触发率增益被算成 100% / 无穷大。）
-  const elementOnly = runCompute(withoutOthers(el));
-  const baseV = metricValueOf(elementOnly);
-  // 元素增益：元素没形成伤害型 DoT → 0（D-171），否则整卡相对「只留元素」的增益
-  let elementGain = 0;
-  if (el.length && feedsDamageDot(el, withCard)) {
-    elementGain = ratioGainOf(baseV, metricValueOf(runCompute(withCard)));
-    if (elementGain === null) return null;
-  }
-  // 触发率增益：整卡相对「只留元素」的增益 —— 内核层数链里 (1+Σ触发率) 的比值
-  //（只留元素去掉了触发率词条，所以这个比值正好是这张卡触发率词条的作用）
-  let rateGain = 0;
-  if (rate.length) {
-    rateGain = ratioGainOf(baseV, metricValueOf(runCompute(withCard)));
-    if (rateGain === null) return null;
-  }
-  if (!el.length && !rate.length) return ratioGainOf(metricValueOf(beforeRes), metricValueOf(runCompute(withCard)));
-  // 元素没形成 DoT → 元素增益 0，结果就是触发率增益；形成了 → 两者相乘（需求方定的式子）
-  return (1 + elementGain) * (1 + rateGain) - 1;
+  // 规则在内核 `core/src/gain-rules.ts`；这里只把"跑一次取当前口径"交给它
+  return coreDotFactorOfCard(
+    own,
+    metricValueOf(beforeRes),
+    withCard,
+    function (cs) { return metricValueOf(runCompute(cs)); },
+    feedsDamageDot(own, withCard),
+  );
 }
 
 /**

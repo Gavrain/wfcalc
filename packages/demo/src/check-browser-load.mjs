@@ -40,6 +40,7 @@ const TS_FILES = [
   'packages/core/src/timeline.ts',
   'packages/core/src/six-second.ts',
   'packages/core/src/gain.ts',
+  'packages/core/src/gain-rules.ts',
   'packages/core/src/material.ts',
   'packages/core/src/set-bonus.ts',
   'packages/core/src/segment.ts',
