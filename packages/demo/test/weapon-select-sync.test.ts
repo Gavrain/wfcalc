@@ -15,10 +15,18 @@
  */
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
+import { readdir, readFile } from 'node:fs/promises';
 import { join, normalize } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { groupWeapons, searchWeapons } from '../public/weapon-picker.js';
+/** 把 `packages/demo/public/*.js` 的源码拼在一起 —— UI 已拆成多个模块，断言要看整体 */
+async function readAllPublicSource(): Promise<string> {
+  const dir = join(ROOT, 'packages/demo/public');
+  const files = (await readdir(dir)).filter((f) => f.endsWith('.js')).sort();
+  const parts = await Promise.all(files.map((f) => readFile(join(dir, f), 'utf8')));
+  return parts.join('\n');
+}
+
 
 const ROOT = normalize(join(fileURLToPath(new URL('.', import.meta.url)), '../../..'));
 
@@ -88,7 +96,7 @@ describe('搜索结果里的当前武器', () => {
 
 describe('DOM：选单重建后选中值必须等于当前武器', () => {
   it('重建选单的地方都会调用 syncWeaponSelect（D-097 不变量）', async () => {
-    const src = await readFile(join(ROOT, 'packages/demo/public/app.js'), 'utf8');
+    const src = await readAllPublicSource();
     // 重建点：renderWeaponOptions 末尾 + switchWeapon 的同武器短路 + 它自身的定义/其它调用
     const syncCount = (src.match(/syncWeaponSelect\(\)/g) ?? []).length;
     assert.ok(syncCount >= 3, `syncWeaponSelect 调用次数应 ≥3，实际 ${syncCount}`);
@@ -106,7 +114,7 @@ describe('DOM：选单重建后选中值必须等于当前武器', () => {
    *   选单与真实武器的一致性改由「点选结果 → switchWeapon → syncWeaponSelect」保证。
    */
   it('搜索结果只画面板，不再重建/同步下拉框', async () => {
-    const src = await readFile(join(ROOT, 'packages/demo/public/app.js'), 'utf8');
+    const src = await readAllPublicSource();
     const body = /function renderSearchResults\([\s\S]*?\n\}\n/.exec(src)?.[0] ?? '';
     assert.ok(body, '应有 renderSearchResults');
     assert.ok(!/syncWeaponSelect\(\)/.test(body), 'renderSearchResults 不应再同步武器下拉');
@@ -115,7 +123,7 @@ describe('DOM：选单重建后选中值必须等于当前武器', () => {
   });
 
   it('syncWeaponSelect 会把当前武器补进选单并选中', async () => {
-    const src = await readFile(join(ROOT, 'packages/demo/public/app.js'), 'utf8');
+    const src = await readAllPublicSource();
     assert.ok(/function syncWeaponSelect/.test(src));
     assert.ok(/（当前）/.test(src), '不在列表里时应补一项「（当前）」');
   });

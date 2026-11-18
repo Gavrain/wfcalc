@@ -19,6 +19,8 @@ let _flash = () => {};
 export function wirePanelDeps(deps) {
   if (deps.rerender) _rerender = deps.rerender;
   if (deps.flash) _flash = deps.flash;
+  const missing = ['rerender', 'flash'].filter((k) => typeof deps[k] !== 'function');
+  if (missing.length) console.error('[ui-panel] 缺少注入：' + missing.join(', '));
 }
 /** 依据列数生成等宽网格模板（首列宽一些） */
 function colTemplate(cols) {

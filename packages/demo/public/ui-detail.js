@@ -32,6 +32,8 @@ export function wireDetailDeps(deps) {
   if (deps.effectiveMode) _effectiveMode = deps.effectiveMode;
   if (deps.selectedVariantIdx) _selectedVariantIdx = deps.selectedVariantIdx;
   if (deps.simulateEquip) _simulateEquip = deps.simulateEquip;
+  const missing = ['rerender', 'effectiveMode', 'selectedVariantIdx', 'simulateEquip'].filter((k) => typeof deps[k] !== 'function');
+  if (missing.length) console.error('[ui-detail] 缺少注入：' + missing.join(', '));
 }
 
 const DETAIL_PLACEHOLDER = '点击备选 Mod 或赋能查看拆解';

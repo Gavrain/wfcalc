@@ -55,7 +55,8 @@ export async function loadModules() {
   const uiSlots = await import(pathToFileURL(join(PUBLIC, 'ui-slots.js')).href);
   const uiCandidates = await import(pathToFileURL(join(PUBLIC, 'ui-candidates.js')).href);
   const uiControls = await import(pathToFileURL(join(PUBLIC, 'ui-controls.js')).href);
-  return { core, adapter, rivenData, manualMods, picker, override, store, data, compute, riven, editor, uiDom, uiRiven, uiLabels, uiParts, uiDetail, uiPanel, uiChips, uiSlots, uiCandidates, uiControls, transpile };
+  const uiWeapon = await import(pathToFileURL(join(PUBLIC, 'ui-weapon.js')).href);
+  return { core, adapter, rivenData, manualMods, picker, override, store, data, compute, riven, editor, uiDom, uiRiven, uiLabels, uiParts, uiDetail, uiPanel, uiChips, uiSlots, uiCandidates, uiControls, uiWeapon, transpile };
 }
 
 /**
@@ -87,6 +88,7 @@ export function inlineImports(src, ns) {
     [/\/ui-slots\.js$/, 'ns.uiSlots'],
     [/\/ui-candidates\.js$/, 'ns.uiCandidates'],
     [/\/ui-controls\.js$/, 'ns.uiControls'],
+    [/\/ui-weapon\.js$/, 'ns.uiWeapon'],
   ];
 
   const unresolved = [];
@@ -193,6 +195,7 @@ export async function loadPage(opts = {}) {
     uiSlots: modules.uiSlots,
     uiCandidates: modules.uiCandidates,
     uiControls: modules.uiControls,
+    uiWeapon: modules.uiWeapon,
   });
   // 把私有的 `async function boot()` 暴露成返回值，供 invokeBoot() 二次启动
   src += '\n;return { boot: boot };\n';

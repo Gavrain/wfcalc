@@ -33,6 +33,8 @@ export function wireRivenDeps(deps) {
   if (deps.rerender) _rerender = deps.rerender;
   if (deps.makeDraggable) _makeDraggable = deps.makeDraggable;
   if (deps.simulateEquip) _simulateEquip = deps.simulateEquip;
+  const missing = ['rerender', 'makeDraggable', 'simulateEquip'].filter((k) => typeof deps[k] !== 'function');
+  if (missing.length) console.error('[ui-riven] 缺少注入：' + missing.join(', '));
 }
 
 /** 由外壳在启动时调用，把 renderAll 注进来 */

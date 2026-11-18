@@ -34,7 +34,9 @@ export function setDropHappened(v) {
 }
 
 export function wireSlotsDeps(deps) {
-  for (const k of Object.keys(injected)) {
+  const missing = Object.keys(injected).filter((k) => typeof deps[k] !== 'function');
+  if (missing.length) console.error('[ui-slots] 缺少注入：' + missing.join(', '));
+for (const k of Object.keys(injected)) {
     if (typeof deps[k] === 'function') injected[k] = deps[k];
   }
 }

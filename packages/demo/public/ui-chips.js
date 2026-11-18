@@ -18,6 +18,8 @@ let _arcaneStackLabel = () => null;
 
 export function wireChipsDeps(deps) {
   if (deps.arcaneStackLabel) _arcaneStackLabel = deps.arcaneStackLabel;
+  const missing = ['arcaneStackLabel'].filter((k) => typeof deps[k] !== 'function');
+  if (missing.length) console.error('[ui-chips] 缺少注入：' + missing.join(', '));
 }
 /**
  * 一张卡上的「贡献」标签。
