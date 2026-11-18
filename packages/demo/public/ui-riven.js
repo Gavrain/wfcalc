@@ -16,7 +16,7 @@ import {
   placeRivenEntry,
 } from './app-riven.js';
 import { RIVEN_COMBOS, RIVEN_SCOPE_LABEL, rivenDisplayUnit } from '../../data/src/manual/riven.ts';
-import { rivenCandidateGain, rivenEntryGain, rivenGain } from './app-compute.js';
+import { isTotalLikeMetric, rivenCandidateGain, rivenEntryGain, rivenGain } from './app-compute.js';
 
 /** 外壳注入的「重新渲染」回调 */
 let _rerender = () => {};
