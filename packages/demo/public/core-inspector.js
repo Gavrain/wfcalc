@@ -8,7 +8,7 @@
  * 数据来源：`compute()` 返回值里的 `materials`（素材池快照）与 `statusTypes`。
  * **页面不重算任何东西**——显示的每个数都直接取自内核。
  *
- * 访问：`npm run demo` 后打开 `/packages/demo/public/core-inspector.html`
+ * 访问：`npm run demo` 后打开 `/check`
  */
 import { compute, setBonusContributions } from '../../core/src/index.ts';
 import {

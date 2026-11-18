@@ -33,7 +33,7 @@ research/           研究记录
 ```bash
 npm run check         # 类型检查 + 单元测试（改完一段就跑，约 2 秒）
 npm run check:smoke   # 再加界面冒烟（碰了界面时跑）
-npm run demo          # http://127.0.0.1:5178
+npm run demo          # 主页 http://127.0.0.1:5178 · 检查页 http://127.0.0.1:5178/check
 npm run build:offline # 离线单文件 dist/wfcalc-standalone.html
 ```
 

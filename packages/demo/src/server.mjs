@@ -201,10 +201,20 @@ function handleSaveWeapon(req, res) {
   });
 }
 
+/**
+ * 地址别名（2026-11-19 需求方）：检查页搬到 `/check`，主页仍是 `/`。
+ * 旧的完整文件路径继续可用，书签不会失效。
+ */
+const PAGE_ALIASES = {
+  '/': '/index.html',
+  '/check': '/core-inspector.html',
+  '/core-inspector.html': '/core-inspector.html',
+};
+
 const server = createServer(async (req, res) => {
   const url = new URL(req.url ?? '/', `http://${req.headers.host}`);
   let pathname = decodeURIComponent(url.pathname);
-  if (pathname === '/') pathname = '/index.html';
+  if (PAGE_ALIASES[pathname]) pathname = PAGE_ALIASES[pathname];
 
   // 开发态探针：前端据此决定是否渲染「编辑」按钮
   if (pathname === '/__dev') {
@@ -263,5 +273,7 @@ const server = createServer(async (req, res) => {
 });
 
 server.listen(PORT, '127.0.0.1', () => {
-  console.log(`\n  计算内核 demo 已启动：http://127.0.0.1:${PORT}\n`);
+  console.log(`\n  计算内核 demo 已启动`);
+  console.log(`    主页    http://127.0.0.1:${PORT}/`);
+  console.log(`    检查页  http://127.0.0.1:${PORT}/check\n`);
 });
