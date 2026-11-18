@@ -679,7 +679,7 @@ function renderBuckets() {
   } else {
     const effCombo = state.combo ?? 12;
     if (document.activeElement !== comboInput) comboInput.value = String(effCombo);
-    comboInput.title = '默认 12（1x 不加成）';
+    comboInput.title = '默认 12';
   }
   // 镀层叠层输入框：上限 = 当前配装里镀层卡的叠层上限（没有镀层卡就禁用）
   const maxY = coMaxStacks();
@@ -736,10 +736,7 @@ function renderBuckets() {
 
   const meta = document.createElement('div');
   meta.className = 'meta';
-  meta.textContent =
-    '异况种类 a = ' + (state.statusTypes ?? res.statusTypes)
-    + '（内核按当前命中分布数出 ' + res.statusTypes + ' 种）'
-    + ' · 素材 ' + res.materials.totalEntries + ' 条 · 乘区 ' + res.materials.buckets.length + ' 个';
+  meta.textContent = res.materials.totalEntries + ' 条素材 · ' + res.materials.buckets.length + ' 个乘区';
   box.append(meta);
 
   const bb = $('#buckets');
@@ -791,7 +788,7 @@ function renderBuckets() {
         parts.push('<span class="locked">×0</span>');
       }
       // 乘区内部是相加关系（pct + flat），乘算另有 '×' 前缀，所以这里用 '+'
-      sum.innerHTML = parts.length ? parts.join(' + ') : '<span class="muted">（全部未生效）</span>';
+      sum.innerHTML = parts.length ? parts.join(' + ') : '<span class="muted">未生效</span>';
     }
     head.append(key, sum);
     card.append(head);
